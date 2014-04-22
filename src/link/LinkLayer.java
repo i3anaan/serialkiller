@@ -37,7 +37,14 @@ public class LinkLayer {
             }
             while(oldBits != Byte.MAX_VALUE && lpt.readLPT() != oldBits) {
                 // Wait until the previous transmission is acknowledged.
+                System.out.println("  Waiting for " + oldBits + ", currently on " + lpt.readLPT());
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            System.out.println("  ACKED");
             lpt.writeLPT(bits);
             oldBits = bits;
             System.out.println("Sent #" + i + ": " + bits + "  Bit: " + bit + "  ABit: " + aBit);
@@ -73,6 +80,7 @@ public class LinkLayer {
 
                 // Echo received value
                 lpt.writeLPT(in);
+                System.out.println("  ACK " + in);
             }
         }
 
