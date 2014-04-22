@@ -1,3 +1,5 @@
+package test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,12 +14,10 @@ public class TestSendJunk {
 		if(args.length==1){
 		
 			OutputStream os = new FileOutputStream(new File("/telpparport"));
-			InputStream is = new FileInputStream(new File("/telpparport"))
+			InputStream is = new FileInputStream(new File("/telpparport"));
 			
 			switch(args[0]){
 			case "spam":
-				
-				
 				while (true) {
 					for (int i = 0; i < Byte.MAX_VALUE; i++) {
 						os.write(i);
@@ -30,8 +30,12 @@ public class TestSendJunk {
 				os.flush();
 				break;
 			case "receiveint":
-				String intRead = is.read();
-				System.out.println(intRead);				
+				String intRead = is.read() +"";
+				System.out.println(intRead);
+				break;
+			default:
+				System.out.println("default");
+				break;
 			}
 		}
 	}
