@@ -72,7 +72,7 @@ public class LinkLayer {
 		while(b<8){
 			byte in = lpt.readLPT();
 			boolean newABit;
-			System.out.println("inByte: "+Integer.toBinaryString(in)+"  oldByte: "+Integer.toBinaryString(oldByte));
+			System.out.println("inByte: "+Integer.toBinaryString(in)+"  oldByte: "+Integer.toBinaryString(oldByte) +"  == "+(in==oldByte));
 			if(in!=oldByte){
 				try {
 					Thread.sleep(500,0);
