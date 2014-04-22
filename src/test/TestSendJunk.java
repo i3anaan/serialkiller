@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import lpt.Lpt;
-
 public class TestSendJunk {
 	public static void main(String[] args) throws IOException {
 		if(args.length==1){
