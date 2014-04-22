@@ -27,7 +27,7 @@ public class Receiver {
 
             if (in != out) {
                 errors++;
-                System.out.println(errors + "/" + steps + "\t= " + (errors/steps));
+                System.out.println("# Errors: \t" + errors + "/" + steps + "\t= " + (((double) errors)/steps));
             }
         }
     }
