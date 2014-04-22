@@ -30,7 +30,7 @@ public class LinkLayer {
 	public void sendByte(byte data) {
 		for (int i = 0; i <8; i=i+1) {
 			byte bit = (byte)(((data>>i) & 1));
-			byte aBit = (byte)(bit ^ (i%2)*2);
+			byte aBit = (byte)(bit ^ ((i%2)*2));
 			//System.out.println(aBit<<4);
 			//Stuurd minst significante bit eerst.
 			System.out.println("Sending:   "+aBit);
@@ -49,6 +49,8 @@ public class LinkLayer {
 		for (int i = 0; i <8; i=i+1) {
 			byte bit = (byte)(((data>>i) & 1));
 			byte aBit = (byte)(bit ^ ((i%2)*2));
+			System.out.println("bit:\t"+Integer.toBinaryString(bit));
+			System.out.println("bit:\t"+Integer.toBinaryString(aBit));
 			fullData[i] = (byte)(aBit<<4);
 			//Stuurd minst significante bit eerst.
 			//lpt.writeLPT(bit);
@@ -65,7 +67,7 @@ public class LinkLayer {
 			
 			if(in!=oldByte){
 				//Nieuwe bit binnen.
-				System.out.println("New Byte detected:"+in);
+				System.out.println("New Byte detected:"+in +"\t "+Integer.toBinaryString(in));
 				result = (byte)((((in>>5 & 1)<<b) | result));
 				oldByte = in;
 				b++;
