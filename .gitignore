@@ -1,3 +1,7 @@
 .classpath
 bin/
 .project
+
+# IntelliJ
+.idea/
+*.iml
