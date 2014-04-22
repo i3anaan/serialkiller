@@ -1,4 +1,4 @@
-package test.official;
+package assignments.assignment1a;
 
 import lpt.Lpt;
 
