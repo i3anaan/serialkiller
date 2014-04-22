@@ -9,20 +9,34 @@ import java.io.InputStream;
 public class TestReceiver {
 
 	public static void main(String[] args) throws FileNotFoundException {
+		//InputStream is = null;
 		InputStream is = new FileInputStream(new File("/telpparport"));
-
+		printByte(23);
+		int oldRead = 0;
+		
 		while (true) {
-			String intRead;
+			int intRead = 0;
+			
 			try {
-				intRead = is.read() + "";
-				if(!intRead.equals("0")){
-					System.out.println(intRead);
+				intRead = is.read() ;
+				if(intRead!=oldRead){
+					System.out.print(intRead+" \t=\t");
+					printByte(intRead);
+					oldRead = intRead;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
+		}		
+		
+	}
+	
+	private static void printByte(int byteInt){
+		for(int i=7;i>=0;i--){
+			System.out.print((byteInt>>>i) & 1);
 		}
+		System.out.print("\n");
 	}
 }
