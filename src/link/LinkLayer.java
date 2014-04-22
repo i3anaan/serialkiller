@@ -52,7 +52,7 @@ public class LinkLayer {
                 // Administrative tasks
 				oldByte = in;
 				b++;
-                System.out.println("Received: " + in + "  Bit: " + bit);
+                System.out.println("Received: " + in + "  Bit: " + bit + "  SubResult: " + result);
 			}
 		}
 		return result;
