@@ -42,7 +42,7 @@ public class LinkLayer {
 		byte[] fullData = new byte[8];
 		for (int i = 0; i <8; i=i+1) {
 			byte bit = (byte)(((data>>i) & 1));
-			byte aBit = (byte)(bit ^ (i%2)*2);
+			byte aBit = (byte)(bit ^ ((i%2)*2));
 			fullData[i] = (byte)(aBit<<4);
 			//Stuurd minst significante bit eerst.
 			//lpt.writeLPT(bit);
