@@ -7,7 +7,7 @@ public class LinkLayerReceiver {
         Lpt lpt = new Lpt();
         boolean loop_continue = true;
         int oldIn = 0;
-        SingleDirectionLinkLayer linkLayer = new SingleDirectionLinkLayer(new Lpt());
+        LinkLayer linkLayer = new SingleDirectionLinkLayer(new Lpt());
         byte oldByte = 1;
         
         
