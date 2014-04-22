@@ -22,7 +22,7 @@ public class LinkLayer {
      * @param data The data to send.
      */
 	public void sendByte(byte data) {
-        byte oldBits = Byte.MAX_VALUE;
+        byte oldBit = Byte.MAX_VALUE;
 
         // Loop over the bits in the byte
 		for (int i = 0; i <8; i++) {
@@ -35,9 +35,9 @@ public class LinkLayer {
             } catch (InterruptedException e) {
                 System.err.println("Error while waiting to send #" + i);
             }
-            while(oldBits != Byte.MAX_VALUE && lpt.readLPT() != oldBits) {
+            while(oldBit != Byte.MAX_VALUE && lpt.readLPT() != oldBit) {
                 // Wait until the previous transmission is acknowledged.
-                System.out.println("  Waiting for " + oldBits + ", currently on " + lpt.readLPT());
+                System.out.println("  Waiting for " + oldBit + ", currently on " + lpt.readLPT());
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
@@ -46,7 +46,7 @@ public class LinkLayer {
             }
             System.out.println("  ACKED");
             lpt.writeLPT(bits);
-            oldBits = bits;
+            oldBit = bit;
             System.out.println("Sent #" + i + ": " + bits + "  Bit: " + bit + "  ABit: " + aBit);
 		}
 	}
@@ -79,8 +79,8 @@ public class LinkLayer {
                 System.out.println("Received #" + b + ": " + in + "  Bit: " + bit + "  SubResult: " + result);
 
                 // Echo received value
-                lpt.writeLPT(in);
-                System.out.println("  ACK " + in);
+                lpt.writeLPT(bit);
+                System.out.println("  ACK " + bit);
             }
         }
 
