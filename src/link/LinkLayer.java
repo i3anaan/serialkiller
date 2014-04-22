@@ -47,7 +47,7 @@ public class LinkLayer {
             // Check for a new value
 			if(in!=oldByte){
                 byte bit = (byte)((in<<2)>>7); // Remove everything but the LSB
-                result = (byte)(result & (bit<<b)); // Add the bit to its relevant position in the result
+                result = (byte)(result | (bit<<b)); // Add the bit to its relevant position in the result
 
                 // Administrative tasks
 				oldByte = in;
