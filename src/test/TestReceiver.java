@@ -20,7 +20,7 @@ public class TestReceiver {
 			try {
 				intRead = is.read() ;
 				if(intRead!=oldRead){
-					System.out.print(intRead+"   =   ");
+					System.out.print(intRead+" \t=\t");
 					printByte(intRead);
 					oldRead = intRead;
 				}
