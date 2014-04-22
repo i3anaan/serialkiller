@@ -25,6 +25,7 @@ public class LinkLayer {
 
 	public LinkLayer(Lpt lpt) {
 		this.lpt = lpt;
+		oldByte = lpt.readLPT();
 	}
 
 	public void sendByte(byte data) {
