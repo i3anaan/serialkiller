@@ -33,7 +33,7 @@ public class LinkLayer {
 			byte aBit = (byte)(bit ^ (i%2)*2);
 			//System.out.println(aBit<<4);
 			//Stuurd minst significante bit eerst.
-			System.out.println("Sending:   "+aBit);
+			System.out.println("Sending:   "+(byte)(aBit<<4));
 			lpt.writeLPT(aBit);
 		}
 	}

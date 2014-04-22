@@ -8,22 +8,19 @@ import lpt.Lpt;
 
 public class LinkLayerSender {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		BufferedReader conInput = new BufferedReader(new InputStreamReader(
 				System.in));
 		LinkLayer linkLayer = new LinkLayer(new Lpt());
 
-		while (true) {
-			String textInput;
-			try {
-				textInput = conInput.readLine();
-				if (textInput != null) {
-					linkLayer.sendByte((byte) Integer.parseInt(textInput));
-					textInput = conInput.readLine();
-				}
-			} catch (IOException e) {
-			}
+		String textInput;
 
+		textInput = conInput.readLine();
+		while (true) {
+			if (textInput != null) {
+				linkLayer.sendByte((byte) Integer.parseInt(textInput));
+				textInput = conInput.readLine();
+			}
 		}
 	}
 }
