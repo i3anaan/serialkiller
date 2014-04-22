@@ -64,7 +64,7 @@ public class LinkLayer {
 				b++;
 			}
 		}
-		System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
+		//System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
 		return result;
 	}
 	
