@@ -17,8 +17,12 @@ public class TestSender {
 		OutputStream os = new FileOutputStream(new File("/telpparport"));
 		BufferedReader is = new BufferedReader(new InputStreamReader(System.in));
 		
-		Byte[] test = {54};
-		System.out.println(test.length);
+		Byte[] test = {54,38,46,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; 
+		//00110110
+		//00100110
+		//00101110
+		//00111110
+		//System.out.println(test.length);
 		os.write(test[0]);
 		os.flush();
 		
