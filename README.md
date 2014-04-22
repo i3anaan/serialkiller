@@ -1,7 +1,7 @@
 serialkiller
 ============
 
-![logo](https://raw.github.com/i3anaan/serialkiller/wander/logo.png)
+![logo](https://raw.githubusercontent.com/i3anaan/serialkiller/wander/logo.png)
 
 SerialKiller is our implementation for the network protocol stack for the
 Telematics Project. It is an attempt to destroy serial cables^W^W^Wset serial
