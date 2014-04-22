@@ -12,6 +12,7 @@ public class LinkLayer {
 	private byte oldByte = Byte.MAX_VALUE;
 	private int consecutiveABitOnes = 0;
 	private boolean oldABit;
+	private boolean connectionSync;
 	
 	private static final byte[] testBytes = {0,32,16,48,0,32,16,48};
 
@@ -73,13 +74,27 @@ public class LinkLayer {
 			boolean newABit;
 			if(in!=oldByte){
 				newABit = (in>>4 & 1) == 1;
+				if(newABit ==oldABit){
+					consecutiveABitOnes++;
+					System.out.println("Received flags:  "+consecutiveABitOnes);
+					if(consecutiveABitOnes>10){
+						connectionSync = true;
+					}
+				}else{
+					consecutiveABitOnes = 0;
+				}
+				
+				
+				
 				//Nieuwe bit binnen.
-				System.out.println("New Byte detected:"+in +"\t "+Integer.toBinaryString(in));
-				System.out.println("ABit = "+newABit);
-				result = (byte)((((in>>5 & 1)<<b) | result));
-				oldByte = in;
-				oldABit = newABit;
-				b++;
+				if(connectionSync){
+					System.out.println("New Byte detected:"+in +"\t "+Integer.toBinaryString(in));
+					System.out.println("ABit = "+newABit);
+					result = (byte)((((in>>5 & 1)<<b) | result));
+					oldByte = in;
+					oldABit = newABit;
+					b++;
+				}
 			}
 		}
 		System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
