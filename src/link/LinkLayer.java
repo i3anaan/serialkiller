@@ -40,21 +40,27 @@ public class LinkLayer {
 		byte result = 0; // Resulting byte
 		int b = 0; // Bit number
 
+        // Do not use the phantom reading from the previous transmission
+        if (oldByte == Byte.MAX_VALUE) {
+            oldByte = lpt.readLPT();
+        }
+
         // Loop over the bits in the byte
-		while(b<8){
-			byte in = lpt.readLPT();
+        while(b<8){
+            byte in = lpt.readLPT();
 
             // Check for a new value
-			if(in!=oldByte){
+            if(in!=oldByte){
                 byte bit = (byte)((in<<2)>>7); // Remove everything but the LSB
                 result = (byte)(result | (bit<<b)); // Add the bit to its relevant position in the result
 
                 // Administrative tasks
-				oldByte = in;
-				b++;
+                oldByte = in;
+                b++;
                 System.out.println("Received: " + in + "  Bit: " + bit + "  SubResult: " + result);
-			}
-		}
+            }
+        }
+
 		return result;
 	}
 }
