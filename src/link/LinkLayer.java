@@ -33,7 +33,8 @@ public class LinkLayer {
 			byte aBit = (byte)(bit ^ (i%2)*2);
 			//System.out.println(aBit<<4);
 			//Stuurd minst significante bit eerst.
-			lpt.writeLPT(bit);
+			System.out.println("Sending:   "+aBit);
+			lpt.writeLPT(aBit);
 		}
 	}
 	
@@ -56,7 +57,7 @@ public class LinkLayer {
 			byte in = lpt.readLPT();
 			if(in!=oldByte){
 				//Nieuwe bit binnen.
-				System.out.println(result);
+				System.out.println("New Byte detected:"+result);
 				result = (byte)((((in>>4 & 1)<<b) | result));
 				b++;
 			}
