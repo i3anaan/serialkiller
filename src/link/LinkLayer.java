@@ -56,10 +56,11 @@ public class LinkLayer {
 		int b = 0; //Incoming byte number
 		while(b<8){
 			byte in = lpt.readLPT();
+			
 			if(in!=oldByte){
 				//Nieuwe bit binnen.
-				System.out.println("New Byte detected:"+result);
-				result = (byte)((((in>>4 & 1)<<b) | result));
+				System.out.println("New Byte detected:"+in);
+				result = (byte)((((in>>5 & 1)<<b) | result));
 				oldByte = in;
 				b++;
 			}
