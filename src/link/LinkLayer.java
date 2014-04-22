@@ -23,11 +23,12 @@ public class LinkLayer {
      */
 	public void sendByte(byte data) {
         // Loop over the bits in the byte
-		for (int i = 0; i <8; i=i+1) {
+		for (int i = 0; i <8; i++) {
 			byte bit = (byte)(((data>>i) & 1)); // The bit to send (results in all zero's except the LSB)
 			byte aBit = (byte)(i%1); // The bit that alternates between 0 and 1
             byte bits = (byte)(bit | (aBit<<1));
 			lpt.writeLPT(bits);
+            System.out.println("Sent: " + bits + "  Bit: " + bit + "  ABit: " + aBit);
 		}
 	}
 
@@ -51,6 +52,7 @@ public class LinkLayer {
                 // Administrative tasks
 				oldByte = in;
 				b++;
+                System.out.println("Received: " + in + "  Bit: " + bit);
 			}
 		}
 		return result;
