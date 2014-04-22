@@ -25,7 +25,7 @@ public class LinkLayer {
         // Loop over the bits in the byte
 		for (int i = 0; i <8; i++) {
 			byte bit = (byte)(((data>>i) & 1)); // The bit to send (results in all zero's except the LSB)
-			byte aBit = (byte)(i%1); // The bit that alternates between 0 and 1
+			byte aBit = (byte)(i%2); // The bit that alternates between 0 and 1
             byte bits = (byte)(bit | (aBit<<1));
 			lpt.writeLPT(bits);
             System.out.println("Sent: " + bits + "  Bit: " + bit + "  ABit: " + aBit);
