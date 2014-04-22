@@ -24,7 +24,8 @@ public class TestSender {
 		//00111110
 		//System.out.println(test.length);
 		for(int i=0;i<test.length;i++){
-			os.write(test[0]);
+			
+			os.write(test[i]);
 			os.flush();
 		}
 		
