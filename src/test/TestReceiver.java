@@ -9,15 +9,16 @@ import java.io.InputStream;
 public class TestReceiver {
 
 	public static void main(String[] args) throws FileNotFoundException {
+		//InputStream is = null;
 		InputStream is = new FileInputStream(new File("/telpparport"));
-
+		printByte(23);
 		while (true) {
-			String intRead;
-			String oldRead = "";
+			int intRead = 0;
+			int oldRead = 0;
 			try {
-				intRead = is.read() + "";
-				if(!intRead.equals("0") && !intRead.equals(oldRead)){
-					System.out.println(intRead);
+				intRead = is.read() ;
+				if(intRead!=oldRead){
+					printByte(intRead);
 					oldRead = intRead;
 				}
 			} catch (IOException e) {
@@ -25,6 +26,14 @@ public class TestReceiver {
 				e.printStackTrace();
 			}
 			
+		}		
+		
+	}
+	
+	private static void printByte(int byteInt){
+		for(int i=7;i>=0;i--){
+			System.out.print((byteInt>>>i) & 1);
 		}
+		System.out.print("\n");
 	}
 }
