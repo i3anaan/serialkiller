@@ -18,6 +18,7 @@ public class TestReceiver {
 			try {
 				intRead = is.read() ;
 				if(intRead!=oldRead){
+					System.out.print(intRead+"   =   ");
 					printByte(intRead);
 					oldRead = intRead;
 				}
