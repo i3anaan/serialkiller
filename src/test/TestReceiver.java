@@ -15,7 +15,9 @@ public class TestReceiver {
 			String intRead;
 			try {
 				intRead = is.read() + "";
-				System.out.println(intRead);
+				if(!intRead.equals("0")){
+					System.out.println(intRead);
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
