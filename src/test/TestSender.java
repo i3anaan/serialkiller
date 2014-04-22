@@ -23,8 +23,10 @@ public class TestSender {
 		//00101110
 		//00111110
 		//System.out.println(test.length);
-		os.write(test[0]);
-		os.flush();
+		for(int i=0;i<test.length;i++){
+			os.write(test[0]);
+			os.flush();
+		}
 		
 		/*try {
 			is.readLine();
