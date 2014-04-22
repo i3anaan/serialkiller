@@ -9,6 +9,7 @@ public class Receiver {
         boolean loop_continue = true;
         int out = 0;
         int errors = 0;
+        int steps = 0;
 
         try {
             out = Integer.parseInt(args[0]);
@@ -21,11 +22,12 @@ public class Receiver {
         }
 
         while(loop_continue) {
+            steps++;
             int in = lpt.readLPT();
 
             if (in != out) {
                 errors++;
-                System.out.println(errors);
+                System.out.println(errors + "/" + steps + "\t= " + (errors/steps));
             }
         }
     }
