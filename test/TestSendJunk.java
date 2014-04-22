@@ -10,6 +10,7 @@ public class TestSendJunk {
 		while (true) {
 			for (int i = 0; i < Byte.MAX_VALUE; i++) {
 				os.write(i);
+				os.flush();
 			}
 		}
 	}
