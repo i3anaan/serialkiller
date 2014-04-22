@@ -16,11 +16,12 @@ public class LinkLayer {
 	public static void main(String[] args) {
 		LinkLayer linkLayer = new LinkLayer(new Lpt());
 		//System.out.println(Integer.toBinaryString(-52));
-		linkLayer.sendByte((byte) -52 );
+		//linkLayer.sendByte((byte) -52 );
 		//System.out.println("Reading byte");
 		//linkLayer.testReadByte(testBytes);
 		
 		//linkLayer.testReadByte(linkLayer.testSendByte((byte)-50));
+		linkLayer.sendFlag();
 	}
 
 	public LinkLayer(Lpt lpt) {
@@ -79,6 +80,23 @@ public class LinkLayer {
 		System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
 		return result;
 	}
+	
+	public void sendFlag(){
+		byte flagBit1 = 3;
+		byte flagBit2 = 2;
+		System.out.println(Integer.toBinaryString(flagBit1));
+		System.out.println(Integer.toBinaryString(flagBit2));
+		
+		for (int i = 0; i <20; i=i+1) {
+			if(i%2==0){
+				lpt.writeLPT(flagBit1);
+			}else{
+				lpt.writeLPT(flagBit2);
+			}
+		}
+	}
+	
+	
 	/*
 	public byte testReadByte(byte[] fullData){
 		byte result = 0;
