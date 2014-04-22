@@ -80,8 +80,6 @@ public class LinkLayer {
 				b++;
 			}
 		}
-		System.out.println(Integer.toBinaryString(result));
-		System.out.println(result);
 		return result;
 	}
 

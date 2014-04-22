@@ -8,9 +8,15 @@ public class LinkLayerReceiver {
         boolean loop_continue = true;
         int oldIn = 0;
         LinkLayer linkLayer = new LinkLayer(new Lpt());
-
+        byte oldByte = 1;
+        
+        
         while(loop_continue) {
-        	linkLayer.readByte();
+        	byte newByte = linkLayer.readByte();
+        	if(newByte!=oldByte){
+        		System.out.println((int)newByte);
+        		oldByte = newByte;
+        	}
         }
     }
 }
