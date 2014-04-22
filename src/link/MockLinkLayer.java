@@ -42,9 +42,14 @@ public class MockLinkLayer implements LinkLayer {
 		if (that != null)
 			that.push(data);
 
-		System.out.printf("[MLL] sent %s '%s' %s %08d\n", this.prefix,
-				(char) data, Byte.toString(data),
-				Integer.parseInt(Integer.toBinaryString(data)));
+		if (debug) {
+			String fmt = "[MLL] sent %s '%s' %s %08d\n";
+			String chr = "" + ((char) data);
+			String val = Byte.toString(data);
+			int bits = Integer.parseInt(Integer.toBinaryString(data));
+
+			System.out.printf(fmt, prefix, chr, val, bits);
+		}
 	}
 
 	@Override
