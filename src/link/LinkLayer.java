@@ -21,10 +21,6 @@ public class LinkLayer {
 		linkLayer.testReadByte(testBytes);
 		
 		linkLayer.testReadByte(linkLayer.testSendByte((byte)-50));
-		
-		
-		
-		
 	}
 
 	public LinkLayer(Lpt lpt) {
@@ -37,7 +33,7 @@ public class LinkLayer {
 			byte aBit = (byte)(bit ^ (i%2)*2);
 			//System.out.println(aBit<<4);
 			//Stuurd minst significante bit eerst.
-			//lpt.writeLPT(bit);
+			lpt.writeLPT(bit);
 		}
 	}
 	
@@ -60,11 +56,12 @@ public class LinkLayer {
 			byte in = lpt.readLPT();
 			if(in!=oldByte){
 				//Nieuwe bit binnen.
+				System.out.println(result);
 				result = (byte)((((in>>4 & 1)<<b) | result));
 				b++;
 			}
 		}
-		//System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
+		System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
 		return result;
 	}
 	
@@ -80,6 +77,7 @@ public class LinkLayer {
 				b++;
 			}
 		}
+		System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
 		return result;
 	}
 
