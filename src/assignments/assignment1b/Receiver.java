@@ -7,16 +7,26 @@ public class Receiver {
     public static void main(String[] args) {
         Lpt lpt = new ErrorLpt();
         boolean loop_continue = true;
-        int oldIn = 0;
+        int out = 0;
+        int errors = 0;
+
+        try {
+            out = Integer.parseInt(args[0]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println("The first argument should be a valid integer.");
+            loop_continue = false;
+        } catch (NumberFormatException e) {
+            System.err.println("The first argument should be a valid integer.");
+            loop_continue = false;
+        }
 
         while(loop_continue) {
             int in = lpt.readLPT();
 
-            if (in != oldIn) {
-                System.out.println(in + " \t=\t" + Integer.toBinaryString(in));
+            if (in != out) {
+                errors++;
+                System.out.println(errors);
             }
-
-            oldIn = in;
         }
     }
 }
