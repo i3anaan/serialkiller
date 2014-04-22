@@ -20,7 +20,7 @@ public class LinkLayer {
 		//System.out.println("Reading byte");
 		linkLayer.testReadByte(testBytes);
 		
-		linkLayer.testReadByte(linkLayer.testSendByte((byte)-50));
+		//linkLayer.testReadByte(linkLayer.testSendByte((byte)-50));
 	}
 
 	public LinkLayer(Lpt lpt) {
@@ -31,6 +31,8 @@ public class LinkLayer {
 		for (int i = 0; i <8; i=i+1) {
 			byte bit = (byte)(((data>>i) & 1));
 			byte aBit = (byte)(bit ^ ((i%2)*2));
+			System.out.println("bit:\t"+Integer.toBinaryString(bit));
+			System.out.println("bit:\t"+Integer.toBinaryString(aBit));
 			//System.out.println(aBit<<4);
 			//Stuurd minst significante bit eerst.
 			System.out.println("Sending:   "+aBit);
@@ -44,20 +46,19 @@ public class LinkLayer {
 		}
 	}
 	
-	public byte[] testSendByte(byte data){
+	/*public byte[] testSendByte(byte data){
 		byte[] fullData = new byte[8];
 		for (int i = 0; i <8; i=i+1) {
 			byte bit = (byte)(((data>>i) & 1));
 			byte aBit = (byte)(bit ^ ((i%2)*2));
-			System.out.println("bit:\t"+Integer.toBinaryString(bit));
-			System.out.println("bit:\t"+Integer.toBinaryString(aBit));
+			
 			fullData[i] = (byte)(aBit<<4);
 			//Stuurd minst significante bit eerst.
 			//lpt.writeLPT(bit);
 			System.out.println("Sending:   "+(byte)(aBit<<4));
 		}
 		return fullData;
-	}
+	}*/
 	
 	public byte readByte(){
 		byte result = 0;
