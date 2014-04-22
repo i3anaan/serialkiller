@@ -22,6 +22,8 @@ public class LinkLayer {
      * @param data The data to send.
      */
 	public void sendByte(byte data) {
+        byte oldBits = Byte.MAX_VALUE;
+
         // Loop over the bits in the byte
 		for (int i = 0; i <8; i++) {
 			byte bit = (byte)(((data>>i) & 1)); // The bit to send (results in all zero's except the LSB)
@@ -33,7 +35,11 @@ public class LinkLayer {
             } catch (InterruptedException e) {
                 System.err.println("Error while waiting to send #" + i);
             }
+            while(oldBits != Byte.MAX_VALUE && lpt.readLPT() != oldBits) {
+                // Wait until the previous transmission is acknowledged.
+            }
             lpt.writeLPT(bits);
+            oldBits = bits;
             System.out.println("Sent #" + i + ": " + bits + "  Bit: " + bit + "  ABit: " + aBit);
 		}
 	}
@@ -64,6 +70,9 @@ public class LinkLayer {
                 oldByte = in;
                 b++;
                 System.out.println("Received #" + b + ": " + in + "  Bit: " + bit + "  SubResult: " + result);
+
+                // Echo received value
+                lpt.writeLPT(in);
             }
         }
 
