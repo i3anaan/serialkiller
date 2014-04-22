@@ -59,6 +59,7 @@ public class LinkLayer {
 				//Nieuwe bit binnen.
 				System.out.println("New Byte detected:"+result);
 				result = (byte)((((in>>4 & 1)<<b) | result));
+				oldByte = in;
 				b++;
 			}
 		}
