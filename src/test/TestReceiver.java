@@ -13,10 +13,12 @@ public class TestReceiver {
 
 		while (true) {
 			String intRead;
+			String oldRead = "";
 			try {
 				intRead = is.read() + "";
-				if(!intRead.equals("0")){
+				if(!intRead.equals("0") && !intRead.equals(oldRead)){
 					System.out.println(intRead);
+					oldRead = intRead;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
