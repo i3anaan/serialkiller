@@ -12,9 +12,11 @@ public class TestReceiver {
 		//InputStream is = null;
 		InputStream is = new FileInputStream(new File("/telpparport"));
 		printByte(23);
+		int oldRead = 0;
+		
 		while (true) {
 			int intRead = 0;
-			int oldRead = 0;
+			
 			try {
 				intRead = is.read() ;
 				if(intRead!=oldRead){
