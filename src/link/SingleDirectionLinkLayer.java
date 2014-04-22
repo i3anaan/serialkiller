@@ -11,19 +11,33 @@ public class SingleDirectionLinkLayer implements LinkLayer {
 	private Lpt lpt;
 
     /** The previously received byte. */
-	private byte oldByte = Byte.MAX_VALUE;
+	private byte oldByte;
 
+    /** Whether debug mode is enabled. May cause prints and/or waits. */
     private boolean debug;
 
+    /**
+     * Constructs a new SingleDirectionLinkLayer instance.
+     * @param lpt The driver class to use.
+     */
     public SingleDirectionLinkLayer(Lpt lpt) {
         this.lpt = lpt;
     }
 
+    /**
+     * Constructs a new SingleDirectionLinkLayer instance.
+     * @param lpt The driver class to use.
+     * @param debug Whether to enable debug mode. May cause prints and/or waits.
+     */
 	public SingleDirectionLinkLayer(Lpt lpt, boolean debug) {
         this.lpt = lpt;
         this.debug = debug;
+
+        // Set the old byte to the current state of the link
+        this.oldByte = lpt.readLPT();
 	}
 
+    @Override
 	public void sendByte(byte data) {
         byte oldBit = Byte.MAX_VALUE;
 
@@ -31,8 +45,9 @@ public class SingleDirectionLinkLayer implements LinkLayer {
 		for (int i = 0; i <8; i++) {
 			byte bit = (byte)(((data>>i) & 1)); // The bit to send (results in all zero's except the LSB)
 			byte aBit = (byte)(i%2); // The bit that alternates between 0 and 1
-            byte bits = (byte)(bit | (aBit<<1));
+            byte bits = (byte)(bit | (aBit<<1)); // Combined into two bits (LSB contains data)
 
+            // DEBUG: Print current value while waiting for the acknowledgement
             if(debug) {
                 try {
                     Thread.sleep(20);
@@ -40,9 +55,13 @@ public class SingleDirectionLinkLayer implements LinkLayer {
                     System.err.println("Error while waiting to send #" + i);
                 }
             }
+
+            // Format current return value
             byte ack = (byte)((lpt.readLPT()<<2)>>7);
+
+            // Wait until the previous transmission is acknowledged
             while(oldBit != Byte.MAX_VALUE && ack != oldBit) {
-                // Wait until the previous transmission is acknowledged.
+                // DEBUG: Wait and print current value while waiting for acknowledgement
                 if(debug) {
                     System.out.println("  Waiting for " + oldBit + ", currently on " + ack);
                     try {
@@ -51,34 +70,38 @@ public class SingleDirectionLinkLayer implements LinkLayer {
                         System.err.println("Error while trying to sleep.");
                     }
                 }
+
+                // Format current return value again
                 ack = (byte)((lpt.readLPT()<<2)>>7);
             }
+
+            // DEBUG: Print that the transmission is acknowledged.
             if(debug) {
                 System.out.println("  ACKED");
             }
+
+            // Write the next bit
             lpt.writeLPT(bits);
             oldBit = bit;
+
+            // DEBUG: Print the result of this bit transmission
             if(debug) {
                 System.out.println("Sent #" + i + ": " + bits + "  Bit: " + bit + "  ABit: " + aBit);
             }
 		}
 	}
 
+    @Override
 	public byte readByte(){
 		byte result = 0; // Resulting byte
 		int b = 0; // Bit number
 
-        // Do not use the phantom reading from the previous transmission
-        if (oldByte == Byte.MAX_VALUE) {
-            oldByte = lpt.readLPT();
-        }
-
         // Loop over the bits in the byte
-        while(b<8){
+        while(b < 8){
             byte in = lpt.readLPT();
 
             // Check for a new value
-            if(in!=oldByte){
+            if(in != oldByte){
                 byte bit = (byte)((in<<2)>>7); // Remove everything but the LSB
                 result = (byte)(result | (bit<<b)); // Add the bit to its relevant position in the result
 
@@ -86,12 +109,15 @@ public class SingleDirectionLinkLayer implements LinkLayer {
                 oldByte = in;
                 b++;
 
+                // DEBUG: Print data relevant to the received bit
                 if(debug) {
                     System.out.println("Received #" + b + ": " + in + "  Bit: " + bit + "  SubResult: " + result);
                 }
 
-                // Echo received value
+                // Return received value as acknowledgement
                 lpt.writeLPT(bit);
+
+                // DEBUG: Print that the acknowledgement is sent
                 if(debug) {
                     System.out.println("  ACK " + bit);
                 }
