@@ -10,11 +10,12 @@ public class Receiver {
 
         while(loop_continue) {
             int in = lpt.readLPT();
-            oldIn = in;
 
             if (in != oldIn) {
                 System.out.println(in + " \t=\t" + Integer.toBinaryString(in));
             }
+
+            oldIn = in;
         }
     }
 }
