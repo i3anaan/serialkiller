@@ -64,7 +64,7 @@ public class LinkLayer {
 	public byte readByte(){
 		byte result = 0;
 		int b = 0; //Incoming byte number
-		oldByte = Byte.MAX_VALUE;
+		//oldByte = Byte.MAX_VALUE;
 		while(b<8){
 			byte in = lpt.readLPT();
 			
