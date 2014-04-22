@@ -35,6 +35,12 @@ public class LinkLayer {
 			//Stuurd minst significante bit eerst.
 			System.out.println("Sending:   "+aBit);
 			lpt.writeLPT(aBit);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
