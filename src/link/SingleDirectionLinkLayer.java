@@ -22,6 +22,10 @@ public class SingleDirectionLinkLayer implements LinkLayer {
      */
     public SingleDirectionLinkLayer(Lpt lpt) {
         this.lpt = lpt;
+        this.debug = false;
+
+        // Set the old byte to the current state of the link
+        this.oldByte = lpt.readLPT();
     }
 
     /**
