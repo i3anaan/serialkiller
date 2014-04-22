@@ -10,6 +10,8 @@ public class LinkLayer {
 
 	private Lpt lpt;
 	private byte oldByte = Byte.MAX_VALUE;
+	private int consecutiveABitOnes = 0;
+	private boolean oldABit;
 	
 	private static final byte[] testBytes = {0,32,16,48,0,32,16,48};
 
@@ -68,12 +70,15 @@ public class LinkLayer {
 		//oldByte = Byte.MAX_VALUE;
 		while(b<8){
 			byte in = lpt.readLPT();
-			
+			boolean newABit;
 			if(in!=oldByte){
+				newABit = (in>>4 & 1) == 1;
 				//Nieuwe bit binnen.
 				System.out.println("New Byte detected:"+in +"\t "+Integer.toBinaryString(in));
+				System.out.println("ABit = "+newABit);
 				result = (byte)((((in>>5 & 1)<<b) | result));
 				oldByte = in;
+				oldABit = newABit;
 				b++;
 			}
 		}
@@ -89,9 +94,11 @@ public class LinkLayer {
 		
 		for (int i = 0; i <20; i=i+1) {
 			if(i%2==0){
+				System.out.println("Send flagBit1!");
 				lpt.writeLPT(flagBit1);
 			}else{
 				lpt.writeLPT(flagBit2);
+				System.out.println("Send flagBit2!");
 			}
 		}
 	}
