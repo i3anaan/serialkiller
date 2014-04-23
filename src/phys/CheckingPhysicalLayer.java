@@ -7,9 +7,7 @@ package phys;
  * layer (hardware or otherwise).
  * 
  */
-public class CheckingPhysicalLayer implements PhysicalLayer {
-	private PhysicalLayer down;
-
+public class CheckingPhysicalLayer extends PhysicalLayer {
 	/** Construct a new CheckingPhysicalLayer. */
 	public CheckingPhysicalLayer(PhysicalLayer down) {
 		super();

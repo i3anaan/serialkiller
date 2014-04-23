@@ -3,11 +3,12 @@ package phys;
 import lpt.Lpt;
 
 /**
- * An implementation of HardwareLayer that uses the 'official', provided, Lpt class.
+ * An implementation of HardwareLayer that uses the 'official', provided, Lpt
+ * class.
  */
 public class LptHardwareLayer extends HardwareLayer {
 	private Lpt lpt;
-	
+
 	public LptHardwareLayer() {
 		lpt = new Lpt();
 	}

@@ -1,5 +1,7 @@
 package phys;
 
+import common.Layer;
+
 /**
  * Basic interface for implementations of physical layers. SerialKiller is only
  * intended to run on Telematica's special kind of serial connection, which
@@ -13,12 +15,13 @@ package phys;
  * is to be expected - and corrected in higher layers.
  * 
  */
-public interface PhysicalLayer {
+public abstract class PhysicalLayer extends Layer {
 	/**
 	 * Sends the two lowest-order bits in the given byte to whatever is backing
 	 * this layer.
 	 */
-	public void sendByte(byte data);
+	@Override
+	public abstract void sendByte(byte data);
 
 	/**
 	 * Reads a pair of bits from the link and return them as the two
@@ -26,5 +29,6 @@ public interface PhysicalLayer {
 	 * 
 	 * @return The received byte
 	 */
-	public byte readByte();
+	@Override
+	public abstract byte readByte();
 }

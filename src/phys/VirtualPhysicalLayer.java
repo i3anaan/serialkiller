@@ -1,22 +1,16 @@
 package phys;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * An implementation of a physical layer that can be used to connect different
  * threads on the same machine.
  */
-public class VirtualPhysicalLayer implements PhysicalLayer {
-	public Lock lock;
-
+public class VirtualPhysicalLayer extends PhysicalLayer {
 	private VirtualPhysicalLayer that;
 	private byte state;
 
 	/** Connect this instance to another instance of VirtualPhysicalLayer. */
 	public void connect(VirtualPhysicalLayer that) {
 		this.that = that;
-		this.lock = new ReentrantLock();
 		this.state = 0;
 	}
 
@@ -27,16 +21,13 @@ public class VirtualPhysicalLayer implements PhysicalLayer {
 
 	@Override
 	public byte readByte() {
-		lock.lock();
-		byte s = state;
-		lock.unlock();
+		byte s;
+		synchronized (this) { s = state; }
 		return s;
 	}
 
 	/** Takes a byte sent by (possibly) another thread. */
 	public void takeByte(byte data) {
-		lock.lock();
-		state = data;
-		lock.unlock();
+		synchronized (this) { state = data; }
 	}
 }

@@ -1,11 +1,13 @@
 package link;
 
+import common.Layer;
+
 /**
  * Basic interface for implementations of link layers. This interface specifies
  * the basic API to ensure compatibility independent of the type of link layer
  * that is used.
  */
-public interface LinkLayer {
+public abstract class LinkLayer extends Layer {
 
 	/**
 	 * Sends the given byte over the link.
@@ -13,13 +15,13 @@ public interface LinkLayer {
 	 * @param data
 	 *            The data to send.
 	 */
-	public void sendByte(byte data);
+	public abstract void sendByte(byte data);
 
 	/**
 	 * Reads a byte from the link.
 	 * 
 	 * @return The received byte
 	 */
-	public byte readByte();
+	public abstract byte readByte();
 
 }

@@ -3,6 +3,8 @@ package link;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import util.Bytes;
+
 /**
  * A fake implementation of a link layer that only provides communication
  * between threads, not between hosts.
@@ -10,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
  * Both readByte and sendByte potentially block, with readByte blocking being
  * much more likely.
  */
-public class MockLinkLayer implements LinkLayer {
+public class MockLinkLayer extends LinkLayer {
 	private static final int queue_sz = 1024;
 
 	private MockLinkLayer that;
@@ -43,12 +45,11 @@ public class MockLinkLayer implements LinkLayer {
 			that.push(data);
 
 		if (debug) {
-			String fmt = "[MLL] sent %s '%s' %s %08d\n";
+			String fmt = "[MLL] sent %s '%s' %s %s\n";
 			String chr = "" + ((char) data);
 			String val = Byte.toString(data);
-			int bits = Integer.parseInt(Integer.toBinaryString(data));
 
-			System.out.printf(fmt, prefix, chr, val, bits);
+			System.out.printf(fmt, prefix, chr, val, Bytes.format(data));
 		}
 	}
 

@@ -5,7 +5,7 @@ package link;
  * immediately return null (0) bytes, and writing to it will do precisely
  * nothing.
  */
-public class NullLinkLayer implements LinkLayer {
+public class NullLinkLayer extends LinkLayer {
 	@Override
 	public void sendByte(byte data) {
 		/* Do nothing. */

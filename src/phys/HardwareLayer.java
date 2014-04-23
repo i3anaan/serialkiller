@@ -13,21 +13,25 @@ package phys;
  * simulate and to reverse this process. The latter is used by the
  * implementations of readByte.
  */
-public abstract class HardwareLayer implements PhysicalLayer {
+public abstract class HardwareLayer extends PhysicalLayer {
 
 	/**
 	 * Shufts the given byte to the right, reversing the operation done by the
 	 * Telematica driver.
 	 */
-	protected byte shuftRight(byte in) {
-		return (byte) 0;
+	public static byte shuftRight(byte in) {
+		byte byte0 = (byte) ((in >> 5) & 1);
+		byte byte1 = (byte) ((in >> 3) & 2);
+		return (byte) (0 | byte0 | byte1);
 	}
 
 	/**
 	 * Shufts the given byte to the left, simulating the operation done by the
 	 * Telematica driver.
 	 */
-	protected byte shuftLeft(byte in) {
-		return (byte) 0;
+	public static byte shuftLeft(byte in) {
+		byte byte0 = (byte) ((in & 1) << 5);
+		byte byte1 = (byte) ((in & 2) << 3);
+		return (byte) (0 | byte0 | byte1);
 	}
 }
