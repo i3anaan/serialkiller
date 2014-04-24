@@ -10,7 +10,7 @@ public class LinkLayerSender {
 
 	public static void main(String[] args) throws IOException {
 		BufferedReader conInput = new BufferedReader(new InputStreamReader(System.in));
-		LinkLayer linkLayer = new SingleDirectionLinkLayer(new Lpt());
+		LinkLayer linkLayer = new AckLinkLayer(new Lpt());
 
 		String textInput;
 

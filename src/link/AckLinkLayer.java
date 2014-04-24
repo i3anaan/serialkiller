@@ -6,7 +6,7 @@ import lpt.Lpt;
  * Handles communication over the physical link. Splits and merges whole bytes to/from a format that is accepted by the
  * link.
  */
-public class SingleDirectionLinkLayer extends LinkLayer {
+public class AckLinkLayer extends LinkLayer {
     /** The driver class that is used. */
 	private Lpt lpt;
 
@@ -17,10 +17,10 @@ public class SingleDirectionLinkLayer extends LinkLayer {
     private boolean debug;
 
     /**
-     * Constructs a new SingleDirectionLinkLayer instance.
+     * Constructs a new AckLinkLayer instance.
      * @param lpt The driver class to use.
      */
-    public SingleDirectionLinkLayer(Lpt lpt) {
+    public AckLinkLayer(Lpt lpt) {
         this.lpt = lpt;
         this.debug = false;
 
@@ -29,11 +29,11 @@ public class SingleDirectionLinkLayer extends LinkLayer {
     }
 
     /**
-     * Constructs a new SingleDirectionLinkLayer instance.
+     * Constructs a new AckLinkLayer instance.
      * @param lpt The driver class to use.
      * @param debug Whether to enable debug mode. May cause prints and/or waits.
      */
-	public SingleDirectionLinkLayer(Lpt lpt, boolean debug) {
+	public AckLinkLayer(Lpt lpt, boolean debug) {
         this.lpt = lpt;
         this.debug = debug;
 
