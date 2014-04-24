@@ -1,133 +1,82 @@
 package link;
 
-import lpt.Lpt;
+import phys.PhysicalLayer;
 
 /**
- * Handles communication over the physical link. Splits and merges whole bytes to/from a format that is accepted by the
- * link.
+ * A half-duplex link layer implementation that changes the return channel data
+ * as an acknowledgement.
+ *
+ * The input byte is split in 8 'bytes' of PHY layer data. The LSB is sent
+ * first. In the byte that is shipped to the physical layer, the LSB is the data
+ * bit, while the other bit contains the 'clock'.
+ *
+ * The sender will wait for an acknowledgement before trying to transmit the
+ * next bit, so bits are transferred correctly. However, when bit faults occur,
+ * the sendByte method may send data too fast (a change in the return channel
+ * can be seen as an ack, even when it is not).
  */
 public class AckLinkLayer extends LinkLayer {
-    /** The driver class that is used. */
-	private Lpt lpt;
-
-    /** The previously received byte. */
-	private byte oldByte;
-
-    /** Whether debug mode is enabled. May cause prints and/or waits. */
-    private boolean debug;
-
     /**
      * Constructs a new AckLinkLayer instance.
-     * @param lpt The driver class to use.
+     * @param down The driver class to use.
      */
-    public AckLinkLayer(Lpt lpt) {
-        this.lpt = lpt;
-        this.debug = false;
-
-        // Set the old byte to the current state of the link
-        this.oldByte = lpt.readLPT();
+    public AckLinkLayer(PhysicalLayer down) {
+        super();
+        this.down = down;
     }
 
-    /**
-     * Constructs a new AckLinkLayer instance.
-     * @param lpt The driver class to use.
-     * @param debug Whether to enable debug mode. May cause prints and/or waits.
-     */
-	public AckLinkLayer(Lpt lpt, boolean debug) {
-        this.lpt = lpt;
-        this.debug = debug;
-
-        // Set the old byte to the current state of the link
-        this.oldByte = lpt.readLPT();
-	}
-
     @Override
-	public void sendByte(byte data) {
-        byte oldBit = Byte.MAX_VALUE;
+	public void sendByte(byte input) {
+        byte clock = 1;
+        byte expectedAck = Byte.MAX_VALUE;
 
-        // Loop over the bits in the byte
-		for (int i = 0; i <8; i++) {
-			byte bit = (byte)(((data>>i) & 1)); // The bit to send (results in all zero's except the LSB)
-			byte aBit = (byte)(i%2); // The bit that alternates between 0 and 1
-            byte bits = (byte)(bit | (aBit<<1)); // Combined into two bits (LSB contains data)
+        // For every bit in the byte...
+        for (int i = 0; i < 8; i++) {
+            // The next bit to send is the LSB.
+            byte databit = (byte) (input & 1);
 
-            // DEBUG: Print current value while waiting for the acknowledgement
-            if(debug) {
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    System.err.println("Error while waiting to send #" + i);
-                }
+            // Wait for the acknowledgement of the previous bit...
+            while (expectedAck != Byte.MAX_VALUE
+                    && down.readByte() != expectedAck) {
+                // Waiting...
             }
 
-            // Format current return value
-            byte ack = (byte)((lpt.readLPT()<<2)>>7);
+            // Pack it with the clock and send it.
+            byte output = (byte) (0 | (clock << 1) | databit);
+            down.sendByte(output);
 
-            // Wait until the previous transmission is acknowledged
-            while(oldBit != Byte.MAX_VALUE && ack != oldBit) {
-                // DEBUG: Wait and print current value while waiting for acknowledgement
-                if(debug) {
-                    System.out.println("  Waiting for " + oldBit + ", currently on " + ack);
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        System.err.println("Error while trying to sleep.");
-                    }
-                }
+            expectedAck = (byte)(0 | (clock << 3) | (databit << 7));
 
-                // Format current return value again
-                ack = (byte)((lpt.readLPT()<<2)>>7);
-            }
-
-            // DEBUG: Print that the transmission is acknowledged.
-            if(debug) {
-                System.out.println("  ACKED");
-            }
-
-            // Write the next bit
-            lpt.writeLPT(bits);
-            oldBit = bit;
-
-            // DEBUG: Print the result of this bit transmission
-            if(debug) {
-                System.out.println("Sent #" + i + ": " + bits + "  Bit: " + bit + "  ABit: " + aBit);
-            }
-		}
+            input >>= 1; // Shift the sent bit off.
+            clock ^= 1; // Invert the clock 'bit'
+        }
 	}
 
     @Override
 	public byte readByte(){
-		byte result = 0; // Resulting byte
-		int b = 0; // Bit number
+        byte data = 0;
+        byte oldclock = 0;
 
-        // Loop over the bits in the byte
-        while(b < 8){
-            byte in = lpt.readLPT();
+        // For every bit in the output byte...
+        for (int i = 0; i < 8; /* */) {
+            // Read and unpack a line byte
+            byte input = down.readByte();
+            byte clock = (byte) ((input >> 1) & 1);
+            byte databit = (byte) (input & 1);
 
-            // Check for a new value
-            if(in != oldByte){
-                byte bit = (byte)((in<<2)>>7); // Remove everything but the LSB
-                result = (byte)(result | (bit<<b)); // Add the bit to its relevant position in the result
+            // If the clock has changed...
+            if (clock != oldclock) {
+                // Insert the data at the correct location and flip the clock
+                data |= databit << i;
 
-                // Administrative tasks
-                oldByte = in;
-                b++;
+                i++; oldclock = clock;
 
-                // DEBUG: Print data relevant to the received bit
-                if(debug) {
-                    System.out.println("Received #" + b + ": " + in + "  Bit: " + bit + "  SubResult: " + result);
-                }
-
-                // Return received value as acknowledgement
-                lpt.writeLPT(bit);
-
-                // DEBUG: Print that the acknowledgement is sent
-                if(debug) {
-                    System.out.println("  ACK " + bit);
-                }
+                // Send acknowledgement
+                down.sendByte((byte) (0 | (clock << 1) | databit));
             }
         }
 
-		return result;
-	}
+        // System.out.println("returning data " + Bytes.format(data));
+        return data;
+    }
 }
