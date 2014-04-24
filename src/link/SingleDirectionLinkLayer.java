@@ -6,7 +6,7 @@ import lpt.Lpt;
  * Handles communication over the physical link. Splits and merges whole bytes to/from a format that is accepted by the
  * link.
  */
-public class SingleDirectionLinkLayer implements LinkLayer {
+public class SingleDirectionLinkLayer extends LinkLayer {
     /** The driver class that is used. */
 	private Lpt lpt;
 

@@ -9,9 +9,8 @@ import lpt.Lpt;
 public class LinkLayerSender {
 
 	public static void main(String[] args) throws IOException {
-		BufferedReader conInput = new BufferedReader(new InputStreamReader(
-				System.in));
-		SingleDirectionLinkLayer linkLayer = new SingleDirectionLinkLayer(new Lpt());
+		BufferedReader conInput = new BufferedReader(new InputStreamReader(System.in));
+		LinkLayer linkLayer = new SingleDirectionLinkLayer(new Lpt());
 
 		String textInput;
 
