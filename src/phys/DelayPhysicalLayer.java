@@ -13,7 +13,7 @@ public class DelayPhysicalLayer extends PhysicalLayer {
 	private int delay;
 
 	public DelayPhysicalLayer(PhysicalLayer down) {
-		this(down, 5);
+		this(down, 1);
 	}
 
 	public DelayPhysicalLayer(PhysicalLayer down, int delay) {
