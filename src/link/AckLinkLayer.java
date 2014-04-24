@@ -1,5 +1,6 @@
 package link;
 
+import phys.HardwareLayer;
 import phys.PhysicalLayer;
 
 /**
@@ -45,7 +46,7 @@ public class AckLinkLayer extends LinkLayer {
             byte output = (byte) (0 | (clock << 1) | databit);
             down.sendByte(output);
 
-            expectedAck = (byte)(0 | (clock << 3) | (databit << 7));
+            expectedAck = HardwareLayer.shuftLeft(output);
 
             input >>= 1; // Shift the sent bit off.
             clock ^= 1; // Invert the clock 'bit'
@@ -72,7 +73,7 @@ public class AckLinkLayer extends LinkLayer {
                 i++; oldclock = clock;
 
                 // Send acknowledgement
-                down.sendByte((byte) (0 | (clock << 1) | databit));
+                down.sendByte(HardwareLayer.shuftRight(input));
             }
         }
 
