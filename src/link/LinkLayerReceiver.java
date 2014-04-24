@@ -1,13 +1,13 @@
 package link;
 
-import lpt.Lpt;
+import phys.LptHardwareLayer;
 
 public class LinkLayerReceiver {
+
 	public static void main(String[] args) {
-        boolean loop_continue = true;
-        LinkLayer linkLayer = new AckLinkLayer(new Lpt());
-        
-        while(loop_continue) {
+        LinkLayer linkLayer = new AckLinkLayer(new LptHardwareLayer());
+
+        while (true) {
         	byte newByte = linkLayer.readByte();
             System.out.println((int)newByte);
         }
