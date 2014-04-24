@@ -73,7 +73,7 @@ public class AckingLinkLayer extends LinkLayer {
                 i++; oldclock = clock;
 
                 // Send acknowledgement
-                down.sendByte(HardwareLayer.shuftRight(input));
+                down.sendByte(HardwareLayer.shuftLeft(input));
             }
         }
 
