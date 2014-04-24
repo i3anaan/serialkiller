@@ -16,12 +16,12 @@ import phys.PhysicalLayer;
  * the sendByte method may send data too fast (a change in the return channel
  * can be seen as an ack, even when it is not).
  */
-public class AckLinkLayer extends LinkLayer {
+public class AckingLinkLayer extends LinkLayer {
     /**
-     * Constructs a new AckLinkLayer instance.
+     * Constructs a new AckingLinkLayer instance.
      * @param down The driver class to use.
      */
-    public AckLinkLayer(PhysicalLayer down) {
+    public AckingLinkLayer(PhysicalLayer down) {
         super();
         this.down = down;
     }
