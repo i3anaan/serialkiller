@@ -17,9 +17,6 @@ public class BandwidthTestBench {
 
             System.out.println("STACK: " + link + "\n");
 
-            // Reset line
-            link.sendByte((byte) 0);
-
             System.out.printf("Please wait %d seconds...\n\n", DURATION / 1000);
 
             if (args[0].equals("send")) {
