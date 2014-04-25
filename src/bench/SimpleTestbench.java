@@ -1,7 +1,12 @@
 package bench;
 
+import phys.CheckingPhysicalLayer;
+import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
+import phys.DumpingPhysicalLayer;
 import phys.VirtualPhysicalLayer;
+import link.DumpingLinkLayer;
+import link.HighSpeedHDXLinkLayer;
 import link.LinkLayer;
 import link.SimpleLinkLayer;
 
@@ -72,8 +77,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new SimpleLinkLayer(new DelayPhysicalLayer(vpla));
-		LinkLayer b = new SimpleLinkLayer(new DelayPhysicalLayer(vplb));
+		LinkLayer a = new HighSpeedHDXLinkLayer(new CheckingPhysicalLayer(new DelayPhysicalLayer(vpla)));
+		LinkLayer b = new HighSpeedHDXLinkLayer(new CheckingPhysicalLayer(new DelayPhysicalLayer(vplb)));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
