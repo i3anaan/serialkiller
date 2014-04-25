@@ -1,7 +1,9 @@
 package bench;
 
 import link.AckingLinkLayer;
+import link.DumpingLinkLayer;
 import link.LinkLayer;
+import phys.DumpingPhysicalLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
 
@@ -12,7 +14,7 @@ public class BandwidthTestBench {
         if (args.length != 1 || !(args[0].equals("send") || args[0].equals("receive"))) {
             System.err.println("Invalid arguments.\nUse 'send' or 'receive'.");
         } else {
-            PhysicalLayer phys = new LptHardwareLayer();
+            PhysicalLayer phys = new DumpingPhysicalLayer(new LptHardwareLayer());
             LinkLayer link = new AckingLinkLayer(phys);
 
             System.out.println("STACK: " + link + "\n");
@@ -27,17 +29,6 @@ public class BandwidthTestBench {
                 while (true) {
                     for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
                         link.sendByte(i);
-                        byte in = link.readByte();
-
-                        if (in == i) {
-                            good++;
-                        } else {
-                            bad++;
-                        }
-
-                        if ((good+bad) % 1024 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
-
-                        System.out.flush();
                     }
                 }
             } else if (args[0].equals("receive")) {
@@ -49,7 +40,6 @@ public class BandwidthTestBench {
                 while (System.currentTimeMillis() < start + DURATION) {
                     byte in = link.readByte();
                     if (in != old) {
-                        link.sendByte(in);
                         num++;
                     }
                 }
