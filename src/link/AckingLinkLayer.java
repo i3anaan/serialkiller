@@ -4,7 +4,7 @@ import phys.HardwareLayer;
 import phys.PhysicalLayer;
 
 /**
- * A half-duplex link layer implementation that changes the return channel data
+ * A non-duplex link layer implementation that changes the return channel data
  * as an acknowledgement.
  *
  * The input byte is split in 8 'bytes' of PHY layer data. The LSB is sent
@@ -46,7 +46,7 @@ public class AckingLinkLayer extends LinkLayer {
             byte output = (byte) (0 | (clock << 1) | databit);
             down.sendByte(output);
 
-            expectedAck = HardwareLayer.shuftLeft(output);
+            expectedAck = output;
 
             input >>= 1; // Shift the sent bit off.
             clock ^= 1; // Invert the clock 'bit'
@@ -73,7 +73,7 @@ public class AckingLinkLayer extends LinkLayer {
                 i++; oldclock = clock;
 
                 // Send acknowledgement
-                down.sendByte(HardwareLayer.shuftLeft(input));
+                down.sendByte(input);
             }
         }
 
