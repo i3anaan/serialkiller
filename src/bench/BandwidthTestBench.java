@@ -9,8 +9,6 @@ public class BandwidthTestBench {
     static final long DURATION = 60000; // 60.000 ms = 1 minute
 
     public static void main(String[] args) {
-        String cmd = "";
-
         if (args.length != 1 || !(args[0].equals("send") || args[0].equals("receive"))) {
             System.err.println("Invalid arguments.\nUse 'send' or 'receive'.");
         } else {
@@ -24,7 +22,7 @@ public class BandwidthTestBench {
 
             System.out.printf("Please wait %d seconds...\n\n", DURATION / 1000);
 
-            if (cmd.equals("send")) {
+            if (args[0].equals("send")) {
                 int good = 0;
                 int bad = 0;
 
@@ -45,7 +43,7 @@ public class BandwidthTestBench {
                         System.out.flush();
                     }
                 }
-            } else if (cmd.equals("receive")) {
+            } else if (args[0].equals("receive")) {
                 long start, end;
                 int num = 0;
                 byte old = link.readByte();
