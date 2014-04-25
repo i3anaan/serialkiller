@@ -46,7 +46,7 @@ public class AckingLinkLayer extends LinkLayer {
             byte output = (byte) (0 | (clock << 1) | databit);
             down.sendByte(output);
 
-            expectedAck = HardwareLayer.shuftLeft(output);
+            expectedAck = output;
 
             input >>= 1; // Shift the sent bit off.
             clock ^= 1; // Invert the clock 'bit'
@@ -73,7 +73,7 @@ public class AckingLinkLayer extends LinkLayer {
                 i++; oldclock = clock;
 
                 // Send acknowledgement
-                down.sendByte(HardwareLayer.shuftLeft(input));
+                down.sendByte(input);
             }
         }
 

@@ -4,6 +4,7 @@ import link.AckingLinkLayer;
 import link.LinkLayer;
 import link.SimpleLinkLayer;
 import phys.DelayPhysicalLayer;
+import phys.LptHardwareLayer;
 import phys.VirtualPhysicalLayer;
 
 /**
@@ -20,22 +21,12 @@ public class AckingTestBench {
 		}
 
 		public void run() {
+            int n = 0;
 			while (true) {
 				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
 					down.sendByte(i);
-					byte in = down.readByte();
-					
-					if (in == i) {
-						System.out.print(".");
-						good++;
-					} else {
-						System.out.print("X");
-						bad++;
-					}
-					
-					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
-					
-					System.out.flush();
+                    n++;
+                    if (n % 128 == 0) System.out.printf("%d sent\n", n);
 				}
 			}
 		}
@@ -51,39 +42,58 @@ public class AckingTestBench {
 		public void run() {
 			while (true) {
 				byte i = down.readByte();
-				down.sendByte(i);
 			}
 		}
 	}
 
 	public static void main(String[] args) {
-		new AckingTestBench().run();
+        if (args.length > 0) {
+            new AckingTestBench().run(true);
+        } else {
+            new AckingTestBench().run();
+        }
 	}
 
-	public void run() {
+	public void run(boolean hardware) {
 		System.out.println("AckingTestbench");
 		System.out.println("===============");
 		System.out.println();
-		
-		VirtualPhysicalLayer vpla, vplb;
-		
-		vpla = new VirtualPhysicalLayer();
-		vplb = new VirtualPhysicalLayer();
 
-		vpla.connect(vplb);
-		vplb.connect(vpla);
+        LinkLayer a, b;
 
-		LinkLayer a = new AckingLinkLayer(new DelayPhysicalLayer(vpla, 0));
-		LinkLayer b = new AckingLinkLayer(new DelayPhysicalLayer(vplb, 0));
-		
-		System.out.println("STACK A: " + a);
-		System.out.println("STACK B: " + a);
-		System.out.println();
-		
-		Thread et = new EchoThread(a);
-		Thread st = new SeqThread(b);
-		
-		et.start();
-		st.start();
+        if (hardware) {
+            LptHardwareLayer hwla, hwlb;
+
+            hwla = new LptHardwareLayer();
+            hwlb = new LptHardwareLayer();
+
+            a = new AckingLinkLayer(hwla);
+            b = new AckingLinkLayer(hwlb);
+        } else {
+            VirtualPhysicalLayer vpla, vplb;
+
+            vpla = new VirtualPhysicalLayer();
+            vplb = new VirtualPhysicalLayer();
+
+            vpla.connect(vplb);
+            vplb.connect(vpla);
+
+            a = new AckingLinkLayer(new DelayPhysicalLayer(vpla, 1));
+            b = new AckingLinkLayer(new DelayPhysicalLayer(vplb, 1));
+        }
+
+        System.out.println("STACK A: " + a);
+        System.out.println("STACK B: " + a);
+        System.out.println();
+
+        Thread et = new EchoThread(a);
+        Thread st = new SeqThread(b);
+
+        et.start();
+        st.start();
 	}
+
+    public void run() {
+        run(false);
+    }
 }
