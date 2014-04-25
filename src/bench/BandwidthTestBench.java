@@ -25,11 +25,6 @@ public class BandwidthTestBench {
             System.out.printf("Please wait %d seconds...\n\n", DURATION / 1000);
 
             if (args[0].equals("send")) {
-                while(phys.readByte() != 0) {
-                    // Wait for handshake
-                }
-                phys.sendByte((byte) 3);
-
                 // Just spammin'
                 while (true) {
                     for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
@@ -37,20 +32,16 @@ public class BandwidthTestBench {
                     }
                 }
             } else if (args[0].equals("receive")) {
-                long start;
+                long start = Long.MAX_VALUE - DURATION - 1;
                 int num = 0;
-                byte old = link.readByte();
-
-                // Handshake
-                while (phys.readByte() != 3) {
-                    // Wait for handshake.
-                }
-
-                start = System.currentTimeMillis();
+                byte old = Byte.MAX_VALUE;
 
                 while (System.currentTimeMillis() < start + DURATION) {
                     byte in = link.readByte();
                     if (in != old) {
+                        if (start > System.currentTimeMillis()) {
+                            start = System.currentTimeMillis();
+                        }
                         num++;
                     }
                 }
