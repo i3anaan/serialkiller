@@ -71,28 +71,10 @@ public class LinkLayer {
 		//oldByte = Byte.MAX_VALUE;
 		while(b<8){
 			byte in = lpt.readLPT();
-			boolean newABit;
+			boolean newABit = (in>>4 & 1) == 1;
 			System.out.println("inByte: "+Integer.toBinaryString(in)+"  oldByte: "+Integer.toBinaryString(oldByte) +"  == "+(in==oldByte));
-			if(in!=oldByte){
-				try {
-					Thread.sleep(500,0);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				newABit = (in>>4 & 1) == 1;
-				if(newABit ==oldABit){
-					consecutiveABitOnes++;
-					System.out.println("Received flags:  "+consecutiveABitOnes);
-					if(consecutiveABitOnes>10){
-						connectionSync = true;
-					}
-				}else{
-					consecutiveABitOnes = 0;
-				}
-				
-				
-				
+			if(newABit!=oldABit){
+				System.out.println()
 				//Nieuwe bit binnen.
 				if(connectionSync){
 					System.out.println("New Byte detected:"+in +"\t "+Integer.toBinaryString(in));
@@ -103,6 +85,27 @@ public class LinkLayer {
 					b++;
 				}
 			}
+			oldABit = newABit;
+			
+			try {
+				Thread.sleep(500,0);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			newABit = (in>>4 & 1) == 1;
+			if(newABit ==oldABit){
+				consecutiveABitOnes++;
+				System.out.println("Received flags:  "+consecutiveABitOnes);
+				if(consecutiveABitOnes>10){
+					connectionSync = true;
+				}
+			}else{
+				consecutiveABitOnes = 0;
+			}
+			
+			
+			
 		}
 		System.out.println((int)(result) + "\t = \t"+Integer.toBinaryString(result));
 		return result;
