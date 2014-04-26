@@ -9,7 +9,6 @@ import phys.VirtualPhysicalLayer;
 import util.Bytes;
 import link.DumpingLinkLayer;
 import link.HighSpeedHDXLinkLayer;
-import link.HighSpeedHDXLinkLayerOLD;
 import link.LinkLayer;
 import link.SimpleLinkLayer;
 
