@@ -1,12 +1,15 @@
 package bench;
 
 import phys.CheckingPhysicalLayer;
+import phys.CleanStartPhysicalLayer;
 import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
 import phys.DumpingPhysicalLayer;
 import phys.VirtualPhysicalLayer;
+import util.Bytes;
 import link.DumpingLinkLayer;
 import link.HighSpeedHDXLinkLayer;
+import link.HighSpeedHDXLinkLayerOLD;
 import link.LinkLayer;
 import link.SimpleLinkLayer;
 
@@ -77,15 +80,20 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new HighSpeedHDXLinkLayer(new CheckingPhysicalLayer(new DelayPhysicalLayer(vpla)));
-		LinkLayer b = new HighSpeedHDXLinkLayer(new CheckingPhysicalLayer(new DelayPhysicalLayer(vplb)));
+		LinkLayer a = new HighSpeedHDXLinkLayer(new DebouncePhysicalLayer(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vpla))));
+		LinkLayer b = new HighSpeedHDXLinkLayer(new DebouncePhysicalLayer(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vplb))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
 		System.out.println();
 		
+		//System.out.println(a.hashCode()+"\tReadFirstByte:\t"+Bytes.format(a.readByte()));
+		//System.out.println(b.hashCode()+"\tReadFirstByte:\t"+Bytes.format(b.readByte()));
+		
 		Thread et = new EchoThread(a);
 		Thread st = new SeqThread(b);
+		
+		
 		
 		et.start();
 		st.start();
