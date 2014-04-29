@@ -17,9 +17,9 @@ public class AlwaysSendingTest {
 		HighSpeedHDXLinkLayer hshdxll = new HighSpeedHDXLinkLayer(new DumpingPhysicalLayer(new DebouncePhysicalLayer(new CleanStartPhysicalLayer(new DelayPhysicalLayer(new LptHardwareLayer(), 1000)))));
 		
 		while (true) {
-			for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
-				System.out.println(Bytes.format((byte) 22));
-				hshdxll.sendByte((byte) 22);
+			for (byte b = 1; b < Byte.MAX_VALUE; b++) {
+				System.out.println(Bytes.format((byte) ((byte) 22 + b)));
+				hshdxll.sendByte((byte) ((byte) 22 + b));
 			}
 		}
 	}

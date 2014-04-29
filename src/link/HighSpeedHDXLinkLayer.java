@@ -109,18 +109,25 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 			if (input != oldByteReceived) {
 				byte extrabit = (byte) (input & 2);
 				byte databit = (byte) (input & 1);
-				data |= databit << bitIndex;
-				bitIndex++;
+				byte addition;
+				int bitsAdded;
+				//data |= databit << bitIndex;
+				//bitIndex++;
 				// New data received;
 				// Insert the data at the correct location
 
 				boolean databitChanged = databit != ((byte) (oldByteReceived & 1));
 				if (databitChanged) {
 					// Read second bit
-					data |= extrabit << (bitIndex-1);
-					bitIndex++;
+					addition = (byte) (input & 3);
+					bitsAdded = 2;
+				}else{
+					addition = databit;
+					bitsAdded = 1;
 				}
-
+				
+				data = (byte)(data | addition<<bitIndex);
+				bitIndex = bitIndex+bitsAdded;
 				System.out.println("Current data received: [" + bitIndex
 						+ "]\t" + Bytes.format(data, bitIndex));
 				down.sendByte(input);
