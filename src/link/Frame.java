@@ -41,9 +41,11 @@ public class Frame {
 		if(bit==0){
 			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength-1));
 			dataStored = (byte)(dataStored & mask);
+			currentLength++;
 		}else if(bit==1){
 			byte mask = (byte)(1<<(Frame.LENGTH-currentLength-1));
 			dataStored = (byte)(dataStored | mask);
+			currentLength++;
 		}else{
 			System.out.println("Adding invalid bit!");
 		}

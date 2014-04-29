@@ -44,7 +44,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					byte input = down.readByte();
 					while (input == previousByteReceived) {
 						input = down.readByte();
-						System.out.println("Waiting for ack...");
+						//System.out.println("Waiting for ack...");
 					}
 					// Found difference, got reaction;
 					// Extract information out of response;
