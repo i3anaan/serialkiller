@@ -17,7 +17,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	byte previousByteReceived = 0;
 
 	Frame lastReceivedFrame = new Frame((byte) 0);
-	Frame frameToSendNext = new Frame((byte) 0);;
+	Frame frameToSendNext = new Frame((byte) 0);
 
 	boolean readFrame;
 	boolean setFrameToSend;
@@ -30,17 +30,19 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 		if (readFrame && setFrameToSend) {
 			readFrame = false;
 			setFrameToSend = false;
-			Frame incomingData = new Frame((byte) 0, 1);
+			Frame incomingData = new Frame();
 			try {
 				while (!incomingData.isComplete()) {
 					if (!connectionSync) {
 						waitForSync();
 					}
 
-					byte byteToSent = adaptBitToPrevious(frameToSendNext
+					byte byteToSend = adaptBitToPrevious(frameToSendNext
 							.nextBit());
-					down.sendByte(byteToSent);
-					previousByteSent = byteToSent;
+					frameToSendNext.removeBit();
+					System.out.println("Byte to send: "+ byteToSend);
+					down.sendByte(byteToSend);
+					previousByteSent = byteToSend;
 
 					byte input = down.readByte();
 					while (input == previousByteReceived) {
@@ -50,10 +52,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					// Found difference, got reaction;
 					// Extract information out of response;
 					previousByteReceived = input;
-					frameToSendNext.removeBit();
+					
 
 					
-					System.out.print(extractBitFromInput(input));
+					System.out.println("Exctraded input bit: " +extractBitFromInput(input));
 					incomingData.add(extractBitFromInput(input));
 					//System.out.println(Bytes.format((byte)incomingData.getByte()));
 				}

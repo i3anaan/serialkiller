@@ -21,7 +21,8 @@ public class DCFDXLLSSSendTest {
 		while (true) {
 			for (byte b = 1; b < Byte.MAX_VALUE; b++) {
 				ll.sendByte((byte) b);
-				System.out.println(ll.readByte());
+				ll.readByte();
+				//System.out.println(ll.readByte());
 				ll.exchangeFrame();
 			}
 		}
