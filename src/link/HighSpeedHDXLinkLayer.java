@@ -15,7 +15,6 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 		this.down = down;
 		oldByteSent = 0; // Works when using CleanStart
 		oldByteReceived = 0;// Works when using CleanStart
-		down.readByte();
 	}
 
 	// For full duplex to work, this probably requires a differnet method
@@ -48,7 +47,7 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 	@Override
 	public void sendByte(byte data) {
 		// down.sendByte(data);
-		byte fullDataToSend = data;
+		down.readByte(); //Create block;
 		int bitIndex = 0;
 		// For every bit in the byte...
 		while (bitIndex < 8) {
@@ -91,6 +90,7 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 		byte data = 0;
 		int bitIndex = 0;
 		byte input = oldByteReceived;
+		down.readByte(); //Create block;
 		// For every bit in the byte...
 		while (bitIndex < 8) {
 			// Read and unpack a line byte
