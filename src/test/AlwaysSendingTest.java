@@ -16,11 +16,13 @@ public class AlwaysSendingTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LinkLayer ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new LptHardwareLayer()));
+		DelayCorrectedFDXLinkLayerSectionSegment ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new LptHardwareLayer()));
 		
 		while (true) {
 			for (byte b = 1; b < Byte.MAX_VALUE; b++) {
 				ll.sendByte((byte) b);
+				ll.exchangeFrame();
+				ll.readByte();
 			}
 		}
 	}

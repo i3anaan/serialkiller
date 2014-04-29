@@ -9,7 +9,7 @@ import util.Bytes;
 public class DCFDXLLSSReceiveTest {
 
 	public static void main(String[] args) {
-		LinkLayer ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new LptHardwareLayer()));
+		DelayCorrectedFDXLinkLayerSectionSegment ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new LptHardwareLayer()));
 		byte old = -1;
 		while (true) {
 			byte b = ll.readByte();
@@ -17,6 +17,8 @@ public class DCFDXLLSSReceiveTest {
 				System.out.println(Bytes.format(b));
 				old = b;
 			}
+			ll.sendByte((byte)22);
+			ll.exchangeFrame();
 			
 		}
 	}
