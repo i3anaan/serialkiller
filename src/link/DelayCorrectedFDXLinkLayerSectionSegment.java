@@ -65,6 +65,29 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 
 	private void waitForSync() {
 		while (!connectionSync) {
+			for(int i=0;i<20;i++){
+				if (down.readByte() != previousByteReceived) {
+					System.out.println("Reaction detected");
+					down.sendByte((byte) 2);
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} // TODO: dit slimmer doen;
+					if(down.readByte()==2){
+						previousByteSent = 2;
+						previousByteReceived=2;
+						connectionSync = true;
+					}
+				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			System.out.println("No other end detected...");
+			
 			System.out.println("Waiting on other end...");
 			down.sendByte((byte) 1);
 			try {
