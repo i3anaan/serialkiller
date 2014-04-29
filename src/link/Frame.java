@@ -1,5 +1,12 @@
 package link;
 
+import util.Bytes;
+
+/**
+ * Sets starting from the left (MSB), reads starting from the right (LSB).
+ * @author I3anaan
+ *
+ */
 public class Frame {
 
 	byte dataStored;
@@ -7,6 +14,10 @@ public class Frame {
 	public static final int LENGTH = 8;
 	int currentLength = 0;
 	
+	public Frame(){
+		dataStored = 0;
+		currentLength = 1;
+	}
 	
 	public Frame(byte data){
 		dataStored = data;
@@ -39,11 +50,13 @@ public class Frame {
 	
 	public void add(byte bit){
 		if(bit==0){
-			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength-1));
+			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength));
 			dataStored = (byte)(dataStored & mask);
+			System.out.println(Bytes.format((byte)mask) +"  |   "+Bytes.format(dataStored));
 			currentLength++;
 		}else if(bit==1){
-			byte mask = (byte)(1<<(Frame.LENGTH-currentLength-1));
+			byte mask = (byte)(1<<(Frame.LENGTH-currentLength));
+			
 			dataStored = (byte)(dataStored | mask);
 			currentLength++;
 		}else{
