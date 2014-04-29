@@ -78,6 +78,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 						previousByteSent = 2;
 						previousByteReceived=2;
 						connectionSync = true;
+						return;
 					}
 				}
 				try {
@@ -113,6 +114,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					previousByteSent = 2;
 					previousByteReceived=2;
 					connectionSync = true;
+					return;
 				}
 			}
 		}
