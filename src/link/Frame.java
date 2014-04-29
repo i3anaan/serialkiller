@@ -13,6 +13,16 @@ public class Frame {
 		currentLength = 8;
 	}
 	
+	/**
+	 * @require 0<length<=Frame.LENGTH;
+	 * @param data
+	 * @param length
+	 */
+	public Frame(byte data, int length){
+		dataStored = data;
+		currentLength = length;
+	}
+	
 	
 	public boolean isComplete(){
 		return currentLength==Frame.LENGTH;
@@ -28,16 +38,25 @@ public class Frame {
 	}
 	
 	public void add(byte bit){
-		/*if(bit==0){
-			byte 1<<(Frame.LENGTH-currentLength-1);
-			dataStored = dataStored
+		if(bit==0){
+			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength-1));
+			dataStored = (byte)(dataStored & mask);
 		}else if(bit==1){
-			
+			byte mask = (byte)(1<<(Frame.LENGTH-currentLength-1));
+			dataStored = (byte)(dataStored | mask);
 		}else{
 			System.out.println("Adding invalid bit!");
-		}*/
+		}
 		
 	}
 	
+	public byte getByte(){
+		return dataStored;
+	}
+	
+	
+	public Frame getFullLength(){
+		return new Frame(dataStored);
+	}
 	
 }
