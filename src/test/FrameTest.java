@@ -95,15 +95,48 @@ public class FrameTest {
 	@Test
 	public void testGetNextBit() {
 		Frame frame = new Frame((byte)0,1);
-		//assertEquals(0,frame.nextBit());
+		assertEquals(0,frame.nextBit());
 		frame = new Frame();
-		//assertEquals(0,frame.nextBit());
-		frame = new Frame((byte)-128,1);
+		assertEquals(0,frame.nextBit());
+		frame = new Frame((byte)-128);
 		System.out.println(Bytes.format((byte)-128));
 		assertEquals(1,frame.nextBit());
-		frame = new Frame((byte)2,1);
+		frame = new Frame((byte)2);
 		assertEquals(0,frame.nextBit());
-		frame = new Frame((byte)3,1);
+		frame = new Frame((byte)3);
+		assertEquals(0,frame.nextBit());
+		
+		Frame frame2 = new Frame();
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame = new Frame((byte)-123);
+		assertEquals(1,frame.nextBit());
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		System.out.println(Bytes.format(frame2.getByte()));
+		frame.removeBit();
+		frame2.add(frame.nextBit());
+		frame.removeBit();
+		System.out.println(Bytes.format((byte)-123)+"  |  "+Bytes.format(frame.getByte())+"  |  "+Bytes.format(frame2.getByte()));
+		assertEquals(frame.getByte(),frame2.getByte());
+		
+		frame = new Frame((byte)-123,1);
 		assertEquals(1,frame.nextBit());
 	}
 

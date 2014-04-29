@@ -41,10 +41,10 @@ public class Frame {
 	
 	
 	public byte nextBit(){
-		System.out.println(Frame.LENGTH-currentLength);
-		System.out.println(Bytes.format((byte)(dataStored>>(Frame.LENGTH-currentLength))));
-		
-		return (byte)((dataStored>>(Frame.LENGTH-currentLength))&1);
+		//System.out.println(Frame.LENGTH-currentLength);
+		//System.out.println(Bytes.format((byte)(dataStored>>(Frame.LENGTH-currentLength))));
+		//System.out.println(Bytes.format((byte)dataStored));
+		return (byte)((dataStored>>(currentLength-1))&1);
 	}
 	
 	public void removeBit(){
