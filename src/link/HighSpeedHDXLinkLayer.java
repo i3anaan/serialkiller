@@ -15,6 +15,8 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 		this.down = down;
 		oldByteSent = 0; // Works when using CleanStart
 		oldByteReceived = 0;// Works when using CleanStart
+
+		down.readByte(); //Create block;
 	}
 
 	// For full duplex to work, this probably requires a differnet method
@@ -47,7 +49,6 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 	@Override
 	public void sendByte(byte data) {
 		// down.sendByte(data);
-		down.readByte(); //Create block;
 		int bitIndex = 0;
 		// For every bit in the byte...
 		while (bitIndex < 8) {
@@ -55,10 +56,13 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 			byte databit = (byte) (data & 1);
 			data >>= 1;
 			bitIndex++;
+			System.out.println("OldByteSent: "+Bytes.format(oldByteSent));
+			//System.out.println("Databit: "+Bytes.format(databit));
 			boolean databitChanged = databit != ((byte) (oldByteSent & 1));
 			byte extrabit;
 
 			if (!databitChanged) {
+				System.out.println("Databit not changed");
 				// Send 1 data bit;
 				if ((oldByteSent & 2) == 2) { // Extra bit was 1
 					extrabit = 0;
@@ -66,9 +70,10 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 					extrabit = 2;
 				}
 			} else {
+				System.out.println("Databit changed");
 				// Send 2 data bits;
 				// Thus let extrabit be data;
-				extrabit = (byte) (data & 1);
+				extrabit = (byte) ((data & 1)*2);
 				data >>>= 1; // Will send 0 if this would be the 9th bit.
 				bitIndex++; // TODO no longer send 0 to fill 9th bit, but use
 							// some form of stream.
@@ -77,8 +82,12 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 				}
 			}
 
+			
+			System.out.println("Databit: "+Bytes.format(databit));
+			System.out.println("Extrabit: "+Bytes.format(extrabit));
 			// Pack output with databit and extrabit;
 			byte output = (byte) (0 | extrabit | databit);
+			System.out.println("HighSpeedHDXLinkLayer shipping off byte to lower layer: " + Bytes.format(output));
 			down.sendByte(output);
 			oldByteSent = output;
 			down.readByte(); // Needs to have debouncer for this to work;
@@ -90,7 +99,6 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 		byte data = 0;
 		int bitIndex = 0;
 		byte input = oldByteReceived;
-		down.readByte(); //Create block;
 		// For every bit in the byte...
 		while (bitIndex < 8) {
 			// Read and unpack a line byte
