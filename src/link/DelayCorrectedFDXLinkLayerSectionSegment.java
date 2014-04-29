@@ -52,9 +52,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					previousByteReceived = input;
 					frameToSendNext.removeBit();
 
+					
+					System.out.print(extractBitFromInput(input));
 					incomingData.add(extractBitFromInput(input));
-					System.out.println(Bytes.format((byte)incomingData.getByte()));
+					//System.out.println(Bytes.format((byte)incomingData.getByte()));
 				}
+				
+				System.out.println("\nFinished byte");
 
 			} catch (InvalidByteTransitionException e) {
 				// TODO iets hierop doen.

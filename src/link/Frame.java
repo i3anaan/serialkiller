@@ -41,6 +41,9 @@ public class Frame {
 	
 	
 	public byte nextBit(){
+		System.out.println(Frame.LENGTH-currentLength);
+		System.out.println(Bytes.format((byte)(dataStored>>(Frame.LENGTH-currentLength))));
+		
 		return (byte)((dataStored>>(Frame.LENGTH-currentLength))&1);
 	}
 	

@@ -57,10 +57,10 @@ public class FrameTest {
 		assertEquals(-1,frame.getByte());
 	}
 	
-	@Test
+	//@Test
 	public void testAdditionMixed() {
 		Frame frame = new Frame((byte)-1,1);
-		System.out.println(Bytes.format((byte)-1));
+		//System.out.println(Bytes.format((byte)-1));
 		assertEquals(-1,frame.getByte());
 		assertEquals(1,frame.nextBit());
 		frame.add((byte)0);
@@ -90,6 +90,21 @@ public class FrameTest {
 		frame.add((byte)0);
 		assertEquals(0,frame.getByte());
 		assertEquals(0,frame.nextBit());
+	}
+	
+	@Test
+	public void testGetNextBit() {
+		Frame frame = new Frame((byte)0,1);
+		//assertEquals(0,frame.nextBit());
+		frame = new Frame();
+		//assertEquals(0,frame.nextBit());
+		frame = new Frame((byte)-128,1);
+		System.out.println(Bytes.format((byte)-128));
+		assertEquals(1,frame.nextBit());
+		frame = new Frame((byte)2,1);
+		assertEquals(0,frame.nextBit());
+		frame = new Frame((byte)3,1);
+		assertEquals(1,frame.nextBit());
 	}
 
 }
