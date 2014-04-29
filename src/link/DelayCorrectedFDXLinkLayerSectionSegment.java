@@ -12,8 +12,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 
 	boolean connectionSync;
 	byte lastSentSyncPing = 0;
-	byte previousDataSent = 0;
-	byte previousDataReceived = 0;
+	byte previousByteSent = 0;
+	byte previousByteReceived = 0;
 
 	Frame lastReceivedFrame;
 	Frame frameToSendNext;
@@ -32,18 +32,18 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 			Frame incomingData = new Frame((byte) 0, 1);
 			try {
 				while (!incomingData.isComplete()) {
-					System.out.println("Waiting on other end...");
-					down.sendByte(adaptBitToPrevious(frameToSendNext.nextBit()));
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					if (!connectionSync) {
+						waitForSync();
 					}
-					// TODO Sync nodig
+					
+					byte byteToSent = adaptBitToPrevious(frameToSendNext.nextBit());
+					down.sendByte(byteToSent);
+					previousByteSent = byteToSent;
 					byte input = down.readByte();
-					if (input != previousDataReceived) {
+					if (input != previousByteReceived) {
 						// Found difference, got reaction;
 						// Extract information out of response;
+						previousByteReceived = input;
 						frameToSendNext.removeBit();
 
 						incomingData.add(extractBitFromInput(input));
@@ -63,27 +63,59 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 		}
 	}
 
+	private void waitForSync() {
+		while (!connectionSync) {
+			System.out.println("Waiting on other end...");
+			down.sendByte((byte) 1);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			down.sendByte((byte) 0);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (down.readByte() != previousByteReceived) {
+				System.out.println("Reaction detected");
+				down.sendByte((byte) 2);
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} // TODO: dit slimmer doen;
+				if(down.readByte()==2){
+					previousByteSent = 2;
+					previousByteReceived=2;
+					connectionSync = true;
+				}
+			}
+		}
+	}
+
 	private byte adaptBitToPrevious(byte nextData) {
-		if ((nextData & 1) == (previousDataSent & 1)) {
+		if ((nextData & 1) == (previousByteSent & 1)) {
 			// Same databit, different clockbit
-			if ((previousDataSent & 2) == 2) { // Invert clockbit
-				return (byte) (0 | (previousDataSent & 1));
+			if ((previousByteSent & 2) == 2) { // Invert clockbit
+				return (byte) (0 | (previousByteSent & 1));
 			} else {
-				return (byte) (2 | (previousDataSent & 1));
+				return (byte) (2 | (previousByteSent & 1));
 			}
 		} else {
 			// Different databit, same clockbit
-			return (byte) ((nextData & 1) | previousDataSent & 2);
+			return (byte) ((nextData & 1) | previousByteSent & 2);
 		}
 	}
 
 	private byte extractBitFromInput(byte input)
 			throws InvalidByteTransitionException {
-		if ((input & 1) == (previousDataReceived & 1)
-				&& (input & 2) != (previousDataReceived & 2)) {
+		if ((input & 1) == (previousByteReceived & 1)
+				&& (input & 2) != (previousByteReceived & 2)) {
 			// Both LSB are same, but it is still diferent > read LSB.
 			return (byte) (input & 1);
-		} else if ((input & 2) == (previousDataReceived & 2)) {
+		} else if ((input & 2) == (previousByteReceived & 2)) {
 			// Both LSB are not same, but it is still different >
 			return (byte) (input & 1);
 		} else {
