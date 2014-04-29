@@ -117,7 +117,7 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 				boolean databitChanged = databit != ((byte) (oldByteReceived & 1));
 				if (databitChanged) {
 					// Read second bit
-					data |= extrabit << bitIndex;
+					data |= extrabit << (bitIndex-1);
 					bitIndex++;
 				}
 
