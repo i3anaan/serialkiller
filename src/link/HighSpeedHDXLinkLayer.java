@@ -134,6 +134,7 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 				oldByteSent = input;
 			}
 		}
+		oldByteReceived = input;
 		return data;
 	}
 

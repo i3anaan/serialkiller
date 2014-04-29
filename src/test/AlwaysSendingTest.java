@@ -18,8 +18,7 @@ public class AlwaysSendingTest {
 		
 		while (true) {
 			for (byte b = 1; b < Byte.MAX_VALUE; b++) {
-				System.out.println(Bytes.format((byte) ((byte) 22 + b)));
-				hshdxll.sendByte((byte) ((byte) 22 + b));
+				hshdxll.sendByte((byte) 22);
 			}
 		}
 	}
