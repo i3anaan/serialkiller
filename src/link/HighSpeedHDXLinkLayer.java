@@ -15,6 +15,7 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 		this.down = down;
 		oldByteSent = 0; // Works when using CleanStart
 		oldByteReceived = 0;// Works when using CleanStart
+		down.readByte();
 	}
 
 	// For full duplex to work, this probably requires a differnet method
