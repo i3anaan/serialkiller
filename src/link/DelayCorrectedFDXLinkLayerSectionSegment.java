@@ -15,8 +15,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	byte previousByteSent = 0;
 	byte previousByteReceived = 0;
 
-	Frame lastReceivedFrame = new Frame((byte)0);
-	Frame frameToSendNext = new Frame((byte)0);;
+	Frame lastReceivedFrame = new Frame((byte) 0);
+	Frame frameToSendNext = new Frame((byte) 0);;
 
 	boolean readFrame;
 	boolean setFrameToSend;
@@ -35,19 +35,23 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					if (!connectionSync) {
 						waitForSync();
 					}
-					
-					byte byteToSent = adaptBitToPrevious(frameToSendNext.nextBit());
+
+					byte byteToSent = adaptBitToPrevious(frameToSendNext
+							.nextBit());
 					down.sendByte(byteToSent);
 					previousByteSent = byteToSent;
-					byte input = down.readByte();
-					if (input != previousByteReceived) {
-						// Found difference, got reaction;
-						// Extract information out of response;
-						previousByteReceived = input;
-						frameToSendNext.removeBit();
 
-						incomingData.add(extractBitFromInput(input));
+					byte input = down.readByte();
+					while (input == previousByteReceived) {
+						input = down.readByte();
+						System.out.println("Waiting for ack...");
 					}
+					// Found difference, got reaction;
+					// Extract information out of response;
+					previousByteReceived = input;
+					frameToSendNext.removeBit();
+
+					incomingData.add(extractBitFromInput(input));
 				}
 
 			} catch (InvalidByteTransitionException e) {
@@ -65,7 +69,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 
 	private void waitForSync() {
 		while (!connectionSync) {
-			for(int i=0;i<20;i++){
+			for (int i = 0; i < 20; i++) {
 				if (down.readByte() != previousByteReceived) {
 					System.out.println("Reaction detected");
 					down.sendByte((byte) 2);
@@ -74,9 +78,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					} // TODO: dit slimmer doen;
-					if(down.readByte()==2){
+					if (down.readByte() == 2) {
 						previousByteSent = 2;
-						previousByteReceived=2;
+						previousByteReceived = 2;
 						connectionSync = true;
 						return;
 					}
@@ -88,7 +92,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 				}
 			}
 			System.out.println("No other end detected...");
-			
+
 			System.out.println("Waiting on other end...");
 			down.sendByte((byte) 1);
 			try {
@@ -110,9 +114,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} // TODO: dit slimmer doen;
-				if(down.readByte()==2){
+				if (down.readByte() == 2) {
 					previousByteSent = 2;
-					previousByteReceived=2;
+					previousByteReceived = 2;
 					connectionSync = true;
 					return;
 				}
