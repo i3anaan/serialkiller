@@ -1,6 +1,7 @@
 package link;
 
 import phys.PhysicalLayer;
+import util.Bytes;
 
 /**
  * Do not use debouncer. Use CleanStart 0.
@@ -52,6 +53,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 					frameToSendNext.removeBit();
 
 					incomingData.add(extractBitFromInput(input));
+					System.out.println(Bytes.format((byte)incomingData.getByte()));
 				}
 
 			} catch (InvalidByteTransitionException e) {

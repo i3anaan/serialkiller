@@ -52,7 +52,7 @@ public class Frame {
 		if(bit==0){
 			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength));
 			dataStored = (byte)(dataStored & mask);
-			System.out.println(Bytes.format((byte)mask) +"  |   "+Bytes.format(dataStored));
+			//System.out.println(Bytes.format((byte)mask) +"  |   "+Bytes.format(dataStored));
 			currentLength++;
 		}else if(bit==1){
 			byte mask = (byte)(1<<(Frame.LENGTH-currentLength));
