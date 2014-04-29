@@ -4,13 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import lpt.Lpt;
+import phys.LptHardwareLayer;
 
 public class LinkLayerSender {
 
 	public static void main(String[] args) throws IOException {
 		BufferedReader conInput = new BufferedReader(new InputStreamReader(System.in));
-		LinkLayer linkLayer = new SingleDirectionLinkLayer(new Lpt());
+        LinkLayer linkLayer = new AckingLinkLayer(new LptHardwareLayer());
 
 		String textInput;
 
