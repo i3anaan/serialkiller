@@ -8,7 +8,6 @@ import util.Bytes;
 
 public class DCFDXLLSSReceiveTest {
 
-	
 	public static void main(String[] args) {
 		LinkLayer ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new LptHardwareLayer()));
 		byte old = -1;

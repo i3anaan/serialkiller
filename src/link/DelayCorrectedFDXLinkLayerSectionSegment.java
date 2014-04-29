@@ -15,8 +15,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	byte previousByteSent = 0;
 	byte previousByteReceived = 0;
 
-	Frame lastReceivedFrame;
-	Frame frameToSendNext;
+	Frame lastReceivedFrame = new Frame((byte)0);
+	Frame frameToSendNext = new Frame((byte)0);;
 
 	boolean readFrame;
 	boolean setFrameToSend;
