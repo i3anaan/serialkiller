@@ -39,6 +39,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 
 					byte byteToSend = adaptBitToPrevious(frameToSendNext
 							.nextBit());
+					//TODO: SHOULD NOT START WITH A ZERO:
 					frameToSendNext.removeBit();
 					System.out.println("Byte to send: "+ byteToSend);
 					down.sendByte(byteToSend);
@@ -163,6 +164,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	@Override
 	public void sendByte(byte data) {
 		frameToSendNext = new Frame(data);
+		//TODO Still starts with 1;
 		setFrameToSend = true;
 	}
 
