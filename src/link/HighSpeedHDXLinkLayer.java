@@ -6,15 +6,14 @@ import util.Bytes;
 
 public class HighSpeedHDXLinkLayer extends LinkLayer {
 
-	private int count;
-	byte oldByteSend; // Should be set after sending something;
+	byte oldByteSent; // Should be set after sending something;
 	byte oldByteReceived; // Should be set before reading something;
 	boolean newInputReceivedSinceSent;
 
 	public HighSpeedHDXLinkLayer(PhysicalLayer down) {
 		super();
 		this.down = down;
-		oldByteSend = 0; // Works when using CleanStart
+		oldByteSent = 0; // Works when using CleanStart
 		oldByteReceived = 0;// Works when using CleanStart
 	}
 
@@ -56,12 +55,12 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 			byte databit = (byte) (data & 1);
 			data >>= 1;
 			bitIndex++;
-			boolean databitChanged = databit != ((byte) (oldByteSend & 1));
+			boolean databitChanged = databit != ((byte) (oldByteSent & 1));
 			byte extrabit;
 
 			if (!databitChanged) {
 				// Send 1 data bit;
-				if ((oldByteSend & 2) == 2) { // Extra bit was 1
+				if ((oldByteSent & 2) == 2) { // Extra bit was 1
 					extrabit = 0;
 				} else {
 					extrabit = 2;
@@ -81,24 +80,22 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 			// Pack output with databit and extrabit;
 			byte output = (byte) (0 | extrabit | databit);
 			down.sendByte(output);
-			oldByteSend = output;
+			oldByteSent = output;
 			down.readByte(); // Needs to have debouncer for this to work;
-
 		}
-
 	}
 
 	@Override
 	public byte readByte() {
 		byte data = 0;
 		int bitIndex = 0;
-
+		byte input = oldByteReceived;
 		// For every bit in the byte...
 		while (bitIndex < 8) {
 			// Read and unpack a line byte
 			// oldByteReceived is set at the end of the previous loop.
-			byte input = down.readByte();
-			// System.out.println("Real Received:" + Bytes.format(input));
+			oldByteReceived = input;
+			input = down.readByte();
 
 			if (input != oldByteReceived) {
 				byte extrabit = (byte) (input & 2);
@@ -118,11 +115,8 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 				System.out.println("Current data received: [" + bitIndex
 						+ "]\t" + Bytes.format(data, bitIndex));
 				down.sendByte(input);
-				oldByteSend = input;
+				oldByteSent = input;
 			}
-			oldByteReceived = input;
-			// Pretty much the same as placing it before the down.readByte(),
-			// except that input doesn't exist at that point.
 		}
 		return data;
 	}
