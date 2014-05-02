@@ -17,6 +17,7 @@ public class FlaggedFrame extends Frame{
 	
 	public FlaggedFrame(Frame payload){
 		this.payload = payload;
+		
 	}
 
 }

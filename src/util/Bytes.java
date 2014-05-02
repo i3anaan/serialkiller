@@ -1,5 +1,7 @@
 package util;
 
+import java.util.BitSet;
+
 /**
  * Contains utility functions for working with bytes.
  */
@@ -14,4 +16,37 @@ public abstract class Bytes {
 	public static String format(byte b,int amount) {
 		return String.format("%0"+amount+"d", Integer.parseInt(Integer.toBinaryString(b & 0xFF)));
 	}
+
+    /**
+     * Parses a bit in a byte into a boolean.
+     * @param b The byte.
+     * @param n The bit number (0-7).
+     * @return The boolean represented by the bit in the byte.
+     */
+    public static boolean parseBoolean(byte b, int n) {
+        assert (n >= 0 && n <= 7);
+
+        byte bit = (byte) ((b << n) >> 7);
+
+        return ((bit & 1) == 1);
+    }
+
+    /**
+     * Gets a byte from a bit set.
+     * @param data The BitSet object that contains the data.
+     * @param start The index of the first bit in the byte.
+     * @return The requested byte.
+     */
+    public static byte fromBitSet(BitSet data, int start) {
+        // Assert that the data is long enough
+        assert (data.size() > start + 8);
+
+        byte b = 0;
+
+        for (int i = 0; i < 8; i++) {
+            b = (byte) (b | (((data.get(start + i)) ? 1:0) << (7-i)));
+        }
+
+        return b;
+    }
 }
