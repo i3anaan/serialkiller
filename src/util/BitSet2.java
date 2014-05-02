@@ -2,6 +2,8 @@ package util;
 
 import java.util.BitSet;
 
+import util.BitSet2;
+
 public class BitSet2 extends BitSet {
 
 	private int length; //actually works
@@ -31,5 +33,9 @@ public class BitSet2 extends BitSet {
 	public void set(int bitIndexFrom, int bitIndexTo, boolean value){
 		super.set(bitIndexFrom,bitIndexTo,value);
 		this.length = Math.max(length, bitIndexTo);
+	}
+	
+	public int length(){
+		return length;
 	}
 }

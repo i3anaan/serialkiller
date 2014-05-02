@@ -1,20 +1,20 @@
 package util;
 
-import java.util.BitSet;
+import util.BitSet2;
 
 public class BitSets {
 
 	 /**
-     * Concatenates the first and second BitSet together.
-     * Will return a new BitSet whos length = |first|+|second|
-     * with the first bit from the second BitSet getting index |first|.
-     * @param frist		The left BitSet
-     * @param second	The right BitSet
-     * @return A new BitSet being a concatenation of both.
+     * Concatenates the first and second BitSet2 together.
+     * Will return a new BitSet2 whos length = |first|+|second|
+     * with the first bit from the second BitSet2 getting index |first|.
+     * @param frist		The left BitSet2
+     * @param second	The right BitSet2
+     * @return A new BitSet2 being a concatenation of both.
      */
-    public static BitSet concatenate(BitSet first, BitSet second) {
-    	int newSize = first.size()+second.size();
-    	BitSet result = new BitSet(newSize);
+    public static BitSet2 concatenate(BitSet2 first, BitSet2 second) {
+    	int newSize = first.length()+second.length();
+    	BitSet2 result = new BitSet2(newSize);
     	int f = 0;
     	int s = 0;
     	for(f=0;f<first.length();f++){

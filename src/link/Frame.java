@@ -1,7 +1,7 @@
 package link;
 
 import java.util.Arrays;
-import java.util.BitSet;
+import util.BitSet2;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSets;
@@ -49,7 +49,7 @@ public class Frame {
 		//System.out.println("Frame(Unit[] units)  "+Arrays.toString(units));
 	}
 
-	public Frame(BitSet data) throws FrameSizeTooSmallException {
+	public Frame(BitSet2 data) throws FrameSizeTooSmallException {
 		//Put as much data as possible in units.
 		for(int i=0;i<data.length()-7;i=i+8){
 			this.units[i/8] = new Unit(Bytes.fromBitSet(data, i));
@@ -60,7 +60,7 @@ public class Frame {
 				this.units[i] = new Unit(Unit.FLAG_FILLER_DATA);
 			}
 		}
-		//System.out.println("Frame(BitSet data)  "+Arrays.toString(units));
+		//System.out.println("Frame(BitSet2 data)  "+Arrays.toString(units));
 	}
 	
 	/**
@@ -68,8 +68,8 @@ public class Frame {
 	 * (Flags and stuffings are filtered out).
 	 * @return
 	 */
-	public BitSet getBitSet(){
-		BitSet result = new BitSet();
+	public BitSet2 getBitSet(){
+		BitSet2 result = new BitSet2();
 		for(Unit u : units){
 			//System.out.println(result.length());
 				result = BitSets.concatenate(result, u.dataAsBitSet());

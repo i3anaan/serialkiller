@@ -2,7 +2,7 @@ package test;
 
 import static org.junit.Assert.*;
 
-import java.util.BitSet;
+import util.BitSet2;
 
 import org.junit.Test;
 
@@ -12,9 +12,9 @@ public class BitSetTests {
 
 	@Test
 	public void test() {
-		BitSet bs1 = new BitSet(5);
+		BitSet2 bs1 = new BitSet2(5);
 		bs1.set(4,true);
-		BitSet bs2 = new BitSet(3);
+		BitSet2 bs2 = new BitSet2(3);
 		
 		assertEquals(5, bs1.length());
 		assertEquals(3, bs2.length());

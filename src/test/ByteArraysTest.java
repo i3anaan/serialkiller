@@ -9,7 +9,7 @@ import util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.BitSet;
+import util.BitSet2;
 
 /** Unit tests for the ByteArrays class. */
 public class ByteArraysTest {
@@ -36,7 +36,7 @@ public class ByteArraysTest {
     public void testToBitSet() {
         byte[] in = {(byte) 112, (byte) 45};
 
-        BitSet expected = new BitSet(16);
+        BitSet2 expected = new BitSet2(16);
         expected.set(1, 4, true);
         expected.set(10, true);
         expected.set(12, 14, true);
@@ -49,7 +49,7 @@ public class ByteArraysTest {
     public void testFromBitSet() {
         byte[] expected = {(byte) 112, (byte) 45};
 
-        BitSet in = new BitSet(16);
+        BitSet2 in = new BitSet2(16);
         in.set(1, 4, true);
         in.set(10, true);
         in.set(12, 14, true);

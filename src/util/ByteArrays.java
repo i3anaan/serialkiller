@@ -1,6 +1,6 @@
 package util;
 
-import java.util.BitSet;
+import util.BitSet2;
 
 /**
  * Contains utilities for working with byte arrays.
@@ -60,14 +60,14 @@ public class ByteArrays {
     }
 
     /**
-     * Convert a byte array to a BitSet object.
+     * Convert a byte array to a BitSet2 object.
      * This method becomes obsolete once Java 7 is available, then
-     * BitSet.valueOf(byte[] bytes) is preferred.
+     * BitSet2.valueOf(byte[] bytes) is preferred.
      * @param bytes The byte array to convert.
-     * @return The BitSet object.
+     * @return The BitSet2 object.
      */
-    public static BitSet toBitSet(byte[] bytes) {
-        BitSet data = new BitSet(bytes.length * 8);
+    public static BitSet2 toBitSet(byte[] bytes) {
+        BitSet2 data = new BitSet2(bytes.length * 8);
 
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < 8; j++) {
@@ -80,13 +80,13 @@ public class ByteArrays {
     }
 
     /**
-     * Convert a BitSet object to a byte array.
+     * Convert a BitSet2 object to a byte array.
      * This method becomes obsolete once Java 7 is available, then
-     * BitSet.toByteArray() is preferred.
-     * @param data The BitSet object to convert.
+     * BitSet2.toByteArray() is preferred.
+     * @param data The BitSet2 object to convert.
      * @return The byte array.
      */
-    public static byte[] fromBitSet(BitSet data) {
+    public static byte[] fromBitSet(BitSet2 data) {
         int len = (int) Math.ceil((double) data.length() / 8);
         byte[] bytes = new byte[len];
 

@@ -7,7 +7,7 @@ import org.junit.Test;
 import util.Bytes;
 
 import java.util.Arrays;
-import java.util.BitSet;
+import util.BitSet2;
 
 /** Unit tests for the Bytes class. */
 public class BytesTest {
@@ -35,7 +35,7 @@ public class BytesTest {
     public void testFromBitSet() {
         byte expected = (byte) 6;
 
-        BitSet in = new BitSet(16);
+        BitSet2 in = new BitSet2(16);
         in.set(9, 11, true);
 
         assertEquals(expected, Bytes.fromBitSet(in, 4));

@@ -2,7 +2,7 @@ package link;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
+import util.BitSet2;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSets;
@@ -42,7 +42,7 @@ public class FlaggedFrame extends Frame {
 		System.out.println("payload done:  "+Arrays.toString(payload.units));
 	}
 
-	public FlaggedFrame(BitSet bits) {
+	public FlaggedFrame(BitSet2 bits) {
 		ArrayList<Unit> units = new ArrayList<Unit>();
 		// Only put data or fill bytes in this arraylist.
 		// Only react on flags, dont store them in this.
@@ -63,8 +63,8 @@ public class FlaggedFrame extends Frame {
 	 * 
 	 * @return
 	 */
-	public BitSet getBitSet() {
-		BitSet result = new BitSet();
+	public BitSet2 getBitSet() {
+		BitSet2 result = new BitSet2();
 		for (Unit u : units) {
 			//System.out.println(u.asBitSet());
 			result = BitSets.concatenate(result, u.asBitSet());

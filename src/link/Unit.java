@@ -1,7 +1,7 @@
 package link;
 
 import java.util.Arrays;
-import java.util.BitSet;
+import util.BitSet2;
 
 import util.BitSets;
 import util.ByteArrays;
@@ -32,19 +32,19 @@ public class Unit {
 		}
 	}
 
-	public BitSet asBitSet() {
+	public BitSet2 asBitSet() {
 		byte[] arr = new byte[] { b };
-		BitSet specialBit = new BitSet();
+		BitSet2 specialBit = new BitSet2();
 		specialBit.set(0,true);
 		return BitSets.concatenate(ByteArrays.toBitSet(arr), specialBit);
 	}
 	
-	public BitSet dataAsBitSet(){
+	public BitSet2 dataAsBitSet(){
 		if(!isSpecial){
 			byte[] arr = new byte[] { b };
 			return ByteArrays.toBitSet(arr);
 		}else{
-			return new BitSet();
+			return new BitSet2();
 		}
 	}
 

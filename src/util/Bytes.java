@@ -1,6 +1,6 @@
 package util;
 
-import java.util.BitSet;
+import util.BitSet2;
 
 /**
  * Contains utility functions for working with bytes.
@@ -33,11 +33,11 @@ public abstract class Bytes {
 
     /**
      * Gets a byte from a bit set.
-     * @param data The BitSet object that contains the data.
+     * @param data The BitSet2 object that contains the data.
      * @param start The index of the first bit in the byte.
      * @return The requested byte.
      */
-    public static byte fromBitSet(BitSet data, int start) {
+    public static byte fromBitSet(BitSet2 data, int start) {
         // Assert that the data is long enough
         assert (data.size() > start + 8);
 

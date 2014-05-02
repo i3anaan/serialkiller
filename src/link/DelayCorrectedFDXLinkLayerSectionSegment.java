@@ -1,7 +1,7 @@
 package link;
 
 import java.util.Arrays;
-import java.util.BitSet;
+import util.BitSet2;
 
 import common.Layer;
 import phys.PhysicalLayer;
@@ -36,8 +36,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		if (readFrame && setFrameToSend) {
 			readFrame = false;
 			setFrameToSend = false;
-			BitSet incomingData = new BitSet();
-			BitSet outgoingData = frameToSendNext.getBitSet();
+			BitSet2 incomingData = new BitSet2();
+			BitSet2 outgoingData = frameToSendNext.getBitSet();
 			System.out.println("outgoing bits: "+outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
