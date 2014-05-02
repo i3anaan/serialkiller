@@ -77,30 +77,28 @@ public class Frame {
 		currentLength--;
 	}
 	
-	public void add(byte bit){
-		if(bit==0){
-			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength-1));
-			dataStored = (byte)(dataStored & mask);
-			//System.out.println(Bytes.format((byte)mask) +"  |   "+Bytes.format(dataStored));
-			currentLength++;
-		}else if(bit==1){
-			byte mask = (byte)(1<<(Frame.LENGTH-currentLength-1));
-			
-			dataStored = (byte)(dataStored | mask);
-			currentLength++;
+	public void add(byte bit) throws InvalidBitException{
+		if(bit==1){
+			dataStored.set(currentLength,true);
+		}else if(bit==0){
+			dataStored.set(currentLength,false);
 		}else{
-			System.out.println("Adding invalid bit!");
+			throw new InvalidBitException();
 		}
-		
 	}
 	
-	public byte getByte(){
-		return dataStored;
+	public byte getByte(int byteIndex){
+		return Bytes.fromBitSet(dataStored,byteIndex*8);
 	}
 	
 	
-	public Frame getFullLength(){
-		return new Frame(dataStored);
+	public Frame getClone(){
+		try {
+			return new Frame(dataStored);
+		} catch (FrameSizeTooSmallException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 }

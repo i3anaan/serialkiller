@@ -1,5 +1,7 @@
 package link;
 
+import common.Layer;
+
 import phys.PhysicalLayer;
 import util.Bytes;
 
@@ -9,15 +11,16 @@ import util.Bytes;
  * @author I3anaan
  * 
  */
-public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
+public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	boolean connectionSync;
 	byte lastSentSyncPing = 0;
 	byte previousByteSent = 0;
 	byte previousByteReceived = 0;
+	Layer down;
 
-	Frame lastReceivedFrame = new Frame((byte) 0);
-	Frame frameToSendNext = new Frame((byte) 0);
+	Frame lastReceivedFrame = new Frame();
+	Frame frameToSendNext = new Frame();
 
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
@@ -67,9 +70,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 				// Unrecoverable biterror?
 				// Should not happen, maybe just try again.
 				e.printStackTrace();
+			} catch (InvalidBitException e) {
+				// Should never heappen;
+				e.printStackTrace();
 			}
 
-			lastReceivedFrame = incomingData.getFullLength();
+			lastReceivedFrame = incomingData.getClone();
 		} else {
 			System.out.println("Not ready to exchange frames yet.");
 		}
@@ -183,15 +189,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 		}
 	}
 
-	@Override
-	public void sendByte(byte data) {
-		frameToSendNext = new Frame(data);
+	public void sendFrame(Frame data) {
+		frameToSendNext = data;
 		setFrameToSend = true;
 	}
 
-	@Override
-	public byte readByte() {
+	public Frame readFrame() {
 		readFrame = true;
-		return lastReceivedFrame.getByte();
+		return lastReceivedFrame.getClone();
 	}
 }
