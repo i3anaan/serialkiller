@@ -25,8 +25,6 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 		exchanger.start();
 	}
 	
-	
-	
 	@Override
 	public void sendByte(byte data) {
 		outbox.add(data);

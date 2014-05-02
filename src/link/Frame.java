@@ -1,5 +1,7 @@
 package link;
 
+import java.util.BitSet;
+
 import util.Bytes;
 
 /**
@@ -9,19 +11,31 @@ import util.Bytes;
  */
 public class Frame {
 
-	byte dataStored;
+	protected BitSet dataStored;
 	
-	public static final int LENGTH = 8;
+	public static final int PAYLOAD_SIZE = 80; //In bits;
+	
+	//Imagine this as a pointer pointing to the end of the bit sequence.
+	//To the left is the last placed, valid, bit.
+	//To the right a new bit would be placed;
+	//XXXXXXXXXXXXX ---------
+	//-------------^---------
+	//-------------|---------
 	int currentLength = 0;
 	
 	public Frame(){
-		dataStored = 0;
+		dataStored = new BitSet(PAYLOAD_SIZE);
 		currentLength = 0;
 	}
 	
-	public Frame(byte data){
-		dataStored = data;
-		currentLength = 8;
+	public Frame(BitSet data) throws FrameSizeTooSmallException{
+		if(data.size()>PAYLOAD_SIZE){
+			throw new FrameSizeTooSmallException();
+		}
+		dataStored = new BitSet(PAYLOAD_SIZE);
+		dataStored.set(0, dataStored.size());
+		dataStored.and(data);
+		currentLength = data.size(); //off by 1 danger zone
 	}
 	
 	/**
@@ -29,9 +43,14 @@ public class Frame {
 	 * @param data
 	 * @param length
 	 */
-	public Frame(byte data, int length){
-		dataStored = data;
-		currentLength = length;
+	public Frame(BitSet data, int length) throws FrameSizeTooSmallException{
+		if(data.size()>PAYLOAD_SIZE){
+			throw new FrameSizeTooSmallException();
+		}
+		dataStored = new BitSet(PAYLOAD_SIZE);
+		dataStored.set(0, dataStored.size());
+		dataStored.and(data);
+		currentLength = length; //off by 1 danger zone
 	}
 	
 	
@@ -39,13 +58,19 @@ public class Frame {
 		//Hier was vroeger een off by one error
 		//(return currentLength==Frame.LENGTH;)
 		//Hierdoor start currentLength nu op 0, en heeft nextBit/add een -1;
-		return currentLength==Frame.LENGTH;
+		return currentLength==Frame.PAYLOAD_SIZE;
 	}
 	
 	
 	public byte nextBit(){
 		//System.out.println("Returning bit: "+(byte)((dataStored>>(currentLength-1))&1));
-		return (byte)((dataStored>>(currentLength-1))&1);
+		boolean bit = dataStored.get(currentLength);
+		currentLength++;
+		if(bit){
+			return 1;
+		}else{
+			return 0;
+		}
 	}
 	
 	public void removeBit(){
