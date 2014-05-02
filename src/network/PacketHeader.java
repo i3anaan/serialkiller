@@ -42,16 +42,22 @@ public class PacketHeader {
     }
 
     protected byte[] compile() {
-        return ByteArrays.fromBitSet(raw);
+        return ByteArrays.fromBitSet(raw, HEADER_LENGTH);
+    }
+
+    protected BitSet raw() {
+        return raw;
     }
 
     public long getChecksum() {
-        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(0, 32)));
+        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(0, 32), 4));
     }
 
     protected void setChecksum(long checksum) {
         if (checksum >= 0 && checksum < 4294967296L) {
-            raw.or(ByteArrays.toBitSet(Arrays.copyOfRange(ByteBuffer.allocate(8).putLong(checksum).array(), 4, 8), HEADER_LENGTH * 8, 0));
+            byte[] arr = ByteBuffer.allocate(8).putLong(checksum).array();
+
+            raw.or(ByteArrays.toBitSet(Arrays.copyOfRange(arr, 4, 8), HEADER_LENGTH * 8, 0));
         } else {
             throw new IllegalArgumentException("The checksum is too large.");
         }
@@ -59,12 +65,12 @@ public class PacketHeader {
     }
 
     public int getTTL() {
-        return (Bytes.fromBitSet(raw, 32) >> 5);
+        return (Bytes.fromBitSet(raw, 32) >> 5) & 7;
     }
 
     protected void setTTL(int TTL) {
         if (TTL >= 0 && TTL < MAX_TTL) {
-            raw.or(Bytes.toBitSet((byte) TTL, HEADER_LENGTH * 8, 32));
+            raw.or(Bytes.toBitSet((byte) (TTL << 5), HEADER_LENGTH * 8, 32));
         } else {
             throw new IllegalArgumentException("The TTL should be between 0 and 7 (inclusive).");
         }
@@ -90,7 +96,7 @@ public class PacketHeader {
     }
 
     public long getLength() {
-        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(37, 48)));
+        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(32, 48), 2));
     }
 
     protected void setLength(long length) {
@@ -112,7 +118,7 @@ public class PacketHeader {
     }
 
     public byte getDestination() {
-        return Bytes.fromBitSet(raw, 64);
+        return Bytes.fromBitSet(raw, 56);
     }
 
     protected void setDestination(byte destination) {
@@ -126,7 +132,7 @@ public class PacketHeader {
 
     protected void setSeqnum(int seqnum) {
         if (seqnum >= 0 && seqnum < 256) {
-            raw.or(Bytes.toBitSet((byte) seqnum, HEADER_LENGTH * 8, 72));
+            raw.or(Bytes.toBitSet((byte) seqnum, HEADER_LENGTH * 8, 64));
         } else {
             throw new IllegalArgumentException("The sequence number should be between 0 and 255 (inclusive).");
         }
@@ -134,12 +140,12 @@ public class PacketHeader {
     }
 
     public int getAcknum() {
-        return (int) Bytes.fromBitSet(raw, 80);
+        return (int) Bytes.fromBitSet(raw, 72);
     }
 
     protected void setAcknum(long acknum) {
         if (acknum >= 0 && acknum < 256) {
-            raw.or(Bytes.toBitSet((byte) acknum, HEADER_LENGTH * 8, 80));
+            raw.or(Bytes.toBitSet((byte) acknum, HEADER_LENGTH * 8, 72));
         } else {
             throw new IllegalArgumentException("The acknowledgement number should be between 0 and 255 (inclusive).");
         }
