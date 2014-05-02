@@ -1,4 +1,4 @@
-package application;
+package network;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,7 +16,6 @@ public class RoutingTable {
 	// Private variables
 	private Map <Integer, Integer> hm;
 
-	
 	public RoutingTable() throws IllegalArgumentException, IOException{
 		
 		hm = new HashMap<Integer, Integer>();
