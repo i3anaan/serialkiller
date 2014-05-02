@@ -23,8 +23,9 @@ public class Packet {
     /**
      * Constructs a new, empty Packet object with a new, empty header.
      */
-    public Packet() {
+    public Packet(int seqnum) {
         header = new PacketHeader();
+        header.setSeqnum(seqnum);
     }
 
     /**
@@ -94,6 +95,38 @@ public class Packet {
 
         // Return data including the checksum
         return Bytes.concat(header.compile(), payload);
+    }
+
+    /**
+     * Create a new Packet object that contains an acknowledgement for this
+     * Packet.
+     * @return The acknowledgement packet.
+     */
+    public Packet createAcknowledgement(int seqnum) {
+        Packet ack = new Packet(seqnum);
+
+        ack.header.setAck(true);
+        ack.header.setAcknum(header.getSeqnum());
+
+        return ack;
+    }
+
+    public Packet[] createPackets(byte[] data, int seqnum) {
+        int num = (int) Math.ceil((double) data.length / MAX_PAYLOAD_LENGTH);
+        Packet[] packets = new Packet[num];
+
+        for (int i = 0; i < num; i++) {
+            packets[i] = new Packet(seqnum);
+
+            packets[i].header.setSegnum(i);
+            packets[i].setPayload(Arrays.copyOfRange(data, MAX_PAYLOAD_LENGTH * i, Math.min(MAX_PAYLOAD_LENGTH * (i + 1), data.length)));
+
+            if (i < num - 1) {
+                packets[i].header.setMore(true);
+            }
+        }
+
+        return packets;
     }
 
 }
