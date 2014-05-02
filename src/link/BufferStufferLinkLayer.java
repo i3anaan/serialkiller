@@ -1,7 +1,6 @@
 package link;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.Bytes;
@@ -32,12 +31,8 @@ public class BufferStufferLinkLayer implements Runnable {
 	private static final byte FLAG = 126; // 01111110
 	
 	private Thread t;
-	private Random r;
 	
-	private byte lastsent = 0x00;
 	private byte lastrecv = 0x00;
-	
-	
 	
 	public BufferStufferLinkLayer(Layer down) {
 		this.down = down;
@@ -46,8 +41,6 @@ public class BufferStufferLinkLayer implements Runnable {
 		
 		t = new Thread(this);
 		t.setName("BufferStuffer " + this.hashCode());
-		
-		r = new Random();
 	}
 	
 	public void sendFrame(byte[] frame) throws InterruptedException {
@@ -63,14 +56,10 @@ public class BufferStufferLinkLayer implements Runnable {
 	}
 	
 	private void setIdle()  { set(IDLE);  }
-	private void setRTS()   { set(RTS); }
-	private void setCTS()   { set(CTS); }
 	private void setByte()  { set(BYTE); }
 	private void setPanic() { set(PANIC); }
 	
 	private byte waitIdle() { return wait(IDLE); }
-	private byte waitRTS()  { return wait(RTS); }
-	private byte waitCTS()  { return wait(CTS); }
 	private byte waitByte() { return wait(BYTE); }
 	private byte waitPanic(){ return wait(PANIC); }
 
@@ -87,7 +76,7 @@ public class BufferStufferLinkLayer implements Runnable {
 				if (in == RTS) {
 					/* Got a request to send! */
 					log("Got a RTS! Setting CTS.");
-					setCTS();
+					set(CTS);
 					
 					// Would rather use ByteBuffer, but ByteBuffer is Java 7
 					ArrayList<Byte> bytes = new ArrayList<Byte>();
@@ -152,7 +141,7 @@ public class BufferStufferLinkLayer implements Runnable {
 						
 						frame = outbox.take();
 						
-						setRTS();
+						set(RTS);
 						log("We want to send something!");
 						
 						byte response = waitnot(IDLE);
@@ -225,7 +214,6 @@ public class BufferStufferLinkLayer implements Runnable {
 	}
 	
 	private void set(byte newstate) {
-		lastsent = newstate;
 		down.sendByte(newstate);
 	}
 	
