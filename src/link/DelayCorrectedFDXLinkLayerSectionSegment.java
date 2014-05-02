@@ -19,8 +19,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	byte previousByteReceived = 0;
 	Layer down;
 
-	Frame lastReceivedFrame = new Frame();
-	Frame frameToSendNext = new Frame();
+	Frame lastReceivedFrame = new FlaggedFrame();
+	Frame frameToSendNext = new FlaggedFrame();
 
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
@@ -33,7 +33,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		if (readFrame && setFrameToSend) {
 			readFrame = false;
 			setFrameToSend = false;
-			Frame incomingData = new Frame();
+			FlaggedFrame incomingData = new FlaggedFrame();
 			try {
 				while (!incomingData.isComplete()) {
 					if (!connectionSync) {
@@ -41,8 +41,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					}
 
 					byte byteToSend = adaptBitToPrevious(frameToSendNext
-							.nextBit());
-					frameToSendNext.removeBit();
+							.readBit());
+					frameToSendNext.moveReaderBack();
 					// System.out.println("Byte to send: "+
 					// Bytes.format(byteToSend));
 					down.sendByte(byteToSend);

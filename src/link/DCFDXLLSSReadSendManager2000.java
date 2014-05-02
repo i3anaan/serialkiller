@@ -14,7 +14,6 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	private ArrayBlockingQueue<Byte> inbox; //TODO frames van maken;
 	private ArrayBlockingQueue<Byte> outbox; //TODO frames van maken;
 		
-	public static final byte FILLER_DATA = 0; //TODO in frame zetten, geen byte
 	
 	public DCFDXLLSSReadSendManager2000(DelayCorrectedFDXLinkLayerSectionSegment down){
 		this.down = down;
@@ -49,7 +48,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 			}
 			
 			if(outbox.isEmpty()){
-				down.sendByte(FILLER_DATA);
+				down.sendByte(FlaggedFrame.FILLER_DATA);
 			}else{
 				try {
 					down.sendByte(outbox.take());
