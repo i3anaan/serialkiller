@@ -20,7 +20,6 @@ public abstract class PhysicalLayer extends Layer {
 	 * Sends the two lowest-order bits in the given byte to whatever is backing
 	 * this layer.
 	 */
-	@Override
 	public abstract void sendByte(byte data);
 
 	/**
@@ -29,6 +28,5 @@ public abstract class PhysicalLayer extends Layer {
 	 * 
 	 * @return The received byte
 	 */
-	@Override
 	public abstract byte readByte();
 }

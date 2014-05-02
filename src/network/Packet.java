@@ -1,7 +1,6 @@
 package network;
 
 import com.google.common.primitives.Bytes;
-import util.ByteArrays;
 
 import java.util.Arrays;
 import java.util.zip.CRC32;
@@ -95,5 +94,4 @@ public class Packet {
         // Return data including the checksum
         return Bytes.concat(header.compile(), payload);
     }
-
 }

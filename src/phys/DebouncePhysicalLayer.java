@@ -8,6 +8,7 @@ package phys;
  * Bytes being sent through this layer are passed through unmodified.
  */
 public class DebouncePhysicalLayer extends PhysicalLayer {
+	protected PhysicalLayer down;
 	private Byte lastRead = null;
 
 	public DebouncePhysicalLayer(PhysicalLayer down) {

@@ -12,7 +12,7 @@ import util.Bytes;
  * Both readByte and sendByte potentially block, with readByte blocking being
  * much more likely.
  */
-public class MockLinkLayer extends LinkLayer {
+public class MockLinkLayer extends BytewiseLinkLayer {
 	private static final int queue_sz = 1024;
 
 	private MockLinkLayer that;

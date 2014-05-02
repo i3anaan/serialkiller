@@ -1,11 +1,10 @@
 package link;
 
-import phys.CleanStartPhysicalLayer;
 import phys.PhysicalLayer;
 import util.Bytes;
 
-public class HighSpeedHDXLinkLayer extends LinkLayer {
-
+public class HighSpeedHDXLinkLayer extends BytewiseLinkLayer {
+	PhysicalLayer down;
 	byte oldByteSent; // Should be set after sending something;
 	byte oldByteReceived; // Should be set before reading something;
 	boolean newInputReceivedSinceSent;
@@ -107,7 +106,6 @@ public class HighSpeedHDXLinkLayer extends LinkLayer {
 			input = down.readByte();
 
 			if (input != oldByteReceived) {
-				byte extrabit = (byte) (input & 2);
 				byte databit = (byte) (input & 1);
 				byte addition;
 				int bitsAdded;

@@ -3,17 +3,17 @@ package link;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import util.Bytes;
+import phys.PhysicalLayer;
 
-import common.Layer;
+import util.Bytes;
 
 /**
  * The BufferStuffer link layer exchanges frames over unreliable links. 
  * 
  * The actual exchange of data is done in a seperate thread.
  */
-public class BufferStufferLinkLayer implements Runnable {
-	private Layer down;
+public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
+	private PhysicalLayer down;
 	private ArrayBlockingQueue<byte[]> outbox;
 	private ArrayBlockingQueue<byte[]> inbox;
 	
@@ -34,7 +34,7 @@ public class BufferStufferLinkLayer implements Runnable {
 	
 	private byte lastrecv = 0x00;
 	
-	public BufferStufferLinkLayer(Layer down) {
+	public BufferStufferLinkLayer(PhysicalLayer down) {
 		this.down = down;
 		this.outbox = new ArrayBlockingQueue<byte[]>(MAX_WAITING_FRAMES);
 		this.inbox = new ArrayBlockingQueue<byte[]>(MAX_WAITING_FRAMES);

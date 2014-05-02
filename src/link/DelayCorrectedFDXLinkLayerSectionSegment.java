@@ -1,7 +1,5 @@
 package link;
 
-import phys.PhysicalLayer;
-
 /*
 public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer{
 	

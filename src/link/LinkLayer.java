@@ -10,20 +10,4 @@ import common.Layer;
  * that is used.
  */
 public abstract class LinkLayer extends Layer {
-
-	/**
-	 * Sends the given byte over the link.
-	 * 
-	 * @param data
-	 *            The data to send.
-	 */
-	public abstract void sendByte(byte data);
-
-	/**
-	 * Reads a byte from the link.
-	 * 
-	 * @return The received byte
-	 */
-	public abstract byte readByte();
-
 }

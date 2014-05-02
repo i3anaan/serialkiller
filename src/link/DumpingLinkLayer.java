@@ -2,8 +2,9 @@ package link;
 
 import util.Bytes;
 
-public class DumpingLinkLayer extends LinkLayer {
-	public DumpingLinkLayer(LinkLayer down) {
+public class DumpingLinkLayer extends BytewiseLinkLayer {
+	BytewiseLinkLayer down;
+	public DumpingLinkLayer(BytewiseLinkLayer down) {
 		super();
 		this.down = down;
 	}
