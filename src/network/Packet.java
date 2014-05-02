@@ -13,6 +13,7 @@ import java.util.zip.Checksum;
  */
 public class Packet {
     public static int HEADER_LENGTH = PacketHeader.HEADER_LENGTH;
+    public static int MAX_TTL = PacketHeader.MAX_TTL;
     public static int MAX_PAYLOAD_LENGTH = 1024;
 
     /** The header. */
@@ -30,6 +31,7 @@ public class Packet {
     public Packet(int seqnum) {
         header = new PacketHeader();
         header.setSeqnum(seqnum);
+        header.setTTL(MAX_TTL);
     }
 
     /**
