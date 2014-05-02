@@ -18,31 +18,36 @@ public class ApplicationLayer {
 	 * Reads payload by checking the payload for commands
 	 * @param data
 	 * @return
+	 * @throws CommandNotFoundException 
 	 */
-	public String readPayload(byte[] data){
-		// retrieves the first byte from the payload and converts it to a Char
-		// then it is checked if the Char is a valid command and if so which one
-		byte check = data[0];
-		String commandString = Byte.toString(check);
-		char command = commandString.charAt(0);
+	public String readPayload(byte[] data) throws CommandNotFoundException{
+		// Retrieves command char from payload
+		char command = getCommand(data);
 
 		// Send Chat message
 		if(command == 'C'){
 			// Creates a new chat message object
 			ChatMessage cm = new ChatMessage(data);
+			System.out.println("Nickname: " +cm.getNickname()+"\n");
+			System.out.println("Message: " +cm.getMessage()+"\n");
 			
 		}
 		// Send request to transfer file
-		if(command == 'F'){
+		else if(command == 'F'){
 
 		}
 		// Accept file transfer
-		if(command == 'A'){
+		else if(command == 'A'){
 
 		}
 		// Transfer file
-		if(command == 'S'){
+		else if(command == 'S'){
 
+		}
+		else{
+			// TODO find ways to catch invalid commands in a more refined manner
+			throw new CommandNotFoundException(String.format("command: %c", command));
+			
 		}
 
 		String d = new String(data);
@@ -64,5 +69,19 @@ public class ApplicationLayer {
 		}
 		return data;
 
+	}
+	
+	/**
+	 * Retrieves the first byte from the payload and converts it to a Char.
+	 * @param data
+	 * @return The Char representing the command in this payload
+	 */
+	private char getCommand(byte[] data){
+		
+		//byte check = data[0];
+		//String commandString = Byte.toString(check);
+		//char command = commandString.charAt(0);
+		
+		return (char)data[0];
 	}
 }

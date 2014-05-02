@@ -18,12 +18,17 @@ public class ChatMessage extends ApplicationLayerMessage {
 		super(data);
 		// Nickname used by the message sender, this is found by using the fact
 		// that nul bytes terminate strings
-			nickname = data.toString();
+			int i;
+			for(i = 0; i<data.length; i++){
+				if(data[i] == ((byte)0))
+					break;
+			}
+			nickname = new String(data, 1, i);
 			int l = nickname.length();
 			
 		// Message part of the payload
 			byte [] payload = Arrays.copyOfRange(data, l, data.length);
-			message = payload.toString();
+			message = new String(payload);
 	}
 
 	/**
