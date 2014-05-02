@@ -2,8 +2,6 @@ package bench;
 
 import java.util.Arrays;
 
-import phys.BitErrorPhysicalLayer;
-import phys.PerfectVirtualPhysicalLayer;
 import phys.VirtualPhysicalLayer;
 import link.BufferStufferLinkLayer;
 
