@@ -69,7 +69,7 @@ public class PacketHeader {
     }
 
     protected void setTTL(int TTL) {
-        if (TTL >= 0 && TTL < MAX_TTL) {
+        if (TTL >= 0 && TTL <= MAX_TTL) {
             raw.or(Bytes.toBitSet((byte) (TTL << 5), HEADER_LENGTH * 8, 32));
         } else {
             throw new IllegalArgumentException("The TTL should be between 0 and 7 (inclusive).");

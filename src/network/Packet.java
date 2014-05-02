@@ -113,26 +113,11 @@ public class Packet {
 
         ack.header.setAck(true);
         ack.header.setAcknum(header.getSeqnum());
+        ack.header.setSender(header.getDestination());
+        ack.header.setDestination(header.getSender());
+        ack.header.setSegnum(header.getSegnum());
 
         return ack;
-    }
-
-    public Packet[] createPackets(byte[] data, int seqnum) {
-        int num = (int) Math.ceil((double) data.length / MAX_PAYLOAD_LENGTH);
-        Packet[] packets = new Packet[num];
-
-        for (int i = 0; i < num; i++) {
-            packets[i] = new Packet(seqnum);
-
-            packets[i].header.setSegnum(i);
-            packets[i].setPayload(Arrays.copyOfRange(data, MAX_PAYLOAD_LENGTH * i, Math.min(MAX_PAYLOAD_LENGTH * (i + 1), data.length)));
-
-            if (i < num - 1) {
-                packets[i].header.setMore(true);
-            }
-        }
-
-        return packets;
     }
 
 }
