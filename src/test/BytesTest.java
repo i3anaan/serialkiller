@@ -41,4 +41,14 @@ public class BytesTest {
         assertEquals(expected, Bytes.fromBitSet(in, 4));
     }
 
+    @Test
+    public void testToBitSet() {
+        byte in = (byte) 6;
+
+        BitSet expected = new BitSet(16);
+        expected.set(9, 11, true);
+
+        assertEquals(expected, Bytes.toBitSet(in, 16, 4));
+    }
+
 }

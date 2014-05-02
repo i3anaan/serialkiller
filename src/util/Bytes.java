@@ -43,4 +43,22 @@ public abstract class Bytes {
 
         return b;
     }
+
+    /**
+     * Convert a byte to a bit set with a given size, and puts the byte on a
+     * given offset.
+     * @param b The byte to convert.
+     * @param size The size of the new BitSet object (in bits).
+     * @param offset The bit number where to start the byte.
+     * @return The new BitSet object.
+     */
+    public static BitSet toBitSet(byte b, int size, int offset) {
+        BitSet data = new BitSet(size);
+
+        for (int i = 0; i < 8; i++) {
+            data.set(i + offset, ((b >> (7-i)) & 1) == 1);
+        }
+
+        return data;
+    }
 }
