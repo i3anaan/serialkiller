@@ -96,7 +96,7 @@ public class PacketHeader {
     }
 
     public long getLength() {
-        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(32, 48), 2));
+        return ByteArrays.parseLong(new byte[]{(byte) (Bytes.fromBitSet(raw, 32) & 7), Bytes.fromBitSet(raw, 40)});
     }
 
     protected void setLength(long length) {

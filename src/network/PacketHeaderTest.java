@@ -123,7 +123,6 @@ public class PacketHeaderTest extends TestCase {
 
         // Set a real length.
         h.setLength(456L);
-        System.out.println(h.raw());
 
         // Check that the right length is set.
         assertEquals("The length is not read/set correctly.", 456L, h.getLength());
