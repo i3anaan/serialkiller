@@ -10,8 +10,26 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 	
 	public FileMessage(byte[] data) {
 		super(data);
-		byte [] size = Arrays.copyOfRange(data, 0, 31);
-		byte [] name = Arrays.copyOfRange(data, 32, data.length);
+		byte [] size = Arrays.copyOfRange(data, 1, 5);
+		byte [] name = Arrays.copyOfRange(data, 5, data.length);
+		fileSize = Integer.parseInt(new String(size));
+		fileName = new String(name);
+	}
+	
+	/**
+	 * Returns the size of the file
+	 * @return size of file
+	 */
+	public int getFileSize(){
+		return fileSize;
+	}
+	
+	/**
+	 * Returns the name of the file
+	 * @return filename
+	 */
+	public String getFileName(){
+		return fileName;
 	}
 	
 	

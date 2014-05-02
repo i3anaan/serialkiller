@@ -40,13 +40,24 @@ public class ApplicationLayer {
 		// Send request to transfer file
 		else if(command == 'F'){
 
+			FileOfferMessage fm = new FileOfferMessage(data);
+			System.out.println("FileOfferMessage: -----------");
+			System.out.println("FileSize: "+fm.getFileSize());
+			System.out.println("FileName: "+fm.getFileName()+ "\n");
 		}
 		// Accept file transfer
 		else if(command == 'A'){
-
+			FileAcceptMessage fm = new FileAcceptMessage(data);
+			System.out.println("FileAcceptMessage: -----------");
+			System.out.println("FileSize: "+fm.getFileSize());
+			System.out.println("FileName: "+fm.getFileName()+"\n");
+			
 		}
 		// Transfer file
 		else if(command == 'S'){
+			FileTransferMessage fm = new FileTransferMessage(data);
+			System.out.println("FileTransferMessage: -----------");
+			System.out.println(fm.getFileBytes().length + " bytes \n");
 
 		}
 		else{
