@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import util.Bytes;
 
+import java.util.Arrays;
+import java.util.BitSet;
+
 /** Unit tests for the Bytes class. */
 public class BytesTest {
 
@@ -26,6 +29,16 @@ public class BytesTest {
         assertEquals(true, Bytes.parseBoolean((byte) 1, 7));
         assertEquals(false, Bytes.parseBoolean((byte) 4, 7));
         assertEquals(true, Bytes.parseBoolean((byte) -1, 5));
+    }
+
+    @Test
+    public void testFromBitSet() {
+        byte expected = (byte) 6;
+
+        BitSet in = new BitSet(16);
+        in.set(9, 11, true);
+
+        assertEquals(expected, Bytes.fromBitSet(in, 4));
     }
 
 }
