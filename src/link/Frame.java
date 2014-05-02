@@ -1,5 +1,6 @@
 package link;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -32,6 +33,7 @@ public class Frame {
 		for(int i=0;i<units.length;i++){
 			units[i] = new Unit(Unit.FLAG_FILLER_DATA);
 		}
+		//System.out.println("Frame()  "+Arrays.toString(units));
 	}
 	
 	public Frame(Unit[] units) {
@@ -39,24 +41,26 @@ public class Frame {
 			this.units[i] = units[i];
 		}
 		//Fill empty spots with Filler data flags.
-		for(int i=0;i<units.length;i++){
-			if(units[i]==null){
-				units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+		for(int i=0;i<PAYLOAD_UNIT_COUNT;i++){
+			if(this.units[i]==null){
+				this.units[i] = new Unit(Unit.FLAG_FILLER_DATA);
 			}
 		}
+		//System.out.println("Frame(Unit[] units)  "+Arrays.toString(units));
 	}
 
 	public Frame(BitSet data) throws FrameSizeTooSmallException {
 		//Put as much data as possible in units.
-		for(int i=0;i<data.size()-7;i=i+8){
-			units[i/8] = new Unit(Bytes.fromBitSet(data, i));
+		for(int i=0;i<data.length()-7;i=i+8){
+			this.units[i/8] = new Unit(Bytes.fromBitSet(data, i));
 		}
 		//Fill empty spots with Filler data flags.
-		for(int i=0;i<units.length;i++){
-			if(units[i]==null){
-				units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+		for(int i=0;i<PAYLOAD_UNIT_COUNT;i++){
+			if(this.units[i]==null){
+				this.units[i] = new Unit(Unit.FLAG_FILLER_DATA);
 			}
 		}
+		//System.out.println("Frame(BitSet data)  "+Arrays.toString(units));
 	}
 	
 	/**
@@ -67,6 +71,7 @@ public class Frame {
 	public BitSet getBitSet(){
 		BitSet result = new BitSet();
 		for(Unit u : units){
+			//System.out.println(result.length());
 				result = BitSets.concatenate(result, u.dataAsBitSet());
 		}
 		return result;
@@ -79,7 +84,7 @@ public class Frame {
 	public Frame getClone() {
 		Unit[] newUnits = new Unit[PAYLOAD_UNIT_COUNT];
 		for(int i=0;i<units.length;i++){
-			newUnits[i] = new Unit(units[i].b);
+			newUnits[i] = new Unit(units[i].b,units[i].isSpecial);
 		}
 		return new Frame(newUnits);
 	}

@@ -7,6 +7,8 @@ import phys.DelayPhysicalLayer;
 import phys.DumpingPhysicalLayer;
 import phys.VirtualPhysicalLayer;
 import util.Bytes;
+import link.DCFDXLLSSReadSendManager2000;
+import link.DelayCorrectedFDXLinkLayerSectionSegment;
 import link.DumpingLinkLayer;
 import link.HighSpeedHDXLinkLayer;
 import link.LinkLayer;
@@ -46,6 +48,36 @@ public class SimpleTestbench {
 			}
 		}
 	}
+	
+	private class SeqThreadSmall extends Thread {
+		private LinkLayer down;
+		int good = 0;
+		int bad = 0;
+
+		public SeqThreadSmall(LinkLayer down) {
+			this.down = down;
+		}
+
+		public void run() {
+			for(int i=0;i<3;i++) {
+					down.sendByte((byte)(i+22));
+					System.out.println("Sending byte");
+					byte in = down.readByte();
+					
+					if (in == i) {
+						System.out.print(".");
+						good++;
+					} else {
+						System.out.print("X");
+						bad++;
+					}
+					
+					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
+					
+					System.out.flush();
+			}
+		}
+	}
 
 	private class EchoThread extends Thread {
 		private LinkLayer down;
@@ -79,8 +111,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new HighSpeedHDXLinkLayer(new DebouncePhysicalLayer(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vpla))));
-		LinkLayer b = new HighSpeedHDXLinkLayer(new DebouncePhysicalLayer(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vplb))));
+		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vpla))));
+		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vplb))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

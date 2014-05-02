@@ -1,16 +1,18 @@
 package link;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 import util.BitSets;
 import util.ByteArrays;
+import util.Bytes;
 
 public class Unit {
 
 	public boolean isSpecial;
 	public byte b;
 
-	public static final int FLAG_FILLER_DATA = 1;
+	public static final int FLAG_FILLER_DATA = -1;
 	public static final byte IS_SPECIAL_BIT = 1;
 
 	public Unit(byte b) {
@@ -48,5 +50,9 @@ public class Unit {
 
 	public boolean isDataOrFill() {
 		return !isSpecial || b==FLAG_FILLER_DATA;
+	}
+	
+	public String toString(){
+		return (isSpecial ? "F" : "D") +Bytes.format(b);
 	}
 }

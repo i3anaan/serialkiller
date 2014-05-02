@@ -1,5 +1,6 @@
 package link;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 import common.Layer;
@@ -31,11 +32,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public void exchangeFrame() {
+		//System.out.println("Exchaning frames!");
 		if (readFrame && setFrameToSend) {
 			readFrame = false;
 			setFrameToSend = false;
 			BitSet incomingData = new BitSet();
 			BitSet outgoingData = frameToSendNext.getBitSet();
+			System.out.println("outgoing bits: "+outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			try {
@@ -69,9 +72,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				// TODO restart exchangeframe?
 				e.printStackTrace();
 			}
-
-			System.out.println("Finished byte-exchange \n");
 			lastReceivedFrame = new FlaggedFrame(incomingData);
+			System.out.println("Build received frame:  "+Arrays.toString(lastReceivedFrame.payload.units));
 		} else {
 			System.out.println("Not ready to exchange frames yet.");
 		}
@@ -195,13 +197,16 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 	}
 
-	public void sendFrame(Frame data) {
-		frameToSendNext = new FlaggedFrame(data);
+	public void sendFrame(FlaggedFrame data) {
+		frameToSendNext = data;
+		System.out.println("Units to send next: "+Arrays.toString(data.payload.units));
 		setFrameToSend = true;
 	}
 
 	public Frame readFrame() {
 		readFrame = true;
+		//System.out.println("readFrame():  "+Arrays.toString(lastReceivedFrame.getPayload().units));
+		
 		return lastReceivedFrame.getPayload().getClone();
 	}
 }

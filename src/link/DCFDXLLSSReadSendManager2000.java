@@ -1,8 +1,10 @@
 package link;
 
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.ByteArrays;
+import util.Bytes;
 
 /**
  * DelayCorrectedFullDuplexLinkLayerSectionSegmentReadWriteSendManager2000
@@ -27,14 +29,24 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	}
 	
 	@Override
-	public void sendByte(byte data) {
-		outbox.add(data);
+	public void sendByte(byte data){
+		try {
+			System.out.println("adding:  "+data + " queue space: "+outbox.size());
+			outbox.put(data);
+			System.out.println(data+"  added");
+			
+		} catch (InterruptedException e) {
+			// TODO hier iets doen?
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public byte readByte() {
 		try {
-			return inbox.take();
+			byte read = inbox.take();
+			System.out.println("Reading byte:  "+Bytes.format(read)+"    "+inbox.size());
+			return read;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return 0; //TODO iets van error flag?
@@ -43,12 +55,22 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 
 	@Override
 	public void run() {
+		down.readFrame();
 		while(true){
-			for(byte b : ByteArrays.fromBitSet(down.readFrame().getBitSet())){
-				inbox.add(b);
-			}
 			down.sendFrame(new FlaggedFrame(outbox));
+			
+			//System.out.println("sentFrame!");
 			down.exchangeFrame();
+			//System.out.println(Arrays.toString(down.readFrame().units));
+			for(byte b : ByteArrays.fromBitSet(down.readFrame().getBitSet())){
+				System.out.println("Putting in inbox:  "+Arrays.toString(down.readFrame().units));
+				try {
+					inbox.put(b);
+				} catch (InterruptedException e) {
+					// TODO hier iets doen?
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 

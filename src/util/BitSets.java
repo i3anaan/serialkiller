@@ -17,13 +17,14 @@ public class BitSets {
     	BitSet result = new BitSet(newSize);
     	int f = 0;
     	int s = 0;
-    	for(f=0;f<first.size();f++){
+    	for(f=0;f<first.length();f++){
     		result.set(f+s,first.get(f));
     	}
-    	for(s=0;s<second.size();s++){
+    	for(s=0;s<second.length();s++){
     		result.set(f+s,second.get(s));
     	}
     	
+    	System.out.println(result);
     	return result;
     	//TODO test this method.
     }

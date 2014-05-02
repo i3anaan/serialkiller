@@ -88,7 +88,6 @@ public class ByteArrays {
      */
     public static byte[] fromBitSet(BitSet data) {
         int len = (int) Math.ceil((double) data.length() / 8);
-        System.out.println(len);
         byte[] bytes = new byte[len];
 
         for (int i = 0; i < len; i++) {

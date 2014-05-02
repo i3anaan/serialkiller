@@ -16,7 +16,7 @@ import util.Bytes;
  * 
  */
 public class FlaggedFrame extends Frame {
-	
+
 	public static final int FLAGGED_FRAME_UNIT_COUNT = Frame.PAYLOAD_UNIT_COUNT;
 	Frame payload;
 
@@ -27,10 +27,11 @@ public class FlaggedFrame extends Frame {
 	public FlaggedFrame(Frame payload) {
 		this.payload = payload;
 	}
-	
-	public FlaggedFrame(ArrayBlockingQueue<Byte> queue){
+
+	public FlaggedFrame(ArrayBlockingQueue<Byte> queue) {
+		System.out.println("Making FlaggedFrame from = "+Arrays.toString(queue.toArray(new Byte[0])));
 		Unit[] units = new Unit[Frame.PAYLOAD_UNIT_COUNT];
-		for(int i=0;i<units.length && !queue.isEmpty();i++){
+		for (int i = 0; i < units.length && !queue.isEmpty(); i++) {
 			try {
 				units[i] = new Unit(queue.take());
 			} catch (InterruptedException e) {
@@ -38,38 +39,40 @@ public class FlaggedFrame extends Frame {
 			}
 		}
 		this.payload = new Frame(units);
+		System.out.println("payload done:  "+Arrays.toString(payload.units));
 	}
-	
-	public FlaggedFrame(BitSet bits){
+
+	public FlaggedFrame(BitSet bits) {
 		ArrayList<Unit> units = new ArrayList<Unit>();
-		//Only put data or fill bytes in this arraylist.
-		//Only react on flags, dont store them in this.
-		
-		for(int i=0;i<bits.size()-8;i=i+9){
-			Unit unit = new Unit(Bytes.fromBitSet(bits, i),bits.get(i+8));
-			if(unit.isDataOrFill()){
+		// Only put data or fill bytes in this arraylist.
+		// Only react on flags, dont store them in this.
+
+		for (int i = 0; i < bits.length() - 8; i = i + 9) {
+			Unit unit = new Unit(Bytes.fromBitSet(bits, i), bits.get(i + 8));
+			if (unit.isDataOrFill() && units.size() < Frame.PAYLOAD_UNIT_COUNT) {
 				units.add(unit);
-			}else{
-				//TODO other flags detected;
+			} else {
+				// TODO other flags detected;
 			}
 		}
 		payload = new Frame(units.toArray(new Unit[0]));
 	}
-	
+
 	/**
-	 * Returns the full bit sequence
-	 * (Flags and stuffings are left in).
+	 * Returns the full bit sequence (Flags and stuffings are left in).
+	 * 
 	 * @return
 	 */
-	public BitSet getBitSet(){
+	public BitSet getBitSet() {
 		BitSet result = new BitSet();
-		for(Unit u : units){
-				result = BitSets.concatenate(result, u.asBitSet());
+		for (Unit u : units) {
+			//System.out.println(u.asBitSet());
+			result = BitSets.concatenate(result, u.asBitSet());
 		}
 		return result;
 	}
 
-	public Frame getPayload(){
+	public Frame getPayload() {
 		return payload;
 	}
 }
