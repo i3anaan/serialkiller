@@ -1,12 +1,16 @@
 package network;
 
 import com.google.common.primitives.Bytes;
-import util.ByteArrays;
 
 import java.util.Arrays;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+/**
+ * Transport/network layer packet.
+ *
+ * Protocol: https://github.com/cschutijser/tpp/blob/master/transport-network.md
+ */
 public class Packet {
     public static int HEADER_LENGTH = PacketHeader.HEADER_LENGTH;
     public static int MAX_PAYLOAD_LENGTH = 1024;
