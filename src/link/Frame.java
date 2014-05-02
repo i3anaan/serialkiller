@@ -86,8 +86,8 @@ public class Frame {
 			throw new InvalidBitException();
 		}
 	}
-	
 	public byte getByte(int byteIndex){
+		//This should work;
 		return Bytes.fromBitSet(dataStored,byteIndex*8);
 	}
 	
