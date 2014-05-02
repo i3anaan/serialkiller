@@ -16,7 +16,7 @@ public class Frame {
 	
 	public Frame(){
 		dataStored = 0;
-		currentLength = 1;
+		currentLength = 0;
 	}
 	
 	public Frame(byte data){
@@ -36,14 +36,15 @@ public class Frame {
 	
 	
 	public boolean isComplete(){
+		//Hier was vroeger een off by one error
+		//(return currentLength==Frame.LENGTH;)
+		//Hierdoor start currentLength nu op 0, en heeft nextBit/add een -1;
 		return currentLength==Frame.LENGTH;
 	}
 	
 	
 	public byte nextBit(){
-		//System.out.println(Frame.LENGTH-currentLength);
-		//System.out.println(Bytes.format((byte)(dataStored>>(Frame.LENGTH-currentLength))));
-		//System.out.println(Bytes.format((byte)dataStored));
+		//System.out.println("Returning bit: "+(byte)((dataStored>>(currentLength-1))&1));
 		return (byte)((dataStored>>(currentLength-1))&1);
 	}
 	
@@ -53,12 +54,12 @@ public class Frame {
 	
 	public void add(byte bit){
 		if(bit==0){
-			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength));
+			byte mask = (byte)~(1<<(Frame.LENGTH-currentLength-1));
 			dataStored = (byte)(dataStored & mask);
 			//System.out.println(Bytes.format((byte)mask) +"  |   "+Bytes.format(dataStored));
 			currentLength++;
 		}else if(bit==1){
-			byte mask = (byte)(1<<(Frame.LENGTH-currentLength));
+			byte mask = (byte)(1<<(Frame.LENGTH-currentLength-1));
 			
 			dataStored = (byte)(dataStored | mask);
 			currentLength++;

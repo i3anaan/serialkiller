@@ -19,8 +19,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	Frame lastReceivedFrame = new Frame((byte) 0);
 	Frame frameToSendNext = new Frame((byte) 0);
 
-	boolean readFrame;
-	boolean setFrameToSend;
+	protected boolean readFrame;
+	protected boolean setFrameToSend;
 
 	public DelayCorrectedFDXLinkLayerSectionSegment(PhysicalLayer down) {
 		this.down = down;
@@ -34,34 +34,33 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 			try {
 				while (!incomingData.isComplete()) {
 					if (!connectionSync) {
-						waitForSync();
+						// waitForSync();
 					}
 
 					byte byteToSend = adaptBitToPrevious(frameToSendNext
 							.nextBit());
-					//TODO: SHOULD NOT START WITH A ZERO:
 					frameToSendNext.removeBit();
-					System.out.println("Byte to send: "+ byteToSend);
+					// System.out.println("Byte to send: "+
+					// Bytes.format(byteToSend));
 					down.sendByte(byteToSend);
 					previousByteSent = byteToSend;
 
 					byte input = down.readByte();
-					while (input == previousByteReceived) {
-						input = down.readByte();
-						//System.out.println("Waiting for ack...");
-					}
+					// while (input == previousByteReceived) {
+					// input = down.readByte();
+					// System.out.println("Waiting for ack...");
+					// }
 					// Found difference, got reaction;
 					// Extract information out of response;
 					previousByteReceived = input;
-					
 
-					
-					System.out.println("Exctraded input bit: " +extractBitFromInput(input));
+					// System.out.println("Exctraded input bit: "
+					// +extractBitFromInput(input));
 					incomingData.add(extractBitFromInput(input));
-					//System.out.println(Bytes.format((byte)incomingData.getByte()));
+					// System.out.println(Bytes.format((byte)incomingData.getByte()));
 				}
-				
-				System.out.println("\nFinished byte");
+
+				System.out.println("Finished byte-exchange \n");
 
 			} catch (InvalidByteTransitionException e) {
 				// TODO iets hierop doen.
@@ -77,60 +76,83 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	}
 
 	private void waitForSync() {
-		while (!connectionSync) {
-			for (int i = 0; i < 20; i++) {
-				if (down.readByte() != previousByteReceived) {
-					System.out.println("Reaction detected");
-					down.sendByte((byte) 2);
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} // TODO: dit slimmer doen;
-					if (down.readByte() == 2) {
-						previousByteSent = 2;
-						previousByteReceived = 2;
-						connectionSync = true;
-						return;
-					}
-				}
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			System.out.println("No other end detected...");
+		if (checkLineInUse()) {
+			// Other end detected, got sync;
+			return;
+		}
+		System.out.println("No other end detected...");
 
+		while (!connectionSync) {
 			System.out.println("Waiting on other end...");
 			down.sendByte((byte) 1);
 			try {
-				Thread.sleep(100);
+				Thread.sleep(2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			down.sendByte((byte) 0);
 			try {
-				Thread.sleep(100);
+				Thread.sleep(2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if (down.readByte() != previousByteReceived) {
-				System.out.println("Reaction detected");
-				down.sendByte((byte) 2);
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} // TODO: dit slimmer doen;
-				if (down.readByte() == 2) {
-					previousByteSent = 2;
-					previousByteReceived = 2;
-					connectionSync = true;
-					return;
-				}
+			checkForResponse();
+		}
+	}
+
+	private boolean checkLineInUse() {
+		boolean lineInUse = false;
+		for (int i = 0; i < 20; i++) {
+			if (!lineInUse && down.readByte() != previousByteReceived) {
+				lineInUse = true;
+				System.out.println("Checking end: Reaction detected");
+			}
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+		
+		//A problem that might occur here is that this will keep sending 2, till it gets a response.
+		//If it doenst get it the first time, I dont think keeping sending is very effective.
+		//But that would mean the line is in use by something unresponsive
+		//and will not be usable till that sender gets removed from the line.
+		while (lineInUse) {
+			down.sendByte((byte) 2);
+			try {
+				Thread.sleep(3);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} // TODO: dit slimmer doen;
+			if (down.readByte() == 2) {
+				previousByteSent = 2;
+				previousByteReceived = 2;
+				connectionSync = true;
+				System.out.println("Checking end: Connected!");
+			}
+		}
+		
+		return connectionSync;
+	}
+
+	private boolean checkForResponse() {
+		if (down.readByte() != previousByteReceived) {
+			System.out.println("Waiting end: Reaction detected!");
+			down.sendByte((byte) 2);
+			try {
+				Thread.sleep(3);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} // TODO: dit slimmer doen;
+			if (down.readByte() == 2) {
+				previousByteSent = 2;
+				previousByteReceived = 2;
+				connectionSync = true;
+				System.out.println("Waiting end: Connected!");
+			}
+		}
+		return connectionSync;
 	}
 
 	private byte adaptBitToPrevious(byte nextData) {
@@ -164,7 +186,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer {
 	@Override
 	public void sendByte(byte data) {
 		frameToSendNext = new Frame(data);
-		//TODO Still starts with 1;
 		setFrameToSend = true;
 	}
 
