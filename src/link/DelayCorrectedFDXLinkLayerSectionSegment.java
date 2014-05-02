@@ -2,12 +2,7 @@ package link;
 
 import phys.PhysicalLayer;
 
-/**
- * Do not use debouncer.
- * Use CleanStart 0.
- * @author I3anaan
- *
- */
+/*
 public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer{
 	
 	boolean connectionSync;
@@ -91,3 +86,4 @@ public class DelayCorrectedFDXLinkLayerSectionSegment extends LinkLayer{
 		return lastReceivedFrame.getByte();
 	}
 }
+*/
