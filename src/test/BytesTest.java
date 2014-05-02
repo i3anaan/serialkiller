@@ -20,4 +20,12 @@ public class BytesTest {
 		assertEquals("01111111", Bytes.format((byte) 127));
 	}
 
+    @Test
+    public void testParseBoolean() {
+        assertEquals(true, Bytes.parseBoolean((byte) 2, 6));
+        assertEquals(true, Bytes.parseBoolean((byte) 1, 7));
+        assertEquals(false, Bytes.parseBoolean((byte) 4, 7));
+        assertEquals(true, Bytes.parseBoolean((byte) -1, 5));
+    }
+
 }
