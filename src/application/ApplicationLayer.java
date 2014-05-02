@@ -83,10 +83,6 @@ public class ApplicationLayer {
 	 */
 	private char getCommand(byte[] data){
 
-		//byte check = data[0];
-		//String commandString = Byte.toString(check);
-		//char command = commandString.charAt(0);
-
 		return (char)data[0];
 	}
 
@@ -132,6 +128,7 @@ public class ApplicationLayer {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(file);
 			fileInputStream.read(data);
+			fileInputStream.close();
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("File Not Found.");
