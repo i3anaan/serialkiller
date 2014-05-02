@@ -1,34 +1,41 @@
 package application.message;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * Representation for all chat messages in the Application layer,
+ * it contains the nickname of the sender, the message and the original payload
+ * @author msbruning
+ *
+ */
 public class ChatMessage extends ApplicationLayerMessage {
 
 	//Private variables
 	private final String nickname;
 	private final String message;
-	
-	
+
+
 	/**
-	 * Representation for all chat messages in the Application layer,
-	 * it contains the nickname of the sender, the message and the original payload
-	 * @param data The payload of this message
+	 * @param message payload
 	 */
 	public ChatMessage(byte[] data) {
 		super(data);
 		// Nickname used by the message sender, this is found by using the fact
 		// that nul bytes terminate strings
-			int i;
-			for(i = 0; i<data.length; i++){
-				if(data[i] == ((byte)0))
-					break;
-			}
-			nickname = new String(data, 1, i);
-			int l = nickname.length();
-			
+		int i;
+		for(i = 0; i<data.length; i++){
+			if(data[i] == 0)
+				break;
+		}
+		nickname = new String(data, 1, i);
+		int l = nickname.length();
+
 		// Message part of the payload
-			byte [] payload = Arrays.copyOfRange(data, l, data.length);
-			message = new String(payload);
+		byte [] payload = Arrays.copyOfRange(data, l, data.length);
+		message = new String(payload);
 	}
 
 	/**
@@ -38,7 +45,7 @@ public class ChatMessage extends ApplicationLayerMessage {
 	public String getNickname(){
 		return nickname;
 	}
-	
+
 	/**
 	 * Returns the contents of the chat message
 	 * @return message
@@ -46,4 +53,5 @@ public class ChatMessage extends ApplicationLayerMessage {
 	public String getMessage(){
 		return message;
 	}
+
 }

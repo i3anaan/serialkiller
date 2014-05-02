@@ -2,6 +2,12 @@ package application;
 
 import java.io.UnsupportedEncodingException;
 
+/**
+ * Test Layer to see if the ApplicationLayer is capable of handling chat messages in a 
+ * correct manner
+ * @author msbruning
+ *
+ */
 public class ReceivingApplicationLayer {
 
 	public ReceivingApplicationLayer() {
@@ -15,7 +21,7 @@ public class ReceivingApplicationLayer {
 		while(loop_continue){
 			
 			String nickname = "CHenk";
-			String message = "Je bent een klootzak";
+			String message = "Je bent een held";
 			byte nullbyte = (byte)0;
 			
 			byte[] nick = nickname.getBytes("UTF-8");
@@ -25,9 +31,6 @@ public class ReceivingApplicationLayer {
 			System.arraycopy(nick, 0, data, 0, nick.length);
 			data[nick.length+1] = nullbyte;
 			System.arraycopy(msg, 0, data, (nick.length+1), msg.length);
-			System.out.println(new String(data, "UTF-8"));
-			
-			
 			
 			try {
 				al.readPayload(data);
