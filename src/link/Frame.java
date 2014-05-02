@@ -15,9 +15,9 @@ import util.Bytes;
  */
 public class Frame {
 
-	protected Unit[] units = new Unit[PAYLOAD_SIZE_UNITS];
+	protected Unit[] units = new Unit[PAYLOAD_UNIT_COUNT];
 
-	public static final int PAYLOAD_SIZE_UNITS = 10;
+	public static final int PAYLOAD_UNIT_COUNT = 10;
 	//public static final int PAYLOAD_SIZE_BITS = PAYLOAD_SIZE_BYTES * 8;
 
 	// Imagine this as a pointer pointing to the end of the bit sequence.
@@ -33,106 +33,54 @@ public class Frame {
 			units[i] = new Unit(Unit.FLAG_FILLER_DATA);
 		}
 	}
+	
+	public Frame(Unit[] units) {
+		for(int i=0;i<units.length;i++){
+			this.units[i] = units[i];
+		}
+		//Fill empty spots with Filler data flags.
+		for(int i=0;i<units.length;i++){
+			if(units[i]==null){
+				units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+			}
+		}
+	}
 
 	public Frame(BitSet data) throws FrameSizeTooSmallException {
-		if (data.size() > PAYLOAD_SIZE_BITS) {
-			throw new FrameSizeTooSmallException();
+		//Put as much data as possible in units.
+		for(int i=0;i<data.size()-7;i=i+8){
+			units[i/8] = new Unit(Bytes.fromBitSet(data, i));
 		}
-		dataStored = new BitSet(PAYLOAD_SIZE_BITS);
-		dataStored.set(0, dataStored.size());
-		dataStored.and(data);
-		currentReaderIndex = data.size(); // off by 1 danger zone
-		fillerBytes=0;
+		//Fill empty spots with Filler data flags.
+		for(int i=0;i<units.length;i++){
+			if(units[i]==null){
+				units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+			}
+		}
 	}
-
+	
 	/**
-	 * @require 0<length<=Frame.LENGTH;
-	 * @param data
-	 * @param length
+	 * Returns only the data contained in this Frame.
+	 * (Flags and stuffings are filtered out).
+	 * @return
 	 */
-	public Frame(BitSet data, int length) throws FrameSizeTooSmallException {
-		if (data.size() > PAYLOAD_SIZE_BITS) {
-			throw new FrameSizeTooSmallException();
+	public BitSet getBitSet(){
+		BitSet result = new BitSet();
+		for(Unit u : units){
+				result = BitSets.concatenate(result, u.dataAsBitSet());
 		}
-		dataStored = new BitSet(PAYLOAD_SIZE_BITS);
-		dataStored.set(0, dataStored.size());
-		dataStored.and(data);
-		currentReaderIndex = length; // off by 1 danger zone
-		fillerBytes=0;
-	}
-	
-	
-	
-	public byte readBit() {
-		boolean bit = dataStored.get(currentReaderIndex);
-		if (bit) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-	
-	public boolean hasNext(){
-		return currentReaderIndex>0;
+		return result;
 	}
 
-	public void moveReaderBack() {
-		currentReaderIndex--;
-	}
-
-	public void moveReaderForward() {
-		currentReaderIndex++;
-	}
-
-	public void add(byte bit) throws InvalidBitException, FrameSizeTooSmallException {
-		if(dataStored.size()>=PAYLOAD_SIZE_BITS){
-			throw new FrameSizeTooSmallException();
-		}
-		if (bit == 1) {
-			dataStored.set(dataStored.size(), true);
-		} else if (bit == 0) {
-			dataStored.set(dataStored.size(), false);
-		} else {
-			throw new InvalidBitException();
-		}
-	}
-
-	public void addByte(byte byteToAdd) throws FrameSizeTooSmallException{
-		if(dataStored.size()+8>=PAYLOAD_SIZE_BITS){
-			throw new FrameSizeTooSmallException();
-		}
-		byte[] converter = new byte[] { byteToAdd };
-		dataStored = BitSets.concatenate(dataStored,
-				ByteArrays.toBitSet(converter));
-	}
-
-	public byte getByte(int byteIndex) {
-		return Bytes.fromBitSet(dataStored, byteIndex * 8);
+	public Unit getUnit(int unitIndex) {
+		return units[unitIndex];
 	}
 
 	public Frame getClone() {
-		try {
-			return new Frame(dataStored);
-		} catch (FrameSizeTooSmallException e) {
-			e.printStackTrace();
-			return null;
+		Unit[] newUnits = new Unit[PAYLOAD_UNIT_COUNT];
+		for(int i=0;i<units.length;i++){
+			newUnits[i] = new Unit(units[i].b);
 		}
+		return new Frame(newUnits);
 	}
-	
-	public void addFillerByte(){
-		fillerBytes++;
-	}
-	
-	public int getFillerBytes(){
-		return fillerBytes;
-	}
-
-	public byte[] getByteArray() throws IncompleteByteException {
-		if (dataStored.size() % 8 == 0) {
-			return ByteArrays.fromBitSet(this.dataStored);
-		} else {
-			throw new IncompleteByteException();
-		}
-	}
-
 }

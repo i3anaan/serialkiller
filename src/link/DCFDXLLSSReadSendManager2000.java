@@ -2,6 +2,8 @@ package link;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+import util.ByteArrays;
+
 /**
  * DelayCorrectedFullDuplexLinkLayerSectionSegmentReadWriteSendManager2000
  * readByte() and sendByte() are NOT blocking;
@@ -42,21 +44,10 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	@Override
 	public void run() {
 		while(true){
-			byte currentRead = down.readByte();
-			if(currentRead!=FILLER_DATA){
-				inbox.add(currentRead);
+			for(byte b : ByteArrays.fromBitSet(down.readFrame().getBitSet())){
+				inbox.add(b);
 			}
-			
-			if(outbox.isEmpty()){
-				down.sendByte(FlaggedFrame.FILLER_DATA);
-			}else{
-				try {
-					down.sendByte(outbox.take());
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					down.sendByte(FILLER_DATA);
-				}
-			}
+			down.sendFrame(new FlaggedFrame(outbox));
 			down.exchangeFrame();
 		}
 	}

@@ -1,7 +1,8 @@
 package link;
 
-import common.Layer;
+import java.util.BitSet;
 
+import common.Layer;
 import phys.PhysicalLayer;
 import util.Bytes;
 
@@ -19,8 +20,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	byte previousByteReceived = 0;
 	Layer down;
 
-	Frame lastReceivedFrame = new FlaggedFrame();
-	Frame frameToSendNext = new FlaggedFrame();
+	FlaggedFrame lastReceivedFrame = new FlaggedFrame();
+	FlaggedFrame frameToSendNext = new FlaggedFrame();
 
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
@@ -33,54 +34,44 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		if (readFrame && setFrameToSend) {
 			readFrame = false;
 			setFrameToSend = false;
-			FlaggedFrame incomingData = new FlaggedFrame();
+			BitSet incomingData = new BitSet();
+			BitSet outgoingData = frameToSendNext.getBitSet();
+			int bitsReceived = 0;
+			int bitsSent = 0;
 			try {
-				while (!incomingData.isComplete() && frameToSendNext.hasNext()) {
+				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT
+						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT) {
 					if (!connectionSync) {
 						// waitForSync();
 					}
 
-					byte byteToSend = adaptBitToPrevious(frameToSendNext
-							.readBit());
-					frameToSendNext.moveReaderBack();
-					// System.out.println("Byte to send: "+
-					// Bytes.format(byteToSend));
+					byte byteToSend = adaptBitToPrevious(outgoingData
+							.get(bitsSent));
 					down.sendByte(byteToSend);
+					bitsSent++;
 					previousByteSent = byteToSend;
 
 					byte input = down.readByte();
 					while (input == previousByteReceived) {
-					input = down.readByte();
-					// System.out.println("Waiting for ack...");
+						input = down.readByte();
+						// System.out.println("Waiting for ack...");
 					}
 					// Found difference, got reaction;
 					// Extract information out of response;
 					previousByteReceived = input;
 
-					// System.out.println("Exctraded input bit: "
-					// +extractBitFromInput(input));
-					incomingData.add(extractBitFromInput(input));
-					// System.out.println(Bytes.format((byte)incomingData.getByte()));
+					incomingData.set(bitsReceived,
+							extractBitFromInput(input) == 1);
+
+					bitsReceived++;
 				}
-
-				System.out.println("Finished byte-exchange \n");
-
 			} catch (InvalidByteTransitionException e) {
-				// TODO iets hierop doen.
-				// Unrecoverable biterror?
-				// Should not happen, maybe just try again.
-				e.printStackTrace();
-			} catch (InvalidBitException e) {
-				// Should never heappen;
+				// TODO restart exchangeframe?
 				e.printStackTrace();
 			}
 
-			try {
-				lastReceivedFrame = incomingData.getPayloadFrame().getClone();
-			} catch (PayloadNotCompleteException e) {
-				//Ignore frame, maybe try again?
-				e.printStackTrace();
-			}
+			System.out.println("Finished byte-exchange \n");
+			lastReceivedFrame = new FlaggedFrame(incomingData);
 		} else {
 			System.out.println("Not ready to exchange frames yet.");
 		}
@@ -124,11 +115,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				e.printStackTrace();
 			}
 		}
-		
-		//A problem that might occur here is that this will keep sending 2, till it gets a response.
-		//If it doenst get it the first time, I dont think keeping sending is very effective.
-		//But that would mean the line is in use by something unresponsive
-		//and will not be usable till that sender gets removed from the line.
+
+		// A problem that might occur here is that this will keep sending 2,
+		// till it gets a response.
+		// If it doenst get it the first time, I dont think keeping sending is
+		// very effective.
+		// But that would mean the line is in use by something unresponsive
+		// and will not be usable till that sender gets removed from the line.
 		while (lineInUse) {
 			down.sendByte((byte) 2);
 			try {
@@ -143,7 +136,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				System.out.println("Checking end: Connected!");
 			}
 		}
-		
+
 		return connectionSync;
 	}
 
@@ -180,6 +173,14 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 	}
 
+	private byte adaptBitToPrevious(boolean nextData) {
+		if (nextData) {
+			return adaptBitToPrevious((byte) 1);
+		} else {
+			return adaptBitToPrevious((byte) 0);
+		}
+	}
+
 	private byte extractBitFromInput(byte input)
 			throws InvalidByteTransitionException {
 		if ((input & 1) == (previousByteReceived & 1)
@@ -195,12 +196,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public void sendFrame(Frame data) {
-		frameToSendNext = data;
+		frameToSendNext = new FlaggedFrame(data);
 		setFrameToSend = true;
 	}
 
 	public Frame readFrame() {
 		readFrame = true;
-		return lastReceivedFrame.getClone();
+		return lastReceivedFrame.getPayload().getClone();
 	}
 }
