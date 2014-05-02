@@ -238,6 +238,6 @@ public class BufferStufferLinkLayer implements Runnable {
 	}
 	
 	private void log(String msg, Object... arguments) {
-		//System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
+		System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
 	}
 }
