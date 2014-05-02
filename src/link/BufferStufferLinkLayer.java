@@ -22,7 +22,7 @@ public class BufferStufferLinkLayer implements Runnable {
 	
 	private static final byte IDLE  = 0x00; // Line is idle.
 	private static final byte RTS   = 0x01; // Request to send.
-	private static final byte CTS   = 0x02; // Clear to send.
+	private static final byte CTS   = 0x03; // Clear to send.
 	private static final byte BYTE  = 0x01; // Byte done.
 	private static final byte LEFT  = 0x02; // Left byte set.
 	private static final byte RIGHT = 0x01; // Right byte set.
@@ -117,7 +117,6 @@ public class BufferStufferLinkLayer implements Runnable {
 							log("Got eight bits and no panic! Wait for end-of-byte signal");
 							waitByte(); setByte();
 						}
-
 						
 						if (b == FLAG) {
 							log("Byte was flag byte, marks end of frame");
@@ -141,8 +140,10 @@ public class BufferStufferLinkLayer implements Runnable {
 						
 						frame = outbox.take();
 						
+						waitIdle();
 						set(RTS);
 						log("We want to send something!");
+						
 						
 						byte response = waitnot(IDLE);
 						
@@ -167,8 +168,8 @@ public class BufferStufferLinkLayer implements Runnable {
 							sendDataByte(FLAG);
 							log("Sent flag, returning to idle.");
 							setIdle();
-							waitIdle();
-
+							timedWaitIdle();
+							
 							log("Both returned to idle.");
 						} else {
 							log("Received something other than CTS or RTS while waiting for response for RTS - panicing.");
@@ -190,6 +191,12 @@ public class BufferStufferLinkLayer implements Runnable {
 				setPanic();
 			}
 		}
+	}
+
+	private void timedWaitIdle() {
+		long t = System.nanoTime();
+		long dt = MAX_WAIT;
+		while (get() != IDLE && System.nanoTime() < t + dt);
 	}
 
 	private void sendDataByte(byte out) {
@@ -238,6 +245,6 @@ public class BufferStufferLinkLayer implements Runnable {
 	}
 	
 	private void log(String msg, Object... arguments) {
-		System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
+		//System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
 	}
 }
