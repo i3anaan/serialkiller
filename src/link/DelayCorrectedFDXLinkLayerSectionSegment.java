@@ -35,7 +35,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			setFrameToSend = false;
 			FlaggedFrame incomingData = new FlaggedFrame();
 			try {
-				while (!incomingData.isComplete()) {
+				while (!incomingData.isComplete() && frameToSendNext.hasNext()) {
 					if (!connectionSync) {
 						// waitForSync();
 					}
@@ -49,10 +49,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					previousByteSent = byteToSend;
 
 					byte input = down.readByte();
-					// while (input == previousByteReceived) {
-					// input = down.readByte();
+					while (input == previousByteReceived) {
+					input = down.readByte();
 					// System.out.println("Waiting for ack...");
-					// }
+					}
 					// Found difference, got reaction;
 					// Extract information out of response;
 					previousByteReceived = input;
@@ -75,7 +75,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				e.printStackTrace();
 			}
 
-			lastReceivedFrame = incomingData.getClone();
+			try {
+				lastReceivedFrame = incomingData.getPayloadFrame().getClone();
+			} catch (PayloadNotCompleteException e) {
+				//Ignore frame, maybe try again?
+				e.printStackTrace();
+			}
 		} else {
 			System.out.println("Not ready to exchange frames yet.");
 		}

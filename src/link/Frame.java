@@ -1,6 +1,7 @@
 package link;
 
 import java.util.BitSet;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSets;
 import util.ByteArrays;
@@ -14,10 +15,10 @@ import util.Bytes;
  */
 public class Frame {
 
-	protected BitSet dataStored;
+	protected Unit[] units = new Unit[PAYLOAD_SIZE_UNITS];
 
-	public static final int PAYLOAD_SIZE_BYTES = 10;
-	public static final int PAYLOAD_SIZE_BITS = PAYLOAD_SIZE_BYTES * 8;
+	public static final int PAYLOAD_SIZE_UNITS = 10;
+	//public static final int PAYLOAD_SIZE_BITS = PAYLOAD_SIZE_BYTES * 8;
 
 	// Imagine this as a pointer pointing to the end of the bit sequence.
 	// To the left is the last placed, valid, bit.
@@ -28,8 +29,9 @@ public class Frame {
 	int currentReaderIndex = 0;
 
 	public Frame() {
-		dataStored = new BitSet(PAYLOAD_SIZE_BITS);
-		currentReaderIndex = 0;
+		for(int i=0;i<units.length;i++){
+			units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+		}
 	}
 
 	public Frame(BitSet data) throws FrameSizeTooSmallException {
@@ -40,6 +42,7 @@ public class Frame {
 		dataStored.set(0, dataStored.size());
 		dataStored.and(data);
 		currentReaderIndex = data.size(); // off by 1 danger zone
+		fillerBytes=0;
 	}
 
 	/**
@@ -55,15 +58,11 @@ public class Frame {
 		dataStored.set(0, dataStored.size());
 		dataStored.and(data);
 		currentReaderIndex = length; // off by 1 danger zone
+		fillerBytes=0;
 	}
-
-	public boolean isComplete() {
-		// Hier was vroeger een off by one error
-		// (return currentLength==Frame.LENGTH;)
-		// Hierdoor start currentLength nu op 0, en heeft nextBit/add een -1;
-		return dataStored.length() == Frame.PAYLOAD_SIZE_BITS;
-	}
-
+	
+	
+	
 	public byte readBit() {
 		boolean bit = dataStored.get(currentReaderIndex);
 		if (bit) {
@@ -71,6 +70,10 @@ public class Frame {
 		} else {
 			return 0;
 		}
+	}
+	
+	public boolean hasNext(){
+		return currentReaderIndex>0;
 	}
 
 	public void moveReaderBack() {
@@ -80,10 +83,9 @@ public class Frame {
 	public void moveReaderForward() {
 		currentReaderIndex++;
 	}
-	
-	public void add(byte bit) throws InvalidBitException,
-			FrameSizeTooSmallException {
-		if (isComplete()) {
+
+	public void add(byte bit) throws InvalidBitException, FrameSizeTooSmallException {
+		if(dataStored.size()>=PAYLOAD_SIZE_BITS){
 			throw new FrameSizeTooSmallException();
 		}
 		if (bit == 1) {
@@ -95,14 +97,13 @@ public class Frame {
 		}
 	}
 
-	public void addByte(byte byteToAdd) throws FrameSizeTooSmallException {
-		byte[] converter = new byte[] { byteToAdd };
-		if (dataStored.size() + 8 < PAYLOAD_SIZE_BITS) {
-			dataStored = BitSets.concatenate(dataStored,
-					ByteArrays.toBitSet(converter));
-		} else {
+	public void addByte(byte byteToAdd) throws FrameSizeTooSmallException{
+		if(dataStored.size()+8>=PAYLOAD_SIZE_BITS){
 			throw new FrameSizeTooSmallException();
 		}
+		byte[] converter = new byte[] { byteToAdd };
+		dataStored = BitSets.concatenate(dataStored,
+				ByteArrays.toBitSet(converter));
 	}
 
 	public byte getByte(int byteIndex) {
@@ -116,6 +117,14 @@ public class Frame {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public void addFillerByte(){
+		fillerBytes++;
+	}
+	
+	public int getFillerBytes(){
+		return fillerBytes;
 	}
 
 	public byte[] getByteArray() throws IncompleteByteException {
