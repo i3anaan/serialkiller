@@ -67,12 +67,23 @@ public class ByteArrays {
      * @return The BitSet object.
      */
     public static BitSet toBitSet(byte[] bytes) {
-        BitSet data = new BitSet(bytes.length * 8);
+        return toBitSet(bytes, bytes.length * 8, 0);
+    }
+
+    /**
+     * Convert a byte array to a BitSet object.
+     * @param bytes The byte array to convert.
+     * @param size The size of the BitSet object.
+     * @param offset The offset where to place the byte array.
+     * @return The BitSet object.
+     */
+    public static BitSet toBitSet(byte[] bytes, int size, int offset) {
+        BitSet data = new BitSet(size);
 
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < 8; j++) {
                 boolean val = ((bytes[i] >> (7-j)) & 1) == 1;
-                data.set((i*8)+j, val);
+                data.set((i*8)+j+offset, val);
             }
         }
 

@@ -36,13 +36,13 @@ public class ByteArraysTest {
     public void testToBitSet() {
         byte[] in = {(byte) 112, (byte) 45};
 
-        BitSet expected = new BitSet(16);
-        expected.set(1, 4, true);
-        expected.set(10, true);
-        expected.set(12, 14, true);
-        expected.set(15, true);
+        BitSet expected = new BitSet(24);
+        expected.set(1+2, 4+2, true);
+        expected.set(10+2, true);
+        expected.set(12+2, 14+2, true);
+        expected.set(15+2, true);
 
-        assertEquals(expected, ByteArrays.toBitSet(in));
+        assertEquals(expected, ByteArrays.toBitSet(in, 24, 2));
     }
 
     @Test
