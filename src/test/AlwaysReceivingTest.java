@@ -4,6 +4,8 @@ import link.HighSpeedHDXLinkLayer;
 import phys.CleanStartPhysicalLayer;
 import phys.DebouncePhysicalLayer;
 import phys.DumpingPhysicalLayer;
+import phys.HardwareLayer;
+import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import util.Bytes;
 
@@ -13,7 +15,7 @@ public class AlwaysReceivingTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LptHardwareLayer ll = new LptHardwareLayer();
+		HardwareLayer ll = new LptErrorHardwareLayer();
 
 		float byte0 = 0;
 		float byte1 = 0;
