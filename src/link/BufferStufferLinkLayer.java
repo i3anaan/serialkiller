@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import phys.PhysicalLayer;
-
 import util.Bytes;
 
 /**
@@ -43,12 +42,20 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 		t.setName("BufferStuffer " + this.hashCode());
 	}
 	
-	public void sendFrame(byte[] frame) throws InterruptedException {
-		outbox.put(frame);
+	public void sendFrame(byte[] frame) {
+		try {
+			outbox.put(frame);
+		} catch (InterruptedException e) {
+			// Just drop the frame, no resend attempt.
+		}
 	}
 
-	public byte[] readFrame() throws InterruptedException {
-		return inbox.take();
+	public byte[] readFrame() {
+		try {
+			return inbox.take();
+		} catch (InterruptedException e) {
+			throw new RuntimeException("inbox.take() timed out");
+		}
 	}
 	
 	public void start() {

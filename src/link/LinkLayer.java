@@ -10,4 +10,13 @@ import common.Layer;
  * that is used.
  */
 public abstract class LinkLayer extends Layer {
+	
+	public abstract void sendFrame(byte[] frame);
+	
+	/**
+	 * Blocking
+	 * @return
+	 */
+	public abstract byte[] readFrame();
+	
 }
