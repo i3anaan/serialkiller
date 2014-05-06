@@ -25,7 +25,7 @@ public class ApplicationLayer {
 	 * @return
 	 * @throws CommandNotFoundException 
 	 */
-	public String readPayload(byte[] data) throws CommandNotFoundException{
+	public void readPayload(byte[] data) throws CommandNotFoundException{
 		// Retrieves command char from payload
 		char command = getCommand(data);
 
@@ -33,6 +33,7 @@ public class ApplicationLayer {
 		if(command == 'C'){
 			// Creates a new chat message object
 			ChatMessage cm = new ChatMessage(data);
+			//TODO call gui to parse chat message
 			System.out.println("Nickname: " +cm.getNickname()+"\n");
 			System.out.println("Message: " +cm.getMessage()+"\n");
 
@@ -44,6 +45,7 @@ public class ApplicationLayer {
 			System.out.println("FileOfferMessage: -----------");
 			System.out.println("FileSize: "+fm.getFileSize());
 			System.out.println("FileName: "+fm.getFileName()+ "\n");
+			//TODO call gui and notify of file offer
 		}
 		// Accept file transfer
 		else if(command == 'A'){
@@ -52,12 +54,19 @@ public class ApplicationLayer {
 			System.out.println("FileSize: "+fm.getFileSize());
 			System.out.println("FileName: "+fm.getFileName()+"\n");
 			
+			//TODO call networkLayer and send data for wrapping
+			byte[] send = readFile("/c/derp/");
+			
 		}
 		// Transfer file
 		else if(command == 'S'){
 			FileTransferMessage fm = new FileTransferMessage(data);
 			System.out.println("FileTransferMessage: -----------");
 			System.out.println(fm.getFileBytes().length + " bytes \n");
+			//Writes the file to requested path
+			
+			//TODO call gui to request filepath
+			writeFile(fm.getFileBytes(), "/c/derp/");
 
 		}
 		else{
@@ -65,9 +74,6 @@ public class ApplicationLayer {
 			throw new CommandNotFoundException(String.format("command: %c", command));
 
 		}
-
-		String d = new String(data);
-		return d;
 	}
 
 	/**
