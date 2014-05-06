@@ -4,7 +4,10 @@ import phys.CleanStartPhysicalLayer;
 import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
 import phys.DumpingPhysicalLayer;
+import phys.HardwareLayer;
+import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
+import phys.PhysicalLayer;
 import util.Bytes;
 import link.DelayCorrectedFDXLinkLayerSectionSegment;
 import link.HighSpeedHDXLinkLayer;
@@ -16,14 +19,10 @@ public class AlwaysSendingTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DelayCorrectedFDXLinkLayerSectionSegment ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new LptHardwareLayer()));
+		HardwareLayer ll = new LptErrorHardwareLayer();
 		
 		while (true) {
-			for (byte b = 1; b < Byte.MAX_VALUE; b++) {
-				ll.sendByte((byte) b);
-				ll.exchangeFrame();
-				ll.readByte();
-			}
+				ll.sendByte((byte) 11);
 		}
 	}
 }
