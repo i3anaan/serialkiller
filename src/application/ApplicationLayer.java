@@ -83,6 +83,7 @@ public class ApplicationLayer {
 	 */
 	public static byte[] writePayload(String s){
 
+		
 		int len = s.length();
 		byte[] data = new byte[len / 2];
 		for (int i = 0; i < len; i += 2) {
@@ -137,7 +138,7 @@ public class ApplicationLayer {
 	 * @param Path of the file to be read
 	 * @return byte array
 	 */
-	private byte[] readFile(String strFilePath){
+	protected byte[] readFile(String strFilePath){
 
 		File file = new File(strFilePath);
 		byte[] data = new byte[strFilePath.length()];
@@ -157,5 +158,23 @@ public class ApplicationLayer {
 		}
 
 		return data;
+	}
+	
+	/**
+	 * Reads a chat message from the chat application
+	 * and converts it into a byte array
+	 * @param String containing chat message
+	 * @return byte array containing chat message
+	 */
+	protected byte[] writeChatMessage(String s){
+		
+		int len = s.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+					+ Character.digit(s.charAt(i+1), 16));
+		}
+		return data;
+	
 	}
 }
