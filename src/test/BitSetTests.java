@@ -19,6 +19,28 @@ public class BitSetTests {
 		assertEquals(5, bs1.length());
 		assertEquals(3, bs2.length());
 		assertEquals(8, BitSets.concatenate(bs1,bs2).length());
+		
+		BitSet2 bs3 = new BitSet2(8);
+		BitSet2 bs4 = new BitSet2();
+		BitSet2 bs5 = new BitSet2(8);
+		bs5.set(9,false);
+		bs4.set(0,false);
+		assertEquals(bs5,BitSets.concatenate(bs3, bs4));
+		System.out.println(bs5);
+		
+		BitSet2 bs6 = new BitSet2();
+		bs6.set(0,false);
+		assertEquals(1,bs6.length());
+		bs6.set(1,false);
+		assertEquals(2,bs6.length());
+		bs6.set(2,false);
+		assertEquals(3,bs6.length());
+		bs6.set(3,false);
+		assertEquals(4,bs6.length());
+		bs6.set(4,false);
+		assertEquals(5,bs6.length());
+		bs6.set(5,false);
+		assertEquals(6,bs6.length());
 	}
 
 }

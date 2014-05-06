@@ -29,7 +29,7 @@ public class FlaggedFrame extends Frame {
 	}
 
 	public FlaggedFrame(ArrayBlockingQueue<Byte> queue) {
-		System.out.println("Making FlaggedFrame from = "+Arrays.toString(queue.toArray(new Byte[0])));
+		//System.out.println(Thread.currentThread().getId()+"  Making FlaggedFrame from = "+Arrays.toString(queue.toArray(new Byte[0])));
 		Unit[] units = new Unit[Frame.PAYLOAD_UNIT_COUNT];
 		for (int i = 0; i < units.length && !queue.isEmpty(); i++) {
 			try {
@@ -39,7 +39,8 @@ public class FlaggedFrame extends Frame {
 			}
 		}
 		this.payload = new Frame(units);
-		System.out.println("payload done:  "+Arrays.toString(payload.units));
+		//this.units = units;
+		//System.out.println("payload done:  "+Arrays.toString(payload.units));
 	}
 
 	public FlaggedFrame(BitSet2 bits) {
@@ -56,6 +57,8 @@ public class FlaggedFrame extends Frame {
 			}
 		}
 		payload = new Frame(units.toArray(new Unit[0]));
+		//this.units = units.toArray(new Unit[0]);
+		//System.out.println("Build from received bitset: "+payload+"  Bitset: "+bits+"   Array: "+Arrays.toString(units.toArray(new Unit[0])));
 	}
 
 	/**
@@ -64,8 +67,9 @@ public class FlaggedFrame extends Frame {
 	 * @return
 	 */
 	public BitSet2 getBitSet() {
+		//System.out.println("Units in flaggedFrame: "+Arrays.toString(units));
 		BitSet2 result = new BitSet2();
-		for (Unit u : units) {
+		for (Unit u : payload.units) { //Should make this better;
 			//System.out.println(u.asBitSet());
 			result = BitSets.concatenate(result, u.asBitSet());
 		}
@@ -74,5 +78,9 @@ public class FlaggedFrame extends Frame {
 
 	public Frame getPayload() {
 		return payload;
+	}
+	
+	public String toString(){
+		return Arrays.toString(this.payload.units);
 	}
 }

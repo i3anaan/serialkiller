@@ -24,7 +24,7 @@ public class BitSets {
     		result.set(f+s,second.get(s));
     	}
     	
-    	System.out.println(result);
+    	//System.out.println(result);
     	return result;
     	//TODO test this method.
     }

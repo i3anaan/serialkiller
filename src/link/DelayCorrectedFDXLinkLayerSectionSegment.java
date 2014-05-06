@@ -20,6 +20,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	byte previousByteSent = 0;
 	byte previousByteReceived = 0;
 	Layer down;
+	
+	private String connectionRole = "unkown";	//Debug
 
 	FlaggedFrame lastReceivedFrame = new FlaggedFrame();
 	FlaggedFrame frameToSendNext = new FlaggedFrame();
@@ -38,16 +40,19 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
 			BitSet2 outgoingData = frameToSendNext.getBitSet();
-			System.out.println("outgoing bits: "+outgoingData.toString());
+			//System.out.println(Thread.currentThread().getId()+"  Frame to send: "+frameToSendNext+"   outgoing bits: "+outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			try {
-				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT
-						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT) {
+				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT*9
+						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT*9) {
+					
 					if (!connectionSync) {
-						// waitForSync();
+						System.out.println(connectionRole+"  Setting up sync..");
+						waitForSync();
+						System.out.println(connectionRole+"  sync done");
 					}
-
+					//System.out.println("Sync done");
 					byte byteToSend = adaptBitToPrevious(outgoingData
 							.get(bitsSent));
 					down.sendByte(byteToSend);
@@ -55,9 +60,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					previousByteSent = byteToSend;
 
 					byte input = down.readByte();
+					//System.out.println("Going in loop");
 					while (input == previousByteReceived) {
 						input = down.readByte();
-						// System.out.println("Waiting for ack...");
+						//System.out.println("Waiting for ack...");
 					}
 					// Found difference, got reaction;
 					// Extract information out of response;
@@ -73,7 +79,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				e.printStackTrace();
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
-			System.out.println("Build received frame:  "+Arrays.toString(lastReceivedFrame.payload.units));
+			//System.out.println("Build received frame:  "+lastReceivedFrame +"   from bits: "+incomingData);
 		} else {
 			System.out.println("Not ready to exchange frames yet.");
 		}
@@ -87,16 +93,16 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		System.out.println("No other end detected...");
 
 		while (!connectionSync) {
-			System.out.println("Waiting on other end...");
+			//System.out.println("Waiting on other end...");
 			down.sendByte((byte) 1);
 			try {
-				Thread.sleep(2);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			down.sendByte((byte) 0);
 			try {
-				Thread.sleep(2);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -106,13 +112,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	private boolean checkLineInUse() {
 		boolean lineInUse = false;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 20+(Math.pow(Math.random()*20,2)); i++) {
 			if (!lineInUse && down.readByte() != previousByteReceived) {
 				lineInUse = true;
 				System.out.println("Checking end: Reaction detected");
 			}
 			try {
-				Thread.sleep(1);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -124,10 +130,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		// very effective.
 		// But that would mean the line is in use by something unresponsive
 		// and will not be usable till that sender gets removed from the line.
-		while (lineInUse) {
+		while (lineInUse && !connectionSync) {
 			down.sendByte((byte) 2);
 			try {
-				Thread.sleep(3);
+				Thread.sleep(30);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} // TODO: dit slimmer doen;
@@ -136,6 +142,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				previousByteReceived = 2;
 				connectionSync = true;
 				System.out.println("Checking end: Connected!");
+				connectionRole = "Client";
 			}
 		}
 
@@ -144,10 +151,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	private boolean checkForResponse() {
 		if (down.readByte() != previousByteReceived) {
-			System.out.println("Waiting end: Reaction detected!");
+			//System.out.println("Waiting end: Reaction detected!");
 			down.sendByte((byte) 2);
 			try {
-				Thread.sleep(3);
+				Thread.sleep(30);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} // TODO: dit slimmer doen;
@@ -156,6 +163,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				previousByteReceived = 2;
 				connectionSync = true;
 				System.out.println("Waiting end: Connected!");
+				connectionRole = "Server";
 			}
 		}
 		return connectionSync;
@@ -199,7 +207,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	public void sendFrame(FlaggedFrame data) {
 		frameToSendNext = data;
-		System.out.println("Units to send next: "+Arrays.toString(data.payload.units));
+		//System.out.println("Units to send next: "+Arrays.toString(data.payload.units));
 		setFrameToSend = true;
 	}
 

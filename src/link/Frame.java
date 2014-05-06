@@ -1,7 +1,9 @@
 package link;
 
 import java.util.Arrays;
+
 import util.BitSet2;
+
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSets;
@@ -87,5 +89,9 @@ public class Frame {
 			newUnits[i] = new Unit(units[i].b,units[i].isSpecial);
 		}
 		return new Frame(newUnits);
+	}
+	
+	public String toString(){
+		return Arrays.toString(this.units);
 	}
 }

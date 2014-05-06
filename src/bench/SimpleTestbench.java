@@ -111,8 +111,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vpla))));
-		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new DelayPhysicalLayer(vplb))));
+		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(vpla)));
+		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(vplb)));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

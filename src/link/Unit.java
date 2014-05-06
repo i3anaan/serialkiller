@@ -21,6 +21,7 @@ public class Unit {
 	}
 
 	public Unit(byte b, boolean special) {
+		//System.out.println(Thread.currentThread().getId()+"  New Unit: "+Bytes.format(b)+"  Special: "+special);
 		this.b = b;
 		this.isSpecial = special;
 	}
@@ -35,7 +36,7 @@ public class Unit {
 	public BitSet2 asBitSet() {
 		byte[] arr = new byte[] { b };
 		BitSet2 specialBit = new BitSet2();
-		specialBit.set(0,true);
+		specialBit.set(0,isSpecial);
 		return BitSets.concatenate(ByteArrays.toBitSet(arr), specialBit);
 	}
 	

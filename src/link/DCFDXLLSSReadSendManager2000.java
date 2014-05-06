@@ -31,9 +31,9 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	@Override
 	public void sendByte(byte data){
 		try {
-			System.out.println("adding:  "+data + " queue space: "+outbox.size());
+			System.out.println("adding:  "+data + " queue size: "+outbox.size());
 			outbox.put(data);
-			System.out.println(data+"  added");
+			//System.out.println(data+"  added");
 			
 		} catch (InterruptedException e) {
 			// TODO hier iets doen?
@@ -45,7 +45,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	public byte readByte() {
 		try {
 			byte read = inbox.take();
-			System.out.println("Reading byte:  "+Bytes.format(read)+"    "+inbox.size());
+			System.out.println("Reading byte:  "+Bytes.format(read)+" :  "+read);
 			return read;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -57,13 +57,16 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	public void run() {
 		down.readFrame();
 		while(true){
-			down.sendFrame(new FlaggedFrame(outbox));
+			//System.out.println("Outbox: "+Arrays.toString(outbox.toArray()));
+			FlaggedFrame frameToSend = new FlaggedFrame(outbox);
+			//System.out.println("Pushing out flagged frame to send: "+frameToSend.payload);
+			down.sendFrame(frameToSend);
 			
 			//System.out.println("sentFrame!");
 			down.exchangeFrame();
 			//System.out.println(Arrays.toString(down.readFrame().units));
 			for(byte b : ByteArrays.fromBitSet(down.readFrame().getBitSet())){
-				System.out.println("Putting in inbox:  "+Arrays.toString(down.readFrame().units));
+				//System.out.println("Putting in inbox:  "+Arrays.toString(down.readFrame().units));
 				try {
 					inbox.put(b);
 				} catch (InterruptedException e) {
