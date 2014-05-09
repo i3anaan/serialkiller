@@ -76,5 +76,27 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 			}
 		}
 	}
+	
+	
+	
+	
+	/**
+	 * 
+	 * Verkregen op normale Lpt:
+	 * 
+	 * Helo 39"&DXLS! This is my test mesage that is sent to confirm usability for the DCFDXLS link-layer serial line protocol. Mesage ends.Helo from DCFDXLS! This is my test mesage that is sent to confirm usability for the DCFDXLS link-layer serial line protocol. Mesage ends.Helo from DCFDXLS! This is my test mesage that is sent to confirm usability for the DCFDXLS link-layer serial line protocol. Mesage ends.Helo from DCFDXLS! This is my test mesage that is sent to confirm usability for the DCFDXLS link-layer serial line protocol.
+	 * 
+	 * 
+	 * Opvallend:
+	 * Merendeel goed, in het begin een raar teken.
+	 * Geen dubbele tekens achterelkaar doorgegeven.
+	 * 
+	 * 
+	 * Verkregen op Error-Lpt:
+	 * üÿþÿüþÒ is sent to confirm usäÈÁaÿþÿ
+	 * Lijkt gebitshift te zijn in zijn geheel.
+	 * 
+	 * 
+	 */
 
 }

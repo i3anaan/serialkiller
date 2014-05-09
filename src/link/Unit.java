@@ -12,7 +12,7 @@ public class Unit {
 	public boolean isSpecial;
 	public byte b;
 
-	public static final int FLAG_FILLER_DATA = -1;
+	public static final int FLAG_FILLER_DATA = -1; //11111111
 	public static final byte IS_SPECIAL_BIT = 1;
 
 	public Unit(byte b) {
@@ -53,7 +53,24 @@ public class Unit {
 		return !isSpecial || b==FLAG_FILLER_DATA;
 	}
 	
+	public boolean isFiller(){
+		return isSpecial && b==FLAG_FILLER_DATA;
+	}
+	
+	
 	public String toString(){
 		return (isSpecial ? "F" : "D") +Bytes.format(b);
+	}
+	
+	public Unit getClone(){
+		return new Unit(b,isSpecial);
+	}
+	
+	public boolean equals(Object obj){
+		if(obj==null){
+			return false;
+		}else{
+			return (obj instanceof Unit) && ((Unit) obj).b==this.b && ((Unit) obj).isSpecial == this.isSpecial;
+		}
 	}
 }

@@ -33,5 +33,15 @@ public class UnitTest {
 		assertEquals(Bytes.format(b),Bytes.format(unit3.b));
 		assertEquals("D"+Bytes.format(b),unit3.toString());
 	}
+	
+	@Test
+	public void testClone(){
+		Unit u = new Unit((byte)3,true);
+		Unit u2 = u.getClone();
+		assertEquals(u, u2);
+		u2.b = (byte) 7;
+		assertNotEquals(u, u2);
+		assertEquals(u,new Unit((byte)3,true));		
+	}
 
 }

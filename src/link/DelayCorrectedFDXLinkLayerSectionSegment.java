@@ -69,7 +69,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					byte input = down.readByte();
 					long waitTime = 5000000000l	+ System.nanoTime();
 					boolean timeout = false;
-					while (input == previousByteReceived && !timeout) {
+					while (!timeout && input == previousByteReceived && input==down.readByte() && input==down.readByte() && input==down.readByte()) {
 						input = down.readByte();
 						if (System.nanoTime() > waitTime) {
 							timeout = true;
@@ -79,8 +79,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						}
 						// log("Waiting for ack...");
 					}
-					// TODO DIT KAN OUT OF SYNC RAKEN, OPEENS EEN ACK WEG OF
-					// DUBBEL SEND.
 					if (!timeout) {
 
 						//log("Difference found! current: " + input
@@ -166,65 +164,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		 */
 	}
 
-	private boolean checkLineInUse() {
-		boolean lineInUse = false;
-		for (int i = 0; i < 20 + (Math.pow(Math.random() * 20, 2)); i++) {
-			if (!lineInUse && down.readByte() != previousByteReceived) {
-				lineInUse = true;
-				log("Checking end: Reaction detected");
-			}
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-
-		// A problem that might occur here is that this will keep sending 2,
-		// till it gets a response.
-		// If it doenst get it the first time, I dont think keeping sending is
-		// very effective.
-		// But that would mean the line is in use by something unresponsive
-		// and will not be usable till that sender gets removed from the line.
-		while (lineInUse && !connectionSync) {
-			down.sendByte((byte) 2);
-			try {
-				Thread.sleep(30);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} // TODO: dit slimmer doen;
-			if (down.readByte() == 2) {
-				previousByteSent = 2;
-				previousByteReceived = 2;
-				connectionSync = true;
-				log("Checking end: Connected!");
-				connectionRole = "Client";
-			}
-		}
-
-		return connectionSync;
-	}
-
-	private boolean checkForResponse() {
-		if (down.readByte() != previousByteReceived) {
-			// log("Waiting end: Reaction detected!");
-			down.sendByte((byte) 2);
-			try {
-				Thread.sleep(30);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} // TODO: dit slimmer doen;
-			if (down.readByte() == 2) {
-				previousByteSent = 2;
-				previousByteReceived = 2;
-				connectionSync = true;
-				log("Waiting end: Connected!");
-				connectionRole = "Server";
-			}
-		}
-		return connectionSync;
-	}
-
+	
 	private byte adaptBitToPrevious(byte nextData) {
 		if ((nextData & 1) == (previousByteSent & 1)) {
 			// Same databit, different clockbit

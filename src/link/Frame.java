@@ -80,7 +80,11 @@ public class Frame {
 	}
 
 	public Unit getUnit(int unitIndex) {
-		return units[unitIndex];
+		if(unitIndex<units.length){
+			return units[unitIndex];
+		}else{
+			return null;
+		}
 	}
 
 	public Frame getClone() {
