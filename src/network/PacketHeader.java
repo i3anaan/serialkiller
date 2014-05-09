@@ -11,8 +11,10 @@ import java.util.BitSet;
  * Represents a header of a packet.
  */
 public class PacketHeader {
-    public static int HEADER_LENGTH = 13;
-    public static int MAX_TTL = 7;
+    public static final int HEADER_LENGTH = 13;
+    public static final int MAX_TTL = 7;
+    public static final int MAX_SEQNUM = 255;
+    public static final long MAX_SEGNUM = 16777215L;
 
     /** The raw data of this header. */
     private BitSet raw;
@@ -75,6 +77,15 @@ public class PacketHeader {
             throw new IllegalArgumentException("The TTL should be between 0 and 7 (inclusive).");
         }
         precompiled = false;
+    }
+
+    /**
+     * Decreases the TTL with 1, unless the TTL is zero, then it stays zero.
+     */
+    public void decreaseTTL() {
+        if (getTTL() > 0) {
+            setTTL(getTTL() - 1);
+        }
     }
 
     public boolean getAck() {
@@ -157,10 +168,10 @@ public class PacketHeader {
     }
 
     protected void setSegnum(long segnum) {
-        if (segnum >= 0 && segnum < 256) {
+        if (segnum >= 0 && segnum < 16777215L) {
             raw.or(ByteArrays.toBitSet(Arrays.copyOfRange(ByteBuffer.allocate(8).putLong(segnum).array(), 5, 8), HEADER_LENGTH * 8, 80));
         } else {
-            throw new IllegalArgumentException("The segment number should be between 0 and 255 (inclusive).");
+            throw new IllegalArgumentException("The segment number should be between 0 and 16777215 (inclusive).");
         }
         precompiled = false;
     }
