@@ -5,6 +5,7 @@ import phys.CleanStartPhysicalLayer;
 import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
 import phys.DumpingPhysicalLayer;
+import phys.PerfectVirtualPhysicalLayer;
 import phys.VirtualPhysicalLayer;
 import util.Bytes;
 import link.DCFDXLLSSReadSendManager2000;
@@ -103,11 +104,13 @@ public class SimpleTestbench {
 		System.out.println("===============");
 		System.out.println();
 		
-		VirtualPhysicalLayer vpla, vplb;
+		PerfectVirtualPhysicalLayer vpla, vplb;
 		
-		vpla = new VirtualPhysicalLayer();
-		vplb = new VirtualPhysicalLayer();
-
+		vpla = new PerfectVirtualPhysicalLayer();
+		vplb = new PerfectVirtualPhysicalLayer();
+		vpla.connect(vplb);
+		vpla.connect(vpla);
+		
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 

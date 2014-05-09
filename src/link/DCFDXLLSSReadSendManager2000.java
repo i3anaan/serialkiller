@@ -31,7 +31,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	@Override
 	public void sendByte(byte data){
 		try {
-			System.out.println("adding:  "+data + " queue size: "+outbox.size());
+			//System.out.println("adding:  "+data + " queue size: "+outbox.size());
 			outbox.put(data);
 			//System.out.println(data+"  added");
 			
@@ -45,7 +45,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable{
 	public byte readByte() {
 		try {
 			byte read = inbox.take();
-			System.out.println("Reading byte:  "+Bytes.format(read)+" :  "+read);
+			//System.out.println("Reading byte:  "+Bytes.format(read)+" :  "+read);
 			return read;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
