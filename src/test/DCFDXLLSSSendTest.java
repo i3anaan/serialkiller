@@ -7,6 +7,7 @@ import phys.DumpingPhysicalLayer;
 import phys.FileHardwareLayer;
 import phys.LptHardwareLayer;
 import util.Bytes;
+import link.DCFDXLLSSReadSendManager2000;
 import link.DelayCorrectedFDXLinkLayerSectionSegment;
 import link.HighSpeedHDXLinkLayer;
 import link.LinkLayer;
@@ -17,16 +18,14 @@ public class DCFDXLLSSSendTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DelayCorrectedFDXLinkLayerSectionSegment ll = new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(new FileHardwareLayer("C:\\Users\\I3anaan\\Desktop\\New Text Document.txt")));
+		DCFDXLLSSReadSendManager2000 ll = new DCFDXLLSSReadSendManager2000(
+				new DelayCorrectedFDXLinkLayerSectionSegment(
+						new LptHardwareLayer()));
 		System.out.println("Start Sending");
-		System.out.println(Bytes.format((byte)-123));
-		//while (true) {
-			for (byte b = 1; b < 2; b++) {
-				ll.sendByte((byte) -123);
-				ll.readByte();
-				//System.out.println(ll.readByte());
-				ll.exchangeFrame();
+		while (true) {
+			for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
+				ll.sendByte((byte) b);
 			}
-		//}
+		}
 	}
 }
