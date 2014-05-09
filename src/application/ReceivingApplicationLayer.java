@@ -17,12 +17,15 @@ public class ReceivingApplicationLayer {
 	public static void main(String[] args) throws UnsupportedEncodingException {
 
 		boolean loop_continue = true;
+		
 		ApplicationLayer al = new ApplicationLayer();
+		Main main = new Main(al);
+		
 		while(loop_continue){
 
 			
-			//byte[] data = getChatMsg();
-			byte[] data = getFileMsg();
+			byte[] data = getChatMsg();
+			//byte[] data = getFileMsg();
 			try {
 				al.readPayload(data);
 			} catch (CommandNotFoundException e) {

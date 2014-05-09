@@ -14,10 +14,12 @@ import javax.swing.JTextArea;
 public class UserListPanel extends JPanel{
 
 	// Private variables
+	private GUI gui;
 	private JTextArea userList;
 	
-	public UserListPanel() {
-		
+	public UserListPanel(GUI gu) {
+		super();
+		gui = gu;
 		this.setLayout(new BorderLayout());
 		// History Field
 				userList = new JTextArea("", 15, 15);

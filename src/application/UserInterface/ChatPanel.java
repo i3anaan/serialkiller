@@ -25,10 +25,12 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 	public  JTextArea   taMessages;
 	
 	// private variables
+	private GUI gui;
 	
 	
-	public ChatPanel() {
+	public ChatPanel(GUI gu) {
 		super();
+		gui = gu;
 		this.setLayout(new BorderLayout());
 		
 		// Append Field
@@ -68,6 +70,8 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 	public void keyPressed(KeyEvent event) {
 		if (event.getKeyCode() == KeyEvent.VK_ENTER) {
 			// call Application Layer to send message
+			// temp debug line
+			addMessage("Henk", myMessage.getText());
 			myMessage.setText("");
 		}
 		

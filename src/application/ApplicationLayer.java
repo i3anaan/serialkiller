@@ -6,13 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Observable;
 
 import application.message.*;
 
 /*
  * Main ApplicationLayer, interpets and writes payload data
  */
-public class ApplicationLayer {
+public class ApplicationLayer extends Observable {
 
 	public ApplicationLayer(){
 
@@ -36,6 +37,8 @@ public class ApplicationLayer {
 			//TODO call gui to parse chat message
 			System.out.println("Nickname: " +cm.getNickname()+"\n");
 			System.out.println("Message: " +cm.getMessage()+"\n");
+			setChanged();
+			notifyObservers(cm);
 
 		}
 		// Send request to transfer file
@@ -138,7 +141,7 @@ public class ApplicationLayer {
 	 * @param Path of the file to be read
 	 * @return byte array
 	 */
-	protected byte[] readFile(String strFilePath){
+	public byte[] readFile(String strFilePath){
 
 		File file = new File(strFilePath);
 		byte[] data = new byte[strFilePath.length()];
@@ -166,7 +169,7 @@ public class ApplicationLayer {
 	 * @param String containing chat message
 	 * @return byte array containing chat message
 	 */
-	protected byte[] writeChatMessage(String s){
+	public byte[] writeChatMessage(String s){
 		
 		int len = s.length();
 		byte[] data = new byte[len / 2];

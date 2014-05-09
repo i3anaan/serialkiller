@@ -13,21 +13,28 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UIManager.*;
 
+import application.*;
+import application.message.ChatMessage;
+
 import java.awt.event.*;
+import java.util.Observable;
+import java.util.Observer;
 
 
-public class GUI extends JFrame implements ActionListener, ItemListener {
+public class GUI extends JFrame implements ActionListener, ItemListener, Observer {
 
 	// private variables
+	private ApplicationLayer apl;
 	
 	// local elements
-	private ChatPanel cp = new ChatPanel();
-	private UserListPanel ulp = new UserListPanel();
+	private ChatPanel cp = new ChatPanel(this);
+	private UserListPanel ulp = new UserListPanel(this);
 	private JTextField	myMessage;
 	private JTextArea   taMessages;
 	
-	public GUI(){
+	public GUI(ApplicationLayer al){
 		super("G.A.R.G.L.E.");	
+		this.apl = al;
 		this.setLayout(new BorderLayout());
 		
 		setPreferredSize(new Dimension(800, 600));
@@ -68,6 +75,16 @@ public class GUI extends JFrame implements ActionListener, ItemListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		
+		if(arg instanceof ChatMessage){
+			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getMessage());
+		}
+		
 		
 	}
 }
