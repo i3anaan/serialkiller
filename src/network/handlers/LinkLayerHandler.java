@@ -1,6 +1,7 @@
-package network;
+package network.handlers;
 
 import link.FrameLinkLayer;
+import network.NetworkLayer;
 
 /**
  * Handler for communication with the link layer.

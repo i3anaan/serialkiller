@@ -1,6 +1,8 @@
-package network;
+package network.handlers;
 
 import link.FrameLinkLayer;
+import network.NetworkLayer;
+import network.Packet;
 
 import java.util.Arrays;
 
@@ -15,7 +17,7 @@ public class LinkLayerInHandler extends LinkLayerHandler {
     @Override
     public void handle() {
         // Get new data frame from the link.
-        byte[] data = link.readFrame(); // TODO: This method is not in the API yet.
+        byte[] data = link.readFrame();
 
         // Make sure the data fits in a packet, otherwise crop it.
         if (data.length > Packet.MAX_PACKET_LENGTH) {

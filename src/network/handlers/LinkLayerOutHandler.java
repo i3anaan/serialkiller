@@ -1,6 +1,8 @@
-package network;
+package network.handlers;
 
 import link.FrameLinkLayer;
+import network.NetworkLayer;
+import network.Packet;
 
 /**
  * Handler for data to the link layer.
@@ -14,9 +16,10 @@ public class LinkLayerOutHandler extends LinkLayerHandler {
     public void handle() {
         try {
             Packet p = out.take();
-            link.sendFrame(p.compile()); // TODO: This method is not in the API yet.
+            link.sendFrame(p.compile());
         } catch (InterruptedException e) {
-            // TODO: Handle exeption
+            // TODO: Log
+            this.stop();
         }
     }
 }

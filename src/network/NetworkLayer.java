@@ -2,6 +2,9 @@ package network;
 
 import common.Layer;
 import link.FrameLinkLayer;
+import network.handlers.Handler;
+import network.handlers.LinkLayerInHandler;
+import network.handlers.LinkLayerOutHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,6 +65,30 @@ public class NetworkLayer extends Layer implements Runnable {
         t.setName("TPP " + this.hashCode());
     }
 
+    /**
+     * Returns the incoming queue of the network layer.
+     * @return The incoming queue.
+     */
+    public ArrayBlockingQueue<Packet> queue() {
+        return queue;
+    }
+
+    /**
+     * Sets the active sequence number to the next value and returns this new
+     * value.
+     * @return The new sequence number.
+     */
+    private int nextSeqnum() {
+        seqnum = (seqnum + 1) % (Packet.MAX_SEQNUM + 1);
+        return seqnum;
+    }
+
+    /**
+     * Constructs handlers and connects them to the hosts based on the entries
+     * in the router.
+     *
+     * Stops and restarts the handlers if the NetworkLayer thread is running.
+     */
     private void constructHandlers() {
         assert (router != null);
 
@@ -98,6 +125,12 @@ public class NetworkLayer extends Layer implements Runnable {
         }
     }
 
+    /**
+     * Constructs routes for a given router and sets the given router as router
+     * for this NetworkLayer instance.
+     * @param r The router.
+     * @param filePath The file containing routes.
+     */
     private void constructRoutes(Router r, String filePath) {
         router = r;
 
@@ -168,7 +201,7 @@ public class NetworkLayer extends Layer implements Runnable {
                 Host linkHost = router.route(p);
 
                 if (linkHost != null && linkHost.handler() != null) {
-                    linkHost.handler().out.offer(p);
+                    linkHost.handler().offer(p);
                 } else {
                     // TODO: Log unroutable packet
                 }
@@ -200,16 +233,6 @@ public class NetworkLayer extends Layer implements Runnable {
         for (Handler h : handlers) {
             h.stop();
         }
-    }
-
-    /**
-     * Sets the active sequence number to the next value and returns this new
-     * value.
-     * @return The new sequence number.
-     */
-    private int nextSeqnum() {
-        seqnum = (seqnum + 1) % (Packet.MAX_SEQNUM + 1);
-        return seqnum;
     }
 
 }

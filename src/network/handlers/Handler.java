@@ -1,4 +1,7 @@
-package network;
+package network.handlers;
+
+import network.NetworkLayer;
+import network.Packet;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -26,10 +29,18 @@ public abstract class Handler implements Runnable {
      * @param parent The parent NetworkLayer instance.
      */
     public Handler(NetworkLayer parent) {
-        this.in = parent.queue;
+        this.in = parent.queue();
         this.out = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
 
         t = new Thread(this);
+    }
+
+    /**
+     * Puts a packet in the outgoing queue.
+     * @param p The packet.
+     */
+    public void offer(Packet p) {
+        out.offer(p);
     }
 
     /**

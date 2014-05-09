@@ -1,5 +1,7 @@
 package network;
 
+import network.handlers.Handler;
+
 /**
  * Represents a host in the network.
  */
