@@ -1,14 +1,14 @@
 package network;
 
-import link.LinkLayer;
+import link.FrameLinkLayer;
 
 /**
  * Handler for communication with the link layer.
  */
 public abstract class LinkLayerHandler extends Handler {
-    LinkLayer link;
+    FrameLinkLayer link;
 
-    public LinkLayerHandler(NetworkLayer parent, LinkLayer link) {
+    public LinkLayerHandler(NetworkLayer parent, FrameLinkLayer link) {
         super(parent);
         this.link = link;
     }

@@ -11,7 +11,9 @@ import phys.PhysicalLayer;
  * 
  * This link layer awaits acknowledgment for every bit sent.
  */
-public class StatefulHDXLinkLayer extends LinkLayer {
+public class StatefulHDXLinkLayer extends BytewiseLinkLayer {
+	private PhysicalLayer down;
+	
 	private int ourState = 0;
 	private int theirState = 0;
 	

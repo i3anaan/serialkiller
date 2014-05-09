@@ -8,6 +8,8 @@ package phys;
  * 
  */
 public class CheckingPhysicalLayer extends PhysicalLayer {
+	protected PhysicalLayer down;
+	
 	/** Construct a new CheckingPhysicalLayer. */
 	public CheckingPhysicalLayer(PhysicalLayer down) {
 		super();

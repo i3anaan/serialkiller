@@ -1,12 +1,12 @@
 package network;
 
-import link.LinkLayer;
+import link.FrameLinkLayer;
 
 /**
  * Handler for data to the link layer.
  */
 public class LinkLayerOutHandler extends LinkLayerHandler {
-    public LinkLayerOutHandler(NetworkLayer parent, LinkLayer link) {
+    public LinkLayerOutHandler(NetworkLayer parent, FrameLinkLayer link) {
         super(parent, link);
     }
 

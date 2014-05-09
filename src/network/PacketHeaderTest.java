@@ -2,8 +2,6 @@ package network;
 
 import junit.framework.TestCase;
 import org.junit.Test;
-import util.ByteArrays;
-import util.Bytes;
 
 import java.util.Arrays;
 import java.util.BitSet;
