@@ -24,4 +24,7 @@ public abstract class LinkLayer extends Layer {
 	 */
 	public abstract byte readByte();
 
+    public abstract void sendFrame(byte[] data);
+    public abstract byte[] readFrame();
+
 }
