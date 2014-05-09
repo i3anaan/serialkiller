@@ -69,7 +69,11 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 			}
 		}
 		
+		int loop_count = 0;
+		int last_panic = 0;
+		
 		while (true) {
+			//log("Top of loop");
 			try {
 				byte in = get();
 				
@@ -146,10 +150,7 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 						
 						if (response == RTS) {
 							log("Collided! Time for sheer panic!");
-							set(PANIC);
-							wait(PANIC);
-							log("Panic complete");
-							continue;
+							throw new PanicException();
 						} else if (response == CTS) {
 							log("Got cleared!");
 							for (int x = 0; x < frame.length; x++) {
@@ -170,13 +171,14 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 							log("Both returned to idle.");
 						} else {
 							log("Received something other than CTS or RTS while waiting for response for RTS - panicing.");
-							set(PANIC);
+							throw new PanicException();
 						}
 					} else {
 						set(IDLE);
-						set(IDLE);
 					}
 				} else if (in == PANIC) {
+					log("Just read value " + in + " which was PANIC, state is now" + get());
+					log("Seen PANIC while in main loop. Trying to recover..");
 					throw new PanicException();
 				} else {
 					log("Received other than RTS while idle - ignoring - value was " + in);
@@ -184,16 +186,27 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 					log("Got unstuck!");
 				}
 			} catch (PanicException e) {
-				log("Panic! Set-then-wait panic, then set-then-wait idle");
+				log("Panic! Set-then-wait panic, then set-then-wait idle - " + (loop_count - last_panic));
+				last_panic = loop_count;
+				
 				boolean recovered = false;
 				while (!recovered) {
 					try {
-					set(PANIC);
-					wait(PANIC);
-					set(IDLE);
-					wait(IDLE);
-					recovered = true;
+						set(IDLE);
+						log("IDLE1 set.");
+						wait(IDLE);
+						log("IDLE1 received.");
+						set(PANIC);
+						log("PANIC2 set.");
+						wait(PANIC);
+						log("PANIC2 received.");
+						set(IDLE);
+						log("IDLE3 set.");
+						wait(IDLE);
+						log("IDLE3 received.");
+						recovered = true;
 					} catch (PanicException f) {
+						log("Panic while recovering from panic");
 						/* Try again. */
 					}
 				}
@@ -202,6 +215,8 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 				log("InterruptedException?!");
 				set(PANIC);
 			}
+			
+			loop_count++;
 		}
 	}
 
@@ -263,6 +278,8 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 	}
 	
 	private void log(String msg, Object... arguments) {
-		System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
+		synchronized (System.out) {
+			System.out.printf("[%8x] [%s] " + msg + "%n", this.hashCode(), System.nanoTime(), arguments);
+		}
 	}
 }
