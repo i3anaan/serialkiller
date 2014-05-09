@@ -1,7 +1,7 @@
 package network;
 
 import common.Layer;
-import link.LinkLayer;
+import link.FrameLinkLayer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class NetworkLayer extends Layer implements Runnable {
     private Collection<Handler> handlers;
 
     /** The link layer that is used. */
-    private LinkLayer link;
+    private FrameLinkLayer link;
 
     /** The router for this network. */
     private Router router;
@@ -44,7 +44,7 @@ public class NetworkLayer extends Layer implements Runnable {
     /**
      * Constructs a new NetworkLayer instance.
      */
-    public NetworkLayer(LinkLayer link) {
+    public NetworkLayer(FrameLinkLayer link) {
         this.link = link;
 
         handlers = new ArrayList<Handler>();

@@ -1,6 +1,5 @@
 package link;
 
-import phys.HardwareLayer;
 import phys.PhysicalLayer;
 
 /**
@@ -16,7 +15,9 @@ import phys.PhysicalLayer;
  * the sendByte method may send data too fast (a change in the return channel
  * can be seen as an ack, even when it is not).
  */
-public class AckingLinkLayer extends LinkLayer {
+public class AckingLinkLayer extends BytewiseLinkLayer {
+	PhysicalLayer down;
+	
     /**
      * Constructs a new AckingLinkLayer instance.
      * @param down The driver class to use.

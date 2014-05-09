@@ -155,5 +155,4 @@ public class Packet {
     public Packet clone() {
         return new Packet(Bytes.concat(header.compile(), payload));
     }
-
 }

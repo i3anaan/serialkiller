@@ -2,6 +2,8 @@ package phys;
 
 /** A physical layer that dumps all bytes that pass through. */
 public class DumpingPhysicalLayer extends PhysicalLayer {
+	protected PhysicalLayer down;
+	
 	public DumpingPhysicalLayer(PhysicalLayer down) {
 		super();
 		this.down = down;

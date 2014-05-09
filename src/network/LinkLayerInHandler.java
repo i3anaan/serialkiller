@@ -1,6 +1,6 @@
 package network;
 
-import link.LinkLayer;
+import link.FrameLinkLayer;
 
 import java.util.Arrays;
 
@@ -8,7 +8,7 @@ import java.util.Arrays;
  * Handler for data from the link layer.
  */
 public class LinkLayerInHandler extends LinkLayerHandler {
-    public LinkLayerInHandler(NetworkLayer parent, LinkLayer link) {
+    public LinkLayerInHandler(NetworkLayer parent, FrameLinkLayer link) {
         super(parent, link);
     }
 

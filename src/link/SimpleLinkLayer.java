@@ -18,7 +18,9 @@ import phys.PhysicalLayer;
  * in any way. This means SimpleLinkLayer will only work when used with a
  * physical layer wrapped with DelayPhysicalLayer.
  */
-public class SimpleLinkLayer extends LinkLayer {
+public class SimpleLinkLayer extends BytewiseLinkLayer {
+	PhysicalLayer down;
+	
 	/** The physical layer implementation under this link layer. */
 	public SimpleLinkLayer(PhysicalLayer down) {
 		super();
