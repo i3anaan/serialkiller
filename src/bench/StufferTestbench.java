@@ -2,6 +2,7 @@ package bench;
 
 import java.util.Arrays;
 
+import phys.BitErrorPhysicalLayer;
 import phys.VirtualPhysicalLayer;
 import link.BufferStufferLinkLayer;
 
@@ -75,9 +76,9 @@ public class StufferTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		BufferStufferLinkLayer a = new BufferStufferLinkLayer(vpla);
+		BufferStufferLinkLayer a = new BufferStufferLinkLayer(new BitErrorPhysicalLayer(vpla));
 		a.start();
-		BufferStufferLinkLayer b = new BufferStufferLinkLayer(vplb);
+		BufferStufferLinkLayer b = new BufferStufferLinkLayer(new BitErrorPhysicalLayer(vplb));
 		b.start();
 		
 		System.out.println("STACK A: " + a);

@@ -33,6 +33,7 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 	private Thread t;
 	
 	private byte lastrecv = 0x00;
+	private byte lastsent = 0x00;
 	
 	public BufferStufferLinkLayer(PhysicalLayer down) {
 		this.down = down;
@@ -55,19 +56,18 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 		t.start();
 	}
 	
-	private void setIdle()  { set(IDLE);  }
-	private void setByte()  { set(BYTE); }
-	private void setPanic() { set(PANIC); }
-	
-	private byte waitIdle() { return wait(IDLE); }
-	private byte waitByte() { return wait(BYTE); }
-	private byte waitPanic(){ return wait(PANIC); }
-
 	@Override
 	public void run() {
+
 		// Startup: Panic, wait for panic, idle, wait for idle
-		setPanic(); waitPanic();
-		setIdle(); waitIdle();
+		while (true) {
+			try {
+			set(PANIC); wait(PANIC);
+			set(IDLE); wait(IDLE);
+			break;
+			} catch (PanicException e) {
+			}
+		}
 		
 		while (true) {
 			try {
@@ -88,9 +88,9 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 						byte b = 0;
 						for (int i = 0; i < 8; i++) {
 							log("Read waiting for idle.");
-							waitIdle();
+							wait(IDLE);
 							log("Read wait for idle complete.");
-							setIdle();
+							set(IDLE);
 							
 							switch(waitnot(IDLE)) {
 							case LEFT:
@@ -102,10 +102,7 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 								break;
 							case PANIC:
 								log("Panic! Aargh!");
-								set(PANIC);
-								wait(PANIC);
-								eof = true;
-								break;
+								throw new PanicException();
 							}
 							
 							if (eof) break;
@@ -115,7 +112,7 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 						
 						if (!eof) {
 							log("Got eight bits and no panic! Wait for end-of-byte signal");
-							waitByte(); setByte();
+							wait(BYTE); set(BYTE);
 						}
 						
 						if (b == FLAG) {
@@ -132,7 +129,7 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 					
 					log("Received a whole frame.");
 					log("Looks like we're done receiving. Set idle.");
-					waitIdle(); setIdle();
+					wait(IDLE); set(IDLE);
 				} else if (in == IDLE) {
 					/* Check if we've got something to send. */
 					if (!outbox.isEmpty()) {
@@ -140,7 +137,7 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 						
 						frame = outbox.take();
 						
-						waitIdle();
+						wait(IDLE);
 						set(RTS);
 						log("We want to send something!");
 						
@@ -149,8 +146,8 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 						
 						if (response == RTS) {
 							log("Collided! Time for sheer panic!");
-							setPanic();
-							waitPanic();
+							set(PANIC);
+							wait(PANIC);
 							log("Panic complete");
 							continue;
 						} else if (response == CTS) {
@@ -161,47 +158,56 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 							}
 							
 							log("Pre-flag idle.");
-							setIdle();
-							waitIdle();
+							set(IDLE);
+							wait(IDLE);
 							
 							log("Pre-flag.");
 							sendDataByte(FLAG);
 							log("Sent flag, returning to idle.");
-							setIdle();
-							timedWaitIdle();
+							set(IDLE);
+							wait(IDLE);
 							
 							log("Both returned to idle.");
 						} else {
 							log("Received something other than CTS or RTS while waiting for response for RTS - panicing.");
-							setPanic();
+							set(PANIC);
 						}
 					} else {
-						setIdle();
+						set(IDLE);
+						set(IDLE);
 					}
 				} else if (in == PANIC) {
-					log("Received PANIC, going idle");
-					setIdle();
+					throw new PanicException();
 				} else {
 					log("Received other than RTS while idle - ignoring - value was " + in);
 					waitnot(in);
 					log("Got unstuck!");
 				}
+			} catch (PanicException e) {
+				log("Panic! Set-then-wait panic, then set-then-wait idle");
+				boolean recovered = false;
+				while (!recovered) {
+					try {
+					set(PANIC);
+					wait(PANIC);
+					set(IDLE);
+					wait(IDLE);
+					recovered = true;
+					} catch (PanicException f) {
+						/* Try again. */
+					}
+				}
+				log("It seems we've recovered.");
 			} catch (InterruptedException e) {
 				log("InterruptedException?!");
-				setPanic();
+				set(PANIC);
 			}
 		}
 	}
 
-	private void timedWaitIdle() {
-		long t = System.nanoTime();
-		long dt = MAX_WAIT;
-		while (get() != IDLE && System.nanoTime() < t + dt);
-	}
-
 	private void sendDataByte(byte out) {
 		for (int i = 0; i < 8; i++) {
-			setIdle(); waitIdle();
+			set(IDLE); wait(IDLE);
 			byte encoded = ((out & 1) == 0) ? LEFT : RIGHT;
 			set(encoded); 
 			log("Set to " + encoded);
@@ -217,22 +223,34 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 		}
 		
 		log("Done sending byte data, signaling end of byte");
-		setByte(); waitByte();
+		set(BYTE); wait(BYTE);
 	}
 	
 	private void set(byte newstate) {
+		lastsent = newstate;
 		down.sendByte(newstate);
 	}
 	
 	private byte get() {
-		lastrecv = down.readByte();
-		return lastrecv;
+		while (true) {
+			set(lastsent);
+			lastrecv = down.readByte();
+			
+			if (lastrecv == down.readByte() && lastrecv == down.readByte() && lastrecv == down.readByte()) {
+				return lastrecv;
+			}
+		}
 	}
 	
 	private byte wait(byte newstate, boolean invert) {
+		long t = System.nanoTime();
+		long dt = MAX_WAIT;
+		
 		while (true) {
+			set(lastsent);
 			byte b = get();
 			if ((b == newstate) == !invert) return b;
+			if ((System.nanoTime() >= t + dt)) throw new PanicException();
 		}
 	}
 	
@@ -245,6 +263,6 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 	}
 	
 	private void log(String msg, Object... arguments) {
-		//System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
+		System.out.printf("[%8x] " + msg + "%n", this.hashCode(), arguments);
 	}
 }
