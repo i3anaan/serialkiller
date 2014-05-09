@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The network layer.
@@ -31,6 +33,9 @@ public class NetworkLayer extends Layer implements Runnable {
     /** The router for this network. */
     private Router router;
 
+    /** A lock for the router. */
+    private Lock routerLock;
+
     /** The router queue. */
     protected ArrayBlockingQueue<Packet> queue;
 
@@ -47,6 +52,7 @@ public class NetworkLayer extends Layer implements Runnable {
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
 
         router = new Router();
+        routerLock = new ReentrantLock(true);
 
         // Load routes
         loadDefaultRoutes();
@@ -112,7 +118,15 @@ public class NetworkLayer extends Layer implements Runnable {
      * router will be lost.
      */
     public void loadDefaultRoutes() {
+        // Lock router
+        routerLock.lock();
+
+        // Create new routes
         constructRoutes(new Router(), ROUTING_PATH);
+        constructHandlers();
+
+        // Free router
+        routerLock.unlock();
     }
 
     /**
@@ -126,6 +140,7 @@ public class NetworkLayer extends Layer implements Runnable {
      */
     public void patchRoutes(String filePath) {
         constructRoutes(router, filePath);
+        constructHandlers();
     }
 
     /**
@@ -147,6 +162,9 @@ public class NetworkLayer extends Layer implements Runnable {
             try {
                 Packet p = queue.take();
                 p.header().decreaseTTL(); // Decrease the TTL for this hop.
+
+                // Route packet (lock the router during this operation)
+                routerLock.lock();
                 Host linkHost = router.route(p);
 
                 if (linkHost != null && linkHost.handler() != null) {
@@ -154,6 +172,8 @@ public class NetworkLayer extends Layer implements Runnable {
                 } else {
                     // TODO: Log unroutable packet
                 }
+
+                routerLock.unlock();
             } catch (InterruptedException e) {
                 // Exit gracefully
                 run = false;
