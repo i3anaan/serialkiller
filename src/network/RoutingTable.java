@@ -29,6 +29,7 @@ public class RoutingTable {
      */
 	public RoutingTable() {
 		routes = new HashMap<Byte, Byte>();
+		tunnels = new HashMap<Byte, String>();
 	}
 
     /**
