@@ -104,18 +104,18 @@ public class SimpleTestbench {
 		System.out.println("===============");
 		System.out.println();
 		
-		PerfectVirtualPhysicalLayer vpla, vplb;
+		VirtualPhysicalLayer vpla, vplb;
 		
-		vpla = new PerfectVirtualPhysicalLayer();
-		vplb = new PerfectVirtualPhysicalLayer();
-		vpla.connect(vplb);
-		vpla.connect(vpla);
+		vpla = new VirtualPhysicalLayer();
+		vplb = new VirtualPhysicalLayer();
+		//vpla.connect(vplb);
+		//vplb.connect(vpla);
 		
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(vpla)));
-		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new CleanStartPhysicalLayer(vplb)));
+		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(vpla));
+		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(vplb));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
