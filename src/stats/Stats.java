@@ -40,6 +40,10 @@ public final class Stats {
 
     /** Return the current value for the specified counter. */
     public static synchronized int getValue(String counter) {
-        return counts.get(counter);
+        if (counts.containsKey(counter)) {
+            return counts.get(counter);
+        } else {
+            return 0;
+        }
     }
 }
