@@ -1,5 +1,7 @@
 package web;
 
+import stats.Stats;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -27,7 +29,8 @@ public class WebService {
 		
 		while (true) {
 			new WebWorker(ssock.accept(), this).start();
-		}
+            Stats.hit("web.connectionsAccepted");
+        }
 	}
 	
 	public Router getRouter() {
@@ -39,7 +42,7 @@ public class WebService {
 			WebService ws = new WebService();
 			ws.run();
 		} catch (IOException e) {
-			
+			e.printStackTrace();
 		}
 	}
 }

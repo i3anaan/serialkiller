@@ -18,6 +18,7 @@ class TemplateResponse extends Response {
             .append("    <style>")
             .append("      body { font-family: sans-serif; font-size: small; color: #333; }")
             .append("      a { color: #2980b9; text-decoration: none; }")
+            .append("      table { font-size: small; }")
             .append("    </style>")
             .append("  </head>")
             .append("  <body>")

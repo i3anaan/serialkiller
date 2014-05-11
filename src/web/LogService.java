@@ -1,5 +1,7 @@
 package web;
 
+import stats.Stats;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +27,7 @@ public class LogService {
 	public void add(LogMessage msg) {
 		if (msg.getSeverity().ordinal() >= LEVEL.ordinal()) {
 			System.out.println(msg.toString());
+            Stats.hit("log.messagesLogged");
 			messages.add(msg);
 		}
 	}
