@@ -5,35 +5,6 @@ class Response {
     public HttpCode code;
     public ContentType contentType;
 
-    public enum HttpCode {
-        Ok("200 OK"),
-        Created("201 Created"),
-        Accepted("202 Accepted"),
-        NoContent("204 No Content"),
-        MovedPermanently("301 Moved Permanently"),
-        MovedTemporarily("302 Moved Temporarily"),
-        NotModified("304 Not Modified"),
-        BadRequest("400 Bad Request"),
-        Unauthorized("401 Unauthorized"),
-        Forbidden("403 Forbidden"),
-        NotFound("404 Not Found"),
-        InternalServerError("500 Internal Server Error"),
-        NotImplemented("501 Not Implemented"),
-        BadGateway("502 Bad Gateway"),
-        ServiceUnavailable("503 Service Unavailable");
-
-        private final String repr;
-        HttpCode(String repr) { this.repr = repr; }
-    }
-
-    public enum ContentType {
-        textPlain("text/plain"),
-        textHtml("text/html");
-
-        private final String repr;
-        ContentType(String repr) { this.repr = repr; }
-    }
-
     public Response() {
         this("");
     }
@@ -59,5 +30,40 @@ class Response {
         buildHeader(resp);
         buildContent(resp);
         return resp.toString();
+    }
+
+    public enum HttpCode {
+        Ok("200 OK"),
+        Created("201 Created"),
+        Accepted("202 Accepted"),
+        NoContent("204 No Content"),
+        MovedPermanently("301 Moved Permanently"),
+        MovedTemporarily("302 Moved Temporarily"),
+        NotModified("304 Not Modified"),
+        BadRequest("400 Bad Request"),
+        Unauthorized("401 Unauthorized"),
+        Forbidden("403 Forbidden"),
+        NotFound("404 Not Found"),
+        InternalServerError("500 Internal Server Error"),
+        NotImplemented("501 Not Implemented"),
+        BadGateway("502 Bad Gateway"),
+        ServiceUnavailable("503 Service Unavailable");
+
+        private final String repr;
+
+        HttpCode(String repr) {
+            this.repr = repr;
+        }
+    }
+
+    public enum ContentType {
+        textPlain("text/plain"),
+        textHtml("text/html");
+
+        private final String repr;
+
+        ContentType(String repr) {
+            this.repr = repr;
+        }
     }
 }

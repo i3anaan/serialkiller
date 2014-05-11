@@ -2,6 +2,10 @@ package web;
 
 import stats.Stats;
 
+/**
+ * A simple ServiceHandler that displays a table with known Stats-package
+ * counters.
+ */
 class StatsHandler extends ServiceHandler {
     @Override
     public String getPath() {

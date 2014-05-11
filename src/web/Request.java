@@ -1,20 +1,23 @@
 package web;
 
+/** Represents a single request to a ServiceHandler. */
 class Request {
-	private String method;
-	private String path;
-	
-	public Request(String method, String path) {
-		super();
-		this.method = method;
-		this.path = path;
-	}
+    private String method;
+    private String path;
 
-	public String getMethod() {
-		return method;
-	}
+    /** Create a new Request. */
+    Request(String requestMethod, String requestPath) {
+        method = requestMethod;
+        path = requestPath;
+    }
 
-	public String getPath() {
-		return path;
-	}
+    /** Returns the method (i.e. "GET" or "POST") for this Request. */
+    public String getMethod() {
+        return method;
+    }
+
+    /** Returns the path (i.e. "/") for this Request. */
+    public String getPath() {
+        return path;
+    }
 }

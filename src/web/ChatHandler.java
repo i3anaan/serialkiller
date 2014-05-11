@@ -1,5 +1,8 @@
 package web;
 
+/**
+ * A ServiceHandler that allows sending and receiving chat messages.
+ */
 class ChatHandler extends ServiceHandler {
     @Override
     public String getPath() {

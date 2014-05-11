@@ -1,49 +1,60 @@
 package web;
 
-/** Represents a single log message. Immutable. */
+import java.util.Date;
+
+/**
+ * Represents a single log message. Immutable.
+ */
 public class LogMessage {
-	public enum Subsystem {
-		APPLICATION, NETWORK, LINK, PHYS, TUNNEL, WEB;
-	}
+    /** Origin of this LogMessage, i.e. the subsystem that caused the log. */
+    private Subsystem subsystem;
 
-	public enum Severity {
-		DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL, ALERT, EMERG, OMG, WTF, BBQ;
-	}
+    /** Severity of this message, ranging from DEBUG to BBQ. */
+    private Severity severity;
 
-	private Subsystem subsystem;
-	private Severity severity;
-	private long timestamp;
-	private String message;
+    /** Moment this message was logged as a currentTimeMillis timestamp. */
+    private long timestamp;
 
-	public LogMessage(Subsystem sys, Severity sev, String msg) {
-		super();
-		this.subsystem = sys;
-		this.severity = sev;
-		this.message = msg;
-		this.timestamp = System.currentTimeMillis();
-	}
+    /** The actual log message. */
+    private String message;
 
-	public Subsystem getSubsystem() {
-		return subsystem;
-	}
+    /** Create a new log message with the given properties. */
+    public LogMessage(Subsystem sys, Severity sev, String msg) {
+        subsystem = sys;
+        severity = sev;
+        message = msg;
+        timestamp = System.currentTimeMillis();
+    }
 
-	public Severity getSeverity() {
-		return severity;
-	}
+    public Subsystem getSubsystem() {
+        return subsystem;
+    }
 
-	public long getTimestamp() {
-		return timestamp;
-	}
+    public Severity getSeverity() {
+        return severity;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	public String toString() {
-		return String.format("[%s] [%s] [%s] %s", 
-				getSeverity(),
-				new java.util.Date(getTimestamp()), 
-				getSubsystem(), 
-				getMessage());
-	}
+    public String getMessage() {
+        return message;
+    }
+
+    public String toString() {
+        return String.format("[%s] [%s] [%s] %s",
+                severity,
+                new Date(timestamp),
+                subsystem,
+                message);
+    }
+
+    public enum Subsystem {
+        APPLICATION, NETWORK, LINK, PHYS, TUNNEL, WEB, UNKNOWN
+    }
+
+    public enum Severity {
+        DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL, ALERT, EMERG, OMG, WTF, BBQ
+    }
 }
