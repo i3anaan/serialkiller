@@ -37,7 +37,6 @@ public class LogService {
     /** Adds a new LogMessage. */
     public void add(LogMessage msg) {
         if (msg.getSeverity().ordinal() >= LEVEL.ordinal()) {
-            System.out.println(msg);
             Stats.hit("log.messagesLogged");
             messages.add(msg);
         }

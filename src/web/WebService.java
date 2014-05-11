@@ -6,49 +6,68 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 /** Main class for the WebService subsystem. */
-public class WebService {
-    private static final int PORT = 8080;
+public class WebService implements Runnable {
     private Logger log;
     private Router router;
+    private int port;
 
-    /** Make a new WebService. */
-    public WebService() {
+    private final Object ready = new Object(); // Notified when service is ready
+
+    /** Make a new WebService that listens on the given port. */
+    public WebService(int serverPort) {
         log = new Logger(LogMessage.Subsystem.WEB);
         router = new Router();
+        port = serverPort;
     }
 
     /** Web service command-line entry point. */
     public static void main(String... args) {
-        try {
-            WebService ws = new WebService();
-            ws.run();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        WebService ws = new WebService(8080);
+        ws.run();
     }
 
     /** Runs the WebService. */
-    public void run() throws IOException {
-        log.info("WebService starting");
-
-        router.register(ChatHandler.class,
-                        IndexHandler.class,
-                        FilesHandler.class,
-                        LogDisplayHandler.class,
-                        StatsHandler.class);
-
-        ServerSocket ssock = new ServerSocket(PORT);
+    @Override
+    public void run() {
+        ServerSocket ssock = null;
 
         try {
+            log.info("WebService starting");
+
+            router.register(ChatHandler.class,
+                    IndexHandler.class,
+                    FilesHandler.class,
+                    LogDisplayHandler.class,
+                    StatsHandler.class);
+
+            ssock = new ServerSocket(port);
+            markReady();
+
             while (true) {
                 new WebWorker(ssock.accept(), this).start();
                 Stats.hit("web.connectionsAccepted");
             }
-        } catch (RuntimeException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            ssock.close();
+            if (ssock != null) {
+                try {
+                    ssock.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+    }
+
+    /** Mark this instance as being ready. */
+    private void markReady() {
+        synchronized(ready) { ready.notifyAll(); }
+    }
+
+    /** Wait for this instance to start serving. */
+    public void waitReady() throws InterruptedException {
+        synchronized (ready) { ready.wait(); }
     }
 
     Router getRouter() {
