@@ -38,7 +38,7 @@ public class WebService implements Runnable {
                     IndexHandler.class,
                     FilesHandler.class,
                     LogDisplayHandler.class,
-                    StatsHandler.class);
+                    StatusHandler.class);
 
             ssock = new ServerSocket(port);
             markReady();
