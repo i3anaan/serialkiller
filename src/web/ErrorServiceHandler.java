@@ -13,7 +13,8 @@ class ErrorServiceHandler extends ServiceHandler {
     public Response handleRequest(Request request) {
         Response r = new TemplateResponse();
         r.code = Response.HttpCode.InternalServerError;
-        r.out.append("An error occurred. Please check the logs for details.");
+        r.out.append("<h2>Error</h2>");
+        r.out.append("<p>An error occurred. Please check the logs for details.</p>");
         return r;
     }
 

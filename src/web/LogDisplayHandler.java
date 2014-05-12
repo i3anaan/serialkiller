@@ -27,8 +27,7 @@ class LogDisplayHandler extends ServiceHandler {
         Iterable<LogMessage> messages = Iterables.limit(reverse, LIMIT);
 
         // Add a short introductory paragraph
-        String intro = String.format("<p>newest %d (max) log lines</p>", LIMIT);
-        r.out.append(intro);
+        r.out.append("<h2>Logs</h2>");
 
         // Build it!
         r.out.append("<pre>");

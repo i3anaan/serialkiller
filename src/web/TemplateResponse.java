@@ -17,24 +17,29 @@ class TemplateResponse extends Response {
                 .append("    <meta charset='utf-8'>")
                 .append("    <link rel=\"icon\" href=\"data:;base64,=\">")
                 .append("    <style>")
-                .append("      body { font-family: sans-serif; font-size: small; color: #333; }")
+                .append("      body { font-family: sans-serif; font-size: small; color: #333; margin: 0; }")
                 .append("      a { color: #2980b9; text-decoration: none; }")
+                .append("      #nav { background-color: #2980b9; padding: 10px; }")
+                .append("      #nav a { color: white; }")
+                .append("      #content { padding: 10px; }")
                 .append("      table { font-size: small; }")
                 .append("    </style>")
                 .append("  </head>")
                 .append("  <body>")
-                .append("    <a href='/'>Home</a> ")
-                .append("    <a href='/chat/'>Chat</a> ")
-                .append("    <a href='/files/'>Files</a> ")
-                .append("    <a href='/logs/'>Logs</a> ")
-                .append("    <a href='/stats/'>Stats</a> ")
+                .append("    <div id='nav'>")
+                .append("    <a href='/'>Home</a>&nbsp; ")
+                .append("    <a href='/chat/'>Chat</a>&nbsp; ")
+                .append("    <a href='/files/'>Files</a>&nbsp; ")
+                .append("    <a href='/logs/'>Logs</a>&nbsp; ")
+                .append("    <a href='/stats/'>Stats</a>&nbsp; ")
                 .append("    <a href='' style='float: right'>Refresh</a>")
-                .append("    <hr>");
+                .append("    </div>")
+                .append("    <div id='content'>");
     }
 
     /** Adds the HTML footer to the given StringBuilder. */
     protected static void buildFoot(StringBuilder resp) {
-        resp.append("</body></html>");
+        resp.append("</div></body></html>");
     }
 
     @Override

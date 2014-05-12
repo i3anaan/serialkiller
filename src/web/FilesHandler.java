@@ -11,6 +11,6 @@ class FilesHandler extends ServiceHandler {
 
     @Override
     public Response handleRequest(Request request) {
-        return new TemplateResponse("Files.");
+        return new TemplateResponse("<h2>Files</h2>");
     }
 }

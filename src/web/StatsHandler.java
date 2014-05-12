@@ -16,6 +16,8 @@ class StatsHandler extends ServiceHandler {
     public Response handleRequest(Request request) {
         Response r = new TemplateResponse();
 
+        r.out.append("<h2>Statistics</h2>");
+
         r.out.append("<table>");
         for (String counter : Stats.getCounters()) {
             String tpl = "<tr><td>%s</td><td>%d</td></tr>";

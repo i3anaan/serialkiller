@@ -11,6 +11,6 @@ class ChatHandler extends ServiceHandler {
 
     @Override
     public Response handleRequest(Request request) {
-        return new TemplateResponse("Chat.");
+        return new TemplateResponse("<h2>Chat</h2>");
     }
 }
