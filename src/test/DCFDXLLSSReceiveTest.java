@@ -14,12 +14,17 @@ public class DCFDXLLSSReceiveTest {
 				new DelayCorrectedFDXLinkLayerSectionSegment(
 						new LptHardwareLayer()));
 		byte old = -1;
+		String received = "";
+		System.out.println("BEGIN TEST");
+		
 		while (true) {
 			byte b = ll.readByte();
 			if (b != old) {
-				System.out.print((char) (b & 0xFF));
+				
+				received = received+(char) (b & 0xFF);
 				old = b;
 			}
+			System.out.println("Received so far:\n"+received);
 		}
 	}
 }
