@@ -10,11 +10,18 @@ import java.util.Observable;
 
 import application.message.*;
 
-/*
- * Main ApplicationLayer, interpets and writes payload data
+/**
+ * Main ApplicationLayer class, responsible for writing and
+ * reading payload data and in turn delivering them to either
+ * the NetworkLayer or the application.
+ * 
+ * @author msbruning
+ *
  */
 public class ApplicationLayer extends Observable {
 
+	public static final String rootDir = System.getProperty("user.home");
+	
 	public ApplicationLayer(){
 
 	}
@@ -49,6 +56,8 @@ public class ApplicationLayer extends Observable {
 			System.out.println("FileSize: "+fm.getFileSize());
 			System.out.println("FileName: "+fm.getFileName()+ "\n");
 			//TODO call gui and notify of file offer
+			setChanged();
+			notifyObservers(fm);
 		}
 		// Accept file transfer
 		else if(command == 'A'){
@@ -58,7 +67,7 @@ public class ApplicationLayer extends Observable {
 			System.out.println("FileName: "+fm.getFileName()+"\n");
 			
 			//TODO call networkLayer and send data for wrapping
-			byte[] send = readFile("/c/derp/");
+			byte[] send = readFile(rootDir + "/downloads");
 			
 		}
 		// Transfer file
@@ -69,7 +78,7 @@ public class ApplicationLayer extends Observable {
 			//Writes the file to requested path
 			
 			//TODO call gui to request filepath
-			writeFile(fm.getFileBytes(), "/c/derp/");
+			writeFile(fm.getFileBytes(), (rootDir + "/downloads"));
 
 		}
 		else{
@@ -84,6 +93,7 @@ public class ApplicationLayer extends Observable {
 	 * @param s String to be converted
 	 * @return b byte array
 	 */
+	// TODO depriciated
 	public static byte[] writePayload(String s){
 
 		
@@ -169,6 +179,7 @@ public class ApplicationLayer extends Observable {
 	 * @param String containing chat message
 	 * @return byte array containing chat message
 	 */
+	// TODO maybe add nickname as parameter
 	public byte[] writeChatMessage(String s){
 		
 		int len = s.length();

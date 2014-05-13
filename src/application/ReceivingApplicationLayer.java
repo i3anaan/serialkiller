@@ -2,6 +2,10 @@ package application;
 
 import java.io.UnsupportedEncodingException;
 
+import javax.swing.SwingUtilities;
+
+import application.UserInterface.GUI;
+
 /**
  * Test Layer to see if the ApplicationLayer is capable of handling chat messages in a 
  * correct manner
@@ -16,25 +20,43 @@ public class ReceivingApplicationLayer {
 
 	public static void main(String[] args) throws UnsupportedEncodingException {
 
+		SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+		
+
 		boolean loop_continue = true;
 		
-		ApplicationLayer al = new ApplicationLayer();
-		Main main = new Main(al);
 		
-		while(loop_continue){
-
-			
-			byte[] data = getChatMsg();
-			//byte[] data = getFileMsg();
-			try {
-				al.readPayload(data);
-			} catch (CommandNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-
-		}
+		ApplicationLayer al = new ApplicationLayer();
+		GUI gui = new GUI(al);
+		al.addObserver(gui);
+		boolean doOnce = true;
+//		while(loop_continue){
+//
+//			
+//			//byte[] data = getChatMsg();
+//			if(doOnce){
+//			byte[] data = null;
+//			try {
+//				data = getFileMsg();
+//			} catch (UnsupportedEncodingException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			try {
+//				al.readPayload(data);
+//				doOnce = false;
+//			} catch (CommandNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			}
+//
+//		}
+		
+        
+		    }
+		});
 	}
 	
 	// Get a chat msg test
