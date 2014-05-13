@@ -36,7 +36,7 @@ public class WebService implements Runnable {
         ServerSocket ssock = null;
 
         try {
-            log.info("WebService starting");
+            //log.info("WebService starting");
 
             router.register(ChatHandler.class);
             router.register(IndexHandler.class);
