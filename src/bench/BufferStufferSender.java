@@ -1,7 +1,6 @@
 package bench;
 
 import phys.LptErrorHardwareLayer;
-import phys.VirtualPhysicalLayer;
 import link.BufferStufferLinkLayer;
 
 public class BufferStufferSender {
