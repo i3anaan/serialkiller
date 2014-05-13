@@ -26,7 +26,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable 
 		this.down = down;
 		this.inbox = new ArrayBlockingQueue<Byte>(1024); // TODO capacity goed
 															// zo?
-		this.outbox = new ArrayBlockingQueue<Byte>(1); // TODO capacity goed
+		this.outbox = new ArrayBlockingQueue<Byte>(1024); // TODO capacity goed
 															// zo?
 
 		exchanger = new Thread(this, "Exchanger");
@@ -77,6 +77,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable 
 					// System.out.println("Putting in inbox:  "+Arrays.toString(down.readFrame().units));
 					try {
 						inbox.put(b);
+						//System.out.print((char) (b & 0xFF));
 					} catch (InterruptedException e) {
 						// TODO hier iets doen?
 						e.printStackTrace();

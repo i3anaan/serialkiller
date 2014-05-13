@@ -60,7 +60,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						waitForSync();
 						log(connectionRole + "  sync done");
 						if (connectionRole.equals("First to receive"))
-							;
 						{
 							receiveFirst = true;
 						}
@@ -72,12 +71,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					if (!receiveFirst) {
 						byteToSend = adaptBitToPrevious(outgoingData
 								.get(bitsSent));
-						log("Previous byte sent: " + previousByteSent
-								+ " Sending now: " + byteToSend);
+						//log("Previous byte sent: " + previousByteSent
+						//		+ " Sending now: " + byteToSend);
 						down.sendByte(byteToSend);
-					} else {
-						receiveFirst = false;
-						bitsSent--;
 					}
 
 					byte input = down.readByte();
@@ -87,8 +83,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					// previousByteReceived and the input has stabilised
 					// (multiple read check).
 					// OR if a timeout occurs.
-					log("Going into wait on ack loop, current input: " + input
-							+ " previousByteReceived: " + previousByteReceived);
+					//log("Going into wait on ack loop, current input: " + input
+					//		+ " previousByteReceived: " + previousByteReceived);
 					while (!timeout
 							&& !(input != previousByteReceived
 									&& input == down.readByte()
@@ -101,6 +97,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						}
 						// log("Waiting for ack...");
 					}
+					
+					/*
 					int stability = 0;
 					char[] bytes = new char[1000];
 					for (int i = 0; i < 1000; i++) {
@@ -114,20 +112,23 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					}
 					log("Signal stability: " + stability + "\t "
 							+ new String(bytes));
-
+*/
 					if (!timeout) {
-						log("No timeout!");
-						log("[" + bitsSent + "] Output: " + byteToSend
-								+ "  Previous Byte Send: " + previousByteSent);
-						log("[" + bitsReceived + "] Input:  " + input
-								+ "  Previous input: " + previousByteReceived);
+						//log("No timeout!");
+						//log("[" + bitsSent + "] Output: " + byteToSend
+						//		+ "  Previous Byte Send: " + previousByteSent);
+						//log("[" + bitsReceived + "] Input:  " + input
+						//		+ "  Previous input: " + previousByteReceived);
 						// No timeout occured, assume both sending and reading
 						// went oke.
 						// Update some variables, and extract the received bit.
-
+						if(!receiveFirst){
 						bitsSent++;
 						totalBytesSend++;
 						previousByteSent = byteToSend;
+						}else{
+							receiveFirst = false;
+						}
 
 						previousByteReceived = input;
 						incomingData.set(bitsReceived,
