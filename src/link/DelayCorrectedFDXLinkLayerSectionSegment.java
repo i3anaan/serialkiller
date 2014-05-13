@@ -95,8 +95,11 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						}
 						// log("Waiting for ack...");
 					}
-					log("Input:  "+input+"  Previous input: "+previousByteReceived);
+					
 					if (!timeout) {
+						log("No timeout!");
+						log("Output: "+byteToSend+"  Previous Byte Send: "+previousByteSent);
+						log("Input:  "+input+"  Previous input: "+previousByteReceived);
 						//No timeout occured, assume both sending and reading went oke.
 						//Update some variables, and extract the received bit.
 						
