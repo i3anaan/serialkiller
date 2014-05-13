@@ -65,7 +65,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					if (bitsReceived != 0 || connectionRole == SENDER) {
 						byteSent = sendBit(outgoingData, bitsSent);
 
-						log("Sent byte: " + previousByteSent);
+						log("Sent byte ["+bitsSent+"]: " + previousByteSent);
 					}
 
 					try {
@@ -78,15 +78,16 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						if (byteSent != NO_BYTE) {
 							previousByteSent = byteSent;
 						}
+						
 						if (receivedByte != NO_BYTE) {
 							incomingData.set(bitsReceived,
 									extractBitFromInput(receivedByte) == 1);
-							bitsReceived++;
 							previousByteReceived = receivedByte;
 						}
+						bitsReceived++;
 
 						retry = false;
-						log("Read byte: " + previousByteReceived);
+						log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
 					} catch (TimeOutException e) {
 						retry = true;
 					}
