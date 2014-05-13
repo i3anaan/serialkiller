@@ -13,7 +13,7 @@ public class DCFDXLLSSReceiveTest {
 	public static void main(String[] args) {
 		DCFDXLLSSReadSendManager2000 ll = new DCFDXLLSSReadSendManager2000(
 				new DelayCorrectedFDXLinkLayerSectionSegment(
-						new LptHardwareLayer()));
+						new LptErrorHardwareLayer()));
 		byte old = -1;
 		String received = "";
 		System.out.println("BEGIN TEST");

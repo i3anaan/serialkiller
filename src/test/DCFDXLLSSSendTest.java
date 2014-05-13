@@ -7,6 +7,7 @@ import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
 import phys.DumpingPhysicalLayer;
 import phys.FileHardwareLayer;
+import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import util.Bytes;
 import link.DCFDXLLSSReadSendManager2000;
@@ -22,7 +23,7 @@ public class DCFDXLLSSSendTest {
 	public static void main(String[] args) {
 		DCFDXLLSSReadSendManager2000 ll = new DCFDXLLSSReadSendManager2000(
 				new DelayCorrectedFDXLinkLayerSectionSegment(
-						new LptHardwareLayer()));
+						new LptErrorHardwareLayer()));
 		System.out.println("Start Sending");
 		ll.setRun(true);
 		int count = 0;
@@ -38,6 +39,6 @@ public class DCFDXLLSSSendTest {
 			
 		}
 		System.out.println("Stopping exchanger thread");
-		ll.setRun(false);
+		//ll.setRun(false);
 	}
 }

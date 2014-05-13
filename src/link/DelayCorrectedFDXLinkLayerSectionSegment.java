@@ -141,7 +141,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		log("Read 3.");
 		long waitTime = (long) (Math.random() * 1000000000) + System.nanoTime();
 		while (System.nanoTime() < waitTime && !lastToSend) {
-			if (down.readByte() == 0) {
+			byte input = down.readByte();
+			if (input == 0 && input==down.readByte() && input == down.readByte() && input == down.readByte()) {
 				// First to see, last to send.
 				connectionRole = SENDER;
 				log("Assumed role: " + connectionRole);
@@ -159,7 +160,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			connectionRole = RECEIVER;
 			down.sendByte((byte) 0);
 			long waitTill = System.nanoTime() + 1000000000l;
-			while (down.readByte() != 1) {
+			byte input = down.readByte();
+			while (!(input==1 && input==down.readByte() && input == down.readByte() && input == down.readByte())) {
+				input = down.readByte();
 				if (System.nanoTime() > waitTill) {
 					log("Waited too long for other side, expecting desync");
 					waitForSync();
