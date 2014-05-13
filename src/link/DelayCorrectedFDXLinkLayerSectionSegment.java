@@ -56,6 +56,15 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						log(connectionRole + "  Setting up sync..");
 						waitForSync();
 						log(connectionRole + "  sync done");
+						if(connectionRole.equals("First to receive"));{
+							incomingData.set(0,true);
+							//incomingData.set(1,true);
+							bitsReceived = 1;
+							totalBytesReceived = 1;
+							log("Fixing offset");
+							//TODO ugly offset fix;
+							//offset seems random
+						}
 					}
 
 					byte byteToSend = adaptBitToPrevious(outgoingData
