@@ -32,6 +32,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
 
+	private boolean receiveFirst;
+
 	public DelayCorrectedFDXLinkLayerSectionSegment(PhysicalLayer down) {
 		this.down = down;
 	}
@@ -47,7 +49,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					+ outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
-			//01100101
+			// 01100101
 			// connectionSync = false;
 			try {
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
@@ -57,25 +59,25 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						log(connectionRole + "  Setting up sync..");
 						waitForSync();
 						log(connectionRole + "  sync done");
-						if(connectionRole.equals("First to receive"));{
-							//incomingData.set(0,true);
-							//incomingData.set(1,true);
-							//bitsReceived = 1;
-							//totalBytesReceived = 1;
-							//log("Fixing offset");
-							//TODO ugly offset fix;
-							//offset seems random
+						if (connectionRole.equals("First to receive"))
+							;
+						{
+							receiveFirst = true;
 						}
-						log("PreviousByteReceived: "+previousByteReceived+", "+down.readByte());
-						log("PreviousByteSent: "+previousByteSent);
+						log("PreviousByteReceived: " + previousByteReceived
+								+ ", " + down.readByte());
+						log("PreviousByteSent: " + previousByteSent);
 					}
-
-					byte byteToSend = adaptBitToPrevious(outgoingData
-							.get(bitsSent));
-					log("Previous byte sent: " + previousByteSent
-					 + " Sending now: " + byteToSend);
-					down.sendByte(byteToSend);
-					
+					if (!receiveFirst) {
+						byte byteToSend = adaptBitToPrevious(outgoingData
+								.get(bitsSent));
+						log("Previous byte sent: " + previousByteSent
+								+ " Sending now: " + byteToSend);
+						down.sendByte(byteToSend);
+					} else {
+						receiveFirst = false;
+						bitsSent--;
+					}
 
 					byte input = down.readByte();
 					long waitTime = 5000000000l + System.nanoTime();
@@ -84,12 +86,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					// previousByteReceived and the input has stabilised
 					// (multiple read check).
 					// OR if a timeout occurs.
-					log("Going into wait on ack loop, current input: "+input+" previousByteReceived: "+previousByteReceived);
+					log("Going into wait on ack loop, current input: " + input
+							+ " previousByteReceived: " + previousByteReceived);
 					while (!timeout
 							&& !(input != previousByteReceived
 									&& input == down.readByte()
-									&& input == down.readByte()
-									&& input == down.readByte())) {
+									&& input == down.readByte() && input == down
+									.readByte())) {
 						input = down.readByte();
 						if (System.nanoTime() > waitTime) {
 							timeout = true;
@@ -98,26 +101,33 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						// log("Waiting for ack...");
 					}
 					int stability = 0;
-					for(int i=0;i<100;i++){
-						if(input!=down.readByte()){
+					char[] bytes = new char[1000];
+					for (int i = 0; i < 1000; i++) {
+
+						if (input == down.readByte()) {
 							stability++;
+							bytes[i] = '.';
+						} else {
+							bytes[i] = '|';
 						}
 					}
-					log("Signal stability: "+stability);
-					
-					
-					
+					log("Signal stability: " + stability + "\t "
+							+ new String(bytes));
+
 					if (!timeout) {
 						log("No timeout!");
-						log("["+bitsSent+"] Output: "+byteToSend+"  Previous Byte Send: "+previousByteSent);
-						log("["+bitsReceived+"] Input:  "+input+"  Previous input: "+previousByteReceived);
-						//No timeout occured, assume both sending and reading went oke.
-						//Update some variables, and extract the received bit.
-						
+						log("[" + bitsSent + "] Output: " + byteToSend
+								+ "  Previous Byte Send: " + previousByteSent);
+						log("[" + bitsReceived + "] Input:  " + input
+								+ "  Previous input: " + previousByteReceived);
+						// No timeout occured, assume both sending and reading
+						// went oke.
+						// Update some variables, and extract the received bit.
+
 						bitsSent++;
 						totalBytesSend++;
 						previousByteSent = byteToSend;
-						
+
 						previousByteReceived = input;
 						incomingData.set(bitsReceived,
 								extractBitFromInput(input) == 1);
