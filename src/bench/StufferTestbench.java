@@ -21,22 +21,19 @@ public class StufferTestbench {
 
 		public void run() {
 			while (true) {
-				try {
-					for (byte i = 0; i < Byte.MAX_VALUE; i++) {
-						byte[] out = {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33};
-						down.sendFrame(out);
-						
-						byte[] in = down.readFrame();
-						
-						if (Arrays.equals(in,  out)) {
-							good++;
-						} else {
-							bad++;
-						}
-						
-						if ((good+bad) % 64 == 0) System.out.printf(" %d/%d frames good\n", good, good+bad);
+				for (byte i = 0; i < Byte.MAX_VALUE; i++) {
+					byte[] out = {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33};
+					down.sendFrame(out);
+					
+					byte[] in = down.readFrame();
+					
+					if (Arrays.equals(in,  out)) {
+						good++;
+					} else {
+						bad++;
 					}
-				} catch (InterruptedException e) {
+					
+					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d frames good\n", good, good+bad);
 				}
 			}
 		}
@@ -51,10 +48,7 @@ public class StufferTestbench {
 
 		public void run() {
 			while (true) {
-				try {
-					down.sendFrame(down.readFrame());
-				} catch (InterruptedException e) {
-				}
+				down.sendFrame(down.readFrame());
 			}
 		}
 	}

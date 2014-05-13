@@ -6,9 +6,18 @@ import java.util.Arrays;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+/**
+ * Transport/network layer packet.
+ *
+ * Protocol: https://github.com/cschutijser/tpp/blob/master/transport-network.md
+ */
 public class Packet {
-    public static int HEADER_LENGTH = PacketHeader.HEADER_LENGTH;
-    public static int MAX_PAYLOAD_LENGTH = 1024;
+    public static final int HEADER_LENGTH = PacketHeader.HEADER_LENGTH;
+    public static final int MAX_TTL = PacketHeader.MAX_TTL;
+    public static final int MAX_SEQNUM = PacketHeader.MAX_SEQNUM;
+    public static final long MAX_SEGNUM = PacketHeader.MAX_SEGNUM;
+    public static final int MAX_PAYLOAD_LENGTH = 1024;
+    public static final int MAX_PACKET_LENGTH = HEADER_LENGTH + MAX_PAYLOAD_LENGTH;
 
     /** The header. */
     private PacketHeader header;
@@ -22,8 +31,10 @@ public class Packet {
     /**
      * Constructs a new, empty Packet object with a new, empty header.
      */
-    public Packet() {
+    public Packet(int seqnum) {
         header = new PacketHeader();
+        header.setSeqnum(seqnum);
+        header.setTTL(MAX_TTL);
     }
 
     /**
@@ -90,8 +101,58 @@ public class Packet {
         // Checksum
         Checksum checksum = new CRC32();
         checksum.update(Bytes.concat(header.compile(), payload), 0, length());
+        header.setChecksum(checksum.getValue());
 
         // Return data including the checksum
         return Bytes.concat(header.compile(), payload);
+    }
+
+    /**
+     * Create a new Packet object that contains an acknowledgement for this
+     * Packet.
+     * @return The acknowledgement packet.
+     */
+    public Packet createAcknowledgement(int seqnum) {
+        Packet ack = new Packet(seqnum);
+
+        ack.header.setAck(true);
+        ack.header.setAcknum(header.getSeqnum());
+        ack.header.setSender(header.getDestination());
+        ack.header.setDestination(header.getSender());
+        ack.header.setSegnum(header.getSegnum());
+
+        return ack;
+    }
+
+    /**
+     * Verifies the data integrity of this packet.
+     * @return Whether this packet is unchanged.
+     */
+    public boolean verify() {
+        boolean valid = true;
+
+        // Verify length
+        if (valid) {
+            valid = payload().length == header().getLength();
+        }
+
+        // Verify checksum
+        if (valid) {
+            Packet clone = this.clone(); // Cloned packet.
+            clone.header().setChecksum(0L); // Reset checksum of cloned packet.
+            clone.compile(); // Compile the clone (calculates the checksum).
+
+            valid = clone.header().getChecksum() == this.header().getChecksum();
+        }
+
+        return valid;
+    }
+
+    /**
+     * Clone this packet instance.
+     * @return The cloned packet instance.
+     */
+    public Packet clone() {
+        return new Packet(Bytes.concat(header.compile(), payload));
     }
 }

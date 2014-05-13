@@ -33,7 +33,7 @@ public class ByteArraysTest {
 
     @Test
     public void testToBitSet() {
-        byte[] in = {(byte) 112, (byte) 45};
+        byte[] in = {(byte) 112, (byte) 45, (byte) 0};
 
         BitSet expected = new BitSet(24);
         expected.set(1+2, 4+2, true);
@@ -46,7 +46,7 @@ public class ByteArraysTest {
 
     @Test
     public void testFromBitSet() {
-        byte[] expected = {(byte) 112, (byte) 45};
+        byte[] expected = {(byte) 112, (byte) 45, (byte) 0};
 
         BitSet in = new BitSet(16);
         in.set(1, 4, true);
@@ -54,7 +54,7 @@ public class ByteArraysTest {
         in.set(12, 14, true);
         in.set(15, true);
 
-        assertTrue(Arrays.equals(expected, ByteArrays.fromBitSet(in)));
+        assertTrue(Arrays.equals(expected, ByteArrays.fromBitSet(in, 3)));
     }
 
 }

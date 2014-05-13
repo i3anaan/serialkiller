@@ -15,7 +15,7 @@ public class ByteArrays {
         long val = 0;
 
         for (int i = 0; i < bytes.length; i++) {
-            val = (val << 8) + (bytes[i] & 0xff);
+            val = (val << 8) | (bytes[i] & 0xff);
         }
 
         return val;
@@ -90,16 +90,19 @@ public class ByteArrays {
         return data;
     }
 
+    public static byte[] fromBitSet(BitSet data) {
+        return fromBitSet(data, (int) Math.ceil((double) data.length() / 8));
+    }
+
     /**
      * Convert a BitSet object to a byte array.
      * This method becomes obsolete once Java 7 is available, then
      * BitSet.toByteArray() is preferred.
      * @param data The BitSet object to convert.
+     * @param len The length of the required data (in bytes).
      * @return The byte array.
      */
-    public static byte[] fromBitSet(BitSet data) {
-        int len = (int) Math.ceil((double) data.length() / 8);
-        System.out.println(len);
+    public static byte[] fromBitSet(BitSet data, int len) {
         byte[] bytes = new byte[len];
 
         for (int i = 0; i < len; i++) {

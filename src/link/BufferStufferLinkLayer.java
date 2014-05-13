@@ -12,7 +12,7 @@ import util.Bytes;
  * 
  * The actual exchange of data is done in a seperate thread.
  */
-public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
+public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 	private PhysicalLayer down;
 	private ArrayBlockingQueue<byte[]> outbox;
 	private ArrayBlockingQueue<byte[]> inbox;
@@ -44,12 +44,20 @@ public class BufferStufferLinkLayer extends LinkLayer implements Runnable {
 		t.setName("BufferStuffer " + this.hashCode());
 	}
 	
-	public void sendFrame(byte[] frame) throws InterruptedException {
-		outbox.put(frame);
+	public void sendFrame(byte[] frame) {
+		try {
+			outbox.put(frame);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public byte[] readFrame() throws InterruptedException {
-		return inbox.take();
+	public byte[] readFrame() {
+		try {
+			return inbox.take();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public void start() {
