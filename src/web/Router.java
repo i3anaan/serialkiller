@@ -3,7 +3,6 @@ package web;
 import stats.Stats;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,8 +36,8 @@ class Router {
     }
 
     /** Register a new ServiceHandler to be returned by route(). */
-    public void register(Class<? extends ServiceHandler>... classes) {
-        Stats.hit("web.router.handlers", classes.length);
-        Collections.addAll(handlers, classes);
+    public void register(Class<? extends ServiceHandler> klass) {
+        Stats.hit("web.router.handlers", 1);
+        handlers.add(klass);
     }
 }

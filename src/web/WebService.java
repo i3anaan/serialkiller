@@ -34,11 +34,11 @@ public class WebService implements Runnable {
         try {
             log.info("WebService starting");
 
-            router.register(ChatHandler.class,
-                    IndexHandler.class,
-                    FilesHandler.class,
-                    LogDisplayHandler.class,
-                    StatusHandler.class);
+            router.register(ChatHandler.class);
+            router.register(IndexHandler.class);
+            router.register(FilesHandler.class);
+            router.register(LogDisplayHandler.class);
+            router.register(StatusHandler.class);
 
             ssock = new ServerSocket(port);
             markReady();
