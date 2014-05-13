@@ -57,14 +57,16 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						waitForSync();
 						log(connectionRole + "  sync done");
 						if(connectionRole.equals("First to receive"));{
-							incomingData.set(0,true);
+							//incomingData.set(0,true);
 							//incomingData.set(1,true);
-							bitsReceived = 1;
-							totalBytesReceived = 1;
-							log("Fixing offset");
+							//bitsReceived = 1;
+							//totalBytesReceived = 1;
+							//log("Fixing offset");
 							//TODO ugly offset fix;
 							//offset seems random
 						}
+						log("PreviousByteReceived: "+previousByteReceived);
+						log("PreviousByteSent: "+previousByteSent);
 					}
 
 					byte byteToSend = adaptBitToPrevious(outgoingData
@@ -72,10 +74,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					// log("Previous byte sent: " + previousByteSent
 					// + " Sending now: " + byteToSend);
 					down.sendByte(byteToSend);
-					bitsSent++;
-					totalBytesSend++;
-					// log("Total sent: " + totalBytesSend);
-					previousByteSent = byteToSend;
+					
 
 					byte input = down.readByte();
 					long waitTime = 5000000000l + System.nanoTime();
@@ -93,16 +92,18 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						if (System.nanoTime() > waitTime) {
 							timeout = true;
 							log("Timeout on wait for ack loop!");
-							bitsSent--; // Go back, to resend previous.
-							totalBytesSend--;
 						}
 						// log("Waiting for ack...");
 					}
 					if (!timeout) {
-						// Found difference, got reaction;
-						// Extract information out of response;
+						//No timeout occured, assume both sending and reading went oke.
+						//Update some variables, and extract the received bit.
+						
+						bitsSent++;
+						totalBytesSend++;
+						previousByteSent = byteToSend;
+						
 						previousByteReceived = input;
-
 						incomingData.set(bitsReceived,
 								extractBitFromInput(input) == 1);
 
