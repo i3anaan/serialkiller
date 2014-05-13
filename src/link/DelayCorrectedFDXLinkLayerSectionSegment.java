@@ -208,8 +208,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public synchronized void log(String msg) {
-		System.out.println(System.nanoTime() + "\t"
-				+ Thread.currentThread().getId() + "\t" + msg);
+		//System.out.println(System.nanoTime() + "\t"
+		//		+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
 		System.err.flush();
 	}
