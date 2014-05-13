@@ -33,7 +33,7 @@ public class WebServiceTest {
     @Test public void testFiles() throws Exception { testURL("/files/"); }
     @Test public void testIndex() throws Exception { testURL("/"); }
     @Test public void testLogs()  throws Exception { testURL("/logs/"); }
-    @Test public void testStats() throws Exception { testURL("/stats/"); }
+    @Test public void testStats() throws Exception { testURL("/status/"); }
 
     private void testURL(String requestURL) throws Exception {
         assertTrue(request(requestURL).startsWith("<html>"));
