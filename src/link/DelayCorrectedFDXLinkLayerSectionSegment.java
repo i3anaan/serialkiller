@@ -21,14 +21,16 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	byte previousByteReceived = 0;
 	Layer down;
 
-	int totalBytesSend = 0;
-	int totalBytesReceived = 0;
 
 	private String connectionRole = "unkown"; // Debug
 
 	FlaggedFrame lastReceivedFrame = new FlaggedFrame();
 	FlaggedFrame frameToSendNext = new FlaggedFrame();
-
+	
+	public static final String SENDER = "sender";
+	public static final String RECEIVER = "receiver";
+	public static final byte NO_BYTE_SENT = -1;
+	
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
 
@@ -39,7 +41,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public void exchangeFrame() {
-		// log("Exchaning frames!");
 		if (readFrame && setFrameToSend) {
 			readFrame = false;
 			setFrameToSend = false;
@@ -49,8 +50,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					+ outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
-			// 01100101
-			// connectionSync = false;
+			boolean retry = false;
+			
 			try {
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
 						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
@@ -59,85 +60,29 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						log(connectionRole + "  Setting up sync..");
 						waitForSync();
 						log(connectionRole + "  sync done");
-						if (!connectionRole.equals("First to send"))
-						{
-							allowedToSend = true;
-						}
-						log("PreviousByteReceived: " + previousByteReceived
-								+ ", " + down.readByte());
-						log("PreviousByteSent: " + previousByteSent);
-					}
-					byte byteToSend = -1;
-					if (allowedToSend) {
-						byteToSend = adaptBitToPrevious(outgoingData
-								.get(bitsSent));
-						log("Previous byte sent: " + previousByteSent
-								+ " Sending now: " + byteToSend);
-						down.sendByte(byteToSend);
-					}
-
-					byte input = down.readByte();
-					long waitTime = 5000000000l + System.nanoTime();
-					boolean timeout = false;
-					// Only stop the loop if the input differs from the
-					// previousByteReceived and the input has stabilised
-					// (multiple read check).
-					// OR if a timeout occurs.
-					log("Going into wait on ack loop, current input: " + input
-							+ " previousByteReceived: " + previousByteReceived);
-					while (!timeout
-							&& !(input != previousByteReceived
-									&& input == down.readByte()
-									&& input == down.readByte() && input == down
-									.readByte())) {
-						input = down.readByte();
-						if (System.nanoTime() > waitTime) {
-							timeout = true;
-							log("Timeout on wait for ack loop!");
-						}
-						// log("Waiting for ack...");
 					}
 					
-					/*
-					int stability = 0;
-					char[] bytes = new char[1000];
-					for (int i = 0; i < 1000; i++) {
-
-						if (input == down.readByte()) {
-							stability++;
-							bytes[i] = '.';
-						} else {
-							bytes[i] = '|';
+					byte byteSent = NO_BYTE_SENT;
+					if (bitsReceived!= 0 || connectionRole==SENDER) {
+						byteSent = sendBit(outgoingData, bitsSent);
+						if(!retry){
+							bitsSent++;
+							previousByteSent = byteSent;
 						}
 					}
-					log("Signal stability: " + stability + "\t "
-							+ new String(bytes));
-*/
-					if (!timeout) {
-						log("No timeout!");
-						if(allowedToSend){
-							log("[" + bitsSent + "] Output: " + byteToSend
-									+ "  Previous Byte Send: " + previousByteSent);
-						}
-						log("[" + bitsReceived + "] Input:  " + input
-								+ "  Previous input: " + previousByteReceived);
-						// No timeout occured, assume both sending and reading
-						// went oke.
-						// Update some variables, and extract the received bit.
-						if(allowedToSend){
-						bitsSent++;
-						totalBytesSend++;
-						previousByteSent = byteToSend;
-						}
-						allowedToSend = true;
-
-						previousByteReceived = input;
+					
+					try {
+						byte receivedByte = readBit();
+						//Succsefully exchanged a bit.
 						incomingData.set(bitsReceived,
-								extractBitFromInput(input) == 1);
-
+								extractBitFromInput(receivedByte) == 1);
 						bitsReceived++;
-						totalBytesReceived++;
-					}
+						previousByteReceived = receivedByte;
+						
+						retry = false;
+					} catch (TimeOutException e) {
+						retry = true;
+					}					
 				}
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
@@ -150,10 +95,35 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			log("Not ready to exchange frames yet.");
 		}
 	}
+	
+	private byte sendBit(BitSet2 outputData, int index){
+		byte byteToSend = adaptBitToPrevious(outputData
+				.get(index));
+		down.sendByte(byteToSend);
+		return byteToSend;
+	}
+	
+	private byte readBit() throws TimeOutException{
+		byte input = down.readByte();
+		long waitTime = 5000000000l + System.nanoTime();
+		boolean timeout = false;
+		while (!(input != previousByteReceived
+						&& input == down.readByte()
+						&& input == down.readByte() && input == down
+						.readByte())) {
+			input = down.readByte();
+			if (System.nanoTime() > waitTime) {
+				timeout = true;
+				log("Timeout on wait for ack loop!");
+				throw new TimeOutException();
+			}
+		}
+		return input;
+	}
+	
 
 	private void waitForSync() {
 		log("On line before sync: " + down.readByte());
-		// down.sendByte((byte) 2);
 		boolean lastToSend = false;
 
 		log("Sending 3");
@@ -164,13 +134,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 		log("Read 3.");
 		long waitTime = (long) (Math.random() * 1000000000) + System.nanoTime();
-		// log("CurrentTime:  " + System.nanoTime() + "  Wait till:  " +
-		// waitTime);
 		while (System.nanoTime() < waitTime) {
-			// log("Randomly delaying sending, while reading.");
 			if (down.readByte() == 0) {
 				// First to see, last to send.
-				connectionRole = "First to send";
+				connectionRole = SENDER;
 				log("Assumed role: " + connectionRole);
 				lastToSend = true;
 				down.sendByte((byte) 1);
@@ -183,7 +150,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		if (!lastToSend) {
 			log("Wait over, sending now");
 			// First to send, last to receive ack.
-			connectionRole = "First to receive";
+			connectionRole = RECEIVER;
 			down.sendByte((byte) 0);
 			long waitTill = System.nanoTime() + 1000000000l;
 			while (down.readByte() != 1) {
