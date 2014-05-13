@@ -1,5 +1,6 @@
 package bench;
 
+import phys.BitErrorPhysicalLayer;
 import phys.CheckingPhysicalLayer;
 import phys.CleanStartPhysicalLayer;
 import phys.DebouncePhysicalLayer;
@@ -114,8 +115,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(vpla));
-		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(vplb));
+		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla))));
+		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

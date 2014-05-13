@@ -43,9 +43,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
 			BitSet2 outgoingData = frameToSendNext.getBitSet();
-			// log(Thread.currentThread().getId()+"  Frame to send: "+frameToSendNext+"   outgoing bits: "+outgoingData.toString());
+			log("Frame to send: "+frameToSendNext+"   outgoing bits: "+outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
+			//connectionSync = false;
 			try {
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
 						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
@@ -58,18 +59,21 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 					byte byteToSend = adaptBitToPrevious(outgoingData
 							.get(bitsSent));
-					//log("Previous byte sent: " + previousByteSent
-					//		+ " Sending now: " + byteToSend);
+					// log("Previous byte sent: " + previousByteSent
+					// + " Sending now: " + byteToSend);
 					down.sendByte(byteToSend);
 					bitsSent++;
 					totalBytesSend++;
-					//log("Total sent: " + totalBytesSend);
+					// log("Total sent: " + totalBytesSend);
 					previousByteSent = byteToSend;
 
 					byte input = down.readByte();
-					long waitTime = 5000000000l	+ System.nanoTime();
+					long waitTime = 5000000000l + System.nanoTime();
 					boolean timeout = false;
-					while (!timeout && input == previousByteReceived && input==down.readByte() && input==down.readByte() && input==down.readByte()) {
+					while (!timeout && input == previousByteReceived){
+							//&& input == down.readByte()
+							//&& input == down.readByte()
+							//&& input == down.readByte()) {
 						input = down.readByte();
 						if (System.nanoTime() > waitTime) {
 							timeout = true;
@@ -80,9 +84,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						// log("Waiting for ack...");
 					}
 					if (!timeout) {
-
-						//log("Difference found! current: " + input
-						//		+ " Previous: " + previousByteReceived);
 						// Found difference, got reaction;
 						// Extract information out of response;
 						previousByteReceived = input;
@@ -92,13 +93,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 						bitsReceived++;
 						totalBytesReceived++;
-						//log("Total received: " + totalBytesReceived);
-						// log("TotalSend:  "+totalBytesSend+" TotalReceived:  "+totalBytesReceived);
-						/*
-						 * try { Thread.sleep(1); } catch (InterruptedException
-						 * e) { // TODO Auto-generated catch block
-						 * e.printStackTrace(); }
-						 */
 					}
 				}
 			} catch (InvalidByteTransitionException e) {
@@ -106,26 +100,26 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				e.printStackTrace();
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
-			log(Thread.currentThread().getId() + " Build received frame:  "
-					+ lastReceivedFrame + "   from bits: " + incomingData);
+			log("Build received frame:  "
+					+ lastReceivedFrame.getPayload() + "   from bits: " + incomingData);
 		} else {
 			log("Not ready to exchange frames yet.");
 		}
 	}
 
 	private void waitForSync() {
-		log("On line before sync: " + down.readByte());
+		//log("On line before sync: " + down.readByte());
 		boolean lastToSend = false;
 
-		log("Sending 3");
+		//log("Sending 3");
 		down.sendByte((byte) 3);
 
 		while (down.readByte() != 3) {
 			// Wait on 11.
 		}
-		log("Read 3.");
+		//log("Read 3.");
 		long waitTime = (long) (Math.random() * 1000000000) + System.nanoTime();
-		log("CurrentTime:  " + System.nanoTime() + "  Wait till:  " + waitTime);
+		//log("CurrentTime:  " + System.nanoTime() + "  Wait till:  " + waitTime);
 		while (System.nanoTime() < waitTime) {
 			// log("Randomly delaying sending, while reading.");
 			if (down.readByte() == 0) {
@@ -164,7 +158,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		 */
 	}
 
-	
 	private byte adaptBitToPrevious(byte nextData) {
 		if ((nextData & 1) == (previousByteSent & 1)) {
 			// Same databit, different clockbit
@@ -194,7 +187,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			// Both LSB are same, but it is still diferent > read LSB.
 			return (byte) (input & 1);
 		} else if ((input & 2) == (previousByteReceived & 2)) {
-			// Both LSB are not same, but it is still different >
+			// Both MSB are same, but it is still different >
 			return (byte) (input & 1);
 		} else {
 			throw new InvalidByteTransitionException();

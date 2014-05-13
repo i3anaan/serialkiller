@@ -90,9 +90,6 @@ public class FrameTest {
 		FlaggedFrame ff4 = new FlaggedFrame(ff3.getBitSet());
 		assertEquals(ff3.getBitSet(),ff4.getBitSet());
 		FlaggedFrame ff5 = new FlaggedFrame(ff2.getBitSet());
-		assertEquals(ff2.getBitSet(),ff5.getBitSet());
-		
-		
-		
+		assertEquals(ff2.getBitSet(),ff5.getBitSet());		
 	}
 }
