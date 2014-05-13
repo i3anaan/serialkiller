@@ -1,10 +1,11 @@
-package web;
+package log;
 
 import stats.Stats;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 
 /**
  * A singleton class that manages a synchronized list of LogMessage instances.

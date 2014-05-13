@@ -3,6 +3,9 @@ package web;
 import java.io.*;
 import java.net.Socket;
 
+import log.LogMessage;
+import log.Logger;
+
 class WebWorker extends Thread {
     private Socket sock;
     private InputStream is;

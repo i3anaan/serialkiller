@@ -6,6 +6,9 @@ import stats.Stats;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import log.LogMessage;
+import log.Logger;
+
 /** Main class for the WebService subsystem. */
 public class WebService implements Runnable {
     private Logger log;
@@ -41,10 +44,6 @@ public class WebService implements Runnable {
             router.register(LogDisplayHandler.class);
             router.register(StatusHandler.class);
             
-            MonitoredQueue<String> mq = new MonitoredQueue<String>("testqueue", 1024);
-            mq.put("hai");
-            mq.put("hello");
-
             ssock = new ServerSocket(port);
             markReady();
 
@@ -54,8 +53,6 @@ public class WebService implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-			e.printStackTrace();
 		} finally {
             if (ssock != null) {
                 try {

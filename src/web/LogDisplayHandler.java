@@ -5,6 +5,9 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+import log.LogMessage;
+import log.LogService;
+
 /**
  * A ServiceHandler that displays log lines.
  */
