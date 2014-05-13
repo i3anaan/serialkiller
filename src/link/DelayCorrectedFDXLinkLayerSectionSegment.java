@@ -142,8 +142,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		long waitTime = (long) (Math.random() * 1000000000) + System.nanoTime();
 		while (System.nanoTime() < waitTime && !lastToSend) {
 			byte input = down.readByte();
-			if (input == 0 && input==down.readByte() && input == down.readByte() && input == down.readByte()) {
-				// First to see, last to send.
+			if (input == 0 && checkStable(input, 20)){ 
+					// First to see, last to send.
 				connectionRole = SENDER;
 				log("Assumed role: " + connectionRole);
 				lastToSend = true;
@@ -161,8 +161,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			down.sendByte((byte) 0);
 			long waitTill = System.nanoTime() + 1000000000l;
 			byte input = down.readByte();
-			while (!(input==1 && input==down.readByte() && input == down.readByte() && input == down.readByte())) {
-				input = down.readByte();
+			while (!(input==1 && checkStable(input,2))){ 
+					input = down.readByte();
 				if (System.nanoTime() > waitTill) {
 					log("Waited too long for other side, expecting desync");
 					waitForSync();
@@ -186,6 +186,17 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		 * (InterruptedException e) { e.printStackTrace(); } checkForResponse();
 		 * }
 		 */
+	}
+	
+	
+	public boolean checkStable(byte input, int amount){
+		//TODO dit onderzoeken of hierdoor sync op errorLPT faalt.
+		for(int i=0;i<amount;i++){
+			if(input!=down.readByte()){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private byte adaptBitToPrevious(byte nextData) {
