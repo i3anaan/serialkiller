@@ -2,7 +2,11 @@ package bench;
 
 import java.util.Arrays;
 
+import com.google.common.base.Charsets;
+
 import phys.BitErrorPhysicalLayer;
+import phys.VirtualCable;
+import phys.VirtualCablePhysicalLayer;
 import phys.VirtualPhysicalLayer;
 import link.BufferStufferLinkLayer;
 
@@ -52,6 +56,37 @@ public class StufferTestbench {
 			}
 		}
 	}
+	
+	private class SendThread extends Thread {
+		private BufferStufferLinkLayer down;
+
+		public SendThread(BufferStufferLinkLayer a) {
+			this.down = a;
+		}
+
+		public void run() {
+			while (true) {
+				down.sendFrame("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".getBytes(Charsets.UTF_8));
+			}
+		}
+	}
+	
+	private class RecvThread extends Thread {
+		private BufferStufferLinkLayer down;
+
+		public RecvThread(BufferStufferLinkLayer a) {
+			this.down = a;
+		}
+
+		public void run() {
+			int i = 0;
+			
+			while (true) {
+				System.out.printf("%-20d %s\n", i, new String(down.readFrame(), Charsets.UTF_8));
+				i++;
+			}
+		}
+	}
 
 	public static void main(String[] args) {
 		new StufferTestbench().run();
@@ -62,25 +97,22 @@ public class StufferTestbench {
 		System.out.println("======================");
 		System.out.println();
 		
-		VirtualPhysicalLayer vpla, vplb;
+		VirtualCable cable = new VirtualCable();
 		
-		vpla = new VirtualPhysicalLayer();
-		vplb = new VirtualPhysicalLayer();
+		VirtualCablePhysicalLayer vpla = new VirtualCablePhysicalLayer(cable, 0);
+		VirtualCablePhysicalLayer vplb = new VirtualCablePhysicalLayer(cable, 1);
 
-		vpla.connect(vplb);
-		vplb.connect(vpla);
-
-		BufferStufferLinkLayer a = new BufferStufferLinkLayer(new BitErrorPhysicalLayer(vpla));
+		BufferStufferLinkLayer a = new BufferStufferLinkLayer(vpla);
 		a.start();
-		BufferStufferLinkLayer b = new BufferStufferLinkLayer(new BitErrorPhysicalLayer(vplb));
+		BufferStufferLinkLayer b = new BufferStufferLinkLayer(vplb);
 		b.start();
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
 		System.out.println();
 		
-		Thread et = new EchoThread(a);
-		Thread st = new SeqThread(b);
+		Thread et = new SendThread(a);
+		Thread st = new RecvThread(b);
 		
 		et.start();
 		st.start();
