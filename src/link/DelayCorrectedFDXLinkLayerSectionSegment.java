@@ -70,10 +70,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					byte input = down.readByte();
 					long waitTime = 5000000000l + System.nanoTime();
 					boolean timeout = false;
-					while (!timeout && input == previousByteReceived){
-							//&& input == down.readByte()
-							//&& input == down.readByte()
-							//&& input == down.readByte()) {
+					while (!timeout && input == previousByteReceived
+							&& input == down.readByte()
+							&& input == down.readByte()
+							&& input == down.readByte()) {
 						input = down.readByte();
 						if (System.nanoTime() > waitTime) {
 							timeout = true;
