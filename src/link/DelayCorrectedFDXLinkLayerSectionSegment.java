@@ -21,16 +21,15 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	byte previousByteReceived = 0;
 	Layer down;
 
-
 	private String connectionRole = "unkown"; // Debug
 
 	FlaggedFrame lastReceivedFrame = new FlaggedFrame();
 	FlaggedFrame frameToSendNext = new FlaggedFrame();
-	
+
 	public static final String SENDER = "sender";
 	public static final String RECEIVER = "receiver";
-	public static final byte NO_BYTE_SENT = -1;
-	
+	public static final byte NO_BYTE = -1;
+
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
 
@@ -51,7 +50,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			boolean retry = false;
-			
+
 			try {
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
 						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
@@ -61,32 +60,36 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						waitForSync();
 						log(connectionRole + "  sync done");
 					}
-					
-					byte byteSent = NO_BYTE_SENT;
-					if (bitsReceived!= 0 || connectionRole==SENDER) {
+
+					byte byteSent = NO_BYTE;
+					if (bitsReceived != 0 || connectionRole == SENDER) {
 						byteSent = sendBit(outgoingData, bitsSent);
-						
-						log("Sent byte: "+previousByteSent);
+
+						log("Sent byte: " + previousByteSent);
 					}
-					
+
 					try {
-						byte receivedByte = readBit();
-						//Succsefully exchanged a bit.
+						byte receivedByte = NO_BYTE;
+						if (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
+							receivedByte = readBit();
+						}
+						// Succsefully exchanged a bit.
 						bitsSent++;
-						if(byteSent!=NO_BYTE_SENT){
+						if (byteSent != NO_BYTE) {
 							previousByteSent = byteSent;
 						}
-						incomingData.set(bitsReceived,
-								extractBitFromInput(receivedByte) == 1);
-						bitsReceived++;
-						previousByteReceived = receivedByte;
-						
-						
+						if (receivedByte != NO_BYTE) {
+							incomingData.set(bitsReceived,
+									extractBitFromInput(receivedByte) == 1);
+							bitsReceived++;
+							previousByteReceived = receivedByte;
+						}
+
 						retry = false;
-						log("Read byte: "+previousByteReceived);
+						log("Read byte: " + previousByteReceived);
 					} catch (TimeOutException e) {
 						retry = true;
-					}					
+					}
 				}
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
@@ -99,22 +102,19 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			log("Not ready to exchange frames yet.");
 		}
 	}
-	
-	private byte sendBit(BitSet2 outputData, int index){
-		byte byteToSend = adaptBitToPrevious(outputData
-				.get(index));
+
+	private byte sendBit(BitSet2 outputData, int index) {
+		byte byteToSend = adaptBitToPrevious(outputData.get(index));
 		down.sendByte(byteToSend);
 		return byteToSend;
 	}
-	
-	private byte readBit() throws TimeOutException{
+
+	private byte readBit() throws TimeOutException {
 		byte input = down.readByte();
 		long waitTime = 5000000000l + System.nanoTime();
 		boolean timeout = false;
-		while (!(input != previousByteReceived
-						&& input == down.readByte()
-						&& input == down.readByte() && input == down
-						.readByte())) {
+		while (!(input != previousByteReceived && input == down.readByte()
+				&& input == down.readByte() && input == down.readByte())) {
 			input = down.readByte();
 			if (System.nanoTime() > waitTime) {
 				timeout = true;
@@ -124,7 +124,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 		return input;
 	}
-	
 
 	private void waitForSync() {
 		log("On line before sync: " + down.readByte());
@@ -138,7 +137,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 		log("Read 3.");
 		long waitTime = (long) (Math.random() * 1000000000) + System.nanoTime();
-		while (System.nanoTime() < waitTime) {
+		while (System.nanoTime() < waitTime && !lastToSend) {
 			if (down.readByte() == 0) {
 				// First to see, last to send.
 				connectionRole = SENDER;
