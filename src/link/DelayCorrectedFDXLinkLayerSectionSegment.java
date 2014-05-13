@@ -65,14 +65,14 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 							//TODO ugly offset fix;
 							//offset seems random
 						}
-						log("PreviousByteReceived: "+previousByteReceived);
+						log("PreviousByteReceived: "+previousByteReceived+", "+down.readByte());
 						log("PreviousByteSent: "+previousByteSent);
 					}
 
 					byte byteToSend = adaptBitToPrevious(outgoingData
 							.get(bitsSent));
-					// log("Previous byte sent: " + previousByteSent
-					// + " Sending now: " + byteToSend);
+					log("Previous byte sent: " + previousByteSent
+					 + " Sending now: " + byteToSend);
 					down.sendByte(byteToSend);
 					
 
@@ -95,6 +95,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						}
 						// log("Waiting for ack...");
 					}
+					log("Input:  "+input+"  Previous input: "+previousByteReceived);
 					if (!timeout) {
 						//No timeout occured, assume both sending and reading went oke.
 						//Update some variables, and extract the received bit.
