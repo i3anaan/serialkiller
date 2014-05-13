@@ -47,6 +47,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					+ outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
+			//01100101
 			// connectionSync = false;
 			try {
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
@@ -83,6 +84,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					// previousByteReceived and the input has stabilised
 					// (multiple read check).
 					// OR if a timeout occurs.
+					log("Going into wait on ack loop, current input: "+input+" previousByteReceived: "+previousByteReceived);
 					while (!timeout
 							&& !(input != previousByteReceived
 									&& input == down.readByte()
@@ -95,6 +97,15 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						}
 						// log("Waiting for ack...");
 					}
+					int stability = 0;
+					for(int i=0;i<100;i++){
+						if(input!=down.readByte()){
+							stability++;
+						}
+					}
+					log("Signal stability: "+stability);
+					
+					
 					
 					if (!timeout) {
 						log("No timeout!");
