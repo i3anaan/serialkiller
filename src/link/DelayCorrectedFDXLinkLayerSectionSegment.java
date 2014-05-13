@@ -74,20 +74,22 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 							receivedByte = readBit();
 						}
 						// Succsefully exchanged a bit.
-						bitsSent++;
+						
 						if (byteSent != NO_BYTE) {
 							previousByteSent = byteSent;
+							bitsSent++;
 						}
 						
 						if (receivedByte != NO_BYTE) {
 							incomingData.set(bitsReceived,
 									extractBitFromInput(receivedByte) == 1);
 							previousByteReceived = receivedByte;
+							log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
 						}
 						bitsReceived++;
 
 						retry = false;
-						log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
+						
 					} catch (TimeOutException e) {
 						retry = true;
 					}
