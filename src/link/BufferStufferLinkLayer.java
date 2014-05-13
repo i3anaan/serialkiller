@@ -200,24 +200,21 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 				boolean recovered = false;
 				while (!recovered) {
 					try {
-						set(IDLE);
-						log("IDLE1 set.");
-						wait(IDLE);
-						log("IDLE1 received.");
 						set(PANIC);
-						log("PANIC2 set.");
+						log("PANIC set.");
 						wait(PANIC);
-						log("PANIC2 received.");
+						log("PANIC received.");
 						set(IDLE);
-						log("IDLE3 set.");
+						log("IDLE set.");
 						wait(IDLE);
-						log("IDLE3 received.");
+						log("IDLE received.");
 						recovered = true;
 					} catch (PanicException f) {
 						log("Panic while recovering from panic");
 						/* Try again. */
 					}
 				}
+				
 				log("It seems we've recovered.");
 			} catch (InterruptedException e) {
 				log("InterruptedException?!");
@@ -255,14 +252,8 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 	}
 	
 	private byte get() {
-		while (true) {
-			set(lastsent);
-			lastrecv = down.readByte();
-			
-			if (lastrecv == down.readByte() && lastrecv == down.readByte() && lastrecv == down.readByte()) {
-				return lastrecv;
-			}
-		}
+		lastrecv = down.readByte();
+		return lastrecv;
 	}
 	
 	private byte wait(byte newstate, boolean invert) {
