@@ -24,7 +24,9 @@ public class DCFDXLLSSSendTest {
 				new DelayCorrectedFDXLinkLayerSectionSegment(
 						new LptHardwareLayer()));
 		System.out.println("Start Sending");
-		while (true) {
+		ll.setRun(true);
+		int count = 0;
+		while (count<3) {
 			// for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
 			// ll.sendByte((byte) b);
 			// }
@@ -32,6 +34,10 @@ public class DCFDXLLSSSendTest {
 					.getBytes(Charsets.UTF_8)) {
 				ll.sendByte((byte) b);
 			}
+			count++;
+			
 		}
+		System.out.println("Stopping exchanger thread");
+		ll.setRun(false);
 	}
 }
