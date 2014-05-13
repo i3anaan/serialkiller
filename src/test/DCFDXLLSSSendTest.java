@@ -1,5 +1,7 @@
 package test;
 
+import com.google.common.base.Charsets;
+
 import phys.CleanStartPhysicalLayer;
 import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
@@ -23,7 +25,11 @@ public class DCFDXLLSSSendTest {
 						new LptHardwareLayer()));
 		System.out.println("Start Sending");
 		while (true) {
-			for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
+			// for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
+			// ll.sendByte((byte) b);
+			// }
+			for (byte b : "Dit is een test message. 112233\n"
+					.getBytes(Charsets.UTF_8)) {
 				ll.sendByte((byte) b);
 			}
 		}

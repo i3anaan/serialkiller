@@ -17,7 +17,7 @@ public class DCFDXLLSSReceiveTest {
 		while (true) {
 			byte b = ll.readByte();
 			if (b != old) {
-				System.out.println(Bytes.format(b));
+				System.out.print((char) (b & 0xFF));
 				old = b;
 			}
 		}
