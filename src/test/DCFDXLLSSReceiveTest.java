@@ -21,7 +21,7 @@ public class DCFDXLLSSReceiveTest {
 		while (true) {
 			byte b = ll.readByte();
 			received = received + (char) (b & 0xFF);
-			System.out.println("Received so far: "+received);
+			System.out.println("Received so far:\n"+received);
 		}
 	}
 }
