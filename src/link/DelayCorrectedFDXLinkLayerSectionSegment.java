@@ -66,14 +66,18 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					totalBytesSend++;
 					// log("Total sent: " + totalBytesSend);
 					previousByteSent = byteToSend;
-
+					
+					boolean inputSet = false;
 					byte input = down.readByte();
+					while(input!=down.readByte() || input!=down.readByte() || input!=down.readByte()){
+						input = down.readByte();
+						//Make sure the signal is stabilised.
+					}
+					
+					
 					long waitTime = 5000000000l + System.nanoTime();
 					boolean timeout = false;
-					while (!timeout && input == previousByteReceived
-							&& input == down.readByte()
-							&& input == down.readByte()
-							&& input == down.readByte()) {
+					while (!timeout && input == previousByteReceived) {
 						input = down.readByte();
 						if (System.nanoTime() > waitTime) {
 							timeout = true;
