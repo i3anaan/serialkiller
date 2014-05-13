@@ -1,5 +1,6 @@
 package web;
 
+import stats.MonitoredQueue;
 import stats.Stats;
 
 import java.io.IOException;
@@ -39,6 +40,10 @@ public class WebService implements Runnable {
             router.register(FilesHandler.class);
             router.register(LogDisplayHandler.class);
             router.register(StatusHandler.class);
+            
+            MonitoredQueue<String> mq = new MonitoredQueue<String>("testqueue", 1024);
+            mq.put("hai");
+            mq.put("hello");
 
             ssock = new ServerSocket(port);
             markReady();
@@ -49,7 +54,9 @@ public class WebService implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        } catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
             if (ssock != null) {
                 try {
                     ssock.close();
