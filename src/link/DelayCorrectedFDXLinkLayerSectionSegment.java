@@ -68,8 +68,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 								+ ", " + down.readByte());
 						log("PreviousByteSent: " + previousByteSent);
 					}
+					byte byteToSend = 0;
 					if (!receiveFirst) {
-						byte byteToSend = adaptBitToPrevious(outgoingData
+						byteToSend = adaptBitToPrevious(outgoingData
 								.get(bitsSent));
 						log("Previous byte sent: " + previousByteSent
 								+ " Sending now: " + byteToSend);
