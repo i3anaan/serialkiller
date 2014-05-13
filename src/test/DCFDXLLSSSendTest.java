@@ -37,6 +37,7 @@ public class DCFDXLLSSSendTest {
 			count++;
 			
 		}
+		System.out.println("Stopping exchanger thread");
 		ll.setRun(false);
 	}
 }

@@ -19,14 +19,14 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable 
 	private ArrayBlockingQueue<Byte> inbox; // TODO frames van maken;
 	private ArrayBlockingQueue<Byte> outbox; // TODO frames van maken;
 	private Thread exchanger;
-	private boolean run =true;
+	private boolean keepRunning = true;
 
 	public DCFDXLLSSReadSendManager2000(
 			DelayCorrectedFDXLinkLayerSectionSegment down) {
 		this.down = down;
 		this.inbox = new ArrayBlockingQueue<Byte>(1024); // TODO capacity goed
 															// zo?
-		this.outbox = new ArrayBlockingQueue<Byte>(1024); // TODO capacity goed
+		this.outbox = new ArrayBlockingQueue<Byte>(1); // TODO capacity goed
 															// zo?
 
 		exchanger = new Thread(this, "Exchanger");
@@ -63,7 +63,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable 
 	public void run() {
 		down.readFrame();
 		while (true) {
-			while (run) {
+			if (keepRunning) {
 				// System.out.println("Outbox: "+Arrays.toString(outbox.toArray()));
 				FlaggedFrame frameToSend = new FlaggedFrame(outbox);
 				// System.out.println("Pushing out flagged frame to send: "+frameToSend.payload);
@@ -86,8 +86,9 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable 
 		}
 	}
 
-	public void setRun(boolean run) {
-		this.run = run;
+	public void setRun(boolean keepRunning) {
+		System.out.println("Setting run to: "+keepRunning);
+		this.keepRunning = keepRunning;
 
 	}
 
