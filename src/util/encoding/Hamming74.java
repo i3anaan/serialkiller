@@ -5,6 +5,22 @@ import java.util.Arrays;
 import util.BitSet2;
 import util.Bytes;
 
+/**
+ * Methods to use a 7,4 (4 to 7) hamming code.
+ * This can be used for error detection and even correction.
+ * Detection will be correct for up to (and including) 2 bit errors.
+ * Correction will be correct for up to (and including) 1 bit error.
+ * 
+ * Usage (using correction):
+ * Encode your data (DATA_BITS long) using encode()
+ * Send the encoded data.
+ * *optional* check if an error has occured using hasError() on the received encoded data.
+ * Correct the encoded data in case of bit errors using getCorrect() on the received encoded data.
+ * Decode the data back to the original data using decode() on the corrected received encoded data.
+ * 
+ * @author I3anaan
+ *
+ */
 public class Hamming74 {
 
 	public static void main(String[] args){
@@ -90,18 +106,12 @@ public class Hamming74 {
 	 * @return	The encoded bits, of length ENCODED_BITS
 	 */
 	public static BitSet2 encode(BitSet2 data){
-		// takes 4 LSB;
 		int[][] matrixData = new int[DATA_BITS][1];
 		for(int i=0;i<DATA_BITS;i++){
 			matrixData[i][0]=data.get(i) ? 1 : 0;
-			//System.out.print(data.get(i) ? 1 : 0);
 		}
-		//System.out.print("\n");
-		//printMatrix(matrixData);
-		
 		
 		int[][] matrixEncoded = mult(matrixG,matrixData);
-		//printMatrix(matrixEncoded);
 		int[][] matrixEncodedBoolean = mod(matrixEncoded,2);
 		BitSet2 result = new BitSet2();
 		for(int i=0;i<ENCODED_BITS;i++){
@@ -111,24 +121,25 @@ public class Hamming74 {
 	}
 	
 	/**
+	 * Gets the syndrome of the data.
+	 * This data should be the encoded data, gotten using decode()
+	 * The syndrome is used to detect and correct errors.
 	 * @param data	The data of length ENCODED_BITS to be decoded
-	 * @return	The syndrom vector used to check or correct errors.
+	 * @return	The syndrome vector used to check or correct errors.
 	 */
 	public static int[][] getSyndrome(BitSet2 data){
 		int[][] matrixData = new int[ENCODED_BITS][1];
 		for(int i=0;i<ENCODED_BITS;i++){
 			matrixData[i][0]=data.get(i) ? 1 : 0;
-		}
-		//printMatrix(matrixData);
-		
+		}		
 		return mod(mult(matrixH,matrixData),2);
 	}
 	
 	/**
-	 * @param syndrom The syndrom vector gotten from decoding data.
-	 * @return	Wether or not the data has an error in it.
+	 * @param syndrome The syndrome vector gotten from decoding data.
+	 * @return	Whether or not the data has an error in it.
 	 * 			This result is correct as long as there are not 3 or more bit errors.
-	 * 			Will also return true (error) if the syndrom format is wrong.
+	 * 			Will also return true (error) if the syndrome format is wrong.
 	 */
 	public static boolean hasError(int[][] syndrome){
 		if(syndrome[0].length!=1){return true;}//Wrong format;
@@ -139,7 +150,7 @@ public class Hamming74 {
 	}
 	
 	/**
-	 * @return Wether or not the data has a bit error.
+	 * @return Whether or not the data has a bit error.
 	 */
 	public static boolean hasError(BitSet2 data){
 		return hasError(getSyndrome(data));
@@ -147,10 +158,10 @@ public class Hamming74 {
 	
 	
 	/**
-	 * Gets the corrected data from the given data and given syndrom.
+	 * Gets the corrected data from the given data.
 	 * Will give correct result as long as there are only 0 or 1 bit errors.
-	 * @param data	The data to decode.
-	 * @return	
+	 * @param data	The encoded data to correct.
+	 * @return	The corrected (but still encoded) data
 	 */
 	public static BitSet2 getCorrected(BitSet2 data){
 		int[][] syndrom = getSyndrome(data);
@@ -166,6 +177,12 @@ public class Hamming74 {
 		}
 	}
 	
+	/**
+	 * Decodes encoded data.
+	 * takes ENCODED_BITS and returns DATA_BITS.
+	 * @param data	encoded data to decode
+	 * @return	decoded data.
+	 */
 	public static BitSet2 decode(BitSet2 data){
 		int[][] matrixData = new int[ENCODED_BITS][1];
 		for(int i=0;i<ENCODED_BITS;i++){
