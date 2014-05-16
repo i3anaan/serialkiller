@@ -54,6 +54,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			try {
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
 						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
+					//while it has bits to send or receive.
 
 					if (!connectionSync) {
 						log(connectionRole + "  Setting up sync..");
@@ -97,6 +98,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				e.printStackTrace();
+				waitForSync();
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
 			log("Build received frame:  " + lastReceivedFrame.getPayload()
@@ -115,12 +117,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	private byte readBit() throws TimeOutException {
 		byte input = down.readByte();
 		long waitTime = 5000000000l + System.nanoTime();
-		boolean timeout = false;
 		while (!(input != previousByteReceived && input == down.readByte()
 				&& input == down.readByte() && input == down.readByte())) {
 			input = down.readByte();
 			if (System.nanoTime() > waitTime) {
-				timeout = true;
 				log("Timeout on wait for ack loop!");
 				throw new TimeOutException();
 			}
@@ -176,17 +176,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			previousByteReceived = 1;
 		}
 		connectionSync = true;
-		/*
-		 * if (checkLineInUse()) { // Other end detected, got sync; return; }
-		 * log("No other end detected...");
-		 * 
-		 * while (!connectionSync) { //log("Waiting on other end...");
-		 * down.sendByte((byte) 1); try { Thread.sleep(20); } catch
-		 * (InterruptedException e) { e.printStackTrace(); }
-		 * down.sendByte((byte) 0); try { Thread.sleep(20); } catch
-		 * (InterruptedException e) { e.printStackTrace(); } checkForResponse();
-		 * }
-		 */
 	}
 	
 	
