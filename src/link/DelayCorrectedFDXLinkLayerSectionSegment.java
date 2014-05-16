@@ -116,7 +116,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		boolean state = false;
 		int signals = 0;
 		
-		while(signals<3){
+		while(signals<1){
 			try {
 				byte in = getNewStableInput();
 				extractBitFromInput(in);
