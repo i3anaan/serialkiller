@@ -117,17 +117,25 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		int signals = 0;
 		
 		while(signals<3){
+			byte in = -1;
 			try {
 				down.sendByte(state ? (byte) 1 : (byte) 2);
 				state = !state;
-				byte in = getNewStableInput();
-				extractBitFromInput(in);
-				previousByteReceived = in;				
+				long maxTime = System.nanoTime()+1000000000l;
+				in = getStableInput();
+				while(in==previousByteReceived && maxTime>System.nanoTime()){
+					in = getStableInput();
+				}
+				if(in!=previousByteReceived){
+					extractBitFromInput(in);
+					previousByteReceived = in;	
+				}
 			} catch (InvalidByteTransitionException e) {
 				//Both sides seen invalidTransition.
 				//TODO might need to check for this multiple times
 				//591652698927615	8	Sending 3
 				signals++;
+				log("Signal got: "+in);
 			}
 		}
 		
@@ -141,6 +149,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			}
 			previousByteReceived = in;
 			signals--;
+		}
+		if(maxTime>System.nanoTime()){
+			log("Timeout on sending panic signals");
 		}
 		
 	}
