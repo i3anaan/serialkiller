@@ -40,7 +40,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100000l;
 	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100000l;
 	
-	private boolean allowedToSend;
+	private int framesStartedSending;
+	private int framesCompleted;
 
 	public DelayCorrectedFDXLinkLayerSectionSegment(PhysicalLayer down) {
 		this.down = down;
@@ -56,9 +57,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					+ outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
-			boolean retry = false;
+			boolean retry = false; //TODO uitzoeken waar deze gebruikt had moeten worden.
 
 			try {
+				framesStartedSending++;
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
 						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
 					//while it has bits to send or receive.
@@ -102,6 +104,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 						retry = true;
 					}
 				}
+				framesCompleted++;
+				System.out.println("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				//e.printStackTrace();
@@ -112,6 +116,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				log("sync complete");
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
+			
 			log("Build received frame:  " + lastReceivedFrame.getPayload()
 					+ "   from bits: " + incomingData);
 		} else {
@@ -312,8 +317,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public synchronized void log(String msg) {
-		System.out.println(System.nanoTime() + "\t"
-				+ Thread.currentThread().getId() + "\t" + msg);
+		//System.out.println(System.nanoTime() + "\t"
+		//		+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
 		System.err.flush();
 	}
