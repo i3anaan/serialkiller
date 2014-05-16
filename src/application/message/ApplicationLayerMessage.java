@@ -17,8 +17,7 @@ public class ApplicationLayerMessage implements Message {
 	
 	@Override
 	public byte[] getPayload() {
-		// TODO Auto-generated method stub
-		return null;
+		return payload;
 	}
 
 }

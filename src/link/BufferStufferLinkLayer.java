@@ -18,7 +18,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 	private ArrayBlockingQueue<byte[]> inbox;
 	
 	public static final int MAX_WAITING_FRAMES = 1024;
-	public static final long MAX_WAIT = 1000000000; // One second
+	public static final long MAX_WAIT = 100000000; // One tenth of a second
 	
 	private static final byte IDLE  = 0x00; // Line is idle.
 	private static final byte RTS   = 0x01; // Request to send.
@@ -185,9 +185,11 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 						set(IDLE);
 					}
 				} else if (in == PANIC) {
-					log("Just read value " + in + " which was PANIC, state is now" + get());
-					log("Seen PANIC while in main loop. Trying to recover..");
-					throw new PanicException();
+					if (get() == PANIC) {
+						log("Just read value " + in + " which was PANIC, state is now " + get());
+						log("Seen PANIC while in main loop. Trying to recover..");
+						throw new PanicException();
+					}
 				} else {
 					log("Received other than RTS while idle - ignoring - value was " + in);
 					waitnot(in);
@@ -200,25 +202,22 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 				boolean recovered = false;
 				while (!recovered) {
 					try {
-						set(IDLE);
-						log("IDLE1 set.");
-						wait(IDLE);
-						log("IDLE1 received.");
 						set(PANIC);
-						log("PANIC2 set.");
+						log("PANIC set.");
 						wait(PANIC);
-						log("PANIC2 received.");
+						log("PANIC received.");
 						set(IDLE);
-						log("IDLE3 set.");
+						log("IDLE set.");
 						wait(IDLE);
-						log("IDLE3 received.");
+						log("IDLE received.");
 						recovered = true;
 					} catch (PanicException f) {
 						log("Panic while recovering from panic");
 						/* Try again. */
 					}
 				}
-				log("It seems we've recovered.");
+				
+				log("It seems we've recovered. Our state is " + lastsent + ", their state is " + get());
 			} catch (InterruptedException e) {
 				log("InterruptedException?!");
 				set(PANIC);
@@ -255,14 +254,8 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 	}
 	
 	private byte get() {
-		while (true) {
-			set(lastsent);
-			lastrecv = down.readByte();
-			
-			if (lastrecv == down.readByte() && lastrecv == down.readByte() && lastrecv == down.readByte()) {
-				return lastrecv;
-			}
-		}
+		lastrecv = down.readByte();
+		return lastrecv;
 	}
 	
 	private byte wait(byte newstate, boolean invert) {
@@ -270,7 +263,6 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 		long dt = MAX_WAIT;
 		
 		while (true) {
-			set(lastsent);
 			byte b = get();
 			if ((b == newstate) == !invert) return b;
 			if ((System.nanoTime() >= t + dt)) throw new PanicException();
@@ -287,7 +279,8 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 	
 	private void log(String msg, Object... arguments) {
 		synchronized (System.out) {
-			System.out.printf("[%8x] [%s] " + msg + "%n", this.hashCode(), System.nanoTime(), arguments);
+			//System.out.printf("[%8x] [%s] " + msg + "%n", this.hashCode(), System.nanoTime(), arguments);
+			System.out.flush();
 		}
 	}
 }

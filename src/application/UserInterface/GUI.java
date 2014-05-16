@@ -1,4 +1,4 @@
-package application;
+package application.UserInterface;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -27,7 +27,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.*;
 
 import application.*;
-import application.UserInterface.PreferencesPanel;
 import application.message.ChatMessage;
 import application.message.FileOfferMessage;
 
@@ -41,17 +40,26 @@ import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
+
 public class GUI extends JFrame implements ActionListener, ItemListener, Observer {
 
-	private JPanel cp = new JPanel();
-	private JPanel ulp = new JPanel();
-	
+	// private variables
+	private ApplicationLayer apl;
+
+	// local elements
+	private ChatPanel cp = new ChatPanel(this);
+	private UserListPanel ulp = new UserListPanel(this);
+	private JTextField	myMessage;
+	private JTextArea   taMessages;
 	// Menu Bar Elements
 	JMenuBar menuBar;
 	JMenu menu, submenu;
 
-	public GUI(){
-		super();	
+	public GUI(ApplicationLayer al){
+		super("G.A.R.G.L.E.");	
+		
+		
+		this.apl = al;
 		this.setLayout(new BorderLayout());
 
 		setPreferredSize(new Dimension(800, 600));
@@ -75,25 +83,6 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		setVisible(true);
 
 	}
-
-	public static void main(final String[] args) {
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (Exception e) {
-			// If Nimbus is not available, fall back to cross-platform
-			try {
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			} catch (Exception ex) {
-
-			}
-		}
-		new GUI();
-	}
 	private void buildBarMenu(){
 		// Create the menu bar
 		JMenuBar menuBar = new JMenuBar();
@@ -111,7 +100,15 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		sendFileItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				saveFile(); // Put whatever here
+				JFileChooser c = new JFileChooser();
+				// Demonstrate "Open" dialog:
+				int rVal = c.showOpenDialog(GUI.this);
+				if (rVal == JFileChooser.APPROVE_OPTION) {
+					// TODO call ApplicationLayer to send chosen file
+				}
+				if (rVal == JFileChooser.CANCEL_OPTION) {
+					
+				}
 			}
 		});
 		// Exit item
@@ -124,19 +121,38 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			}
 		});
 		// Options item
-		JMenuItem optionItem = new JMenuItem("Options");
-		exitItem.addActionListener(new ActionListener(){
+				JMenuItem optionItem = new JMenuItem("Options");
+				exitItem.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+
+						new PreferencesPanel();
+					}
+				});
+		// RoutingTable item
+		JMenuItem routeItem = new JMenuItem("Set RoutingTable");
+
+		routeItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-				new PreferencesPanel();
+				JFileChooser c = new JFileChooser();
+				// Demonstrate "Open" dialog:
+				int rVal = c.showOpenDialog(GUI.this);
+				if (rVal == JFileChooser.APPROVE_OPTION) {
+					// TODO call network layer to load new routing table
+				}
+				if (rVal == JFileChooser.CANCEL_OPTION) {
+					// TODO maybe do something, don't think we should
+				}
 			}
 		});
 		menu.add(sendFileItem);
+		//menu.add(routeItem);
 		menu.add(optionItem);
 		menu.add(exitItem);
 
 		this.setJMenuBar(menuBar);
+
 	}
 
 	private void buildChatMenu() {
@@ -159,46 +175,43 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		if (choice == JOptionPane.YES_OPTION){
 			System.out.println("yes");
 			JFileChooser c = new JFileChooser();
-
+			// Demonstrate "Open" dialog:
 			int rVal = c.showOpenDialog(GUI.this);
 			if (rVal == JFileChooser.APPROVE_OPTION) {
-
+				// TODO call network layer to load new routing table
+				System.exit(0);
 			}
 			if (rVal == JFileChooser.CANCEL_OPTION) {
-
+				// TODO maybe do something, don't think we should
+				System.exit(0);
 			}
-
+			
 		}else{
 			System.out.println("no");
 		}
 		return null;
 
 	}
-
-	public void save2(){
+	
+	public void derp2(){
 		JFileChooser c = new JFileChooser();
-
-
+		//String path = null;
+		// Demonstrate "Open" dialog:
 		int rVal = c.showOpenDialog(GUI.this);
 		if (rVal == JFileChooser.APPROVE_OPTION) {
 			System.exit(0);
-
+			//path = c.getCurrentDirectory().toString();
 		}
 		if (rVal == JFileChooser.CANCEL_OPTION) {
 			System.exit(0);
-
+			// TODO maybe do something, don't think we should
 		}
-	}
-
-	@Override
-	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		// TODO Auto-generated method stub
+
 
 	}
 
@@ -208,5 +221,21 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 	}
 
+	@Override
+	public void update(Observable o, Object arg) {
 
+
+		if(arg instanceof ChatMessage){
+			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getMessage());
+		}
+		else if(arg instanceof FileOfferMessage){
+			// TODO 1: play sound
+			// TODO 2: parse system message
+			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
+			saveFile();
+			//derp2();
+		}
+
+
+	}
 }

@@ -1,10 +1,11 @@
-package web;
+package log;
 
 import stats.Stats;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 
 /**
  * A singleton class that manages a synchronized list of LogMessage instances.
@@ -38,6 +39,10 @@ public class LogService {
     public void add(LogMessage msg) {
         if (msg.getSeverity().ordinal() >= LEVEL.ordinal()) {
             Stats.hit("log.messagesLogged");
+            synchronized (System.out) {
+            	System.out.println(msg);
+                System.out.flush();
+            }
             messages.add(msg);
         }
     }

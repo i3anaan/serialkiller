@@ -5,21 +5,22 @@ import java.util.Arrays;
 import com.google.common.base.Charsets;
 
 import phys.BitErrorPhysicalLayer;
+import phys.DelayPhysicalLayer;
 import phys.VirtualCable;
 import phys.VirtualCablePhysicalLayer;
-import phys.VirtualPhysicalLayer;
-import link.BufferStufferLinkLayer;
+import link.BittasticLinkLayer;
+import link.FrameLinkLayer;
 
 /**
  * A simple test bench application for testing the BufferStuffer link layer.
  */
-public class StufferTestbench {
-	private class SeqThread extends Thread {
-		private BufferStufferLinkLayer down;
+public class TasticTestBench {
+	public class SeqThread extends Thread {
+		private FrameLinkLayer down;
 		int good = 0;
 		int bad = 0;
 
-		public SeqThread(BufferStufferLinkLayer b) {
+		public SeqThread(FrameLinkLayer b) {
 			this.down = b;
 		}
 
@@ -43,10 +44,10 @@ public class StufferTestbench {
 		}
 	}
 
-	private class EchoThread extends Thread {
-		private BufferStufferLinkLayer down;
+	public class EchoThread extends Thread {
+		private FrameLinkLayer down;
 
-		public EchoThread(BufferStufferLinkLayer a) {
+		public EchoThread(FrameLinkLayer a) {
 			this.down = a;
 		}
 
@@ -58,9 +59,9 @@ public class StufferTestbench {
 	}
 	
 	private class SendThread extends Thread {
-		private BufferStufferLinkLayer down;
+		private FrameLinkLayer down;
 
-		public SendThread(BufferStufferLinkLayer a) {
+		public SendThread(FrameLinkLayer a) {
 			this.down = a;
 		}
 
@@ -72,9 +73,9 @@ public class StufferTestbench {
 	}
 	
 	private class RecvThread extends Thread {
-		private BufferStufferLinkLayer down;
+		private FrameLinkLayer down;
 
-		public RecvThread(BufferStufferLinkLayer a) {
+		public RecvThread(FrameLinkLayer a) {
 			this.down = a;
 		}
 
@@ -89,12 +90,12 @@ public class StufferTestbench {
 	}
 
 	public static void main(String[] args) {
-		new StufferTestbench().run();
+		new TasticTestBench().run();
 	}
 
 	public void run() {
-		System.out.println("BufferStufferTestbench");
-		System.out.println("======================");
+		System.out.println("TasticTestBench");
+		System.out.println("===============");
 		System.out.println();
 		
 		VirtualCable cable = new VirtualCable();
@@ -102,10 +103,10 @@ public class StufferTestbench {
 		VirtualCablePhysicalLayer vpla = new VirtualCablePhysicalLayer(cable, 0);
 		VirtualCablePhysicalLayer vplb = new VirtualCablePhysicalLayer(cable, 1);
 
-		BufferStufferLinkLayer a = new BufferStufferLinkLayer(vpla);
-		a.start();
-		BufferStufferLinkLayer b = new BufferStufferLinkLayer(vplb);
-		b.start();
+		BittasticLinkLayer a = new BittasticLinkLayer(new BitErrorPhysicalLayer(vpla));
+		new Thread(a).start();
+		BittasticLinkLayer b = new BittasticLinkLayer(new BitErrorPhysicalLayer(vplb));
+		new Thread(b).start();
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

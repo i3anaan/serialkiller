@@ -5,6 +5,9 @@ import stats.Stats;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import log.LogMessage;
+import log.Logger;
+
 /** Main class for the WebService subsystem. */
 public class WebService implements Runnable {
     private Logger log;
@@ -34,12 +37,12 @@ public class WebService implements Runnable {
         try {
             log.info("WebService starting");
 
-            router.register(ChatHandler.class,
-                    IndexHandler.class,
-                    FilesHandler.class,
-                    LogDisplayHandler.class,
-                    StatusHandler.class);
-
+            router.register(ChatHandler.class);
+            router.register(IndexHandler.class);
+            router.register(FilesHandler.class);
+            router.register(LogDisplayHandler.class);
+            router.register(StatusHandler.class);
+            
             ssock = new ServerSocket(port);
             markReady();
 
@@ -49,7 +52,7 @@ public class WebService implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
+		} finally {
             if (ssock != null) {
                 try {
                     ssock.close();

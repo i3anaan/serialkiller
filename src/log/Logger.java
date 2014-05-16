@@ -1,7 +1,7 @@
-package web;
+package log;
 
-import web.LogMessage.Subsystem;
-import web.LogMessage.Severity;
+import log.LogMessage.Severity;
+import log.LogMessage.Subsystem;
 
 /**
  * A connection to a central LogService. There is only one LogService, but every
