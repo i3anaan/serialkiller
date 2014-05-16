@@ -135,6 +135,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				//TODO might need to check for this multiple times
 				//591652698927615	8	Sending 3
 				signals++;
+				previousByteReceived = in;	
 				log("Signal got: "+in);
 			}
 		}
