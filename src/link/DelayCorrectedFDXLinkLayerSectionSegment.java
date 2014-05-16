@@ -153,10 +153,11 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				previousByteReceived = in;	
 				//log("Signal got: "+in);
 			}
+			
 		}
-		
+		int extraSignals = 100;
 		long maxTime = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS_NANO;
-		while(signals>-10 && maxTime>System.nanoTime()){
+		while(extraSignals>0 && maxTime>System.nanoTime()){
 			down.sendByte(state ? (byte) 1 : (byte) 2);
 			state = !state;
 			byte in = getStableInput();
@@ -164,12 +165,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				in = getStableInput();
 			}
 			previousByteReceived = in;
-			signals--;
+			extraSignals--;
 		}
 		if(maxTime>System.nanoTime()){
 			log("PANIC: Timeout on sending extra panic signals");
 		}
-		
+		log("PANIC: Signal and wait procedure complete");
 	}
 
 	private byte sendBit(BitSet2 outputData, int index) {
