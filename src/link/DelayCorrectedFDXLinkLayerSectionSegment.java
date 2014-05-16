@@ -96,7 +96,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 							previousByteReceived = receivedByte;
 							//log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
 						}
-						bitsReceived++;System.out.println(
+						bitsReceived++;
 
 						retry = false;
 						
