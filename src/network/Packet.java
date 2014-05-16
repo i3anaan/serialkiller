@@ -198,4 +198,8 @@ public class Packet {
     public void timestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    public String toString() {
+        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d;>", header().getSender(), header().getDestination(), header().getSeqnum(), header.getSegnum());
+    }
 }

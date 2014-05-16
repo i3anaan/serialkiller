@@ -1,11 +1,11 @@
 package network;
 
+import application.ApplicationLayer;
 import common.Layer;
 import link.FrameLinkLayer;
-import network.handlers.Handler;
-import network.handlers.LinkLayerInHandler;
-import network.handlers.LinkLayerOutHandler;
-import network.handlers.RetransmissionHandler;
+import log.LogMessage;
+import log.Logger;
+import network.handlers.*;
 
 import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
@@ -34,6 +34,9 @@ public class NetworkLayer extends Layer implements Runnable {
     /** Size of the queue. */
     public static final int QUEUE_SIZE = 64;
 
+    /** The logger. */
+    private static Logger logger;
+
     /** The thread for this instance. */
     private Thread t;
 
@@ -45,6 +48,9 @@ public class NetworkLayer extends Layer implements Runnable {
 
     /** The link layer that is used. */
     private FrameLinkLayer link;
+
+    /** The application layer that is used. */
+    private ApplicationLayer app;
 
     /** The router for this network. */
     private Router router;
@@ -66,11 +72,12 @@ public class NetworkLayer extends Layer implements Runnable {
     /**
      * Constructs a new NetworkLayer instance.
      */
-    public NetworkLayer(FrameLinkLayer link, byte address, byte sibling) {
+    public NetworkLayer(FrameLinkLayer link, ApplicationLayer app, byte address, byte sibling) {
         ADDRESS_SELF = address;
         ADDRESS_SIBLING = sibling;
 
         this.link = link;
+        this.app = app;
 
         handlers = new ArrayList<Handler>();
 
@@ -138,7 +145,7 @@ public class NetworkLayer extends Layer implements Runnable {
                 sendPacket(p);
             }
         } else {
-            // TODO: Log
+            NetworkLayer.getLogger().error(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
             throw new SizeLimitExceededException("The data is too long for the packets.");
         }
     }
@@ -155,10 +162,12 @@ public class NetworkLayer extends Layer implements Runnable {
         if (host != null && host.handler() != null) {
             host.handler().offer(p);
 
-            p.timestamp(System.currentTimeMillis());
-            sent.add(p);
+            // Mark packet as sent when we are the original sender.
+            if (p.header().getSender() == ADDRESS_SELF) {
+                markSent(p);
+            }
         } else {
-            // TODO: Log
+            NetworkLayer.getLogger().error(p.toString() + " is not routable. Packet dropped.");
         }
 
         routerLock.unlock();
@@ -172,6 +181,7 @@ public class NetworkLayer extends Layer implements Runnable {
             if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
                 sent.remove(p);
                 retransmissionHandler.offer(p);
+                NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
             }
         }
     }
@@ -183,6 +193,7 @@ public class NetworkLayer extends Layer implements Runnable {
     public void markSent(Packet p) {
         p.timestamp(System.currentTimeMillis());
         sent.add(p);
+        NetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
     }
 
     @Override
@@ -201,29 +212,23 @@ public class NetworkLayer extends Layer implements Runnable {
                 // Check if this is an acknowledgement or should be acknowledged.
                 if (p.header().getAck()) {
                     sent.remove(p.header().getAcknum());
+                    NetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
                     return; // We are done.
                 } else if (p.header().getDestination() == ADDRESS_SELF) {
                     // Send acknowledgement if we are the final destination.
-                    queue.offer(p.createAcknowledgement(nextSeqnum()));
+                    Packet ack = p.createAcknowledgement(nextSeqnum());
+                    queue.offer(ack);
+                    NetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
                 }
 
-                // Route packet (lock the router during this operation)
-                routerLock.lock();
-                Host linkHost = router.route(p);
-
-                if (linkHost != null && linkHost.handler() != null) {
-                    // Push packet to handler.
-                    linkHost.handler().offer(p);
-                } else {
-                    // TODO: Log unroutable packet
-                }
-
-                routerLock.unlock();
+                sendPacket(p);
             } catch (InterruptedException e) {
-                // Exit gracefully
+                // Exit gracefully.
                 run = false;
             }
         }
+
+        NetworkLayer.getLogger().warning("NetworkLayer stopped.");
 
         // Destroy handlers.
         stopHandlers();
@@ -248,7 +253,14 @@ public class NetworkLayer extends Layer implements Runnable {
         // Check all hosts for a possible handler.
         for (Host host : router.hosts()) {
             if (host.address() == ADDRESS_SELF) {
-                // TODO: Construct & connect application layer handler
+                // Construct ApplicationLayer handler.
+                Handler h = new ApplicationLayerHandler(this, app);
+
+                // Add handler to collection.
+                handlers.add(h);
+
+                // Connect handler to host.
+                host.handler(h);
             } else if (host.address() == ADDRESS_SIBLING) {
                 // Construct LinkLayer handlers.
                 Handler in = new LinkLayerInHandler(this, link);
@@ -263,6 +275,8 @@ public class NetworkLayer extends Layer implements Runnable {
             } else if (host.IP() != null && !host.IP().equals("")) {
                 // TODO: Construct & connect tunnel handler
             }
+
+            NetworkLayer.getLogger().debug(host.toString() + " connected with " + host.handler().toString() + ".");
         }
 
         // Add retransmission handler
@@ -294,6 +308,8 @@ public class NetworkLayer extends Layer implements Runnable {
 
         r.parse(routes);
         r.update();
+
+        NetworkLayer.getLogger().alert("Routes updated.");
     }
 
     /**
@@ -301,6 +317,8 @@ public class NetworkLayer extends Layer implements Runnable {
      * router will be lost.
      */
     public void loadDefaultRoutes() {
+        NetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
+
         // Lock router
         routerLock.lock();
 
@@ -319,11 +337,23 @@ public class NetworkLayer extends Layer implements Runnable {
      * This method should only be used to add extra routes to the router, not
      * to (re)load the default file. This last use is not just discouraged but
      * strictly forbidden and can lead to unroutable packets and invalid routes.
+     *
+     * The results of this method are not guaranteed, this method is seen as an
+     * expirimental feature.
      * @param filePath The routes file.
      */
     public void patchRoutes(String filePath) {
+        NetworkLayer.getLogger().warning("Patching routes from file (" + filePath + ").");
+
+        // Lock router
+        routerLock.lock();
+
+        // Add new routes
         constructRoutes(router, filePath);
         constructHandlers();
+
+        // Free router
+        routerLock.unlock();
     }
 
     /**
@@ -331,6 +361,7 @@ public class NetworkLayer extends Layer implements Runnable {
      */
     public void start() {
         t.start();
+        NetworkLayer.getLogger().warning("NetworkLayer started.");
     }
 
     /**
@@ -349,6 +380,13 @@ public class NetworkLayer extends Layer implements Runnable {
         for (Handler h : handlers) {
             h.stop();
         }
+    }
+
+    public static Logger getLogger() {
+        if (logger == null) {
+            logger = new Logger(LogMessage.Subsystem.NETWORK);
+        }
+        return logger;
     }
 
 }

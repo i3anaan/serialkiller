@@ -8,6 +8,8 @@ import network.Packet;
  * Handler for data to the link layer.
  */
 public class LinkLayerOutHandler extends LinkLayerHandler {
+    private String name = "LinkHandler<Out>";
+
     public LinkLayerOutHandler(NetworkLayer parent, FrameLinkLayer link) {
         super(parent, link);
     }

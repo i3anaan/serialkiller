@@ -9,6 +9,8 @@ import java.util.Collection;
  * Makes sure that packets are retransmitted.
  */
 public class RetransmissionHandler extends Handler {
+    private String name = "RetransmissionHandler";
+
     NetworkLayer parent;
 
     public RetransmissionHandler(NetworkLayer parent) {

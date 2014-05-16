@@ -13,6 +13,7 @@ import java.util.TreeMap;
  * Handler for the application layer.
  */
 public class ApplicationLayerHandler extends Handler {
+    private String name = "ApplicationHandler";
     public static final int SAFE_SEGNUM = (int) Math.min(Integer.MAX_VALUE, Packet.MAX_SEGNUM);
 
     /** The application layer to talk to. */

@@ -22,6 +22,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public abstract class Handler implements Runnable {
     private static final int QUEUE_SIZE = 64;
+    private String name = "Handler";
     private Thread t;
     private boolean run;
 
@@ -89,4 +90,7 @@ public abstract class Handler implements Runnable {
         }
     }
 
+    public String toString() {
+        return String.format(name + " <" + hashCode() + ">");
+    }
 }
