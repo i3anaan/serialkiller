@@ -97,9 +97,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				}
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
-				e.printStackTrace();
+				//e.printStackTrace();
+				log("signaling panic");
 				signalAndWaitOnInvalidByteTransition();
+				log("signal and wait for panic complete, starting sync");
 				waitForSync();
+				log("sync complete");
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
 			log("Build received frame:  " + lastReceivedFrame.getPayload()
@@ -115,7 +118,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		
 		while(signals<3){
 			try {
-				byte in = getStableInput();
+				byte in = getNewStableInput();
 				extractBitFromInput(in);
 				previousByteReceived = in;
 				down.sendByte(state ? (byte) 1 : (byte) 2);
@@ -210,11 +213,20 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		return true;
 	}
 	
+	
 	public byte getStableInput(){
 		byte in = down.readByte();
 		while(!checkStable(in,4)){
 			in = down.readByte();
 		}
+		return in;
+	}
+	public byte getNewStableInput(){
+		byte in = getStableInput();
+		while(in==previousByteReceived){
+			in = getStableInput();
+		}
+		//TODO maybe move setting previousByteReceived to here?
 		return in;
 	}
 
@@ -268,8 +280,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public synchronized void log(String msg) {
-		//System.out.println(System.nanoTime() + "\t"
-		//		+ Thread.currentThread().getId() + "\t" + msg);
+		System.out.println(System.nanoTime() + "\t"
+				+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
 		System.err.flush();
 	}
