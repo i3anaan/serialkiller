@@ -1,14 +1,12 @@
 package link;
 
+import java.util.Arrays;
 import java.util.Random;
-
-import com.google.common.base.Charsets;
 
 import log.LogMessage;
 import log.Logger;
 import phys.PhysicalLayer;
 import stats.MonitoredQueue;
-import stats.Stats;
 
 public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private PhysicalLayer down;
@@ -16,11 +14,20 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private MonitoredQueue<byte[]> outbox;
 	private Logger log;
 	
+	private byte[] inbound = null;
+	private byte[] outbound = null;
+	private int inptr = 0;
+	private int outptr = 0;
+	
 	private boolean ourClk = false;
 	private boolean ourDat = false;
 	
 	private boolean primary = false;
 	private boolean secondary = false;
+	
+	private static final byte ACK_FLAG = 'A';
+	private static final byte EOF_FLAG = 'E';
+	private static final byte ERR_FLAG = '!';
 	
 	private static final long ELECTION_TIME = 1000; // 1s
 	
@@ -46,7 +53,6 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return;
 	}
 
 	@Override
@@ -111,12 +117,9 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	
 	private void runPrimary() {
 		char last16bits = 0;
-		int x = 0;
-		
-		byte[] databytes = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ ".getBytes(Charsets.UTF_8);
 		
 		while (true) {
-			char out = packPair(databytes[x], false);
+			char out = takeOutboundPair();
 			
 			for (int i = 15; i >= 0; i--) {
 				setData(((out >> i) & 1) == 1);
@@ -129,61 +132,99 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				waitClock(false);
 				
 				if (validPair(last16bits)) {
-					//log.debug("PRI " + Bytes.format(unpackPair(last16bits)));
-					//System.out.print((char)unpackPair(last16bits));
-					last16bits = 0; // XXX Check if this is needed
-					rcvdByte();
+					putInboundPair(last16bits);
+					last16bits = 0;
 				}
 				
 				last16bits <<= 1;
 			}
-			
-			sentByte();
-			x++;
-			x %= databytes.length;
 		}
 	}
 	
-	private void sentByte() {
-		Stats.hit("link.tastic.sent");
+	/** Called by the main loop to ask for the next pair to send. */
+	private char takeOutboundPair() {
+		if (outbound == null) {
+			try {
+				outbound = outbox.poll();
+				outptr = 0;
+			} catch (InterruptedException e) {
+				/* Do nothing. */
+			}
+		}
+		
+		if (outbound != null) {
+			if (outptr == outbound.length) {
+				outbound = null;
+				return packPair(EOF_FLAG, true);
+			} else {
+			byte b = outbound[outptr];
+			outptr++;
+			return packPair(b, false);
+			}
+		}
+
+		// If we don't have anything interesting to send, just send line idle.
+		return 0;
+	}
+	
+	/** Called by the main loop when it sees a new pair. */
+	private void putInboundPair(char pair) {
+		if (inbound == null) {
+			// Make room for an incoming message.
+			inbound = new byte[1024];
+			inptr = 0;
+		}
+		
+		if (isSpecial(pair)) {
+			switch (unpackPair(pair)) {
+			case ACK_FLAG:
+				log.debug("Ack!");
+				break;
+			case EOF_FLAG:
+				try {
+					inbox.put(Arrays.copyOf(inbound, inptr));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				inbound = null;
+				break;
+			case ERR_FLAG:
+				log.error("Err!");
+				break;
+			}
+		} else {
+			inbound[inptr] = unpackPair(pair);
+			inptr++;
+		}
 	}
 
-	private void rcvdByte() {
-		Stats.hit("link.tastic.rcvd");
+	private boolean isSpecial(char pair) {
+		return (pair >> 3 & 1) == 1;
 	}
 
 	private void runSecondary() {
 		char last16bits = 0;
-		int x = 0;
 		
-		byte[] databytes = "Hello, world!".getBytes(Charsets.UTF_8);
-
 		while (true) {
-			char out = packPair(databytes[x], false);
+			char out = takeOutboundPair();
 
 			for (int i = 15; i >= 0; i--) {
 				waitClock(true);
-				last16bits |= (getTheirData()?1:0);
+				last16bits |= (getTheirData() ? 1 : 0);
 	
 				setClock(true);
-				
 				waitClock(false);
 				setData((out & 1) == 1);
 				setClock(false);
 				
 				if (validPair(last16bits)) {
-					//log.debug("SEC " + Bytes.format(unpackPair(last16bits)));
-					
-					last16bits = 0; // XXX Check if this is needed
-					rcvdByte();
+					putInboundPair(last16bits);
+					last16bits = 0;
 				}
 				
 				last16bits <<= 1;
 			}
-			
-			sentByte();
-			x++;
-			x %= databytes.length;
 		}
 	}
 	
@@ -213,10 +254,12 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		}
 	}
 	
+	/** Unpacks a pair into a data byte. */
 	public static byte unpackPair(char bits) {
 		return (byte) ((bits >> 4) & 0xFF);
 	}
 	
+	/** Packs a data byte into a pair. */
 	public static char packPair(byte b, boolean special) {
 		return (char) (40960 | (b << 4) | (Integer.bitCount(b) % 8) | (special ? 8 : 0));
 	}

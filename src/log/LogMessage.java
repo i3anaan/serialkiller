@@ -51,7 +51,7 @@ public class LogMessage {
     }
 
     public String toString() {
-        return String.format("[%s] [%s] [%s] [%s] %s",
+        return String.format("[%-8s] [%s] [%4s] [%04d] %s",
                 severity,
                 new Date(timestamp),
                 subsystem,
