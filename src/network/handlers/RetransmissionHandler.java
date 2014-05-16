@@ -19,20 +19,16 @@ public class RetransmissionHandler extends Handler {
     }
 
     @Override
-    public void handle() {
+    public void handle() throws InterruptedException {
         // Make sure the queue is filled by checking for retransmissions
         parent.checkRetransmissions();
 
-        try {
-            Packet p = out.take();
+        Packet p = out.take();
 
-            // Offer again
-            in.add(p);
+        // Offer again
+        in.add(p);
 
-            // Mark packet as sent
-            parent.markSent(p);
-        } catch (InterruptedException e) {
-            // TODO: Log
-        }
+        // Mark packet as sent
+        parent.markSent(p);
     }
 }

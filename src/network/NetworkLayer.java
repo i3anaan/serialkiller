@@ -177,6 +177,7 @@ public class NetworkLayer extends Layer implements Runnable {
      * Sends retransmissions to the RetransmissionHandler.
      */
     public void checkRetransmissions() {
+        NetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
         for (Packet p : sent) {
             if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
                 sent.remove(p);
@@ -184,6 +185,7 @@ public class NetworkLayer extends Layer implements Runnable {
                 NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
             }
         }
+        NetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
     }
 
     /**

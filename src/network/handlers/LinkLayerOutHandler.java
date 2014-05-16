@@ -15,13 +15,8 @@ public class LinkLayerOutHandler extends LinkLayerHandler {
     }
 
     @Override
-    public void handle() {
-        try {
-            Packet p = out.take();
-            link.sendFrame(p.compile());
-        } catch (InterruptedException e) {
-            // TODO: Log
-            this.stop();
-        }
+    public void handle() throws InterruptedException {
+        Packet p = out.take();
+        link.sendFrame(p.compile());
     }
 }

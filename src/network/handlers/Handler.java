@@ -60,7 +60,7 @@ public abstract class Handler implements Runnable {
      * Method that actually handles the packets in the queues. This method gets
      * called in a loop as long as the thread runs.
      */
-    public abstract void handle();
+    public abstract void handle() throws InterruptedException;
 
     /**
      * Starts the handler.
@@ -68,6 +68,7 @@ public abstract class Handler implements Runnable {
     public void start() {
         run = true;
         t.start();
+        NetworkLayer.getLogger().alert(toString() + " started.");
     }
 
     /**
@@ -79,14 +80,20 @@ public abstract class Handler implements Runnable {
         try {
             t.join();
         } catch (InterruptedException e) {
-            // TODO: Log this exception
         }
+        NetworkLayer.getLogger().alert(toString() + " stopped.");
     }
 
     @Override
     public void run() {
         while (run) {
-            handle();
+            try {
+                handle();
+            } catch (InterruptedException e) {
+                // Exit gracefully.
+                NetworkLayer.getLogger().error(toString() + " interrupted.");
+                stop();
+            }
         }
     }
 

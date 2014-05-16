@@ -39,57 +39,52 @@ public class ApplicationLayerHandler extends Handler {
     }
 
     @Override
-    public void handle() {
-        try {
-            Packet p = out.take();
-            int seqnum = p.header().getSeqnum();
-            int segnum = p.header().getSegnum();
-            boolean more = p.header().getMore();
+    public void handle() throws InterruptedException {
+        Packet p = out.take();
+        int seqnum = p.header().getSeqnum();
+        int segnum = p.header().getSegnum();
+        boolean more = p.header().getMore();
 
-            // Check if the payload is segmented.
-            if (more || segnum != 0) {
-                // Check for overflow / DoS.
-                if (segnum > SAFE_SEGNUM) {
-                    // Drop whole sequence.
-                    segments.remove(seqnum);
-                    return;
-                }
-                // Add new sequence to segments map.
-                if (!segments.containsKey(seqnum)) {
-                    segments.put(seqnum, new TreeMap<Integer, Packet>());
-                }
-                if (!sequenceSizes.containsKey(seqnum)) {
-                    sequenceSizes.put(seqnum, 0);
-                }
-
-                // Add this segment to segments map.
-                segments.get(seqnum).put(segnum, p);
-
-                // If this packet is the last segment, set total.
-                if (!more) {
-                    sequenceSizes.put(seqnum, segnum);
-                }
-
-                // Check if we have all segments and concatenate data.
-                if (sequenceSizes.get(seqnum) == segments.get(seqnum).size()) {
-                    // Send concatenated payload to application.
-                    app.readPayload(Packet.concatPayloads(segments.get(seqnum).values()));
-
-                    // Cleanup.
-                    segments.remove(seqnum);
-                    sequenceSizes.remove(seqnum);
-                }
-
-                // Done.
-                return;
-            } else {
-                // Simple payload.
-                app.readPayload(p.payload());
+        // Check if the payload is segmented.
+        if (more || segnum != 0) {
+            // Check for overflow / DoS.
+            if (segnum > SAFE_SEGNUM) {
+                // Drop whole sequence.
+                segments.remove(seqnum);
                 return;
             }
-        } catch (InterruptedException e) {
-            // TODO: Log
-            this.stop();
+            // Add new sequence to segments map.
+            if (!segments.containsKey(seqnum)) {
+                segments.put(seqnum, new TreeMap<Integer, Packet>());
+            }
+            if (!sequenceSizes.containsKey(seqnum)) {
+                sequenceSizes.put(seqnum, 0);
+            }
+
+            // Add this segment to segments map.
+            segments.get(seqnum).put(segnum, p);
+
+            // If this packet is the last segment, set total.
+            if (!more) {
+                sequenceSizes.put(seqnum, segnum);
+            }
+
+            // Check if we have all segments and concatenate data.
+            if (sequenceSizes.get(seqnum) == segments.get(seqnum).size()) {
+                // Send concatenated payload to application.
+                app.readPayload(Packet.concatPayloads(segments.get(seqnum).values()));
+
+                // Cleanup.
+                segments.remove(seqnum);
+                sequenceSizes.remove(seqnum);
+            }
+
+            // Done.
+            return;
+        } else {
+            // Simple payload.
+            app.readPayload(p.payload());
+            return;
         }
     }
 }
