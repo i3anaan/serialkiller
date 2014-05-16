@@ -8,6 +8,7 @@ import phys.BitErrorPhysicalLayer;
 import phys.DelayPhysicalLayer;
 import phys.VirtualCable;
 import phys.VirtualCablePhysicalLayer;
+import web.WebService;
 import link.BittasticLinkLayer;
 import link.FrameLinkLayer;
 
@@ -90,6 +91,7 @@ public class TasticTestBench {
 	}
 
 	public static void main(String[] args) {
+		new Thread(new WebService(8080)).start();
 		new TasticTestBench().run();
 	}
 
