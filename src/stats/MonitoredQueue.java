@@ -29,6 +29,12 @@ public class MonitoredQueue <T> {
 		return out;
 	}
 	
+	public T poll() throws InterruptedException {
+		T out = queue.poll();
+		update();
+		return out;
+	}
+	
 	public void put(T elem) throws InterruptedException {
 		queue.put(elem);
 		update();
