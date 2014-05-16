@@ -36,7 +36,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	//TODO experiment with timeout values
 	public static final long TIMEOUT_NO_NEW_BIT_NANO = 10*1000000l;
 	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 10*1000000l;
-	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 10*1000000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 100*1000000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NO_NEW_BIT_NANO= 1*1000000l;
 	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100*1000000l;
 	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100*1000000l;
 	
@@ -164,7 +165,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			down.sendByte(state ? (byte) 1 : (byte) 2);
 			state = !state;
 			byte in = getStableInput();
-			while(in==previousByteReceived && maxTime>System.nanoTime()){
+			long maxTimeNewInput = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS_NO_NEW_BIT_NANO;
+			while(in==previousByteReceived && maxTimeNewInput>System.nanoTime()){
 				in = getStableInput();
 			}
 			previousByteReceived = in;
