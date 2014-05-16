@@ -34,11 +34,11 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	protected boolean setFrameToSend;
 	
 	//TODO experiment with timeout values
-	public static final long TIMEOUT_NO_NEW_BIT_NANO = 5000000l;
-	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 100000l;
-	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 100000l;
-	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100000l;
-	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100000l;
+	public static final long TIMEOUT_NO_NEW_BIT_NANO = 10*1000000l;
+	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 10*1000000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 10*1000000l;
+	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100*1000000l;
+	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100*1000000l;
 	
 	private int framesStartedSending;
 	private int framesCompleted;
@@ -96,7 +96,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 							previousByteReceived = receivedByte;
 							//log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
 						}
-						bitsReceived++;
+						bitsReceived++;System.out.println(
 
 						retry = false;
 						
@@ -109,7 +109,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				//e.printStackTrace();
-				log("signaling panic");
+				//log("signaling panic");
+				log("FRAME FAILED");
 				signalAndWaitOnInvalidByteTransition();
 				//log("signal and wait for panic complete, starting sync");
 				waitForSync();
@@ -319,8 +320,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public synchronized void log(String msg) {
-		//System.out.println(System.nanoTime() + "\t"
-		//		+ Thread.currentThread().getId() + "\t" + msg);
+		System.out.println(System.nanoTime() + "\t"
+				+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
 		System.err.flush();
 	}
