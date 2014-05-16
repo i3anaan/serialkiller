@@ -3,6 +3,7 @@ package network;
 import com.google.common.primitives.Bytes;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -27,6 +28,9 @@ public class Packet {
 
     /** Whether the packages is precompiled (that is, not changed). */
     private boolean precompiled = false;
+
+    /** Timestamp. */
+    private long timestamp;
 
     /**
      * Constructs a new, empty Packet object with a new, empty header.
@@ -154,5 +158,36 @@ public class Packet {
      */
     public Packet clone() {
         return new Packet(Bytes.concat(header.compile(), payload));
+    }
+
+    /**
+     * Concatenates the payloads of multiple packets.
+     * @param packets The collection of packets.
+     * @return The concatenated payloads.
+     */
+    public static byte[] concatPayloads(Collection<Packet> packets) {
+        byte[] result = new byte[0];
+
+        for (Packet packet : packets) {
+            result = Bytes.concat(result, packet.payload());
+        }
+
+        return result;
+    }
+
+    /**
+     * Get the meta timestamp.
+     * @return The timestamp.
+     */
+    public long timestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Set the meta timestamp for this packet.
+     * @param timestamp The timestamp.
+     */
+    public void timestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

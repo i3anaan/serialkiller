@@ -163,11 +163,11 @@ public class PacketHeader {
         precompiled = false;
     }
 
-    public long getSegnum() {
-        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(80, 104)));
+    public int getSegnum() {
+        return (int) ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(80, 104)));
     }
 
-    protected void setSegnum(long segnum) {
+    protected void setSegnum(int segnum) {
         if (segnum >= 0 && segnum < 16777215L) {
             raw.or(ByteArrays.toBitSet(Arrays.copyOfRange(ByteBuffer.allocate(8).putLong(segnum).array(), 5, 8), HEADER_LENGTH * 8, 80));
         } else {

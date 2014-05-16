@@ -5,20 +5,30 @@ import link.FrameLinkLayer;
 import network.handlers.Handler;
 import network.handlers.LinkLayerInHandler;
 import network.handlers.LinkLayerOutHandler;
+import network.handlers.RetransmissionHandler;
 
+import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * The network layer.
+ * The main class for the network layer.
+ *
+ * This class runs a thread that monitors packets in a queue and sends each
+ * packet to the relevant handler (see handlers.Handler or Router for more
+ * information).
+ *
+ * This class also has methods for sending data and tracks sent packets.
  */
 public class NetworkLayer extends Layer implements Runnable {
-    public static final byte ADDRESS_SELF = 0; // TODO: Move to configuration file
-    public static final byte ADDRESS_SIBLING = 0; // TODO: Move to configuration file
+    public static final long TIMEOUT = 10000; // in milliseconds
+    public final byte ADDRESS_SELF;
+    public final byte ADDRESS_SIBLING;
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
 
     /** Size of the queue. */
@@ -29,6 +39,9 @@ public class NetworkLayer extends Layer implements Runnable {
 
     /** The collection of handlers used for connecting with underlying layers. */
     private Collection<Handler> handlers;
+
+    /** The retransmission handler. */
+    private Handler retransmissionHandler;
 
     /** The link layer that is used. */
     private FrameLinkLayer link;
@@ -42,20 +55,32 @@ public class NetworkLayer extends Layer implements Runnable {
     /** The router queue. */
     protected ArrayBlockingQueue<Packet> queue;
 
+    /** The sent and to be acknowledged packets. */
+    private Collection<Packet> sent;
+
+    long ackTimeout;
+
+    /** The next available sequence number. */
     private int seqnum;
 
     /**
      * Constructs a new NetworkLayer instance.
      */
-    public NetworkLayer(FrameLinkLayer link) {
+    public NetworkLayer(FrameLinkLayer link, byte address, byte sibling) {
+        ADDRESS_SELF = address;
+        ADDRESS_SIBLING = sibling;
+
         this.link = link;
 
         handlers = new ArrayList<Handler>();
 
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
+        sent = new ArrayList<Packet>();
 
         router = new Router();
         routerLock = new ReentrantLock(true);
+
+        ackTimeout = System.currentTimeMillis();
 
         // Load routes
         loadDefaultRoutes();
@@ -81,6 +106,127 @@ public class NetworkLayer extends Layer implements Runnable {
     private int nextSeqnum() {
         seqnum = (seqnum + 1) % (Packet.MAX_SEQNUM + 1);
         return seqnum;
+    }
+
+    /**
+     * Send data using this NetworkLayer. The data may be split into segments
+     * and being reassembled at the other end.
+     * @param data The data.
+     */
+    public void send(byte[] data, byte destination) throws SizeLimitExceededException {
+        int segments = (int) Math.ceil((double) data.length / Packet.MAX_PAYLOAD_LENGTH);
+
+        if (segments == 1) {
+            // Send a single packet.
+            Packet p = new Packet(nextSeqnum());
+            p.header().setSender(ADDRESS_SELF);
+            p.header().setDestination(destination);
+            p.setPayload(data);
+
+            sendPacket(p);
+        } else if (segments <= PacketHeader.MAX_SEGNUM) {
+            int seqnum = nextSeqnum();
+
+            // Send each packet individually
+            for (int i = 0; i < segments; i++) {
+                Packet p = new Packet(seqnum);
+                p.header().setSegnum(i);
+                p.header().setSender(ADDRESS_SELF);
+                p.header().setDestination(destination);
+                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), segments)));
+
+                sendPacket(p);
+            }
+        } else {
+            // TODO: Log
+            throw new SizeLimitExceededException("The data is too long for the packets.");
+        }
+    }
+
+    /**
+     * Sends the given packet.
+     * @param p The packet.
+     */
+    private void sendPacket(Packet p) {
+        routerLock.lock();
+
+        Host host = router.route(p);
+
+        if (host != null && host.handler() != null) {
+            host.handler().offer(p);
+
+            p.timestamp(System.currentTimeMillis());
+            sent.add(p);
+        } else {
+            // TODO: Log
+        }
+
+        routerLock.unlock();
+    }
+
+    /**
+     * Sends retransmissions to the RetransmissionHandler.
+     */
+    public void checkRetransmissions() {
+        for (Packet p : sent) {
+            if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
+                sent.remove(p);
+                retransmissionHandler.offer(p);
+            }
+        }
+    }
+
+    /**
+     * Marks the given packet as sent.
+     * @param p The packet.
+     */
+    public void markSent(Packet p) {
+        p.timestamp(System.currentTimeMillis());
+        sent.add(p);
+    }
+
+    @Override
+    public void run() {
+        // Run handlers
+        startHandlers();
+
+        boolean run = true;
+
+        // Route packets in the queue to their handlers.
+        while (run) {
+            try {
+                Packet p = queue.take();
+                p.header().decreaseTTL(); // Decrease the TTL for this hop.
+
+                // Check if this is an acknowledgement or should be acknowledged.
+                if (p.header().getAck()) {
+                    sent.remove(p.header().getAcknum());
+                    return; // We are done.
+                } else if (p.header().getDestination() == ADDRESS_SELF) {
+                    // Send acknowledgement if we are the final destination.
+                    queue.offer(p.createAcknowledgement(nextSeqnum()));
+                }
+
+                // Route packet (lock the router during this operation)
+                routerLock.lock();
+                Host linkHost = router.route(p);
+
+                if (linkHost != null && linkHost.handler() != null) {
+                    // Push packet to handler.
+                    linkHost.handler().offer(p);
+                } else {
+                    // TODO: Log unroutable packet
+                }
+
+                routerLock.unlock();
+            } catch (InterruptedException e) {
+                // Exit gracefully
+                run = false;
+            }
+        }
+
+        // Destroy handlers.
+        stopHandlers();
     }
 
     /**
@@ -118,6 +264,10 @@ public class NetworkLayer extends Layer implements Runnable {
                 // TODO: Construct & connect tunnel handler
             }
         }
+
+        // Add retransmission handler
+        retransmissionHandler = new RetransmissionHandler(this);
+        handlers.add(retransmissionHandler);
 
         // Start new handlers (only if the network layer is running).
         if (t.isAlive()) {
@@ -181,40 +331,6 @@ public class NetworkLayer extends Layer implements Runnable {
      */
     public void start() {
         t.start();
-    }
-
-    @Override
-    public void run() {
-        // Run handlers
-        startHandlers();
-
-        boolean run = true;
-
-        // Route packets in the queue to their handlers.
-        while (run) {
-            try {
-                Packet p = queue.take();
-                p.header().decreaseTTL(); // Decrease the TTL for this hop.
-
-                // Route packet (lock the router during this operation)
-                routerLock.lock();
-                Host linkHost = router.route(p);
-
-                if (linkHost != null && linkHost.handler() != null) {
-                    linkHost.handler().offer(p);
-                } else {
-                    // TODO: Log unroutable packet
-                }
-
-                routerLock.unlock();
-            } catch (InterruptedException e) {
-                // Exit gracefully
-                run = false;
-            }
-        }
-
-        // Destroy handlers.
-        stopHandlers();
     }
 
     /**
