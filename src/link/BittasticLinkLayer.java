@@ -119,7 +119,7 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		char last16bits = 0;
 		
 		while (true) {
-			char out = takeOutboundPair();
+			char out = buildOutboundPair();
 			
 			for (int i = 15; i >= 0; i--) {
 				setData(((out >> i) & 1) == 1);
@@ -131,8 +131,8 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				setClock(false);
 				waitClock(false);
 				
-				if (validPair(last16bits)) {
-					putInboundPair(last16bits);
+				if (isValidPair(last16bits)) {
+					handleInboundPair(last16bits);
 					last16bits = 0;
 				}
 				
@@ -142,7 +142,7 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	}
 	
 	/** Called by the main loop to ask for the next pair to send. */
-	private char takeOutboundPair() {
+	private char buildOutboundPair() {
 		if (outbound == null) {
 			try {
 				outbound = outbox.poll();
@@ -168,14 +168,14 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	}
 	
 	/** Called by the main loop when it sees a new pair. */
-	private void putInboundPair(char pair) {
+	private void handleInboundPair(char pair) {
 		if (inbound == null) {
 			// Make room for an incoming message.
 			inbound = new byte[1024];
 			inptr = 0;
 		}
 		
-		if (isSpecial(pair)) {
+		if (isSpecialPair(pair)) {
 			switch (unpackPair(pair)) {
 			case ACK_FLAG:
 				log.debug("Ack!");
@@ -187,7 +187,8 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 					e.printStackTrace();
 				}
 				
-				inbound = null;
+				Arrays.fill(inbound, (byte)0);
+				inptr = 0;
 				break;
 			case ERR_FLAG:
 				log.error("Err!");
@@ -199,7 +200,7 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		}
 	}
 
-	private boolean isSpecial(char pair) {
+	private boolean isSpecialPair(char pair) {
 		return (pair >> 3 & 1) == 1;
 	}
 
@@ -207,7 +208,7 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		char last16bits = 0;
 		
 		while (true) {
-			char out = takeOutboundPair();
+			char out = buildOutboundPair();
 
 			for (int i = 15; i >= 0; i--) {
 				waitClock(true);
@@ -218,8 +219,8 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				setData((out & 1) == 1);
 				setClock(false);
 				
-				if (validPair(last16bits)) {
-					putInboundPair(last16bits);
+				if (isValidPair(last16bits)) {
+					handleInboundPair(last16bits);
 					last16bits = 0;
 				}
 				
@@ -241,7 +242,7 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	 * F: Special (flag) bit
 	 * P: Parity bit
 	 */
-	public static boolean validPair(char bits) {
+	public static boolean isValidPair(char bits) {
 		byte highnibble = (byte) (bits >> 12 & 15);
 		byte outbyte = (byte) ((bits >> 4) & 0xFF);
 		byte parity = (byte) (bits & 7);

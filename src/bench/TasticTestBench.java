@@ -67,7 +67,7 @@ public class TasticTestBench {
 
 		public void run() {
 			while (true) {
-				down.sendFrame("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".getBytes(Charsets.UTF_8));
+				down.sendFrame("abcdefgh".getBytes(Charsets.UTF_8));
 			}
 		}
 	}
