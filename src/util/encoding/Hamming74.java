@@ -25,7 +25,14 @@ public class Hamming74 {
 
 	public static void main(String[] args){
 		//printMatrix(matrixG);
-		BitSet2 bs0 = new BitSet2();
+		
+		printMatrix(matrixH);
+		System.out.println("");
+		printMatrix(generateH(32));
+		
+		
+		
+		/*BitSet2 bs0 = new BitSet2();
 		bs0.set(0,true);
 		bs0.set(1,false);
 		bs0.set(2,true);
@@ -41,7 +48,7 @@ public class Hamming74 {
 		bs1.set(6,true);
 		printMatrix(getSyndrome(bs1));
 		System.out.println(hasError(bs1));
-		System.out.println(getCorrected(bs1));
+		System.out.println(getCorrected(bs1));*/
 	}
 	
 	
@@ -215,6 +222,7 @@ public class Hamming74 {
 	 * Prints the matrix
 	 */
 	public static void printMatrix(int[][] a){
+		System.out.println("Matrix: ("+a.length+"x"+a[0].length+")");
 		for(int n=0;n<a.length;n++){
 			for(int m=0;m<a[0].length;m++){
 				System.out.print(a[n][m]+"\t");			
@@ -222,4 +230,39 @@ public class Hamming74 {
 			System.out.print("\n");
 		}
 	}
+	
+	
+	/**
+	 * Rounds the dataBitCount up to the nearest power of 2 
+	 * @param dataBits
+	 * @return
+	 */
+	public static int[][] generateH(int dataBitCount){
+		int dataBitCountCeiled = (int)Math.pow(2,Math.ceil(Math.log(dataBitCount)/Math.log(2)));
+		int parityBitsNeeded = (int) Math.ceil(Math.log(dataBitCount)/Math.log(2)) +1;
+		//System.out.println("DataBitCount="+dataBitCount+"  DataBitCountCeiled="+dataBitCountCeiled+"  ParityBitsNeeded="+parityBitsNeeded);
+		int[][] h = new int[parityBitsNeeded][parityBitsNeeded+dataBitCountCeiled];
+		for(int i=0;i<parityBitsNeeded;i++){
+			int offset = sumTill(i);
+			//System.out.println("Offset = "+offset);
+			for(int a=offset;a<parityBitsNeeded+dataBitCountCeiled;a=a+((int)Math.pow(2, i))*2){
+				//System.out.println("a="+a);
+				for(int b=0;b<Math.min((parityBitsNeeded+dataBitCountCeiled)-a,((int)Math.pow(2, i)));b++){
+					//System.out.println("b="+b);
+					//printMatrix(h);
+					h[i][a+b] = 1;
+				}
+			}
+		}
+		return h;
+	}
+	
+	public static int sumTill(int value){
+		int result = 0;
+		for(int i=0;i<=value;i++){
+			result = result+i;
+		}
+		return result;
+	}
+	
 }
