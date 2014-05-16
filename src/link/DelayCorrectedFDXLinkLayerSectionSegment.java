@@ -98,6 +98,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				e.printStackTrace();
+				signalAndWaitOnInvalidByteTransition();
 				waitForSync();
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
@@ -106,6 +107,26 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		} else {
 			log("Not ready to exchange frames yet.");
 		}
+	}
+
+	private void signalAndWaitOnInvalidByteTransition() {
+		boolean state = false;
+		int signals = 0;
+		
+		while(signals<3){
+			try {
+				byte in = getStableInput();
+				extractBitFromInput(in);
+				previousByteReceived = in;
+				down.sendByte(state ? (byte) 1 : (byte) 2);
+				state = !state;
+			} catch (InvalidByteTransitionException e) {
+				//Both sides seen invalidTransition.
+				//TODO might need to check for this multiple times
+				signals++;
+			}
+		}
+		
 	}
 
 	private byte sendBit(BitSet2 outputData, int index) {
@@ -187,6 +208,14 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			}
 		}
 		return true;
+	}
+	
+	public byte getStableInput(){
+		byte in = down.readByte();
+		while(!checkStable(in,4)){
+			in = down.readByte();
+		}
+		return in;
 	}
 
 	private byte adaptBitToPrevious(byte nextData) {
