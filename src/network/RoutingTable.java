@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * This class represents a simple routing table that manages a collection of
@@ -17,6 +18,7 @@ import java.util.*;
  * 3>2
  * 5>8
  * 2=192.168.0.1
+ * @param <e>
  */
 public class RoutingTable {
     /** The map with routes. The first element is the destination host, the
@@ -84,6 +86,28 @@ public class RoutingTable {
      */
 	public void fromString(String str) throws IOException {
 		fromReader(new BufferedReader(new StringReader(str)));
+	}
+	
+	/**
+	 * Create a GraphViz-format description of the routes.
+	 */
+	public String toGraph() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("digraph{");
+		
+		for (Entry<Byte, Byte> e : routes.entrySet()) {
+			sb.append(String.format("%s->%s;", e.getValue(), e.getKey()));
+		}
+		
+		sb.append("}");
+		return sb.toString();
+	}
+	
+	/**
+	 * Generate a link to 
+	 */
+	public String toGraphUri() {
+		return "https://chart.googleapis.com/chart?cht=gv&chl=" + toGraph();
 	}
 
     /**
