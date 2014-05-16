@@ -16,7 +16,7 @@ public class Packet {
     public static final int HEADER_LENGTH = PacketHeader.HEADER_LENGTH;
     public static final int MAX_TTL = PacketHeader.MAX_TTL;
     public static final int MAX_SEQNUM = PacketHeader.MAX_SEQNUM;
-    public static final long MAX_SEGNUM = PacketHeader.MAX_SEGNUM;
+    public static final int MAX_SEGNUM = PacketHeader.MAX_SEGNUM;
     public static final int MAX_PAYLOAD_LENGTH = 1024;
     public static final int MAX_PACKET_LENGTH = HEADER_LENGTH + MAX_PAYLOAD_LENGTH;
 
@@ -57,7 +57,7 @@ public class Packet {
 
     /**
      * Check whether this package is precompiled and ready to use.
-     * @return Wheter this package is precompiled.
+     * @return Whether this package is precompiled.
      */
     public boolean isPrecompiled() {
         return precompiled && header.precompiled;
@@ -103,7 +103,9 @@ public class Packet {
      */
     public byte[] compile() {
         // Checksum
+        header.setChecksum(0L);
         Checksum checksum = new CRC32();
+        checksum.reset();
         checksum.update(Bytes.concat(header.compile(), payload), 0, length());
         header.setChecksum(checksum.getValue());
 
@@ -142,11 +144,17 @@ public class Packet {
 
         // Verify checksum
         if (valid) {
-            Packet clone = this.clone(); // Cloned packet.
-            clone.header().setChecksum(0L); // Reset checksum of cloned packet.
-            clone.compile(); // Compile the clone (calculates the checksum).
+            // Get original checksum.
+            long checksum = this.header().getChecksum();
 
-            valid = clone.header().getChecksum() == this.header().getChecksum();
+            // Recalculate checksum.
+            this.compile();
+
+            // Check if the checksums are equal.
+            valid = this.header().getChecksum() == checksum;
+
+            // Restore original checksum.
+            this.header().setChecksum(checksum);
         }
 
         return valid;
