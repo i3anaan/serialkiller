@@ -35,9 +35,23 @@ public class Hamming74 {
 	 * A00	A0m
 	 * An0	Anm
 	 */
-	public static final int[][] matrixG = new int[][]{new int[]{1,1,0,1},new int[]{1,0,1,1},new int[]{1,0,0,0},new int[]{0,1,1,1},new int[]{0,1,0,0},new int[]{0,0,1,0},new int[]{0,0,0,1}}; 
-	public static final int[][] matrixH = new int[][]{new int[]{1,0,1,0,1,0,1},new int[]{0,1,1,0,0,1,1},new int[]{0,0,0,1,1,1,1}};
-	public static final int[][] matrixR = new int[][]{new int[]{0,0,1,0,0,0,0},new int[]{0,0,0,0,1,0,0},new int[]{0,0,0,0,0,1,0},new int[]{0,0,0,0,0,0,1}};
+	public static final int[][] matrixG = new int[][]{
+		new int[]{1,1,0,1},
+		new int[]{1,0,1,1},
+		new int[]{1,0,0,0},
+		new int[]{0,1,1,1},
+		new int[]{0,1,0,0},
+		new int[]{0,0,1,0},
+		new int[]{0,0,0,1}}; 
+	public static final int[][] matrixH = new int[][]{
+		new int[]{1,0,1,0,1,0,1},
+		new int[]{0,1,1,0,0,1,1},
+		new int[]{0,0,0,1,1,1,1}};
+	public static final int[][] matrixR = new int[][]{
+		new int[]{0,0,1,0,0,0,0},
+		new int[]{0,0,0,0,1,0,0},
+		new int[]{0,0,0,0,0,1,0},
+		new int[]{0,0,0,0,0,0,1}};
 	
 	/**
 	 * Multiply matrix a times b: a*b
@@ -68,10 +82,15 @@ public class Hamming74 {
 		   return ans;
 		}
 	
-	
+	/**
+	 * Encodes the given data.
+	 * DATA_BITS amount go in, ENCODED_BITS come out.
+	 * The encoded bits are then more resilient to errors.
+	 * @param data	The data to encode (takes the first DATA_BITS bits)
+	 * @return	The encoded bits, of length ENCODED_BITS
+	 */
 	public static BitSet2 encode(BitSet2 data){
 		// takes 4 LSB;
-		//System.out.println(Bytes.format(data));
 		int[][] matrixData = new int[DATA_BITS][1];
 		for(int i=0;i<DATA_BITS;i++){
 			matrixData[i][0]=data.get(i) ? 1 : 0;
