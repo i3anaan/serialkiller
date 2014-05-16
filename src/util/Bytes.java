@@ -12,6 +12,10 @@ public abstract class Bytes {
 		return String.format("%08d", Integer.parseInt(Integer.toBinaryString(b & 0xFF)));
 	}
 	
+	public static String format(char b) {
+		return String.format("%16s", Integer.toBinaryString((int)b & 0xFFFF));
+	}
+	
 	/** 
 	 * Formats the given byte as an eight-character string. 
 	 * Only prints the given amount, starting at LSB;
