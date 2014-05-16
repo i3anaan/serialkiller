@@ -170,8 +170,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			previousByteReceived = in;
 			extraSignals--;
 		}
-		if(maxTime>System.nanoTime()){
-			log("PANIC: Timeout on sending extra panic signals");
+		if(maxTime<System.nanoTime()){
+			log("PANIC: Timeout on sending extra panic signals, amount sent: "+(1000-extraSignals));
 		}
 		log("PANIC: Signal and wait procedure complete");
 	}
