@@ -32,6 +32,10 @@ public class MonitoredQueue <T> {
 	public void put(T elem) throws InterruptedException {
 		queue.put(elem);
 		update();
-		return;
+	}
+	
+	public void offer(T elem) throws InterruptedException {
+		queue.offer(elem);
+		update();
 	}
 }
