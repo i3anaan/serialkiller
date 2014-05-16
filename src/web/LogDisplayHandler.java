@@ -1,8 +1,5 @@
 package web;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +10,7 @@ import log.LogService;
  * A ServiceHandler that displays log lines.
  */
 class LogDisplayHandler extends ServiceHandler {
-    private static final int LIMIT = 1000;
+    private static final int LIMIT = 100;
 
     @Override
     public String getPath() {
@@ -26,9 +23,7 @@ class LogDisplayHandler extends ServiceHandler {
 
         // Get the LIMIT newest logs
         LogService logger = LogService.getInstance();
-        List<LogMessage> allMessages = logger.getMessages();
-        List<LogMessage> reverse = Lists.reverse(allMessages);
-        Iterable<LogMessage> messages = Iterables.limit(reverse, LIMIT);
+        List<LogMessage> messages = logger.getMessages();
         
         // Add some styles.
         puts(r, "<style>");
@@ -45,7 +40,8 @@ class LogDisplayHandler extends ServiceHandler {
 
         // Build it!
         puts(r, "<table>");
-        for (LogMessage lm : messages) {
+        for (int i = messages.size() - 1; i >= 0 && i >= messages.size() - LIMIT; i--) {
+        	LogMessage lm = messages.get(i);
         	puts(r, "<tr class='%s %s'>", lm.getSeverity(), lm.getSubsystem());
         	puts(r, "<td>[%s]</td>", lm.getSeverity());
         	puts(r, "<td>[%s]</td>", new Date(lm.getTimestamp()));
