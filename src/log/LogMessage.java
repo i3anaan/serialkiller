@@ -17,6 +17,9 @@ public class LogMessage {
 
     /** The actual log message. */
     private String message;
+    
+    /** The thread that logged the message. */
+    private long thread;
 
     /** Create a new log message with the given properties. */
     public LogMessage(Subsystem sys, Severity sev, String msg) {
@@ -24,6 +27,7 @@ public class LogMessage {
         severity = sev;
         message = msg;
         timestamp = System.currentTimeMillis();
+        thread = Thread.currentThread().getId();
     }
 
     public Subsystem getSubsystem() {
@@ -37,16 +41,21 @@ public class LogMessage {
     public long getTimestamp() {
         return timestamp;
     }
+    
+    public long getThread() {
+    	return thread;
+    }
 
     public String getMessage() {
         return message;
     }
 
     public String toString() {
-        return String.format("[%s] [%s] [%s] %s",
+        return String.format("[%s] [%s] [%s] [%s] %s",
                 severity,
                 new Date(timestamp),
                 subsystem,
+                thread,
                 message);
     }
 

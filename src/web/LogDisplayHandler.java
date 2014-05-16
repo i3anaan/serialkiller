@@ -48,8 +48,9 @@ class LogDisplayHandler extends ServiceHandler {
         for (LogMessage lm : messages) {
         	puts(r, "<tr class='%s %s'>", lm.getSeverity(), lm.getSubsystem());
         	puts(r, "<td>[%s]</td>", lm.getSeverity());
-        	puts(r, "<td>[%s]</td>", lm.getSubsystem());
         	puts(r, "<td>[%s]</td>", new Date(lm.getTimestamp()));
+        	puts(r, "<td>[%s]</td>", lm.getSubsystem());
+        	puts(r, "<td>[%s]</td>", lm.getThread());
         	puts(r, "<td>%s</td>", lm.getMessage());
         	puts(r, "</tr>");
         }
