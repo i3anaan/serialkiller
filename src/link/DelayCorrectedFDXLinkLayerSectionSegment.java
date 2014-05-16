@@ -141,10 +141,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				}
 				if(in!=previousByteReceived){
 					extractBitFromInput(in);
-					previousByteReceived = in;	
+					previousByteReceived = in;
+					signals = 0;
 				}else{
 					log("PANIC: Timout on waiting for ack");
 				}
+				
 			} catch (InvalidByteTransitionException e) {
 				//Both sides seen invalidTransition.
 				//TODO might need to check for this multiple times
