@@ -33,11 +33,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
 	
-	public static final long TIMEOUT_NO_NEW_BIT_NANO = 5000l;
-	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 1000l;
-	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS= 1000l;
-	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC = 1000l;
-	public static final long RANGE_SYNC_RANDOM_WAIT = 1000l;
+	//TODO experiment with timeout values
+	public static final long TIMEOUT_NO_NEW_BIT_NANO = 5000000l;
+	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 100000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 100000l;
+	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100000l;
+	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100000l;
 	
 	private boolean allowedToSend;
 
@@ -146,7 +147,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			}
 		}
 		
-		long maxTime = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS;
+		long maxTime = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS_NANO;
 		while(signals>-10 && maxTime>System.nanoTime()){
 			down.sendByte(state ? (byte) 1 : (byte) 2);
 			state = !state;
@@ -195,7 +196,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			inputOne = down.readByte();
 		}
 		log("Read 3.");
-		long waitTime = (long) (Math.random() * RANGE_SYNC_RANDOM_WAIT) + System.nanoTime();
+		long waitTime = (long) (Math.random() * RANGE_SYNC_RANDOM_WAIT_NANO) + System.nanoTime();
 		while (System.nanoTime() < waitTime && !lastToSend) {
 			byte inputTwo = down.readByte();
 			if (inputTwo == 0 && checkStable(inputTwo, 4)){ 
@@ -215,7 +216,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			// First to send, last to receive ack.
 			connectionRole = RECEIVER;
 			down.sendByte((byte) 0);
-			long waitTill = System.nanoTime() + TIMEOUT_SYNC_PROCEDURE_DESYNC;
+			long waitTill = System.nanoTime() + TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO;
 			byte input = down.readByte();
 			while (!(input==1 && checkStable(input,4))){ 
 					input = down.readByte();
