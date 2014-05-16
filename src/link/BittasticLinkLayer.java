@@ -9,8 +9,6 @@ import log.Logger;
 import phys.PhysicalLayer;
 import stats.MonitoredQueue;
 import stats.Stats;
-import util.ByteArrays;
-import util.Bytes;
 
 public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private PhysicalLayer down;
@@ -25,8 +23,6 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private boolean secondary = false;
 	
 	private static final long ELECTION_TIME = 1000; // 1s
-	private static final long PACKET_SIZE = 1024; // bytes
-	private static final long OVERHEAD = 4; // bytes
 	
 	private Random r;
 	
@@ -83,14 +79,6 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		return (get() & 1) == 1;
 	}
 	
-	private boolean getOurClock() {
-		return ourClk;
-	}
-	
-	private boolean getOurData() {
-		return ourDat;
-	}
-	
 	private void setClock(boolean state) {
 		ourClk = state;
 		set((ourClk ? 2 : 0) | (ourDat ? 1 : 0));
@@ -99,15 +87,6 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private void setData(boolean state) {
 		ourDat = state;
 		set((ourClk ? 2 : 0) | (ourDat ? 1 : 0));
-	}
-	
-	private void toggleClk() {
-		boolean state = getOurClock();
-		setClock(!state);
-	}
-	
-	private void waitClk() {
-		waitClock(!getTheirClock());
 	}
 	
 	private void waitClock(boolean state) {

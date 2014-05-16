@@ -5,7 +5,6 @@ import java.util.Arrays;
 import com.google.common.base.Charsets;
 
 import phys.BitErrorPhysicalLayer;
-import phys.DelayPhysicalLayer;
 import phys.VirtualCable;
 import phys.VirtualCablePhysicalLayer;
 import web.WebService;
