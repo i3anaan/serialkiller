@@ -32,7 +32,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	protected boolean readFrame;
 	protected boolean setFrameToSend;
-
+	
+	public static final long TIMEOUT_NO_NEW_BIT_NANO = 5000l;
+	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 1000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS= 1000l;
+	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC = 1000l;
+	public static final long RANGE_SYNC_RANDOM_WAIT = 1000l;
+	
 	private boolean allowedToSend;
 
 	public DelayCorrectedFDXLinkLayerSectionSegment(PhysicalLayer down) {
@@ -121,7 +127,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			try {
 				down.sendByte(state ? (byte) 1 : (byte) 2);
 				state = !state;
-				long maxTime = System.nanoTime()+1000000000l;
+				long maxTime = System.nanoTime()+TIMEOUT_PANIC_NO_NEW_BIT_NANO;
 				in = getStableInput();
 				while(in==previousByteReceived && maxTime>System.nanoTime()){
 					in = getStableInput();
@@ -140,7 +146,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			}
 		}
 		
-		long maxTime = System.nanoTime()+1000000000l;
+		long maxTime = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS;
 		while(signals>-10 && maxTime>System.nanoTime()){
 			down.sendByte(state ? (byte) 1 : (byte) 2);
 			state = !state;
@@ -165,7 +171,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	private byte readBit() throws TimeOutException {
 		byte input = down.readByte();
-		long waitTime = 5000000000l + System.nanoTime();
+		long waitTime = TIMEOUT_NO_NEW_BIT_NANO + System.nanoTime();
 		while (!(input != previousByteReceived && input == down.readByte()
 				&& input == down.readByte() && input == down.readByte())) {
 			input = down.readByte();
@@ -189,7 +195,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			inputOne = down.readByte();
 		}
 		log("Read 3.");
-		long waitTime = (long) (Math.random() * 1000000000) + System.nanoTime();
+		long waitTime = (long) (Math.random() * RANGE_SYNC_RANDOM_WAIT) + System.nanoTime();
 		while (System.nanoTime() < waitTime && !lastToSend) {
 			byte inputTwo = down.readByte();
 			if (inputTwo == 0 && checkStable(inputTwo, 4)){ 
@@ -209,7 +215,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			// First to send, last to receive ack.
 			connectionRole = RECEIVER;
 			down.sendByte((byte) 0);
-			long waitTill = System.nanoTime() + 1000000000l;
+			long waitTill = System.nanoTime() + TIMEOUT_SYNC_PROCEDURE_DESYNC;
 			byte input = down.readByte();
 			while (!(input==1 && checkStable(input,4))){ 
 					input = down.readByte();
