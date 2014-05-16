@@ -141,7 +141,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 		
 		long maxTime = System.nanoTime()+1000000000l;
-		while(signals>0 && maxTime>System.nanoTime()){
+		while(signals>-10 && maxTime>System.nanoTime()){
 			down.sendByte(state ? (byte) 1 : (byte) 2);
 			state = !state;
 			byte in = getStableInput();
