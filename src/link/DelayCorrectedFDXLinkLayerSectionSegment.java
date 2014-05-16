@@ -118,11 +118,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		
 		while(signals<1){
 			try {
+				down.sendByte(state ? (byte) 1 : (byte) 2);
+				state = !state;
 				byte in = getNewStableInput();
 				extractBitFromInput(in);
 				previousByteReceived = in;
-				down.sendByte(state ? (byte) 1 : (byte) 2);
-				state = !state;
+				
 			} catch (InvalidByteTransitionException e) {
 				//Both sides seen invalidTransition.
 				//TODO might need to check for this multiple times
