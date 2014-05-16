@@ -8,6 +8,7 @@ import log.LogMessage;
 import log.Logger;
 import phys.PhysicalLayer;
 import stats.MonitoredQueue;
+import stats.Stats;
 import util.ByteArrays;
 import util.Bytes;
 
@@ -76,21 +77,6 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	
 	private boolean getTheirClock() {
 		return (get() & 2) == 2;
-		/*
-		byte dampbuf = 85;
-		
-		for (int i = 0; i < 8; i++) {
-			dampbuf <<= 1;
-			dampbuf |= ((get() & 2) >> 1);
-		}
-		
-		int onebits = Math.min(Integer.bitCount(dampbuf), 8);
-		int nulbits = 8 - onebits;
-		
-		//log.debug("gtc ob " + onebits + " nb " + nulbits + " db " + dampbuf);
-		
-		return onebits >= nulbits;
-		*/
 	}
 	
 	private boolean getTheirData() {
@@ -147,13 +133,11 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private void runPrimary() {
 		char last16bits = 0;
 		int x = 0;
-		int y = 0;
 		
 		byte[] databytes = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ ".getBytes(Charsets.UTF_8);
 		
-		
 		while (true) {
-			char out = packPair(databytes[x]);
+			char out = packPair(databytes[x], false);
 			
 			for (int i = 15; i >= 0; i--) {
 				setData(((out >> i) & 1) == 1);
@@ -166,34 +150,37 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				waitClock(false);
 				
 				if (validPair(last16bits)) {
-					//log.debug("PRI " + Bytes.format(unpackPair(last16bits)) + "/" + (char)unpackPair(last16bits));
+					//log.debug("PRI " + Bytes.format(unpackPair(last16bits)));
 					//System.out.print((char)unpackPair(last16bits));
 					last16bits = 0; // XXX Check if this is needed
-					
-					y++;
-					if (y != 0 && y % 60 == 0) {
-						y = 0;
-						//System.out.println();
-					}
+					rcvdByte();
 				}
 				
 				last16bits <<= 1;
 			}
 			
+			sentByte();
 			x++;
 			x %= databytes.length;
 		}
 	}
 	
+	private void sentByte() {
+		Stats.hit("link.tastic.sent");
+	}
+
+	private void rcvdByte() {
+		Stats.hit("link.tastic.rcvd");
+	}
+
 	private void runSecondary() {
 		char last16bits = 0;
 		int x = 0;
-		int y = 0;
 		
 		byte[] databytes = "Hello, world!".getBytes(Charsets.UTF_8);
 
 		while (true) {
-			char out = packPair(databytes[x]);
+			char out = packPair(databytes[x], false);
 
 			for (int i = 15; i >= 0; i--) {
 				waitClock(true);
@@ -206,22 +193,16 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				setClock(false);
 				
 				if (validPair(last16bits)) {
-					//log.debug("SEC " + Bytes.format(unpackPair(last16bits)) + "/" + (char)unpackPair(last16bits));
+					//log.debug("SEC " + Bytes.format(unpackPair(last16bits)));
 					
-					System.out.print(new String(new byte[]{unpackPair(last16bits)}, Charsets.UTF_8));
-
 					last16bits = 0; // XXX Check if this is needed
-					
-					y++;
-					if (y != 0 && y % 80 == 0) {
-						y = 0;
-						System.out.println();
-					}
+					rcvdByte();
 				}
 				
 				last16bits <<= 1;
 			}
 			
+			sentByte();
 			x++;
 			x %= databytes.length;
 		}
@@ -257,8 +238,8 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		return (byte) ((bits >> 4) & 0xFF);
 	}
 	
-	public static char packPair(byte b) {
-		return (char) (40960 | (b << 4) | (Integer.bitCount(b) % 8));
+	public static char packPair(byte b, boolean special) {
+		return (char) (40960 | (b << 4) | (Integer.bitCount(b) % 8) | (special ? 8 : 0));
 	}
 
 	private void electPrimary() {
