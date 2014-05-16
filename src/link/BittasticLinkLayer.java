@@ -1,6 +1,5 @@
 package link;
 
-import java.util.BitSet;
 import java.util.Random;
 
 import com.google.common.base.Charsets;
@@ -77,6 +76,21 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	
 	private boolean getTheirClock() {
 		return (get() & 2) == 2;
+		/*
+		byte dampbuf = 85;
+		
+		for (int i = 0; i < 8; i++) {
+			dampbuf <<= 1;
+			dampbuf |= ((get() & 2) >> 1);
+		}
+		
+		int onebits = Math.min(Integer.bitCount(dampbuf), 8);
+		int nulbits = 8 - onebits;
+		
+		//log.debug("gtc ob " + onebits + " nb " + nulbits + " db " + dampbuf);
+		
+		return onebits >= nulbits;
+		*/
 	}
 	
 	private boolean getTheirData() {
@@ -133,13 +147,13 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private void runPrimary() {
 		char last16bits = 0;
 		int x = 0;
+		int y = 0;
 		
-		byte[] databytes = "Hello, world!".getBytes(Charsets.UTF_8);
-		BitSet data = ByteArrays.toBitSet(databytes);
+		byte[] databytes = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ ".getBytes(Charsets.UTF_8);
 		
 		
 		while (true) {
-			char out = packByte(databytes[x]);
+			char out = packPair(databytes[x]);
 			
 			for (int i = 15; i >= 0; i--) {
 				setData(((out >> i) & 1) == 1);
@@ -151,13 +165,19 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				setClock(false);
 				waitClock(false);
 				
-				if (validByte(last16bits)) {
-					log.debug("PRI " + Bytes.format(unpackByte(last16bits)) + "/" + (char)unpackByte(last16bits));
+				if (validPair(last16bits)) {
+					//log.debug("PRI " + Bytes.format(unpackPair(last16bits)) + "/" + (char)unpackPair(last16bits));
+					//System.out.print((char)unpackPair(last16bits));
 					last16bits = 0; // XXX Check if this is needed
+					
+					y++;
+					if (y != 0 && y % 60 == 0) {
+						y = 0;
+						//System.out.println();
+					}
 				}
 				
 				last16bits <<= 1;
-				out >>= 1;
 			}
 			
 			x++;
@@ -167,11 +187,15 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	
 	private void runSecondary() {
 		char last16bits = 0;
+		int x = 0;
+		int y = 0;
+		
+		byte[] databytes = "Hello, world!".getBytes(Charsets.UTF_8);
 
 		while (true) {
-			char out = 26602;
+			char out = packPair(databytes[x]);
 
-			for (int i = 0; i < 16; i++) {
+			for (int i = 15; i >= 0; i--) {
 				waitClock(true);
 				last16bits |= (getTheirData()?1:0);
 	
@@ -181,14 +205,25 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 				setData((out & 1) == 1);
 				setClock(false);
 				
-				if (validByte(last16bits)) {
-					log.debug("SEC " + Bytes.format(unpackByte(last16bits)) + "/" + (char)unpackByte(last16bits));
+				if (validPair(last16bits)) {
+					//log.debug("SEC " + Bytes.format(unpackPair(last16bits)) + "/" + (char)unpackPair(last16bits));
+					
+					System.out.print(new String(new byte[]{unpackPair(last16bits)}, Charsets.UTF_8));
+
 					last16bits = 0; // XXX Check if this is needed
+					
+					y++;
+					if (y != 0 && y % 80 == 0) {
+						y = 0;
+						System.out.println();
+					}
 				}
 				
 				last16bits <<= 1;
-				out >>= 1;
 			}
+			
+			x++;
+			x %= databytes.length;
 		}
 	}
 	
@@ -205,28 +240,25 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	 * F: Special (flag) bit
 	 * P: Parity bit
 	 */
-	private boolean validByte(char bits) {
+	public static boolean validPair(char bits) {
 		byte highnibble = (byte) (bits >> 12 & 15);
 		byte outbyte = (byte) ((bits >> 4) & 0xFF);
 		byte parity = (byte) (bits & 7);
 		int bitcount = Integer.bitCount(outbyte) % 8;
 		
 		if (highnibble == 10) {
-			log.debug("vB hn " + Bytes.format(highnibble) + " " + highnibble + " ob " + Bytes.format(outbyte) + " pa " + Bytes.format(parity) + " bc " + bitcount + " valid " + (highnibble == 10 && bitcount == parity));
 			return highnibble == 10 && bitcount == parity;
 		} else {
 			return false;
 		}
 	}
 	
-	private byte unpackByte(char bits) {
+	public static byte unpackPair(char bits) {
 		return (byte) ((bits >> 4) & 0xFF);
 	}
 	
-	private char packByte(byte b) {
-		char out = (char) (40960 | (b << 4) | (Integer.bitCount(b) % 8));
-		//System.out.println(Bytes.format(out));
-		return out;
+	public static char packPair(byte b) {
+		return (char) (40960 | (b << 4) | (Integer.bitCount(b) % 8));
 	}
 
 	private void electPrimary() {
