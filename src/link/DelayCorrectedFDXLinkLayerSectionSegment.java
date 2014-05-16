@@ -53,8 +53,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
 			BitSet2 outgoingData = frameToSendNext.getBitSet();
-			log("Frame to send: " + frameToSendNext + "   outgoing bits: "
-					+ outgoingData.toString());
+			//log("Frame to send: " + frameToSendNext + "   outgoing bits: "
+			//		+ outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			boolean retry = false; //TODO uitzoeken waar deze gebruikt had moeten worden.
@@ -66,16 +66,16 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					//while it has bits to send or receive.
 
 					if (!connectionSync) {
-						log(connectionRole + "  Setting up sync..");
+						//log(connectionRole + "  Setting up sync..");
 						waitForSync();
-						log(connectionRole + "  sync done");
+						//log(connectionRole + "  sync done");
 					}
 
 					byte byteSent = NO_BYTE;
 					if (bitsReceived != 0 || connectionRole == SENDER) {
 						byteSent = sendBit(outgoingData, bitsSent);
 
-						log("Sent byte ["+bitsSent+"]: " + previousByteSent);
+						//log("Sent byte ["+bitsSent+"]: " + previousByteSent);
 					}
 
 					try {
@@ -94,7 +94,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 							incomingData.set(bitsReceived,
 									extractBitFromInput(receivedByte) == 1);
 							previousByteReceived = receivedByte;
-							log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
+							//log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
 						}
 						bitsReceived++;
 
@@ -105,20 +105,20 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					}
 				}
 				framesCompleted++;
-				System.out.println("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
+				log("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				//e.printStackTrace();
 				log("signaling panic");
 				signalAndWaitOnInvalidByteTransition();
-				log("signal and wait for panic complete, starting sync");
+				//log("signal and wait for panic complete, starting sync");
 				waitForSync();
-				log("sync complete");
+				//log("sync complete");
 			}
 			lastReceivedFrame = new FlaggedFrame(incomingData);
 			
-			log("Build received frame:  " + lastReceivedFrame.getPayload()
-					+ "   from bits: " + incomingData);
+			//log("Build received frame:  " + lastReceivedFrame.getPayload()
+			//		+ "   from bits: " + incomingData);
 		} else {
 			log("Not ready to exchange frames yet.");
 		}
@@ -141,6 +141,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				if(in!=previousByteReceived){
 					extractBitFromInput(in);
 					previousByteReceived = in;	
+				}else{
+					log("PANIC: Timout on waiting for ack");
 				}
 			} catch (InvalidByteTransitionException e) {
 				//Both sides seen invalidTransition.
@@ -148,7 +150,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				//591652698927615	8	Sending 3
 				signals++;
 				previousByteReceived = in;	
-				log("Signal got: "+in);
+				//log("Signal got: "+in);
 			}
 		}
 		
@@ -164,7 +166,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			signals--;
 		}
 		if(maxTime>System.nanoTime()){
-			log("Timeout on sending panic signals");
+			log("PANIC: Timeout on sending extra panic signals");
 		}
 		
 	}
@@ -182,7 +184,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				&& input == down.readByte() && input == down.readByte())) {
 			input = down.readByte();
 			if (System.nanoTime() > waitTime) {
-				log("Timeout on wait for ack loop!");
+				log("READBIT: Timeout on wait for ack loop!");
 				throw new TimeOutException();
 			}
 		}
@@ -190,24 +192,24 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	private void waitForSync() {
-		log("On line before sync: " + down.readByte());
+		//log("On line before sync: " + down.readByte());
 		boolean lastToSend = false;
 
-		log("Sending 3");
+		//log("Sending 3");
 		down.sendByte((byte) 3);
 		byte inputOne = down.readByte();
 		while (!(inputOne == 3 && checkStable(inputOne,5))) {
 			// Wait on 11.
 			inputOne = down.readByte();
 		}
-		log("Read 3.");
+		//log("Read 3.");
 		long waitTime = (long) (Math.random() * RANGE_SYNC_RANDOM_WAIT_NANO) + System.nanoTime();
 		while (System.nanoTime() < waitTime && !lastToSend) {
 			byte inputTwo = down.readByte();
 			if (inputTwo == 0 && checkStable(inputTwo, 4)){ 
 					// First to see, last to send.
 				connectionRole = SENDER;
-				log("Assumed role: " + connectionRole);
+				//log("Assumed role: " + connectionRole);
 				lastToSend = true;
 				down.sendByte((byte) 1);
 				// send ack.
@@ -217,7 +219,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			}
 		}
 		if (!lastToSend) {
-			log("Wait over, sending now");
+			//log("Wait over, sending now");
 			// First to send, last to receive ack.
 			connectionRole = RECEIVER;
 			down.sendByte((byte) 0);
@@ -226,7 +228,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			while (!(input==1 && checkStable(input,4))){ 
 					input = down.readByte();
 				if (System.nanoTime() > waitTill) {
-					log("Waited too long for other side, expecting desync");
+					log("SYNC: Waited too long for other side, expecting desync");
 					waitForSync();
 					return;
 				}
