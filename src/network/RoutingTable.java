@@ -18,7 +18,6 @@ import java.util.Map.Entry;
  * 3>2
  * 5>8
  * 2=192.168.0.1
- * @param <e>
  */
 public class RoutingTable {
     /** The map with routes. The first element is the destination host, the

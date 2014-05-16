@@ -66,13 +66,11 @@ public class Router {
                 Host host;
                 if (t.getTunnels().containsKey(addr)) {
                     // Add host with IP.
-                	Map<Byte, String> m = t.getTunnels();
-                    host = new Host(addr, m.get(addr));
+                    host = new Host(addr, t.getTunnels().get(addr));
                 } else if (t.getRoutes().containsKey(addr)) {
                     // Or with a route.
                     host = new Host(addr);
-                	Map<Byte, Byte> m = t.getRoutes();
-                    routesCache.put(host, m.get(addr));
+                    routesCache.put(host, t.getRoutes().get(addr));
                 } else {
                     // Well, this host has to appear somewhere...
                     host = new Host(addr);
