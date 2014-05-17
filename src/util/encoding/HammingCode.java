@@ -1,6 +1,8 @@
 package util.encoding;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import util.BitSet2;
 import util.Bytes;
@@ -21,44 +23,15 @@ import util.Bytes;
  * @author I3anaan
  *
  */
-public class Hamming74 {
+public class HammingCode {
 
-	public static void main(String[] args){
-		//printMatrix(matrixG);
-		
-		printMatrix(matrixH);
-		System.out.println("");
-		printMatrix(generateH(32));
-		
-		
-		
-		/*BitSet2 bs0 = new BitSet2();
-		bs0.set(0,true);
-		bs0.set(1,false);
-		bs0.set(2,true);
-		bs0.set(3,true);
-		System.out.println(Hamming74.encode(bs0)+"\n");
-		BitSet2 bs1 = new BitSet2();
-		bs1.set(0,false);
-		bs1.set(1,true);
-		bs1.set(2,true);
-		bs1.set(3,false);
-		bs1.set(4,false);
-		bs1.set(5,true);
-		bs1.set(6,true);
-		printMatrix(getSyndrome(bs1));
-		System.out.println(hasError(bs1));
-		System.out.println(getCorrected(bs1));*/
-	}
-	
-	
-	public static final int DATA_BITS = 4;
-	public static final int ENCODED_BITS = 7;
+	public int dataBitCount = 4;
+	public int encodedBitCount = 7;
 	/*
 	 * A00	A0m
 	 * An0	Anm
 	 */
-	public static final int[][] matrixG = new int[][]{
+	/*public static final int[][] matrixG = new int[][]{
 		new int[]{1,1,0,1},
 		new int[]{1,0,1,1},
 		new int[]{1,0,0,0},
@@ -75,6 +48,15 @@ public class Hamming74 {
 		new int[]{0,0,0,0,1,0,0},
 		new int[]{0,0,0,0,0,1,0},
 		new int[]{0,0,0,0,0,0,1}};
+	*/
+	public int[][] matrixH;
+	public int[][] matrixR;
+	public int[][] matrixG;
+	
+	public HammingCode(int dataBitCount){
+		generateMatrices(dataBitCount);		
+	}
+	
 	
 	/**
 	 * Multiply matrix a times b: a*b
@@ -85,7 +67,7 @@ public class Hamming74 {
 	 * 				int[]{0,1,1,0}	};
 	 * @return result matrix;
 	 */
-	public static int[][] mult(int a[][], int b[][]){//a[n][m], b[m][p]
+	public int[][] mult(int a[][], int b[][]){//a[n][m], b[m][p]
 		   if(a.length == 0) return new int[0][0];
 		   if(a[0].length != b.length) return null; //invalid dims
 		 
@@ -112,16 +94,15 @@ public class Hamming74 {
 	 * @param data	The data to encode (takes the first DATA_BITS bits)
 	 * @return	The encoded bits, of length ENCODED_BITS
 	 */
-	public static BitSet2 encode(BitSet2 data){
-		int[][] matrixData = new int[DATA_BITS][1];
-		for(int i=0;i<DATA_BITS;i++){
+	public BitSet2 encode(BitSet2 data){
+		int[][] matrixData = new int[dataBitCount][1];
+		for(int i=0;i<dataBitCount;i++){
 			matrixData[i][0]=data.get(i) ? 1 : 0;
 		}
-		
 		int[][] matrixEncoded = mult(matrixG,matrixData);
 		int[][] matrixEncodedBoolean = mod(matrixEncoded,2);
 		BitSet2 result = new BitSet2();
-		for(int i=0;i<ENCODED_BITS;i++){
+		for(int i=0;i<encodedBitCount;i++){
 			result.set(i,matrixEncodedBoolean[i][0]==1);
 		}
 		return result;
@@ -134,9 +115,9 @@ public class Hamming74 {
 	 * @param data	The data of length ENCODED_BITS to be decoded
 	 * @return	The syndrome vector used to check or correct errors.
 	 */
-	public static int[][] getSyndrome(BitSet2 data){
-		int[][] matrixData = new int[ENCODED_BITS][1];
-		for(int i=0;i<ENCODED_BITS;i++){
+	public int[][] getSyndrome(BitSet2 data){
+		int[][] matrixData = new int[encodedBitCount][1];
+		for(int i=0;i<encodedBitCount;i++){
 			matrixData[i][0]=data.get(i) ? 1 : 0;
 		}		
 		return mod(mult(matrixH,matrixData),2);
@@ -148,7 +129,7 @@ public class Hamming74 {
 	 * 			This result is correct as long as there are not 3 or more bit errors.
 	 * 			Will also return true (error) if the syndrome format is wrong.
 	 */
-	public static boolean hasError(int[][] syndrome){
+	public boolean hasError(int[][] syndrome){
 		if(syndrome[0].length!=1){return true;}//Wrong format;
 		for(int n=0;n<syndrome.length;n++){
 			if(syndrome[n][0]==1){return true;}//bit error			
@@ -159,7 +140,7 @@ public class Hamming74 {
 	/**
 	 * @return Whether or not the data has a bit error.
 	 */
-	public static boolean hasError(BitSet2 data){
+	public boolean hasError(BitSet2 data){
 		return hasError(getSyndrome(data));
 	}
 	
@@ -170,7 +151,7 @@ public class Hamming74 {
 	 * @param data	The encoded data to correct.
 	 * @return	The corrected (but still encoded) data
 	 */
-	public static BitSet2 getCorrected(BitSet2 data){
+	public BitSet2 getCorrected(BitSet2 data){
 		int[][] syndrom = getSyndrome(data);
 		if(!hasError(syndrom)){
 			return data;
@@ -179,8 +160,9 @@ public class Hamming74 {
 			for(int i=0; i<syndrom.length;i++){
 				errorIndex = errorIndex+ (int)(syndrom[i][0]*Math.pow(2, i));
 			}
-			data.flip(errorIndex);
-			return data;
+			BitSet2 result = (BitSet2) data.clone();
+			result.flip(errorIndex);
+			return result;
 		}
 	}
 	
@@ -190,9 +172,9 @@ public class Hamming74 {
 	 * @param data	encoded data to decode
 	 * @return	decoded data.
 	 */
-	public static BitSet2 decode(BitSet2 data){
-		int[][] matrixData = new int[ENCODED_BITS][1];
-		for(int i=0;i<ENCODED_BITS;i++){
+	public BitSet2 decode(BitSet2 data){
+		int[][] matrixData = new int[encodedBitCount][1];
+		for(int i=0;i<encodedBitCount;i++){
 			matrixData[i][0]=data.get(i) ? 1 : 0;
 		}
 		
@@ -233,30 +215,86 @@ public class Hamming74 {
 	
 	
 	/**
-	 * Rounds the dataBitCount up to the nearest power of 2 
-	 * @param dataBits
-	 * @return
+	 * Generates the matrices H, R and G based on the dataBitCount.
+	 * These matrices are used in encoding and decoding.
+	 * @param dataBitCount	The amount of dataBits this code should support
+	 * 			Rounds the dataBitCount up to the nearest power of 2 
 	 */
-	public static int[][] generateH(int dataBitCount){
+	public void generateMatrices(int dataBitCount){
+		//Generate H
 		int dataBitCountCeiled = (int)Math.pow(2,Math.ceil(Math.log(dataBitCount)/Math.log(2)));
+		this.dataBitCount = dataBitCountCeiled;
 		int parityBitsNeeded = (int) Math.ceil(Math.log(dataBitCount)/Math.log(2)) +1;
-		//System.out.println("DataBitCount="+dataBitCount+"  DataBitCountCeiled="+dataBitCountCeiled+"  ParityBitsNeeded="+parityBitsNeeded);
+		this.encodedBitCount = dataBitCountCeiled+parityBitsNeeded;
 		int[][] h = new int[parityBitsNeeded][parityBitsNeeded+dataBitCountCeiled];
 		for(int i=0;i<parityBitsNeeded;i++){
 			int offset = sumTill(i);
-			//System.out.println("Offset = "+offset);
 			for(int a=offset;a<parityBitsNeeded+dataBitCountCeiled;a=a+((int)Math.pow(2, i))*2){
-				//System.out.println("a="+a);
 				for(int b=0;b<Math.min((parityBitsNeeded+dataBitCountCeiled)-a,((int)Math.pow(2, i)));b++){
-					//System.out.println("b="+b);
-					//printMatrix(h);
 					h[i][a+b] = 1;
 				}
 			}
 		}
-		return h;
+		//H done
+		//System.out.print("H: ");
+		//printMatrix(h);
+		this.matrixH = h;
+		
+		//Generate R
+		int[][] r = new int[dataBitCountCeiled][dataBitCountCeiled+parityBitsNeeded];
+		int[] dataIndices = getDataIndices(dataBitCountCeiled);
+		for(int i=0;i<dataBitCountCeiled;i++){
+			r[i][dataIndices[i]]=1;
+		}
+		//R done
+		//System.out.print("R: ");
+		//printMatrix(r);
+		this.matrixR = r;
+		
+		//Generate G
+		int[][] g = new int[dataBitCountCeiled+parityBitsNeeded][dataBitCountCeiled];
+		int pivots = 0;
+		for(int i=0;i<dataBitCountCeiled+parityBitsNeeded;i++){
+			if(indexOf(dataIndices,i)!=-1){
+				g[i][indexOf(dataIndices,i)]=1;
+				pivots++;
+			}else{
+				g[i] = getCoverRow(h,dataIndices,i-pivots);
+			}
+		}
+		//G done
+		//System.out.print("G: ");
+		//printMatrix(g);
+		this.matrixG = g;
 	}
 	
+	
+	
+	//The following methods are support methods for generating the matrices H R and G.
+	
+	
+	/**
+	 * Returns a array where the index represents the data bit index.
+	 * This array represents which data bits the given parity bit covers (1).
+	 * @param h	The H matrix
+	 * @param dataIndices	The array specifying the indices of the databits (in h)
+	 * @param parityBitIndex	The parity bit number to check (this count has nothing to do with databits)
+	 * @return	An array specifying which data bits the given parity bit covers.
+	 */
+	private static int[] getCoverRow(int[][] h, int[] dataIndices,int parityBitIndex) {
+		int[] result = new int[dataIndices.length];
+		for(int i=0;i<dataIndices.length;i++){
+			result[i] = h[parityBitIndex][dataIndices[i]];
+		}
+		return result;
+	}
+
+	/**
+	 * Like a factorial, but with addition.
+	 * equal to (0<=n<=value)sigma(n)
+	 * @param value	Till where to count
+	 * @return (0<=n<=value)sigma(n)
+	 */
 	public static int sumTill(int value){
 		int result = 0;
 		for(int i=0;i<=value;i++){
@@ -264,5 +302,42 @@ public class Hamming74 {
 		}
 		return result;
 	}
+	/**
+	 * Makes an array in which the indices of data bits are stored.
+	 * These indices are to be used in matrix G and H.
+	 * @param dataBitCount	The amount of dataBits to contain
+	 * @return an array in which the indices of data bits are stored.
+	 */
+	public static int[] getDataIndices(int dataBitCount){
+		int offset = 0;
+		int[] indices = new int[dataBitCount];
+		int count=0;
+		int p = 0;
+		while(count<dataBitCount){
+			int d;
+			offset++;
+			for(d=0;d<Math.pow(2, p)-1 && count<dataBitCount;d++){
+				indices[count] =offset;
+				offset++;
+				count++;
+			}
+			p++;
+		}
+		return indices;
+	}
 	
+	/**
+	 * Returns the index of the given value in the given array
+	 * @param arr	The array to check
+	 * @param value	The value to search
+	 * @return	First index of the value in array, or -1 if not found;
+	 */
+	public static int indexOf(int[] arr, int value){
+		for(int i=0;i<arr.length;i++){
+			if(arr[i]==value){
+				return i;
+			}
+		}
+		return -1;
+	}
 }
