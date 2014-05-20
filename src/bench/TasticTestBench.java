@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import com.google.common.base.Charsets;
 
-import phys.BitErrorPhysicalLayer;
-import phys.VirtualCable;
-import phys.VirtualCablePhysicalLayer;
+import phys.diag.BitErrorPhysicalLayer;
+import phys.diag.VirtualCable;
+import phys.diag.VirtualCablePhysicalLayer;
 import web.WebService;
 import link.BittasticLinkLayer;
 import link.FrameLinkLayer;

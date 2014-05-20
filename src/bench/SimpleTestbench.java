@@ -1,14 +1,13 @@
 package bench;
 
 import link.*;
-import phys.BitErrorPhysicalLayer;
-import phys.CheckingPhysicalLayer;
-import phys.CleanStartPhysicalLayer;
-import phys.DebouncePhysicalLayer;
-import phys.DelayPhysicalLayer;
-import phys.DumpingPhysicalLayer;
-import phys.PerfectVirtualPhysicalLayer;
-import phys.VirtualPhysicalLayer;
+import phys.diag.BitErrorPhysicalLayer;
+import phys.diag.CheckingPhysicalLayer;
+import phys.diag.DebouncePhysicalLayer;
+import phys.diag.DelayPhysicalLayer;
+import phys.diag.DumpingPhysicalLayer;
+import phys.diag.PerfectVirtualPhysicalLayer;
+import phys.diag.VirtualPhysicalLayer;
 import util.Bytes;
 
 /**
