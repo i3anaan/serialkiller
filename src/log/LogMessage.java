@@ -60,7 +60,7 @@ public class LogMessage {
     }
 
     public enum Subsystem {
-        APPLICATION, NETWORK, LINK, PHYS, TUNNEL, WEB, UNKNOWN
+        APPLICATION, NETWORK, LINK, PHYS, TUNNEL, WEB, STARTER, UNKNOWN
     }
 
     public enum Severity {

@@ -7,4 +7,8 @@ public abstract class Layer {
 	public String toString() {
 		return getClass().getSimpleName() + (down == null ? "" : "/" + down.toString());
 	}
+
+	/** Callback for any layer-specific startup behaviour. */
+	public void start() {
+	}
 }
