@@ -1,11 +1,11 @@
 package network;
 
-import application.ApplicationLayer;
 import common.Layer;
 import link.FrameLinkLayer;
 import log.LogMessage;
 import log.Logger;
 import network.handlers.*;
+import tunnel.Tunneling;
 
 import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
@@ -50,6 +50,9 @@ public class NetworkLayer extends Layer implements Runnable {
     /** The link layer that is used. */
     private FrameLinkLayer link;
 
+    /** The tunneling class instance. */
+    private Tunneling tunnels;
+
     /** The router for this network. */
     private Router router;
 
@@ -70,14 +73,11 @@ public class NetworkLayer extends Layer implements Runnable {
 
     /**
      * Constructs a new NetworkLayer instance.
-<<<<<<< Updated upstream
-=======
      * @param link The LinkLayer implementation instance to use. Only
      *             FrameLinkLayer subclass instances are supported.
      * @param address The TPP address of this host.
      * @param sibling the TPP address of the sibling host, connected by the
      *                serial cable.
->>>>>>> Stashed changes
      */
     public NetworkLayer(FrameLinkLayer link, byte address, byte sibling) {
         ADDRESS_SELF = address;
@@ -93,6 +93,8 @@ public class NetworkLayer extends Layer implements Runnable {
 
         router = new Router();
         routerLock = new ReentrantLock(true);
+
+        this.tunnels = new Tunneling(this);
 
         // Load routes
         loadDefaultRoutes();
@@ -208,7 +210,7 @@ public class NetworkLayer extends Layer implements Runnable {
                     retransmissionHandler.offer(p); // Offer the packet again.
                     NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
                 } else {
-                    NetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()))
+                    NetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()));
                 }
             }
         }

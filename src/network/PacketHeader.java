@@ -107,8 +107,8 @@ public class PacketHeader {
         precompiled = false;
     }
 
-    public long getLength() {
-        return ByteArrays.parseLong(new byte[]{(byte) (Bytes.fromBitSet(raw, 32) & 7), Bytes.fromBitSet(raw, 40)});
+    public int getLength() {
+        return (int) ByteArrays.parseLong(new byte[]{(byte) (Bytes.fromBitSet(raw, 32) & 7), Bytes.fromBitSet(raw, 40)});
     }
 
     protected void setLength(long length) {

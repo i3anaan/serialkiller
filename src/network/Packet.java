@@ -186,6 +186,10 @@ public class Packet {
         return result;
     }
 
+    public static PacketHeader parseHeader(byte[] raw) {
+        return new PacketHeader(raw);
+    }
+
     /**
      * Get the meta timestamp.
      * @return The timestamp.
