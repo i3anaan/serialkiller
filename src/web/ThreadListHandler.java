@@ -2,7 +2,7 @@ package web;
 
 import java.util.Set;
 
-public class ThreadListHandler extends ServiceHandler {
+class ThreadListHandler extends ServiceHandler {
 
 	@Override
 	public String getPath() {

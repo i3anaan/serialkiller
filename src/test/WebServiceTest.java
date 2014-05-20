@@ -9,15 +9,22 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
+import log.LogMessage;
+import log.LogService;
+
 import static org.junit.Assert.*;
 
 /** Runs and tests the web interface. */
 public class WebServiceTest {
     private static final int PORT = 1234;
+    private static LogMessage.Severity before;
     private static Thread thread;
 
     @BeforeClass
     public static void setUp() throws Exception {
+        before = LogService.getLevel();
+        LogService.setLevel(LogMessage.Severity.WARNING);
+        
         WebService ws = new WebService(1234);
         thread = new Thread(ws);
         thread.start();
@@ -26,6 +33,7 @@ public class WebServiceTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
+        LogService.setLevel(before);
         thread.interrupt();
     }
 

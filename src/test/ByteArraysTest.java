@@ -47,7 +47,7 @@ public class ByteArraysTest {
     public void testFromBitSet() {
         byte[] expected = {(byte) 112, (byte) 45};
 
-        BitSet2 in = new BitSet2(24);
+        BitSet2 in = new BitSet2(16);
         in.set(1, 4, true);
         in.set(10, true);
         in.set(12, 14, true);
