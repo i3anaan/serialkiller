@@ -13,7 +13,7 @@ import util.Bytes;
  * @author I3anaan
  * 
  */
-public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable {
+public class DCFDXLLSSReadSendManager2000 extends BytewiseLinkLayer implements Runnable {
 	DelayCorrectedFDXLinkLayerSectionSegment down;
 
 	private ArrayBlockingQueue<Byte> inbox; // TODO frames van maken;

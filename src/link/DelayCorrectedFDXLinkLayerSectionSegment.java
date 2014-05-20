@@ -19,7 +19,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	byte lastSentSyncPing = 0;
 	byte previousByteSent = 0;
 	byte previousByteReceived = 0;
-	Layer down;
+	PhysicalLayer down;
 
 	private String connectionRole = "unkown"; // Debug
 

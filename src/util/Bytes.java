@@ -1,6 +1,7 @@
 package util;
 
 import util.BitSet2;
+import java.util.Collection;
 
 /**
  * Contains utility functions for working with bytes.
@@ -19,23 +20,6 @@ public abstract class Bytes {
 	public static String format(byte b, int amount) {
 		return String.format("%0" + amount + "d",
 				Integer.parseInt(Integer.toBinaryString(b & 0xFF)));
-	}
-
-	/**
-	 * Parses a bit in a byte into a boolean.
-	 * 
-	 * @param b
-	 *            The byte.
-	 * @param n
-	 *            The bit number (0-7).
-	 * @return The boolean represented by the bit in the byte.
-	 */
-	public static boolean parseBoolean(byte b, int n) {
-		assert (n >= 0 && n <= 7);
-
-		byte bit = (byte) ((b << n) >> 7);
-
-		return ((bit & 1) == 1);
 	}
 
 	/**
@@ -79,4 +63,47 @@ public abstract class Bytes {
 		return data;
 	}
 
+	/** Turns a collection of numbers into an array of bytes. Based on Guava's Bytes.toArray. */
+	public static byte[] toArray(Collection<? extends Number> collection) {
+      Object[] boxedArray = collection.toArray();
+      int len = boxedArray.length;
+      
+      byte[] array = new byte[len];
+      for (int i = 0; i < len; i++) {
+        array[i] = ((Number) boxedArray[i]).byteValue();
+      }
+      return array;
+	}
+
+    /**
+     * Parses a bit in a byte into a boolean.
+     * @param b The byte.
+     * @param n The bit number (0-7).
+     * @return The boolean represented by the bit in the byte.
+     */
+    public static boolean parseBoolean(byte b, int n) {
+        assert (n >= 0 && n <= 7);
+
+        byte bit = (byte) ((b << n) >> 7);
+
+        return ((bit & 1) == 1);
+    }
+
+    /**
+     * Convert a byte to a bit set with a given size, and puts the byte on a
+     * given offset.
+     * @param b The byte to convert.
+     * @param size The size of the new BitSet object (in bits).
+     * @param offset The bit number where to start the byte.
+     * @return The new BitSet object.
+     */
+    public static BitSet2 toBitSet2(byte b, int size, int offset) {
+        BitSet2 data = new BitSet2(size);
+
+        for (int i = 0; i < 8; i++) {
+            data.set(i + offset, ((b >> (7-i)) & 1) == 1);
+        }
+
+        return data;
+    }
 }

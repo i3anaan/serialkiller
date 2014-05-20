@@ -10,10 +10,11 @@ package phys;
  * down.
  */
 public class DelayPhysicalLayer extends PhysicalLayer {
+	protected PhysicalLayer down;
 	private int delay;
 
 	public DelayPhysicalLayer(PhysicalLayer down) {
-		this(down, 5);
+		this(down, 1);
 	}
 
 	public DelayPhysicalLayer(PhysicalLayer down, int delay) {

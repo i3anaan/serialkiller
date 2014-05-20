@@ -10,7 +10,7 @@ package phys;
  * 
  */
 public class CleanStartPhysicalLayer extends PhysicalLayer {
-
+	protected PhysicalLayer down;
 	byte startByte = 0;
 	boolean fakingFirst = true;
 	byte startData;

@@ -7,7 +7,6 @@ import phys.DumpingPhysicalLayer;
 import phys.HardwareLayer;
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
-import util.Bytes;
 
 public class AlwaysReceivingTest {
 
@@ -21,7 +20,6 @@ public class AlwaysReceivingTest {
 		float byte1 = 0;
 		float byte2 = 0;
 		float byte3 = 0;
-
 		byte old = -1;
 
 		float total = 1;

@@ -6,8 +6,9 @@ import java.util.Random;
  *
  */
 public class BitErrorPhysicalLayer extends PhysicalLayer {
+	protected PhysicalLayer down;
 	private Random rand;
-	private double chance = 0.0003;
+	private double chance = 0.003;
 
 	public BitErrorPhysicalLayer(PhysicalLayer down) {
 		super();
