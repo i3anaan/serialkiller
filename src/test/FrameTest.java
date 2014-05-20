@@ -85,8 +85,6 @@ public class FrameTest {
 		}
 		
 		assertNotEquals(ff2.getBitSet(), ff3.getBitSet());
-		System.out.println(ff2.getBitSet());
-		System.out.println(ff3.getBitSet());
 		FlaggedFrame ff4 = new FlaggedFrame(ff3.getBitSet());
 		assertEquals(ff3.getBitSet(),ff4.getBitSet());
 		FlaggedFrame ff5 = new FlaggedFrame(ff2.getBitSet());

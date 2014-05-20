@@ -26,7 +26,6 @@ public class BitSetTests {
 		bs5.set(9,false);
 		bs4.set(0,false);
 		assertEquals(bs5,BitSets.concatenate(bs3, bs4));
-		System.out.println(bs5);
 		
 		BitSet2 bs6 = new BitSet2();
 		bs6.set(0,false);
