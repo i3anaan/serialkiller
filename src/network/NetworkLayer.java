@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NetworkLayer extends Layer implements Runnable {
     public static final long TIMEOUT = 10000; // in milliseconds
+    public static final int MAX_RETRANSMISSIONS = 10; // 0 for no maximum
     public final byte ADDRESS_SELF;
     public final byte ADDRESS_SIBLING;
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
@@ -64,13 +65,19 @@ public class NetworkLayer extends Layer implements Runnable {
     /** The sent and to be acknowledged packets. */
     private Collection<Packet> sent;
 
-    long ackTimeout;
-
     /** The next available sequence number. */
     private int seqnum;
 
     /**
      * Constructs a new NetworkLayer instance.
+<<<<<<< Updated upstream
+=======
+     * @param link The LinkLayer implementation instance to use. Only
+     *             FrameLinkLayer subclass instances are supported.
+     * @param address The TPP address of this host.
+     * @param sibling the TPP address of the sibling host, connected by the
+     *                serial cable.
+>>>>>>> Stashed changes
      */
     public NetworkLayer(FrameLinkLayer link, byte address, byte sibling) {
         ADDRESS_SELF = address;
@@ -86,8 +93,6 @@ public class NetworkLayer extends Layer implements Runnable {
 
         router = new Router();
         routerLock = new ReentrantLock(true);
-
-        ackTimeout = System.currentTimeMillis();
 
         // Load routes
         loadDefaultRoutes();
@@ -192,13 +197,22 @@ public class NetworkLayer extends Layer implements Runnable {
      */
     public void checkRetransmissions() {
         NetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
+
         for (Packet p : sent) {
             if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
-                sent.remove(p);
-                retransmissionHandler.offer(p);
-                NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
+                sent.remove(p); // We handled this one.
+
+                // Only retransmit if the threshold is not exceeded.
+                if (MAX_RETRANSMISSIONS > 0 && p.retransmissions() < MAX_RETRANSMISSIONS) {
+                    p.retransmit(); // Mark packet as retransmitted once again.
+                    retransmissionHandler.offer(p); // Offer the packet again.
+                    NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
+                } else {
+                    NetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()))
+                }
             }
         }
+
         NetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
     }
 

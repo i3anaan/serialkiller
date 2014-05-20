@@ -32,6 +32,9 @@ public class Packet {
     /** Timestamp. */
     private long timestamp;
 
+    /** Number of retransmissions. */
+    private int retransmissions;
+
     /**
      * Constructs a new, empty Packet object with a new, empty header.
      */
@@ -197,6 +200,21 @@ public class Packet {
      */
     public void timestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    /**
+     * Returns the amount of retransmissions done for this packet.
+     * @return The amount of retransmissions done for this packet.
+     */
+    public int retransmissions() {
+        return retransmissions;
+    }
+
+    /**
+     * Marks this packet as being retransmitted. Updates a counter.
+     */
+    public void retransmit() {
+        retransmissions++;
     }
 
     public String toString() {
