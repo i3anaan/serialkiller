@@ -21,13 +21,13 @@ public class VirtualPhysicalLayer extends PhysicalLayer {
 
 	@Override
 	public byte readByte() {
-		byte s;
-		synchronized (this) { s = state; }
-		return s;
+		synchronized (this) {
+			return state;
+		}
 	}
 
 	/** Takes a byte sent by (possibly) another thread. */
 	public void takeByte(byte data) {
-		synchronized (this) { state = data; }
+		state = data;
 	}
 }
