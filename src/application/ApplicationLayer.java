@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Observable;
 
+import log.LogMessage;
+import log.Logger;
+import network.NetworkLayer;
+import network.Packet;
 import application.message.*;
 
 /**
@@ -20,10 +24,13 @@ import application.message.*;
  */
 public class ApplicationLayer extends Observable {
 
-	public static final String rootDir = System.getProperty("user.home");
+	/** NetworkLayer that this ApplicationLayer communicates with */
+	private NetworkLayer networkLayer;
+	/** The Logger object used by this layer to send log messages to the web interface */
+	private Logger logger;
 	
-	public ApplicationLayer(){
-
+	public ApplicationLayer(NetworkLayer nl){
+		this.networkLayer = nl;
 	}
 
 
@@ -33,48 +40,35 @@ public class ApplicationLayer extends Observable {
 	 * @return
 	 * @throws CommandNotFoundException 
 	 */
-	public void readPayload(byte[] data) throws CommandNotFoundException{
+	public void readPayload(byte adress, byte[] data) throws CommandNotFoundException{
 		// Retrieves command char from payload
 		char command = getCommand(data);
 
-		// Send Chat message
+		// Chat message
 		if(command == 'C'){
-			// Creates a new chat message object
-			ChatMessage cm = new ChatMessage(data);
-			//TODO call gui to parse chat message
-			System.out.println("Nickname: " +cm.getNickname()+"\n");
-			System.out.println("Message: " +cm.getMessage()+"\n");
+			// Creates a new chat message object and notifies the gui
+			ChatMessage cm = new ChatMessage(adress, data);
 			setChanged();
 			notifyObservers(cm);
 
 		}
-		// Send request to transfer file
+		// Request to transfer file
 		else if(command == 'F'){
 
 			FileOfferMessage fm = new FileOfferMessage(data);
-			System.out.println("FileOfferMessage: -----------");
-			System.out.println("FileSize: "+fm.getFileSize());
-			System.out.println("FileName: "+fm.getFileName()+ "\n");
-			//TODO call gui and notify of file offer
 			setChanged();
 			notifyObservers(fm);
 		}
 		// Accept file transfer
 		else if(command == 'A'){
 			FileAcceptMessage fm = new FileAcceptMessage(data);
-			System.out.println("FileAcceptMessage: -----------");
-			System.out.println("FileSize: "+fm.getFileSize());
-			System.out.println("FileName: "+fm.getFileName()+"\n");
-			
-			//TODO call networkLayer and send data for wrapping
+			//TODO start file transfer
 			byte[] send = readFile(rootDir + "/downloads");
 			
 		}
 		// Transfer file
 		else if(command == 'S'){
 			FileTransferMessage fm = new FileTransferMessage(data);
-			System.out.println("FileTransferMessage: -----------");
-			System.out.println(fm.getFileBytes().length + " bytes \n");
 			//Writes the file to requested path
 			
 			//TODO call gui to request filepath
@@ -86,25 +80,6 @@ public class ApplicationLayer extends Observable {
 			throw new CommandNotFoundException(String.format("command: %c", command));
 
 		}
-	}
-
-	/**
-	 * Converts a HexString into a byte array
-	 * @param s String to be converted
-	 * @return b byte array
-	 */
-	// TODO depriciated
-	public static byte[] writePayload(String s){
-
-		
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-					+ Character.digit(s.charAt(i+1), 16));
-		}
-		return data;
-
 	}
 
 	/**
@@ -191,4 +166,37 @@ public class ApplicationLayer extends Observable {
 		return data;
 	
 	}
+	
+	 @Override
+	    public void run() {
+
+	        boolean run = true;
+
+	        // Read payloads in the queue.
+	        while (run) {
+	            try {
+	                Payload p = networkLayer.read();
+
+	                // incoming payload
+	                	readPayload(p.adress, p.data);
+	                    ApplicationLayer.getLogger().debug("Received payload: " + p.toString() + ".");
+	                    return; // We are done.
+
+	                sendPacket(p);
+	            } catch (InterruptedException e) {
+	                // Exit gracefully.
+	                run = false;
+	            }
+	        }
+	        ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
+
+	    }
+	    
+	 	/** Returns the Logger object for this ApplicationLayer */
+	    public static Logger getLogger() {
+	        if (logger == null) {
+	            logger = new Logger(LogMessage.Subsystem.NETWORK);
+	        }
+	        return logger;
+	    }
 }

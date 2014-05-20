@@ -207,22 +207,20 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	
 	/**
 	 * Method to be called for saving files when a file transfer
-	 * request is received
-	 * @return the path to save the file to
+	 * request is received, returns null when file offer is refused
+	 * @param name of sender
+	 * @param name of file
+	 * @param size of file in bytes
+	 * @return path to save file to
 	 */
-	
-	private void saveFile(){
-		FileOfferDialog fod = new FileOfferDialog(GUI.this,"Henk", "trolface.jpg", 12);
+	private String saveFile(String senderName, String fileName, int fileSize){
+		
+		FileOfferDialog fod = new FileOfferDialog(GUI.this, senderName, fileName, fileSize);
 		fod.setVisible(true);
+		
 		String rval = fod.getValue();
 		
-		if(rval != FileOfferDialog.FILEOFFER_REJECT){
-			System.out.println(fod.getValue());
-		}else{
-			// IGNORE FILE
-		}
-		
-		
+		return rval;
 	}
 
 	@Override
@@ -249,7 +247,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			// TODO 1: play sound
 			// TODO 2: parse system message
 			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
-			saveFile();
+			saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 		}
 
 
