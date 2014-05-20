@@ -38,12 +38,12 @@ public class PacketHeader {
             throw new IllegalArgumentException("The raw data is not of the correct size.");
         }
 
-        this.raw = ByteArrays.toBitSet(raw);
+        this.raw = BitSet2.valueOf(raw);
         precompiled = true;
     }
 
     protected byte[] compile() {
-        return ByteArrays.fromBitSet(raw, HEADER_LENGTH);
+        return raw.toByteArray();
     }
 
     protected BitSet2 raw() {

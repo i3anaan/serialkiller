@@ -70,10 +70,10 @@ public class FrameTest {
 			arr1.add((byte)22);
 		}
 		
-		FlaggedFrame ff0 = new FlaggedFrame(arr0);
-		FlaggedFrame ff1 = new FlaggedFrame(arr1);
-		FlaggedFrame ff2 = new FlaggedFrame(arr2);
-		FlaggedFrame ff3 = new FlaggedFrame(arr3);
+		FlaggedFrame ff0 = new FlaggedFrame(arr0,'a');
+		FlaggedFrame ff1 = new FlaggedFrame(arr1,'b');
+		FlaggedFrame ff2 = new FlaggedFrame(arr2,'ç');
+		FlaggedFrame ff3 = new FlaggedFrame(arr3,'d');
 		
 		assert(ff2.getPayload().getUnit(0).b==(byte)44);
 		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
@@ -84,12 +84,12 @@ public class FrameTest {
 			}
 		}
 		
-		assertNotEquals(ff2.getBitSet(), ff3.getBitSet());
-		System.out.println(ff2.getBitSet());
-		System.out.println(ff3.getBitSet());
-		FlaggedFrame ff4 = new FlaggedFrame(ff3.getBitSet());
-		assertEquals(ff3.getBitSet(),ff4.getBitSet());
-		FlaggedFrame ff5 = new FlaggedFrame(ff2.getBitSet());
-		assertEquals(ff2.getBitSet(),ff5.getBitSet());		
+		assertNotEquals(ff2.getDataBitSet(), ff3.getDataBitSet());
+		System.out.println(ff2.getDataBitSet());
+		System.out.println(ff3.getDataBitSet());
+		FlaggedFrame ff4 = new FlaggedFrame(ff3.getDataBitSet());
+		assertEquals(ff3.getDataBitSet(),ff4.getDataBitSet());
+		FlaggedFrame ff5 = new FlaggedFrame(ff2.getDataBitSet());
+		assertEquals(ff2.getDataBitSet(),ff5.getDataBitSet());		
 	}
 }

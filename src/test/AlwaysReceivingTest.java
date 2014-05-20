@@ -14,9 +14,7 @@ public class AlwaysReceivingTest {
 		float byte1 = 0;
 		float byte2 = 0;
 		float byte3 = 0;
-		
 		byte old = -1;
-		
 		float total = 1;
 
 		while (true) {

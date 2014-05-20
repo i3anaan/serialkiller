@@ -34,11 +34,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	protected boolean setFrameToSend;
 	
 	//TODO experiment with timeout values
-	public static final long TIMEOUT_NO_NEW_BIT_NANO = 5000000l;
-	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 100000l;
-	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 100000l;
-	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100000l;
-	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100000l;
+	public static final long TIMEOUT_NO_NEW_BIT_NANO = 10*1000000l;
+	public static final long TIMEOUT_PANIC_NO_NEW_BIT_NANO= 10*1000000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NANO= 100*1000000l;
+	public static final long TIMEOUT_PANIC_EXTRA_SIGNALS_NO_NEW_BIT_NANO= 1*1000000l;
+	public static final long TIMEOUT_SYNC_PROCEDURE_DESYNC_NANO = 100*1000000l;
+	public static final long RANGE_SYNC_RANDOM_WAIT_NANO = 100*1000000l;
 	
 	private int framesStartedSending;
 	private int framesCompleted;
@@ -52,7 +53,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			readFrame = false;
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
-			BitSet2 outgoingData = frameToSendNext.getBitSet();
+			BitSet2 outgoingData = frameToSendNext.getDataBitSet();
 			//log("Frame to send: " + frameToSendNext + "   outgoing bits: "
 			//		+ outgoingData.toString());
 			int bitsReceived = 0;
@@ -109,7 +110,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				//e.printStackTrace();
-				log("signaling panic");
+				//log("signaling panic");
+				log("FRAME FAILED");
 				signalAndWaitOnInvalidByteTransition();
 				//log("signal and wait for panic complete, starting sync");
 				waitForSync();
@@ -131,6 +133,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		while(signals<3){
 			byte in = -1;
 			try {
+				log("PANIC: Sending:"+(state ? (byte) 1 : (byte) 2)+"  signals received: "+signals);
 				down.sendByte(state ? (byte) 1 : (byte) 2);
 				state = !state;
 				long maxTime = System.nanoTime()+TIMEOUT_PANIC_NO_NEW_BIT_NANO;
@@ -140,10 +143,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				}
 				if(in!=previousByteReceived){
 					extractBitFromInput(in);
-					previousByteReceived = in;	
+					previousByteReceived = in;
+					signals = 0;
 				}else{
 					log("PANIC: Timout on waiting for ack");
 				}
+				
 			} catch (InvalidByteTransitionException e) {
 				//Both sides seen invalidTransition.
 				//TODO might need to check for this multiple times
@@ -152,23 +157,25 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				previousByteReceived = in;	
 				//log("Signal got: "+in);
 			}
+			
 		}
-		
+		int extraSignals = 100;
 		long maxTime = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS_NANO;
-		while(signals>-10 && maxTime>System.nanoTime()){
+		while(extraSignals>0 && maxTime>System.nanoTime()){
 			down.sendByte(state ? (byte) 1 : (byte) 2);
 			state = !state;
 			byte in = getStableInput();
-			while(in==previousByteReceived && maxTime>System.nanoTime()){
+			long maxTimeNewInput = System.nanoTime()+TIMEOUT_PANIC_EXTRA_SIGNALS_NO_NEW_BIT_NANO;
+			while(in==previousByteReceived && maxTimeNewInput>System.nanoTime()){
 				in = getStableInput();
 			}
 			previousByteReceived = in;
-			signals--;
+			extraSignals--;
 		}
-		if(maxTime>System.nanoTime()){
-			log("PANIC: Timeout on sending extra panic signals");
+		if(maxTime<System.nanoTime()){
+			log("PANIC: Timeout on sending extra panic signals, amount sent: "+(100-extraSignals));
 		}
-		
+		log("PANIC: Signal and wait procedure complete");
 	}
 
 	private byte sendBit(BitSet2 outputData, int index) {
@@ -319,10 +326,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public synchronized void log(String msg) {
-		//System.out.println(System.nanoTime() + "\t"
-		//		+ Thread.currentThread().getId() + "\t" + msg);
+		System.out.println(System.nanoTime() + "\t"
+				+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
 		System.err.flush();
 	}
-
 }

@@ -40,20 +40,18 @@ public class ByteArraysTest {
         expected.set(10, true);
         expected.set(12, 14, true);
         expected.set(15, true);
-
-        assertEquals(expected, ByteArrays.toBitSet(in));
+        assertEquals(expected, BitSet2.valueOf(in));
     }
 
     @Test
     public void testFromBitSet() {
         byte[] expected = {(byte) 112, (byte) 45};
 
-        BitSet2 in = new BitSet2(16);
+        BitSet2 in = new BitSet2(24);
         in.set(1, 4, true);
         in.set(10, true);
         in.set(12, 14, true);
         in.set(15, true);
-
         assertTrue(Arrays.equals(expected, ByteArrays.fromBitSet(in)));
     }
 
