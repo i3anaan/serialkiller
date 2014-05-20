@@ -1,13 +1,9 @@
 package link.jack;
 
-import javax.management.RuntimeErrorException;
-
 import util.BitSet2;
-import util.ByteArrays;
-import util.Bytes;
 import util.encoding.HammingCode;
 
-public class HammingUnit {
+public class HammingUnit{
 
 	public byte b;
 	private HammingCode hc;
@@ -54,8 +50,8 @@ public class HammingUnit {
 		return (isSpecial() ? "F" : "D") +getEncodedPayloadAsBitSet2();
 	}
 	
-	public Unit getClone(){
-		return new Unit(getDecodedPayload(),isSpecial());
+	public PureUnit getClone(){
+		return new PureUnit(getDecodedPayload(),isSpecial());
 	}
 	
 	public boolean equals(Object obj){

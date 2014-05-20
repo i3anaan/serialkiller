@@ -16,7 +16,7 @@ import util.Bytes;
  */
 public class Frame {
 
-	protected Unit[] units = new Unit[PAYLOAD_UNIT_COUNT];
+	protected PureUnit[] units = new PureUnit[PAYLOAD_UNIT_COUNT];
 
 	public static final int PAYLOAD_UNIT_COUNT = 10;
 	//public static final int PAYLOAD_SIZE_BITS = PAYLOAD_SIZE_BYTES * 8;
@@ -31,19 +31,19 @@ public class Frame {
 
 	public Frame() {
 		for(int i=0;i<units.length;i++){
-			units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+			units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
 		}
 		//System.out.println("Frame()  "+Arrays.toString(units));
 	}
 	
-	public Frame(Unit[] units) {
+	public Frame(PureUnit[] units) {
 		for(int i=0;i<units.length;i++){
 			this.units[i] = units[i];
 		}
 		//Fill empty spots with Filler data flags.
 		for(int i=0;i<PAYLOAD_UNIT_COUNT;i++){
 			if(this.units[i]==null){
-				this.units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+				this.units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
 			}
 		}
 		//System.out.println("Frame(Unit[] units)  "+Arrays.toString(units));
@@ -52,12 +52,12 @@ public class Frame {
 	public Frame(BitSet2 data){
 		//Put as much data as possible in units.
 		for(int i=0;i<data.length()-7;i=i+8){
-			this.units[i/8] = new Unit(Bytes.fromBitSet(data, i));
+			this.units[i/8] = new PureUnit(Bytes.fromBitSet(data, i));
 		}
 		//Fill empty spots with Filler data flags.
 		for(int i=0;i<PAYLOAD_UNIT_COUNT;i++){
 			if(this.units[i]==null){
-				this.units[i] = new Unit(Unit.FLAG_FILLER_DATA);
+				this.units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
 			}
 		}
 		//System.out.println("Frame(BitSet2 data)  "+Arrays.toString(units));
@@ -70,7 +70,7 @@ public class Frame {
 	 */
 	public BitSet2 getDataBitSet(){
 		BitSet2 result = new BitSet2();
-		for(Unit u : units){
+		for(PureUnit u : units){
 			//System.out.println(result.length());
 				result = BitSet2.concatenate(result, u.dataAsBitSet());
 		}
@@ -84,14 +84,14 @@ public class Frame {
 	 */
 	public BitSet2 getFullBitSet(){
 		BitSet2 result = new BitSet2();
-		for(Unit u : units){
+		for(PureUnit u : units){
 			//System.out.println(result.length());
 				result = BitSet2.concatenate(result, u.asBitSet());
 		}
 		return result;
 	}
 
-	public Unit getUnit(int unitIndex) {
+	public PureUnit getUnit(int unitIndex) {
 		if(unitIndex<units.length){
 			return units[unitIndex];
 		}else{
@@ -99,14 +99,14 @@ public class Frame {
 		}
 	}
 	
-	public Unit[] getUnits(){
+	public PureUnit[] getUnits(){
 		return units;
 	}
 
 	public Frame getClone() {
-		Unit[] newUnits = new Unit[PAYLOAD_UNIT_COUNT];
+		PureUnit[] newUnits = new PureUnit[PAYLOAD_UNIT_COUNT];
 		for(int i=0;i<units.length;i++){
-			newUnits[i] = new Unit(units[i].b,units[i].isSpecial);
+			newUnits[i] = new PureUnit(units[i].b,units[i].isSpecial);
 		}
 		return new Frame(newUnits);
 	}

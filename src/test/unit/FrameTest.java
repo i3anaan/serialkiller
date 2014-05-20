@@ -6,7 +6,7 @@ import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import link.jack.FlaggedFrame;
 import link.jack.Frame;
-import link.jack.Unit;
+import link.jack.PureUnit;
 
 import org.junit.Test;
 

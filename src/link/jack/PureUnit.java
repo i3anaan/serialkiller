@@ -5,7 +5,7 @@ import util.BitSet2;
 import util.ByteArrays;
 import util.Bytes;
 
-public class Unit {
+public class PureUnit {
 
 	public boolean isSpecial;
 	public byte b;
@@ -14,18 +14,18 @@ public class Unit {
 	public static final int FLAG_END_OF_FRAME = -2;
 	public static final byte IS_SPECIAL_BIT = 1;
 
-	public Unit(byte b) {
+	public PureUnit(byte b) {
 		this.b = b;
 		isSpecial = false;
 	}
 
-	public Unit(byte b, boolean special) {
+	public PureUnit(byte b, boolean special) {
 		//System.out.println(Thread.currentThread().getId()+"  New Unit: "+Bytes.format(b)+"  Special: "+special);
 		this.b = b;
 		this.isSpecial = special;
 	}
 
-	public Unit(int type) {
+	public PureUnit(int type) {
 		this.isSpecial = true;
 		if (type == FLAG_FILLER_DATA) {
 			this.b = FLAG_FILLER_DATA;
@@ -63,15 +63,15 @@ public class Unit {
 		return (isSpecial ? "F" : "D") +Bytes.format(b);
 	}
 	
-	public Unit getClone(){
-		return new Unit(b,isSpecial);
+	public PureUnit getClone(){
+		return new PureUnit(b,isSpecial);
 	}
 	
 	public boolean equals(Object obj){
 		if(obj==null){
 			return false;
 		}else{
-			return (obj instanceof Unit) && ((Unit) obj).b==this.b && ((Unit) obj).isSpecial == this.isSpecial;
+			return (obj instanceof PureUnit) && ((PureUnit) obj).b==this.b && ((PureUnit) obj).isSpecial == this.isSpecial;
 		}
 	}
 

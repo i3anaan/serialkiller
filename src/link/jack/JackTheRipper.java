@@ -19,7 +19,7 @@ public class JackTheRipper extends FrameLinkLayer{
 		for(byte b : data){
 			down.sendByte(b);
 		}
-		down.sendUnit(new Unit(Unit.FLAG_END_OF_FRAME));
+		down.sendUnit(new PureUnit(PureUnit.FLAG_END_OF_FRAME));
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class JackTheRipper extends FrameLinkLayer{
 		ArrayList<Byte> dataFrame = new ArrayList<Byte>();
 		boolean frameComplete = false;
 		while(frameComplete){
-			Unit u = down.readUnit();
+			PureUnit u = down.readUnit();
 			if(!u.isSpecial){//Is data
 				dataFrame.add(u.b);
 			}else if(u.isEndOfFrame()){
