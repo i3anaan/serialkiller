@@ -65,7 +65,6 @@ public class Tunneling implements Runnable {
         // Remove and stop the old tunnel if present.
         if (tunnels.containsKey(tunnel.ip())) {
             Tunnel old = tunnels.remove(tunnel.ip());
-            old.stop();
         }
 
         // Add the new tunnel to the collection.
@@ -74,7 +73,6 @@ public class Tunneling implements Runnable {
 
         // Start the new tunnel if necessary.
         if (tunnel.connected()) {
-            tunnel.start();
         }
     }
 
