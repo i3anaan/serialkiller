@@ -42,6 +42,7 @@ public class WebService implements Runnable {
             router.register(FilesHandler.class);
             router.register(LogDisplayHandler.class);
             router.register(StatusHandler.class);
+            router.register(ThreadListHandler.class);
             
             ssock = new ServerSocket(port);
             markReady();
