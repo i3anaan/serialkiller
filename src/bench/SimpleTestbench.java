@@ -1,33 +1,31 @@
 package bench;
 
 import link.*;
-import phys.diag.BitErrorPhysicalLayer;
-import phys.diag.CheckingPhysicalLayer;
-import phys.diag.DebouncePhysicalLayer;
+import link.diag.BytewiseLinkLayer;
+import link.jack.DCFDXLLSSReadSendManager2000;
+import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
+import link.jack.JackTheRipper;
 import phys.diag.DelayPhysicalLayer;
-import phys.diag.DumpingPhysicalLayer;
-import phys.diag.PerfectVirtualPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
-import util.Bytes;
 
 /**
  * A simple test bench application for testing layers of the SerialKiller stack.
  */
 public class SimpleTestbench {
 	private class SeqThread extends Thread {
-		private BytewiseLinkLayer down;
+		private FrameLinkLayer down;
 		int good = 0;
 		int bad = 0;
 
-		public SeqThread(BytewiseLinkLayer down) {
+		public SeqThread(FrameLinkLayer down) {
 			this.down = down;
 		}
 
 		public void run() {
 			while (true) {
 				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-					down.sendByte(i);
-					byte in = down.readByte();
+					down.sendFrame(new byte[]{i});
+					byte in = down.readFrame()[0];
 					
 					if (in == i) {
 						System.out.print(".");
@@ -76,16 +74,16 @@ public class SimpleTestbench {
 	}
 
 	private class EchoThread extends Thread {
-		private BytewiseLinkLayer down;
+		private FrameLinkLayer down;
 
-		public EchoThread(BytewiseLinkLayer down) {
+		public EchoThread(FrameLinkLayer down) {
 			this.down = down;
 		}
 
 		public void run() {
 			while (true) {
-				byte i = down.readByte();
-				down.sendByte(i);
+				byte i = down.readFrame()[0];
+				down.sendFrame(new byte[]{i});
 			}
 		}
 	}
@@ -109,8 +107,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		BytewiseLinkLayer a = null;// = new DCFDXLLSSRSM2000FrameReadSendManager3000(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla)))));
-		BytewiseLinkLayer b = null;// = new DCFDXLLSSRSM2000FrameReadSendManager3000(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb)))));
+		FrameLinkLayer a = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new DelayPhysicalLayer(vpla))));
+		FrameLinkLayer b = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new DelayPhysicalLayer(vplb))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

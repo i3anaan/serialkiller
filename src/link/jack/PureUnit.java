@@ -83,4 +83,7 @@ public class PureUnit implements Unit{
 	public boolean isSpecial() {
 		return isSpecial;
 	}
+	public byte getByte(){
+		return b;
+	}
 }

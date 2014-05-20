@@ -58,9 +58,9 @@ public class FlaggedFrame extends Frame {
 	}
 
 	public FlaggedFrame(BitSet2 bits) {
-		ArrayList<PureUnit> units = new ArrayList<PureUnit>();
-		// Only put data or fill bytes in this arraylist.
-		// Only react on flags, dont store them in this.
+		ArrayList<Unit> units = new ArrayList<Unit>();
+		// Only put higher level data (can still contain data) in array.
+		// Do not store miniFrame flags, only reacht on those.
 
 		if (JackTheRipper.UNIT_IN_USE instanceof PureUnit) {
 			for (int i = 0; i < bits.length() - 8; i = i + 9) {
@@ -68,6 +68,15 @@ public class FlaggedFrame extends Frame {
 						bits.get(i + 8));
 				if (unit.isDataOrFill()
 						&& units.size() < Frame.PAYLOAD_UNIT_COUNT) {
+					units.add(unit);
+				} else {
+					// TODO other flags detected;
+				}
+			}
+		}else if(JackTheRipper.UNIT_IN_USE instanceof HammingUnit){
+			for (int i = 0; i < bits.length()-3; i = i + 4) {
+				HammingUnit unit = new HammingUnit(bits.get(i, i+4),JackTheRipper.HC);
+				if (units.size() < Frame.PAYLOAD_UNIT_COUNT) {
 					units.add(unit);
 				} else {
 					// TODO other flags detected;

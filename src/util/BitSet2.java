@@ -19,6 +19,13 @@ public class BitSet2 extends BitSet {
 		super();
 		this.length = 0;
 	}
+	public BitSet2(boolean[] arr){
+		super();
+		this.length = arr.length;
+		for(int i=0;i<arr.length;i++){
+			this.set(i,arr[i]);
+		}
+	}
 	
 	public BitSet2(BitSet bitset){
 		super();

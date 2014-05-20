@@ -25,7 +25,7 @@ public class HammingUnit implements Unit{
 			dataBS.set(dataBS.length()-i-1,data>>i==1);
 		}
 		this.hc = hc;
-		this.b =(byte) (hc.encode(dataBS).toByteArray()[0]);
+		this.b =(byte) (hc.encode(dataBS).toByteArray()[0] | 1);
 	}
 
 	public HammingUnit(BitSet2 data, boolean special, HammingCode hc) {
@@ -97,5 +97,9 @@ public class HammingUnit implements Unit{
 	}
 	public BitSet2 getDecodedPayloadAsBitSet2(){
 		return hc.decode(getEncodedPayloadAsBitSet2());
+	}
+	
+	public byte getByte(){
+		return b;
 	}
 }
