@@ -22,8 +22,10 @@ public class BitSet2 extends BitSet {
 	
 	public BitSet2(BitSet bitset){
 		super();
+		System.out.println("Constructor bitset done");
 		this.length = 0;
 		for(int i=0;i<bitset.length();i++){
+			System.out.println("bitset.get("+i+")");
 			this.set(i,bitset.get(i));
 		}
 	}
@@ -72,9 +74,16 @@ public class BitSet2 extends BitSet {
 		
 		return s;
 	}
+	
 	@Override
 	public BitSet2 get(int fromIndex, int toIndex){
-		return new BitSet2(super.get(fromIndex, toIndex));		
+		//TODO Workaround because java fails.
+		BitSet2 bs2 = new BitSet2();
+		for(int i = 0;i<toIndex-fromIndex;i++){
+			bs2.set(i,this.get(fromIndex+i));
+		}
+		return bs2;
+		//return new BitSet2(super.get(fromIndex, toIndex));
 	}
 	@Override
 	public Object clone(){

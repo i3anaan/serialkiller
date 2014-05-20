@@ -48,11 +48,13 @@ public class ByteArraysTest {
     public void testFromBitSet() {
         byte[] expected = {(byte) 112, (byte) 45, (byte) 0};
 
-        BitSet2 in = new BitSet2(16);
+        BitSet2 in = new BitSet2(24);
         in.set(1, 4, true);
         in.set(10, true);
         in.set(12, 14, true);
         in.set(15, true);
+        System.out.println("excpected: "+Arrays.toString(expected));
+        System.out.println("actual: "+Arrays.toString(in.toByteArray()));
         assertTrue(Arrays.equals(expected, in.toByteArray()));
     }
 
