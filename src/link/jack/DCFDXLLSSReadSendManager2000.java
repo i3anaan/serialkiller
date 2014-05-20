@@ -1,10 +1,5 @@
 package link.jack;
-
-import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
-
-import util.ByteArrays;
-import util.Bytes;
 
 /**
  * DelayCorrectedFullDuplexLinkLayerSectionSegmentReadWriteSendManager2000
@@ -17,33 +12,23 @@ import util.Bytes;
 public class DCFDXLLSSReadSendManager2000 implements Runnable {
 	DelayCorrectedFDXLinkLayerSectionSegment down;
 
-	private ArrayBlockingQueue<PureUnit> inbox; // TODO frames van maken;
-	private ArrayBlockingQueue<PureUnit> outbox; // TODO frames van maken;
+	private ArrayBlockingQueue<Unit> inbox; // TODO frames van maken;
+	private ArrayBlockingQueue<Unit> outbox; // TODO frames van maken;
 	private Thread exchanger;
 	private boolean keepRunning = true;
 
 	public DCFDXLLSSReadSendManager2000(
 			DelayCorrectedFDXLinkLayerSectionSegment down) {
 		this.down = down;
-		this.inbox = new ArrayBlockingQueue<PureUnit>(1024); // TODO capacity goed
+		this.inbox = new ArrayBlockingQueue<Unit>(1024); // TODO capacity goed
 															// zo?
-		this.outbox = new ArrayBlockingQueue<PureUnit>(1024); // TODO capacity goed
+		this.outbox = new ArrayBlockingQueue<Unit>(1024); // TODO capacity goed
 															// zo?
 
 		exchanger = new Thread(this, "Exchanger");
 		exchanger.start();
 	}
-
-	public void sendByte(byte data) {
-		try {
-			outbox.put(new PureUnit(data));
-		} catch (InterruptedException e) {
-			// TODO hier iets doen?
-			e.printStackTrace();
-		}
-	}
-
-	public void sendUnit(PureUnit unit) {
+	public void sendUnit(Unit unit) {
 		try {
 			outbox.put(unit);
 		} catch (InterruptedException e) {
@@ -52,9 +37,9 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 		}
 	}
 
-	public PureUnit readUnit() {
+	public Unit readUnit() {
 		try {
-			PureUnit read = inbox.take();
+			Unit read = inbox.take();
 			return read;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -70,7 +55,7 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 				FlaggedFrame frameToSend = new FlaggedFrame(outbox);
 				down.sendFrame(frameToSend);
 				down.exchangeFrame();
-				for (PureUnit u : down.readFrame().getUnits()) {
+				for (Unit u : down.readFrame().getUnits()) {
 					try {
 						if (!u.isFiller()) {
 							inbox.put(u);

@@ -1,9 +1,10 @@
 package link.jack;
 
 import util.BitSet2;
+import util.ByteArrays;
 import util.encoding.HammingCode;
 
-public class HammingUnit{
+public class HammingUnit implements Unit{
 
 	public byte b;
 	private HammingCode hc;
@@ -16,13 +17,23 @@ public class HammingUnit{
 		this.hc = hc;
 		this.b =(byte) (hc.encode(data).toByteArray()[0]);
 	}
+	
+	//4 MSB
+	public HammingUnit(byte data,HammingCode hc) {
+		BitSet2 dataBS = new BitSet2(hc.dataBitCount);
+		for(int i =0;i<hc.dataBitCount;i++){
+			dataBS.set(dataBS.length()-i-1,data>>i==1);
+		}
+		this.hc = hc;
+		this.b =(byte) (hc.encode(dataBS).toByteArray()[0]);
+	}
 
 	public HammingUnit(BitSet2 data, boolean special, HammingCode hc) {
 		this.hc = hc;
 		this.b =(byte) (hc.encode(data).toByteArray()[0] | (special ? 1 : 0));
 	}
 
-	public BitSet2 asBitSet() {
+	public BitSet2 fullAsBitSet() {
 		byte[] arr = new byte[] { b };
 		BitSet2 specialBit = new BitSet2();
 		specialBit.set(0,isSpecial());

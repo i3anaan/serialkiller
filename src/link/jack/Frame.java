@@ -16,7 +16,7 @@ import util.Bytes;
  */
 public class Frame {
 
-	protected PureUnit[] units = new PureUnit[PAYLOAD_UNIT_COUNT];
+	protected Unit[] units = new Unit[PAYLOAD_UNIT_COUNT];
 
 	public static final int PAYLOAD_UNIT_COUNT = 10;
 	//public static final int PAYLOAD_SIZE_BITS = PAYLOAD_SIZE_BYTES * 8;
@@ -29,14 +29,19 @@ public class Frame {
 	// -------------|---------
 	int currentReaderIndex = 0;
 
-	public Frame() {
-		for(int i=0;i<units.length;i++){
-			units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
-		}
-		//System.out.println("Frame()  "+Arrays.toString(units));
+	public Frame(){
+		
 	}
 	
-	public Frame(PureUnit[] units) {
+	/*
+	public Frame() {
+		for(int i=0;i<units.length;i++){
+			units[i] = new Unit(PureUnit.FLAG_FILLER_DATA);
+		}
+		//System.out.println("Frame()  "+Arrays.toString(units));
+	}*/
+	
+	public Frame(Unit[] units) {
 		for(int i=0;i<units.length;i++){
 			this.units[i] = units[i];
 		}
@@ -70,7 +75,7 @@ public class Frame {
 	 */
 	public BitSet2 getDataBitSet(){
 		BitSet2 result = new BitSet2();
-		for(PureUnit u : units){
+		for(Unit u : units){
 			//System.out.println(result.length());
 				result = BitSet2.concatenate(result, u.dataAsBitSet());
 		}
@@ -84,14 +89,14 @@ public class Frame {
 	 */
 	public BitSet2 getFullBitSet(){
 		BitSet2 result = new BitSet2();
-		for(PureUnit u : units){
+		for(Unit u : units){
 			//System.out.println(result.length());
-				result = BitSet2.concatenate(result, u.asBitSet());
+				result = BitSet2.concatenate(result, u.fullAsBitSet());
 		}
 		return result;
 	}
 
-	public PureUnit getUnit(int unitIndex) {
+	public Unit getUnit(int unitIndex) {
 		if(unitIndex<units.length){
 			return units[unitIndex];
 		}else{
@@ -99,14 +104,14 @@ public class Frame {
 		}
 	}
 	
-	public PureUnit[] getUnits(){
+	public Unit[] getUnits(){
 		return units;
 	}
 
 	public Frame getClone() {
-		PureUnit[] newUnits = new PureUnit[PAYLOAD_UNIT_COUNT];
+		Unit[] newUnits = new Unit[PAYLOAD_UNIT_COUNT];
 		for(int i=0;i<units.length;i++){
-			newUnits[i] = new PureUnit(units[i].b,units[i].isSpecial);
+			newUnits[i] = units[i].getClone();
 		}
 		return new Frame(newUnits);
 	}

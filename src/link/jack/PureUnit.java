@@ -5,7 +5,7 @@ import util.BitSet2;
 import util.ByteArrays;
 import util.Bytes;
 
-public class PureUnit {
+public class PureUnit implements Unit{
 
 	public boolean isSpecial;
 	public byte b;
@@ -34,7 +34,7 @@ public class PureUnit {
 		}
 	}
 
-	public BitSet2 asBitSet() {
+	public BitSet2 fullAsBitSet() {
 		byte[] arr = new byte[] { b };
 		BitSet2 specialBit = new BitSet2();
 		specialBit.set(0,isSpecial);
@@ -77,5 +77,10 @@ public class PureUnit {
 
 	public boolean isEndOfFrame() {
 		return isSpecial&&b==FLAG_END_OF_FRAME;
+	}
+
+	@Override
+	public boolean isSpecial() {
+		return isSpecial;
 	}
 }

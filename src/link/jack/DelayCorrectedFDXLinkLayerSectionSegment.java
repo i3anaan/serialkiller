@@ -1,10 +1,13 @@
 package link.jack;
 
 import java.util.Arrays;
+
 import util.BitSet2;
+import util.ByteArrays;
 import common.Layer;
 import phys.PhysicalLayer;
 import util.Bytes;
+import util.encoding.HammingCode;
 
 /**
  * Do not use debouncer.
@@ -14,6 +17,7 @@ import util.Bytes;
  */
 public class DelayCorrectedFDXLinkLayerSectionSegment {
 
+	
 	boolean connectionSync;
 	byte lastSentSyncPing = 0;
 	byte previousByteSent = 0;
