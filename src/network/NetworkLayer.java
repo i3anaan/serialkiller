@@ -49,9 +49,6 @@ public class NetworkLayer extends Layer implements Runnable {
     /** The link layer that is used. */
     private FrameLinkLayer link;
 
-    /** The application layer that is used. */
-    private ApplicationLayer app;
-
     /** The router for this network. */
     private Router router;
 
@@ -60,6 +57,9 @@ public class NetworkLayer extends Layer implements Runnable {
 
     /** The router queue. */
     protected ArrayBlockingQueue<Packet> queue;
+
+    /** The queue for the application layer. */
+    private ArrayBlockingQueue<Payload> appQueue;
 
     /** The sent and to be acknowledged packets. */
     private Collection<Packet> sent;
@@ -72,16 +72,16 @@ public class NetworkLayer extends Layer implements Runnable {
     /**
      * Constructs a new NetworkLayer instance.
      */
-    public NetworkLayer(FrameLinkLayer link, ApplicationLayer app, byte address, byte sibling) {
+    public NetworkLayer(FrameLinkLayer link, byte address, byte sibling) {
         ADDRESS_SELF = address;
         ADDRESS_SIBLING = sibling;
 
         this.link = link;
-        this.app = app;
 
         handlers = new ArrayList<Handler>();
 
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
+        appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
         sent = new ArrayList<Packet>();
 
         router = new Router();
@@ -113,6 +113,20 @@ public class NetworkLayer extends Layer implements Runnable {
     private int nextSeqnum() {
         seqnum = (seqnum + 1) % (Packet.MAX_SEQNUM + 1);
         return seqnum;
+    }
+
+    /**
+     * Returns the next available payload. This is a proxy method for
+     * ArrayBlockingQueue.
+     * @return The next available payload.
+     * @throws InterruptedException
+     */
+    public Payload read() throws InterruptedException {
+        return appQueue.take();
+    }
+
+    public void send(Payload payload) throws SizeLimitExceededException {
+        send(payload.data, payload.address);
     }
 
     /**
@@ -256,7 +270,7 @@ public class NetworkLayer extends Layer implements Runnable {
         for (Host host : router.hosts()) {
             if (host.address() == ADDRESS_SELF) {
                 // Construct ApplicationLayer handler.
-                Handler h = new ApplicationLayerHandler(this, app);
+                Handler h = new ApplicationLayerHandler(this, appQueue);
 
                 // Add handler to collection.
                 handlers.add(h);

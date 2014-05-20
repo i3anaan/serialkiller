@@ -104,4 +104,8 @@ public class Host {
         linkedHost = null;
         handler = null;
     }
+
+    public String toString() {
+        return String.format("Host<%d>", address);
+    }
 }
