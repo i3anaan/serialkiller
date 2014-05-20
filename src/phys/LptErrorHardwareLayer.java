@@ -1,5 +1,7 @@
 package phys;
 
+import lpt.Lpt;
+
 public class LptErrorHardwareLayer extends HardwareLayer {
 	private lpt.ErrorLpt lpt;
 
