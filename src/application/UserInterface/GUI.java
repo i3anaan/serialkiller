@@ -162,9 +162,8 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	 * preferences and save them when requested
 	 */
 	private void buildOptionMenu(){
-		saveFile2();
-		//TabbedPreferencePane tpp = new TabbedPreferencePane(GUI.this, "Preferences", true);	
-		//tpp.setVisible(true);
+		TabbedPreferencePane tpp = new TabbedPreferencePane(GUI.this, "Preferences", true);	
+		tpp.setVisible(true);
 	}
 
 	private void buildChatMenu() {
@@ -173,40 +172,46 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		this.add(ulp, BorderLayout.EAST);
 
 	}
-
+//	DEPRICIATED
+//	/**
+//	 * Method to be called for saving files when a file transfer
+//	 * request is received
+//	 * @return the path to save the file to
+//	 */
+//	public String saveFile(){
+//
+//		int choice = JOptionPane.showConfirmDialog(GUI.this, "You are being offered a file, accept?", "File Offer",
+//				JOptionPane.YES_NO_OPTION);
+//
+//		if (choice == JOptionPane.YES_OPTION){
+//			System.out.println("yes");
+//			JFileChooser c = new JFileChooser();
+//			// Demonstrate "Open" dialog:
+//			int rVal = c.showOpenDialog(GUI.this);
+//			if (rVal == JFileChooser.APPROVE_OPTION) {
+//				File mostRecentOutputDirectory = c.getSelectedFile();
+//				prefs.put("LAST_OUTPUT_DIR", mostRecentOutputDirectory.getAbsolutePath());
+//				
+//			}
+//			if (rVal == JFileChooser.CANCEL_OPTION) {
+//				// TODO maybe do something, don't think we should
+//				System.exit(0);
+//			}
+//
+//		}else{
+//			System.out.println("no");
+//		}
+//		return null;
+//
+//	}
+	
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received
 	 * @return the path to save the file to
 	 */
-	public String saveFile(){
-
-		int choice = JOptionPane.showConfirmDialog(GUI.this, "You are being offered a file, accept?", "File Offer",
-				JOptionPane.YES_NO_OPTION);
-
-		if (choice == JOptionPane.YES_OPTION){
-			System.out.println("yes");
-			JFileChooser c = new JFileChooser();
-			// Demonstrate "Open" dialog:
-			int rVal = c.showOpenDialog(GUI.this);
-			if (rVal == JFileChooser.APPROVE_OPTION) {
-				File mostRecentOutputDirectory = c.getSelectedFile();
-				prefs.put("LAST_OUTPUT_DIR", mostRecentOutputDirectory.getAbsolutePath());
-				
-			}
-			if (rVal == JFileChooser.CANCEL_OPTION) {
-				// TODO maybe do something, don't think we should
-				System.exit(0);
-			}
-
-		}else{
-			System.out.println("no");
-		}
-		return null;
-
-	}
 	
-	private void saveFile2(){
+	private void saveFile(){
 		FileOfferDialog fod = new FileOfferDialog(GUI.this,"Henk", "trolface.jpg", 12);
 		fod.setVisible(true);
 		String rval = fod.getValue();
