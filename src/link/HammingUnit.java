@@ -18,10 +18,10 @@ public class HammingUnit {
 	//1111000
 	public HammingUnit(BitSet2 data,HammingCode hc) {
 		this.hc = hc;
-		this.b =(byte) (hc.encode(data).toByteArray()[0] | 1);
+		this.b =(byte) (hc.encode(data).toByteArray()[0]);
 	}
 
-	public HammingUnit(BitSet2 data,boolean special, HammingCode hc) {
+	public HammingUnit(BitSet2 data, boolean special, HammingCode hc) {
 		this.hc = hc;
 		this.b =(byte) (hc.encode(data).toByteArray()[0] | (special ? 1 : 0));
 	}
@@ -51,7 +51,7 @@ public class HammingUnit {
 	
 	
 	public String toString(){
-		return (isSpecial() ? "F" : "D") +getDecodedPayloadAsBitSet2();
+		return (isSpecial() ? "F" : "D") +getEncodedPayloadAsBitSet2();
 	}
 	
 	public Unit getClone(){
@@ -81,7 +81,7 @@ public class HammingUnit {
 	public BitSet2 getEncodedPayloadAsBitSet2(){
 		BitSet2 bs2 = new BitSet2(7);
 		for(int i=0;i<7;i++){
-			bs2.set(bs2.length()-i,((b>>(i+1))&1)==1);
+			bs2.set(bs2.length()-i-1,((b>>(i+1))&1)==1);
 		}
 		return bs2;
 	}
