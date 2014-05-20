@@ -26,7 +26,6 @@ public class UnitTest {
 		assertEquals("D"+Bytes.format(b),unit2.toString());
 		
 		BitSet2 bs = unit0.dataAsBitSet();
-		System.out.println(bs);
 		bs.set(8,false);
 		assertEquals(Bytes.format(b),Bytes.format(Bytes.fromBitSet(bs, 0)));
 		Unit unit3 = new Unit(Bytes.fromBitSet(bs, 0),bs.get(8));

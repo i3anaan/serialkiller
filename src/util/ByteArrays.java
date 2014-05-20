@@ -1,5 +1,7 @@
 package util;
 
+import java.util.List;
+
 /**
  * Contains utilities for working with byte arrays.
  */
@@ -123,4 +125,25 @@ public class ByteArrays {
 
         return bytes;
     }
+
+	/**
+	 * Converts a list of Byte (not the primitive) to a byte[]
+	 * Will return null if the given list is null, or it contains a null.
+	 * @param arr
+	 * @return
+	 */
+	public static byte[] fromList(List<Byte> arr) {
+		if (arr == null) {
+			return null;
+		}
+		final int n = arr.size();
+		byte ret[] = new byte[n];
+		for (int i = 0; i < n; i++) {
+			if (arr.get(i) == null) {
+				return null;
+			}
+			ret[i] = arr.get(i);
+		}
+		return ret;
+	}
 }

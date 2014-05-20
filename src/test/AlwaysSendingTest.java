@@ -5,7 +5,6 @@ import phys.DebouncePhysicalLayer;
 import phys.DelayPhysicalLayer;
 import phys.DumpingPhysicalLayer;
 import phys.LptHardwareLayer;
-import util.Bytes;
 import link.HighSpeedHDXLinkLayer;
 
 public class AlwaysSendingTest {

@@ -110,8 +110,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		BytewiseLinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla))));
-		BytewiseLinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb))));
+		BytewiseLinkLayer a = null;// = new DCFDXLLSSRSM2000FrameReadSendManager3000(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla)))));
+		BytewiseLinkLayer b = null;// = new DCFDXLLSSRSM2000FrameReadSendManager3000(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb)))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
