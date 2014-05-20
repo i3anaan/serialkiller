@@ -16,6 +16,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+// TODO: Let all offer() methods return a boolean an log dropped packets.
+
 /**
  * The main class for the network layer.
  *
@@ -228,6 +230,20 @@ public class NetworkLayer extends Layer implements Runnable {
         NetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
     }
 
+    /**
+     * Returns a collection of all addresses known to the router.
+     * @return The collection of all known addresses.
+     */
+    public Collection<Byte> hosts() {
+        Collection<Byte> hosts = new ArrayList<Byte>();
+
+        for (Host h : router.hosts()) {
+            hosts.add(h.address());
+        }
+
+        return hosts;
+    }
+
     @Override
     public void run() {
         // Run handlers
@@ -277,9 +293,7 @@ public class NetworkLayer extends Layer implements Runnable {
 
         // Stop existing handlers (only if the network layer is running).
         if (t.isAlive()) {
-            for (Handler h : handlers) {
-                stopHandlers();
-            }
+            stopHandlers();
         }
 
         // Check all hosts for a possible handler.

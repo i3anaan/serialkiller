@@ -51,7 +51,8 @@ public class ApplicationLayerHandler extends Handler {
             // Check for overflow / DoS.
             if (segnum > SAFE_SEGNUM) {
                 // Drop whole sequence.
-                segments.remove(seqnum);
+                segments.get(sender).remove(seqnum);
+                NetworkLayer.getLogger().warning(p.toString() + " exceeds the safe segment number size. All segments dropped.");
                 return;
             }
             // Check for host in maps.

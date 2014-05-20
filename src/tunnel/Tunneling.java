@@ -53,7 +53,7 @@ public class Tunneling implements Runnable {
         Tunnel tunnel = new Tunnel(ip, queue, autoconnect);
 
         // Perform tunnel create actions.
-        _create(tunnel);
+        create(tunnel);
 
         return tunnel;
     }
@@ -63,12 +63,12 @@ public class Tunneling implements Runnable {
         Tunnel tunnel = new Tunnel(socket, queue, autoconnect);
 
         // Perform tunnel create actions.
-        _create(tunnel);
+        create(tunnel);
 
         return tunnel;
     }
 
-    private void _create(Tunnel tunnel) {
+    private void create(Tunnel tunnel) {
         // Remove and stop the old tunnel if present.
         if (tunnels.containsKey(tunnel.ip())) {
             Tunnel old = tunnels.remove(tunnel.ip());
@@ -80,6 +80,7 @@ public class Tunneling implements Runnable {
 
         // Start the new tunnel if necessary.
         if (tunnel.connected()) {
+            new Thread(tunnel).start();
         }
     }
 

@@ -1,7 +1,8 @@
 package network;
 
 /**
- * Simple class to enable returning two types at once.
+ * Simple class designed to enable returning two specific types at once, from
+ * the network layer to the application layer.
  */
 public class Payload {
     public byte[] data;
