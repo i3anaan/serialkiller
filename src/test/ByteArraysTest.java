@@ -42,7 +42,7 @@ public class ByteArraysTest {
         expected.set(12, 14, true);
         expected.set(15, true);
 
-        assertEquals(expected, ByteArrays.toBitSet(in));
+        assertEquals(expected, BitSet2.valueOf(in));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class ByteArraysTest {
         in.set(12, 14, true);
         in.set(15, true);
 
-        assertTrue(Arrays.equals(expected, ByteArrays.fromBitSet(in)));
+        assertTrue(Arrays.equals(expected, in.toByteArray()));
     }
 
 }

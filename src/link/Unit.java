@@ -37,13 +37,13 @@ public class Unit {
 		byte[] arr = new byte[] { b };
 		BitSet2 specialBit = new BitSet2();
 		specialBit.set(0,isSpecial);
-		return BitSets.concatenate(ByteArrays.toBitSet(arr), specialBit);
+		return BitSets.concatenate(BitSet2.valueOf(arr), specialBit);
 	}
 	
 	public BitSet2 dataAsBitSet(){
 		if(!isSpecial){
 			byte[] arr = new byte[] { b };
-			return ByteArrays.toBitSet(arr);
+			return BitSet2.valueOf(arr);
 		}else{
 			return new BitSet2();
 		}

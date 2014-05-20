@@ -59,44 +59,7 @@ public class ByteArrays {
         return result;
     }
 
-    /**
-     * Convert a byte array to a BitSet2 object.
-     * This method becomes obsolete once Java 7 is available, then
-     * BitSet2.valueOf(byte[] bytes) is preferred.
-     * @param bytes The byte array to convert.
-     * @return The BitSet2 object.
-     */
-    public static BitSet2 toBitSet(byte[] bytes) {
-        BitSet2 data = new BitSet2(bytes.length * 8);
+    
 
-        for (int i = 0; i < bytes.length; i++) {
-            for (int j = 0; j < 8; j++) {
-                boolean val = ((bytes[i] >> (7-j)) & 1) == 1;
-                data.set((i*8)+j, val);
-            }
-        }
-
-        return data;
-    }
-
-    /**
-     * Convert a BitSet2 object to a byte array.
-     * This method becomes obsolete once Java 7 is available, then
-     * BitSet2.toByteArray() is preferred.
-     * @param data The BitSet2 object to convert.
-     * @return The byte array.
-     */
-    public static byte[] fromBitSet(BitSet2 data) {
-        int len = (int) Math.ceil((double) data.length() / 8);
-        byte[] bytes = new byte[len];
-
-        for (int i = 0; i < len; i++) {
-            for (int j = 0; j < 8; j++) {
-                byte bit = (data.get((i*8)+j)) ? (byte) 1 : (byte) 0;
-                bytes[i] = (byte) (bytes[i] | (bit << (7-j)));
-            }
-        }
-
-        return bytes;
-    }
+    
 }

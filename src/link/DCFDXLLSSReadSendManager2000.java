@@ -72,8 +72,7 @@ public class DCFDXLLSSReadSendManager2000 extends LinkLayer implements Runnable 
 				// System.out.println("sentFrame!");
 				down.exchangeFrame();
 				// System.out.println(Arrays.toString(down.readFrame().units));
-				for (byte b : ByteArrays.fromBitSet(down.readFrame()
-						.getBitSet())) {
+				for (byte b : down.readFrame().getBitSet().toByteArray()) {
 					// System.out.println("Putting in inbox:  "+Arrays.toString(down.readFrame().units));
 					try {
 						inbox.put(b);
