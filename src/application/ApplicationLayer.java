@@ -26,8 +26,21 @@ public class ApplicationLayer extends Observable {
 
 	/** NetworkLayer that this ApplicationLayer communicates with */
 	private NetworkLayer networkLayer;
+	
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private Logger logger;
+	
+	/** byte value of a chat flag */
+	private static final byte chatCommand = 'C';
+	
+	/** byte value of a fileOffer flag */
+	private static final byte fileOfferCommand = 'F';
+	
+	/** byte value of a  fileAccept flag */
+	private static final byte fileAcceptCommand = 'A';
+	
+	/** byte value of a fileTransfer flag */
+	private static final byte fileTransferCommand = 'S';
 	
 	public ApplicationLayer(NetworkLayer nl){
 		this.networkLayer = nl;
@@ -40,14 +53,16 @@ public class ApplicationLayer extends Observable {
 	 * @return
 	 * @throws CommandNotFoundException 
 	 */
-	public void readPayload(byte adress, byte[] data) throws CommandNotFoundException{
+	public void readPayload(Payload p) throws CommandNotFoundException{
+		
+		
 		// Retrieves command char from payload
-		char command = getCommand(data);
+		char command = getCommand(p.data);
 
 		// Chat message
 		if(command == 'C'){
 			// Creates a new chat message object and notifies the gui
-			ChatMessage cm = new ChatMessage(adress, data);
+			ChatMessage cm = new ChatMessage(p.adress, p.data);
 			setChanged();
 			notifyObservers(cm);
 
@@ -55,29 +70,37 @@ public class ApplicationLayer extends Observable {
 		// Request to transfer file
 		else if(command == 'F'){
 
-			FileOfferMessage fm = new FileOfferMessage(data);
+			FileOfferMessage fm = new FileOfferMessage(p.adress, p.data);
 			setChanged();
 			notifyObservers(fm);
+			
+			ApplicationLayer.getLogger().debug("Received FileOffer: " + p.toString() + ".");
 		}
 		// Accept file transfer
 		else if(command == 'A'){
-			FileAcceptMessage fm = new FileAcceptMessage(data);
+			FileAcceptMessage fm = new FileAcceptMessage(adress, data);
 			//TODO start file transfer
 			byte[] send = readFile(rootDir + "/downloads");
+			
+			ApplicationLayer.getLogger().debug("Accepted File Transfer: " + p.toString() + ".");
 			
 		}
 		// Transfer file
 		else if(command == 'S'){
-			FileTransferMessage fm = new FileTransferMessage(data);
+			FileTransferMessage fm = new FileTransferMessage(adress, data);
 			//Writes the file to requested path
 			
 			//TODO call gui to request filepath
 			writeFile(fm.getFileBytes(), (rootDir + "/downloads"));
+			
+			ApplicationLayer.getLogger().debug("Started File Transfer: " + p.toString() + ".");
 
 		}
 		else{
 			// TODO find ways to catch invalid commands in a more refined manner
 			throw new CommandNotFoundException(String.format("command: %c", command));
+			
+			ApplicationLayer.getLogger().debug("CommandNotFoundException on: " + p.toString() + ".");
 
 		}
 	}
@@ -151,18 +174,26 @@ public class ApplicationLayer extends Observable {
 	/**
 	 * Reads a chat message from the chat application
 	 * and converts it into a byte array
+	 * @param String containing nickname
 	 * @param String containing chat message
-	 * @return byte array containing chat message
+	 * @return byte array containing payload for a chat message
 	 */
-	// TODO maybe add nickname as parameter
-	public byte[] writeChatMessage(String s){
+	
+	public byte[] writeChatMessage(String nickname, String message){
+		// convert String to UTF-8		
+		byte nullbyte = (byte) 0;
+		byte[] nick = nickname.getBytes("UTF-8");
+		byte[] msg = message.getBytes("UTF-8");
+
+		// create new byte[] with minimum length needed
+		byte[] data = new byte[nick.length + 2 + msg.length];
 		
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-					+ Character.digit(s.charAt(i+1), 16));
-		}
+		// connoctate byte arrays into a new byte array
+		data[0] = chatCommand;
+		System.arraycopy(nick, 0, data, 1, nick.length);
+		data[nick.length+1] = nullbyte;
+		System.arraycopy(msg, 0, data, (nick.length+2), msg.length);
+		
 		return data;
 	
 	}
@@ -178,8 +209,8 @@ public class ApplicationLayer extends Observable {
 	                Payload p = networkLayer.read();
 
 	                // incoming payload
-	                	readPayload(p.adress, p.data);
-	                    ApplicationLayer.getLogger().debug("Received payload: " + p.toString() + ".");
+	                	readPayload(p);
+	                    ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
 	                    return; // We are done.
 
 	                sendPacket(p);

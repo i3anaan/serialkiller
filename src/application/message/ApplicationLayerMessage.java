@@ -21,6 +21,7 @@ public class ApplicationLayerMessage implements Message {
 	public byte[] getPayload() {
 		return payload;
 	}
+	
 	@Override
 	public byte getAdress() {
 		return adress;
