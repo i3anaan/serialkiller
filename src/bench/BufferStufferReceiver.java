@@ -1,7 +1,7 @@
 package bench;
 
 import link.BufferStufferLinkLayer;
-import phys.VirtualPhysicalLayer;
+import phys.diag.VirtualPhysicalLayer;
 
 public class BufferStufferReceiver {
 	public static void main(String[] args) throws Exception {

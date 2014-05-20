@@ -12,18 +12,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import phys.DummyPhysicalLayer;
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
+import phys.diag.NullPhysicalLayer;
 import util.Environment;
 import web.WebService;
-
 import network.NetworkLayer;
-
 import application.ApplicationLayer;
 import application.GUI;
-
 import link.BittasticLinkLayer;
 import link.BufferStufferLinkLayer;
 import log.LogMessage;
@@ -42,7 +39,7 @@ public class Starter extends JFrame implements ActionListener {
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {NetworkLayer.class};
 	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class};
-	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, DummyPhysicalLayer.class};
+	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, NullPhysicalLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
 	// Combo boxes for all the options.

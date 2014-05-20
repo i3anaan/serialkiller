@@ -282,4 +282,8 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 			System.out.flush();
 		}
 	}
+	
+	public class PanicException extends RuntimeException{
+		
+	}
 }
