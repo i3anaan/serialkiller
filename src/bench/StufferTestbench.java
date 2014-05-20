@@ -2,8 +2,8 @@ package bench;
 
 import com.google.common.base.Charsets;
 
-import phys.VirtualCable;
-import phys.VirtualCablePhysicalLayer;
+import phys.diag.VirtualCable;
+import phys.diag.VirtualCablePhysicalLayer;
 import link.BufferStufferLinkLayer;
 
 /**
