@@ -207,14 +207,14 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	}
 	
 	private void saveFile2(){
-		FileOfferDialog fod = new FileOfferDialog(GUI.this);
+		FileOfferDialog fod = new FileOfferDialog(GUI.this,"Henk", "trolface.jpg", 12);
 		fod.setVisible(true);
-		String rval = fod.openFileOfferDialog("Henk", "trolface.jpg", 12);
+		String rval = fod.getValue();
 		
-		if(rval == FileOfferDialog.FILEOFFER_REJECT){
-			System.out.println("derp");
+		if(rval != FileOfferDialog.FILEOFFER_REJECT){
+			System.out.println(fod.getValue());
 		}else{
-			System.out.println(rval);
+			// IGNORE FILE
 		}
 		
 		

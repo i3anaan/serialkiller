@@ -15,6 +15,7 @@ import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -39,8 +40,8 @@ public class FileOfferDialog extends Dialog implements EventListener{
 	 * @param file name
 	 * @param file size
 	 */
-	public FileOfferDialog(GUI gui) {
-		super(gui, "File Offer");
+	public FileOfferDialog(GUI gui,String sender, String name, int size) {
+		super(gui, "File Offer", true);
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		
 		this.addWindowListener(new WindowAdapter() {
@@ -49,22 +50,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 			}
 		});
 		
-		
-		
-	}
-	
-	/**
-	 * Creates a FileOfferDialog where the result is determined by
-	 * detecting that the user has selected an output path to save to
-	 * or not
-	 * @param sender of the file offer
-	 * @param name of the file being offered
-	 * @param size of the file being offered
-	 * @return path to save file to OR null if the offer is rejected
-	 */
-	public String openFileOfferDialog(String sender, String name, int size){
-		
-		
+
 		setSize( 400, 200 );
 		setMinimumSize( new Dimension( 400, 200 ) );
 		setMaximumSize( new Dimension( 400, 200 ) );
@@ -154,7 +140,30 @@ public class FileOfferDialog extends Dialog implements EventListener{
 		
 		topPanel.add(panel1);
 		
-		return result;
 		
+	}
+	
+	/**
+	 * Creates a FileOfferDialog where the result is determined by
+	 * detecting that the user has selected an output path to save to
+	 * or not
+	 * @param sender of the file offer
+	 * @param name of the file being offered
+	 * @param size of the file being offered
+	 * @return path to save file to OR null if the offer is rejected
+	 */
+	public String openFileOfferDialog(String sender, String name, int size){
+		
+		return null;
+		
+	}
+	
+	/**
+	 * This method shows the current value of the current
+	 * return value
+	 * @return null or path value
+	 */
+	public String getValue(){
+		return result;
 	}
 }
