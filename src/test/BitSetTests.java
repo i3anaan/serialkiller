@@ -6,8 +6,6 @@ import util.BitSet2;
 
 import org.junit.Test;
 
-import util.BitSets;
-
 public class BitSetTests {
 
 	@Test
@@ -18,14 +16,14 @@ public class BitSetTests {
 		
 		assertEquals(5, bs1.length());
 		assertEquals(3, bs2.length());
-		assertEquals(8, BitSets.concatenate(bs1,bs2).length());
+		assertEquals(8, BitSet2.concatenate(bs1,bs2).length());
 		
 		BitSet2 bs3 = new BitSet2(8);
 		BitSet2 bs4 = new BitSet2();
 		BitSet2 bs5 = new BitSet2(8);
 		bs5.set(9,false);
 		bs4.set(0,false);
-		assertEquals(bs5,BitSets.concatenate(bs3, bs4));
+		assertEquals(bs5,BitSet2.concatenate(bs3, bs4));
 		System.out.println(bs5);
 		
 		BitSet2 bs6 = new BitSet2();

@@ -5,8 +5,6 @@ import java.util.Arrays;
 import util.BitSet2;
 
 import java.util.concurrent.ArrayBlockingQueue;
-
-import util.BitSets;
 import util.ByteArrays;
 import util.Bytes;
 
@@ -74,7 +72,7 @@ public class Frame {
 		BitSet2 result = new BitSet2();
 		for(Unit u : units){
 			//System.out.println(result.length());
-				result = BitSets.concatenate(result, u.dataAsBitSet());
+				result = BitSet2.concatenate(result, u.dataAsBitSet());
 		}
 		return result;
 	}
@@ -88,7 +86,7 @@ public class Frame {
 		BitSet2 result = new BitSet2();
 		for(Unit u : units){
 			//System.out.println(result.length());
-				result = BitSets.concatenate(result, u.asBitSet());
+				result = BitSet2.concatenate(result, u.asBitSet());
 		}
 		return result;
 	}

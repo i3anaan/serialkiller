@@ -70,10 +70,10 @@ public class FrameTest {
 			arr1.add((byte)22);
 		}
 		
-		FlaggedFrame ff0 = new FlaggedFrame(arr0);
-		FlaggedFrame ff1 = new FlaggedFrame(arr1);
-		FlaggedFrame ff2 = new FlaggedFrame(arr2);
-		FlaggedFrame ff3 = new FlaggedFrame(arr3);
+		FlaggedFrame ff0 = new FlaggedFrame(arr0,'a');
+		FlaggedFrame ff1 = new FlaggedFrame(arr1,'b');
+		FlaggedFrame ff2 = new FlaggedFrame(arr2,'ç');
+		FlaggedFrame ff3 = new FlaggedFrame(arr3,'d');
 		
 		assert(ff2.getPayload().getUnit(0).b==(byte)44);
 		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){

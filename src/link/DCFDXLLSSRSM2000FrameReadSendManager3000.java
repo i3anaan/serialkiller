@@ -35,6 +35,4 @@ public class DCFDXLLSSRSM2000FrameReadSendManager3000 extends FrameLinkLayer{
 		}
 		return ByteArrays.fromList(dataFrame);
 	}
-	
-
 }
