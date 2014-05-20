@@ -1,5 +1,6 @@
 package bench;
 
+import link.*;
 import phys.BitErrorPhysicalLayer;
 import phys.CheckingPhysicalLayer;
 import phys.CleanStartPhysicalLayer;
@@ -9,23 +10,17 @@ import phys.DumpingPhysicalLayer;
 import phys.PerfectVirtualPhysicalLayer;
 import phys.VirtualPhysicalLayer;
 import util.Bytes;
-import link.DCFDXLLSSReadSendManager2000;
-import link.DelayCorrectedFDXLinkLayerSectionSegment;
-import link.DumpingLinkLayer;
-import link.HighSpeedHDXLinkLayer;
-import link.LinkLayer;
-import link.SimpleLinkLayer;
 
 /**
  * A simple test bench application for testing layers of the SerialKiller stack.
  */
 public class SimpleTestbench {
 	private class SeqThread extends Thread {
-		private LinkLayer down;
+		private BytewiseLinkLayer down;
 		int good = 0;
 		int bad = 0;
 
-		public SeqThread(LinkLayer down) {
+		public SeqThread(BytewiseLinkLayer down) {
 			this.down = down;
 		}
 
@@ -52,11 +47,11 @@ public class SimpleTestbench {
 	}
 	
 	private class SeqThreadSmall extends Thread {
-		private LinkLayer down;
+		private BytewiseLinkLayer down;
 		int good = 0;
 		int bad = 0;
 
-		public SeqThreadSmall(LinkLayer down) {
+		public SeqThreadSmall(BytewiseLinkLayer down) {
 			this.down = down;
 		}
 
@@ -82,9 +77,9 @@ public class SimpleTestbench {
 	}
 
 	private class EchoThread extends Thread {
-		private LinkLayer down;
+		private BytewiseLinkLayer down;
 
-		public EchoThread(LinkLayer down) {
+		public EchoThread(BytewiseLinkLayer down) {
 			this.down = down;
 		}
 
@@ -115,8 +110,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		LinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla))));
-		LinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb))));
+		BytewiseLinkLayer a = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla))));
+		BytewiseLinkLayer b = new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

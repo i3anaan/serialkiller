@@ -40,9 +40,6 @@ public abstract class Bytes {
      * @return The requested byte.
      */
     public static byte fromBitSet(BitSet2 data, int start) {
-        // Assert that the data is long enough
-        assert (data.size() > start + 8);
-
         byte b = 0;
 
         for (int i = 0; i < 8; i++) {
@@ -50,5 +47,23 @@ public abstract class Bytes {
         }
 
         return b;
+    }
+
+    /**
+     * Convert a byte to a bit set with a given size, and puts the byte on a
+     * given offset.
+     * @param b The byte to convert.
+     * @param size The size of the new BitSet2 object (in bits).
+     * @param offset The bit number where to start the byte.
+     * @return The new BitSet2 object.
+     */
+    public static BitSet2 toBitSet(byte b, int size, int offset) {
+        BitSet2 data = new BitSet2(size);
+
+        for (int i = 0; i < 8; i++) {
+            data.set(i + offset, ((b >> (7-i)) & 1) == 1);
+        }
+
+        return data;
     }
 }

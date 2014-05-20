@@ -3,9 +3,8 @@ package link;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import com.google.common.primitives.Bytes;
 import phys.PhysicalLayer;
-
-import util.Bytes;
 
 /**
  * The BufferStuffer link layer exchanges frames over unreliable links. 
@@ -119,7 +118,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 							
 							if (eof) break;
 							
-							log("Got bit " + Bytes.format(b));
+							log("Got bit " + util.Bytes.format(b));
 						}
 						
 						if (!eof) {

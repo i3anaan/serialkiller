@@ -1,12 +1,11 @@
 package network;
 
+import util.BitSet2;
 import util.ByteArrays;
 import util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.BitSet;
-
 /**
  * Represents a header of a packet.
  */
@@ -17,7 +16,7 @@ public class PacketHeader {
     public static final int MAX_SEGNUM = 16777215;
 
     /** The raw data of this header. */
-    private BitSet raw;
+    private BitSet2 raw;
 
     /** Whether the header is precompiled (that is, not changed). */
     protected boolean precompiled;
@@ -27,7 +26,7 @@ public class PacketHeader {
      */
     protected PacketHeader() {
         precompiled = false;
-        raw = new BitSet(HEADER_LENGTH * 8);
+        raw = new BitSet2(HEADER_LENGTH * 8);
     }
 
     /**
@@ -47,7 +46,7 @@ public class PacketHeader {
         return ByteArrays.fromBitSet(raw, HEADER_LENGTH);
     }
 
-    protected BitSet raw() {
+    protected BitSet2 raw() {
         return raw;
     }
 
