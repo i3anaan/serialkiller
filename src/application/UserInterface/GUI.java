@@ -241,12 +241,12 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 
 		if(arg instanceof ChatMessage){
-			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getMessage());
+			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
 		}
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
-			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
+			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
 			saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 		}
 
