@@ -20,6 +20,7 @@ class WebWorker extends Thread {
         this.sock = sock;
         this.log = new Logger(LogMessage.Subsystem.WEB);
         this.service = service;
+        this.setName("Web worker");
     }
 
     public void run() {
