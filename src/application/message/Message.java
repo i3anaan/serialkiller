@@ -8,4 +8,10 @@ public interface Message {
 	 * @return byte[] payload
 	 */
 	public byte[] getPayload();
+	
+	/**
+	 * Returns the sender of this message
+	 * @return byte adress;
+	 */
+	public byte getAdress();
 }

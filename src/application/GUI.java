@@ -1,5 +1,6 @@
 package application;
 
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,7 +28,8 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.*;
 
 import application.*;
-import application.UserInterface.PreferencesPanel;
+import application.UserInterface.*;
+//import application.UserInterface.GUI;
 import application.message.ChatMessage;
 import application.message.FileOfferMessage;
 
@@ -45,13 +47,18 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 	private JPanel cp = new JPanel();
 	private JPanel ulp = new JPanel();
+	private static GUI				 gui;
 	
 	// Menu Bar Elements
 	JMenuBar menuBar;
 	JMenu menu, submenu;
 
 	public GUI(){
-		super();	
+		super();
+		gui = this;
+		
+		
+		
 		this.setLayout(new BorderLayout());
 
 		setPreferredSize(new Dimension(800, 600));
@@ -93,6 +100,8 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			}
 		}
 		new GUI();
+		
+		
 	}
 	private void buildBarMenu(){
 		// Create the menu bar
@@ -125,12 +134,15 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		});
 		// Options item
 		JMenuItem optionItem = new JMenuItem("Options");
-		exitItem.addActionListener(new ActionListener(){
+		optionItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-				new PreferencesPanel();
+				
+				options();
+				
 			}
+
+			
 		});
 		menu.add(sendFileItem);
 		menu.add(optionItem);
@@ -146,6 +158,12 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 	}
 
+	private void options() {
+		// UN COMMENT TO TEST
+		//TabbedPreferencePane tpp = new TabbedPreferencePane(gui, "Preferences", true);
+		//tpp.setVisible(true);
+		
+	}
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received
