@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import util.Bytes;
 
-import java.util.Arrays;
+
 import util.BitSet2;
 
 /** Unit tests for the Bytes class. */

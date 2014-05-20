@@ -1,16 +1,14 @@
-package application;
+package application.message;
 
 import java.util.Arrays;
-
-import application.message.FileMessage;
 
 public class FileTransferMessage extends FileMessage {
 
 	// Private variables
 	private final byte[] fileBytes;
 	
-	public FileTransferMessage(byte[] data) {
-		super(data);
+	public FileTransferMessage(byte adress, byte[] data) {
+		super(adress, data);
 		fileBytes = Arrays.copyOfRange(data, 1, data.length);
 		
 	}

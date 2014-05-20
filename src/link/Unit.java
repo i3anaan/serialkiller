@@ -2,8 +2,6 @@ package link;
 
 import java.util.Arrays;
 import util.BitSet2;
-
-import util.BitSets;
 import util.ByteArrays;
 import util.Bytes;
 
@@ -13,6 +11,7 @@ public class Unit {
 	public byte b;
 
 	public static final int FLAG_FILLER_DATA = -1; //11111111
+	public static final int FLAG_END_OF_FRAME = -2;
 	public static final byte IS_SPECIAL_BIT = 1;
 
 	public Unit(byte b) {
@@ -30,6 +29,8 @@ public class Unit {
 		this.isSpecial = true;
 		if (type == FLAG_FILLER_DATA) {
 			this.b = FLAG_FILLER_DATA;
+		}else if(type==FLAG_END_OF_FRAME){
+			this.b = FLAG_END_OF_FRAME;
 		}
 	}
 
@@ -37,13 +38,13 @@ public class Unit {
 		byte[] arr = new byte[] { b };
 		BitSet2 specialBit = new BitSet2();
 		specialBit.set(0,isSpecial);
-		return BitSets.concatenate(ByteArrays.toBitSet(arr), specialBit);
+		return BitSet2.concatenate(BitSet2.valueOf(arr), specialBit);
 	}
 	
 	public BitSet2 dataAsBitSet(){
 		if(!isSpecial){
 			byte[] arr = new byte[] { b };
-			return ByteArrays.toBitSet(arr);
+			return BitSet2.valueOf(arr);
 		}else{
 			return new BitSet2();
 		}
@@ -72,5 +73,9 @@ public class Unit {
 		}else{
 			return (obj instanceof Unit) && ((Unit) obj).b==this.b && ((Unit) obj).isSpecial == this.isSpecial;
 		}
+	}
+
+	public boolean isEndOfFrame() {
+		return isSpecial&&b==FLAG_END_OF_FRAME;
 	}
 }

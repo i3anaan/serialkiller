@@ -6,6 +6,10 @@ import java.net.Socket;
 import log.LogMessage;
 import log.Logger;
 
+/**
+ * A WebWorker is a Thread that handles a single request. When it has ful-
+ * filled its purpose, it dies.
+ */
 class WebWorker extends Thread {
     private Socket sock;
     private InputStream is;
@@ -20,6 +24,7 @@ class WebWorker extends Thread {
         this.sock = sock;
         this.log = new Logger(LogMessage.Subsystem.WEB);
         this.service = service;
+        this.setName("Web worker");
     }
 
     public void run() {

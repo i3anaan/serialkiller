@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class LogService {
     /** The minimum level of log messages we want to log. */
-    private static final LogMessage.Severity LEVEL = LogMessage.Severity.DEBUG;
+    private static LogMessage.Severity level = LogMessage.Severity.DEBUG;
 
     /** The singleton instance. */
     private static LogService instance;
@@ -37,7 +37,7 @@ public class LogService {
 
     /** Adds a new LogMessage. */
     public void add(LogMessage msg) {
-        if (msg.getSeverity().ordinal() >= LEVEL.ordinal()) {
+        if (msg.getSeverity().ordinal() >= level.ordinal()) {
             Stats.hit("log.messagesLogged");
             synchronized (System.out) {
             	System.out.println(msg);
@@ -51,4 +51,16 @@ public class LogService {
     public List<LogMessage> getMessages() {
         return Collections.unmodifiableList(messages);
     }
+
+    /** Returns the current logging level. */
+	public static LogMessage.Severity getLevel() {
+		return level;
+	}
+
+	/** Sets the logging level. */
+	public static void setLevel(LogMessage.Severity level) {
+		LogService.level = level;
+	}
+    
+    
 }

@@ -1,24 +1,30 @@
 package application.UserInterface;
 
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
-class TabbedPreferencePane
-		extends 	JFrame
+public class TabbedPreferencePane
+extends 	Dialog
 {
-	private		GUI			gui;
 	private		JTabbedPane tabbedPane;
 	private		JPanel		panel1;
 	private		JPanel		panel2;
 	private		JPanel		panel3;
 
 
-	public TabbedPreferencePane(GUI gui)
+	public TabbedPreferencePane(GUI gui, String name, boolean modal)
 	{
-		this.gui = gui;
-		
-		setTitle( "GARGLE Preferences" );
+		super(gui, name, modal);
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(final WindowEvent e) {
+				e.getWindow().dispose();
+			}
+		});
+
+
 		setSize( 400, 300 );
 		setMinimumSize( new Dimension( 400, 300 ) );
 		setMaximumSize( new Dimension( 400, 300 ) );
@@ -26,7 +32,7 @@ class TabbedPreferencePane
 
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout( new BorderLayout() );
-		getContentPane().add( topPanel );
+		this.add(topPanel);
 
 		// Create the tab pages
 		createUserPage();
@@ -65,7 +71,7 @@ class TabbedPreferencePane
 	{
 		panel2 = new JPanel();
 		panel2.setLayout(null );
-		
+
 		// Default location to download files to
 		JLabel pathLabel = new JLabel( "Default file path:" );
 		pathLabel.setBounds( 10, 15, 150, 20 );
@@ -73,7 +79,7 @@ class TabbedPreferencePane
 		JTextField defPathField = new JTextField();
 		defPathField.setBounds( 10, 35, 300, 20 );
 		panel2.add( defPathField );
-		
+
 		// Setting for ignoring all file offers
 		JLabel blockLabel = new JLabel( "Ignore all file offers:" );
 		blockLabel.setBounds( 10, 60, 150, 20 );
@@ -81,32 +87,26 @@ class TabbedPreferencePane
 		JCheckBox block = new JCheckBox();
 		block.setBounds( 160, 60, 150, 20 );
 		panel2.add(block);
-		
+
 		// Save preferences
 		JButton save = new JButton("Save");
 		save.setBounds( 10, 105, 150, 20 );
 		panel2.add( save );
-		
+
 	}
 
 	public void createSoundPage()
 	{
 		panel3 = new JPanel();
-		panel3.setLayout( new GridLayout( 3, 2 ) );
+		panel3.setLayout(null );
 
-		panel3.add( new JLabel( "Field 1:" ) );
-		panel3.add( new TextArea() );
-		panel3.add( new JLabel( "Field 2:" ) );
-		panel3.add( new TextArea() );
-		panel3.add( new JLabel( "Field 3:" ) );
-		panel3.add( new TextArea() );
+		// Setting for ignoring all sounds
+		JLabel muteLabel = new JLabel( "Mute all sounds:" );
+		muteLabel.setBounds( 10, 60, 150, 20 );
+		panel3.add(muteLabel);
+		JCheckBox mute = new JCheckBox();
+		mute.setBounds( 160, 60, 150, 20 );
+		panel3.add(mute);
 	}
 
-    // Main method to get things started
-	public static void main( String args[] )
-	{
-		// Create an instance of the test application
-		TabbedPreferencePane mainFrame	= new TabbedPreferencePane(null);
-		mainFrame.setVisible( true );
-	}
 }

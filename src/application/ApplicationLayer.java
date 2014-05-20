@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Observable;
 
+import log.LogMessage;
+import log.Logger;
+import network.NetworkLayer;
+import network.Packet;
 import application.message.*;
 
 /**
@@ -20,10 +24,26 @@ import application.message.*;
  */
 public class ApplicationLayer extends Observable {
 
-	public static final String rootDir = System.getProperty("user.home");
+	/** NetworkLayer that this ApplicationLayer communicates with */
+	private NetworkLayer networkLayer;
 	
-	public ApplicationLayer(){
-
+	/** The Logger object used by this layer to send log messages to the web interface */
+	private Logger logger;
+	
+	/** byte value of a chat flag */
+	private static final byte chatCommand = 'C';
+	
+	/** byte value of a fileOffer flag */
+	private static final byte fileOfferCommand = 'F';
+	
+	/** byte value of a  fileAccept flag */
+	private static final byte fileAcceptCommand = 'A';
+	
+	/** byte value of a fileTransfer flag */
+	private static final byte fileTransferCommand = 'S';
+	
+	public ApplicationLayer(NetworkLayer nl){
+		this.networkLayer = nl;
 	}
 
 
@@ -33,78 +53,56 @@ public class ApplicationLayer extends Observable {
 	 * @return
 	 * @throws CommandNotFoundException 
 	 */
-	public void readPayload(byte[] data) throws CommandNotFoundException{
+	public void readPayload(Payload p) throws CommandNotFoundException{
+		
+		
 		// Retrieves command char from payload
-		char command = getCommand(data);
+		char command = getCommand(p.data);
 
-		// Send Chat message
+		// Chat message
 		if(command == 'C'){
-			// Creates a new chat message object
-			ChatMessage cm = new ChatMessage(data);
-			//TODO call gui to parse chat message
-			System.out.println("Nickname: " +cm.getNickname()+"\n");
-			System.out.println("Message: " +cm.getMessage()+"\n");
+			// Creates a new chat message object and notifies the gui
+			ChatMessage cm = new ChatMessage(p.adress, p.data);
 			setChanged();
 			notifyObservers(cm);
 
 		}
-		// Send request to transfer file
+		// Request to transfer file
 		else if(command == 'F'){
 
-			FileOfferMessage fm = new FileOfferMessage(data);
-			System.out.println("FileOfferMessage: -----------");
-			System.out.println("FileSize: "+fm.getFileSize());
-			System.out.println("FileName: "+fm.getFileName()+ "\n");
-			//TODO call gui and notify of file offer
+			FileOfferMessage fm = new FileOfferMessage(p.adress, p.data);
 			setChanged();
 			notifyObservers(fm);
+			
+			ApplicationLayer.getLogger().debug("Received FileOffer: " + p.toString() + ".");
 		}
 		// Accept file transfer
 		else if(command == 'A'){
-			FileAcceptMessage fm = new FileAcceptMessage(data);
-			System.out.println("FileAcceptMessage: -----------");
-			System.out.println("FileSize: "+fm.getFileSize());
-			System.out.println("FileName: "+fm.getFileName()+"\n");
-			
-			//TODO call networkLayer and send data for wrapping
+			FileAcceptMessage fm = new FileAcceptMessage(adress, data);
+			//TODO start file transfer
 			byte[] send = readFile(rootDir + "/downloads");
+			
+			ApplicationLayer.getLogger().debug("Accepted File Transfer: " + p.toString() + ".");
 			
 		}
 		// Transfer file
 		else if(command == 'S'){
-			FileTransferMessage fm = new FileTransferMessage(data);
-			System.out.println("FileTransferMessage: -----------");
-			System.out.println(fm.getFileBytes().length + " bytes \n");
+			FileTransferMessage fm = new FileTransferMessage(adress, data);
 			//Writes the file to requested path
 			
 			//TODO call gui to request filepath
 			writeFile(fm.getFileBytes(), (rootDir + "/downloads"));
+			
+			ApplicationLayer.getLogger().debug("Started File Transfer: " + p.toString() + ".");
 
 		}
 		else{
 			// TODO find ways to catch invalid commands in a more refined manner
 			throw new CommandNotFoundException(String.format("command: %c", command));
+			
+			ApplicationLayer.getLogger().debug("CommandNotFoundException on: " + p.toString() + ".");
 
 		}
-	}
-
-	/**
-	 * Converts a HexString into a byte array
-	 * @param s String to be converted
-	 * @return b byte array
-	 */
-	// TODO depriciated
-	public static byte[] writePayload(String s){
-
-		
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-					+ Character.digit(s.charAt(i+1), 16));
-		}
-		return data;
-
 	}
 
 	/**
@@ -176,19 +174,60 @@ public class ApplicationLayer extends Observable {
 	/**
 	 * Reads a chat message from the chat application
 	 * and converts it into a byte array
+	 * @param String containing nickname
 	 * @param String containing chat message
-	 * @return byte array containing chat message
+	 * @return byte array containing payload for a chat message
 	 */
-	// TODO maybe add nickname as parameter
-	public byte[] writeChatMessage(String s){
+	
+	public byte[] writeChatMessage(String nickname, String message){
+		// convert String to UTF-8		
+		byte nullbyte = (byte) 0;
+		byte[] nick = nickname.getBytes("UTF-8");
+		byte[] msg = message.getBytes("UTF-8");
+
+		// create new byte[] with minimum length needed
+		byte[] data = new byte[nick.length + 2 + msg.length];
 		
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-					+ Character.digit(s.charAt(i+1), 16));
-		}
+		// connoctate byte arrays into a new byte array
+		data[0] = chatCommand;
+		System.arraycopy(nick, 0, data, 1, nick.length);
+		data[nick.length+1] = nullbyte;
+		System.arraycopy(msg, 0, data, (nick.length+2), msg.length);
+		
 		return data;
 	
 	}
+	
+	 @Override
+	    public void run() {
+
+	        boolean run = true;
+
+	        // Read payloads in the queue.
+	        while (run) {
+	            try {
+	                Payload p = networkLayer.read();
+
+	                // incoming payload
+	                	readPayload(p);
+	                    ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
+	                    return; // We are done.
+
+	                sendPacket(p);
+	            } catch (InterruptedException e) {
+	                // Exit gracefully.
+	                run = false;
+	            }
+	        }
+	        ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
+
+	    }
+	    
+	 	/** Returns the Logger object for this ApplicationLayer */
+	    public static Logger getLogger() {
+	        if (logger == null) {
+	            logger = new Logger(LogMessage.Subsystem.NETWORK);
+	        }
+	        return logger;
+	    }
 }
