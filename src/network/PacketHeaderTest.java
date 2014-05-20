@@ -217,7 +217,7 @@ public class PacketHeaderTest extends TestCase {
 
         // Check for overflows.
         try {
-            h.setSegnum(256);
+            h.setSegnum(PacketHeader.MAX_SEGNUM + 1);
             fail("The segment number can be overflowed.");
         } catch (IllegalArgumentException e) {
             // Expected, do nothing.

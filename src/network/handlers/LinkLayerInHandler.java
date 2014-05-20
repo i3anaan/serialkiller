@@ -10,6 +10,8 @@ import java.util.Arrays;
  * Handler for data from the link layer.
  */
 public class LinkLayerInHandler extends LinkLayerHandler {
+    private String name = "LinkHandler<In>";
+
     public LinkLayerInHandler(NetworkLayer parent, FrameLinkLayer link) {
         super(parent, link);
     }

@@ -1,12 +1,11 @@
 package network;
 
+import util.BitSet2;
 import util.ByteArrays;
 import util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.BitSet;
-
 /**
  * Represents a header of a packet.
  */
@@ -14,10 +13,10 @@ public class PacketHeader {
     public static final int HEADER_LENGTH = 13;
     public static final int MAX_TTL = 7;
     public static final int MAX_SEQNUM = 255;
-    public static final long MAX_SEGNUM = 16777215L;
+    public static final int MAX_SEGNUM = 16777215;
 
     /** The raw data of this header. */
-    private BitSet raw;
+    private BitSet2 raw;
 
     /** Whether the header is precompiled (that is, not changed). */
     protected boolean precompiled;
@@ -27,7 +26,7 @@ public class PacketHeader {
      */
     protected PacketHeader() {
         precompiled = false;
-        raw = new BitSet(HEADER_LENGTH * 8);
+        raw = new BitSet2(HEADER_LENGTH * 8);
     }
 
     /**
@@ -47,7 +46,7 @@ public class PacketHeader {
         return ByteArrays.fromBitSet(raw, HEADER_LENGTH);
     }
 
-    protected BitSet raw() {
+    protected BitSet2 raw() {
         return raw;
     }
 
@@ -57,8 +56,10 @@ public class PacketHeader {
 
     protected void setChecksum(long checksum) {
         if (checksum >= 0 && checksum < 4294967296L) {
-            byte[] arr = ByteBuffer.allocate(8).putLong(checksum).array();
+            // Reset checksum
+            raw.set(0, 32, false);
 
+            byte[] arr = ByteBuffer.allocate(8).putLong(checksum).array();
             raw.or(ByteArrays.toBitSet(Arrays.copyOfRange(arr, 4, 8), HEADER_LENGTH * 8, 0));
         } else {
             throw new IllegalArgumentException("The checksum is too large.");
@@ -142,7 +143,7 @@ public class PacketHeader {
     }
 
     protected void setSeqnum(int seqnum) {
-        if (seqnum >= 0 && seqnum < 256) {
+        if (seqnum >= 0 && seqnum <= MAX_SEQNUM) {
             raw.or(Bytes.toBitSet((byte) seqnum, HEADER_LENGTH * 8, 64));
         } else {
             throw new IllegalArgumentException("The sequence number should be between 0 and 255 (inclusive).");
@@ -155,7 +156,7 @@ public class PacketHeader {
     }
 
     protected void setAcknum(long acknum) {
-        if (acknum >= 0 && acknum < 256) {
+        if (acknum >= 0 && acknum <= MAX_SEQNUM) {
             raw.or(Bytes.toBitSet((byte) acknum, HEADER_LENGTH * 8, 72));
         } else {
             throw new IllegalArgumentException("The acknowledgement number should be between 0 and 255 (inclusive).");
@@ -163,12 +164,12 @@ public class PacketHeader {
         precompiled = false;
     }
 
-    public long getSegnum() {
-        return ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(80, 104)));
+    public int getSegnum() {
+        return (int) ByteArrays.parseLong(ByteArrays.fromBitSet(raw.get(80, 104)));
     }
 
-    protected void setSegnum(long segnum) {
-        if (segnum >= 0 && segnum < 16777215L) {
+    protected void setSegnum(int segnum) {
+        if (segnum >= 0 && segnum <= MAX_SEGNUM) {
             raw.or(ByteArrays.toBitSet(Arrays.copyOfRange(ByteBuffer.allocate(8).putLong(segnum).array(), 5, 8), HEADER_LENGTH * 8, 80));
         } else {
             throw new IllegalArgumentException("The segment number should be between 0 and 16777215 (inclusive).");

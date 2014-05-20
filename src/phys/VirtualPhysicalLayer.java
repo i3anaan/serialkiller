@@ -16,11 +16,7 @@ public class VirtualPhysicalLayer extends PhysicalLayer {
 
 	@Override
 	public void sendByte(byte data) {
-		synchronized (this) {
-			synchronized (that) {
-				that.takeByte(data);
-			}
-		}
+		that.takeByte(data);
 	}
 
 	@Override
