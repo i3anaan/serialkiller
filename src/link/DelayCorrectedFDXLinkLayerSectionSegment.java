@@ -53,7 +53,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			readFrame = false;
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
-			BitSet2 outgoingData = frameToSendNext.getBitSet();
+			BitSet2 outgoingData = frameToSendNext.getDataBitSet();
 			//log("Frame to send: " + frameToSendNext + "   outgoing bits: "
 			//		+ outgoingData.toString());
 			int bitsReceived = 0;

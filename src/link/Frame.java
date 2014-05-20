@@ -70,11 +70,25 @@ public class Frame {
 	 * (Flags and stuffings are filtered out).
 	 * @return
 	 */
-	public BitSet2 getBitSet(){
+	public BitSet2 getDataBitSet(){
 		BitSet2 result = new BitSet2();
 		for(Unit u : units){
 			//System.out.println(result.length());
 				result = BitSets.concatenate(result, u.dataAsBitSet());
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns all the bits in this payload
+	 * (Flags and stuffings are left in).
+	 * @return
+	 */
+	public BitSet2 getFullBitSet(){
+		BitSet2 result = new BitSet2();
+		for(Unit u : units){
+			//System.out.println(result.length());
+				result = BitSets.concatenate(result, u.asBitSet());
 		}
 		return result;
 	}
@@ -85,6 +99,10 @@ public class Frame {
 		}else{
 			return null;
 		}
+	}
+	
+	public Unit[] getUnits(){
+		return units;
 	}
 
 	public Frame getClone() {

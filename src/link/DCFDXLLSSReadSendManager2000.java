@@ -13,49 +13,51 @@ import util.Bytes;
  * @author I3anaan
  * 
  */
-public class DCFDXLLSSReadSendManager2000 extends BytewiseLinkLayer implements Runnable {
+public class DCFDXLLSSReadSendManager2000 implements Runnable {
 	DelayCorrectedFDXLinkLayerSectionSegment down;
 
-	private ArrayBlockingQueue<Byte> inbox; // TODO frames van maken;
-	private ArrayBlockingQueue<Byte> outbox; // TODO frames van maken;
+	private ArrayBlockingQueue<Unit> inbox; // TODO frames van maken;
+	private ArrayBlockingQueue<Unit> outbox; // TODO frames van maken;
 	private Thread exchanger;
 	private boolean keepRunning = true;
 
 	public DCFDXLLSSReadSendManager2000(
 			DelayCorrectedFDXLinkLayerSectionSegment down) {
 		this.down = down;
-		this.inbox = new ArrayBlockingQueue<Byte>(1024); // TODO capacity goed
+		this.inbox = new ArrayBlockingQueue<Unit>(1024); // TODO capacity goed
 															// zo?
-		this.outbox = new ArrayBlockingQueue<Byte>(1024); // TODO capacity goed
+		this.outbox = new ArrayBlockingQueue<Unit>(1024); // TODO capacity goed
 															// zo?
 
 		exchanger = new Thread(this, "Exchanger");
 		exchanger.start();
 	}
 
-	@Override
 	public void sendByte(byte data) {
 		try {
-			// System.out.println("adding:  "+data +
-			// " queue size: "+outbox.size());
-			outbox.put(data);
-			// System.out.println(data+"  added");
-
+			outbox.put(new Unit(data));
 		} catch (InterruptedException e) {
 			// TODO hier iets doen?
 			e.printStackTrace();
 		}
 	}
 
-	@Override
-	public byte readByte() {
+	public void sendUnit(Unit unit) {
 		try {
-			byte read = inbox.take();
-			// System.out.println("Reading byte:  "+Bytes.format(read)+" :  "+read);
+			outbox.put(unit);
+		} catch (InterruptedException e) {
+			// TODO hier iets doen?
+			e.printStackTrace();
+		}
+	}
+
+	public Unit readUnit() {
+		try {
+			Unit read = inbox.take();
 			return read;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			return 0; // TODO iets van error flag?
+			return null; // TODO iets van error flag?
 		}
 	}
 
@@ -64,19 +66,16 @@ public class DCFDXLLSSReadSendManager2000 extends BytewiseLinkLayer implements R
 		down.readFrame();
 		while (true) {
 			if (keepRunning) {
-				// System.out.println("Outbox: "+Arrays.toString(outbox.toArray()));
 				FlaggedFrame frameToSend = new FlaggedFrame(outbox);
-				// System.out.println("Pushing out flagged frame to send: "+frameToSend.payload);
 				down.sendFrame(frameToSend);
-
-				// System.out.println("sentFrame!");
 				down.exchangeFrame();
-				// System.out.println(Arrays.toString(down.readFrame().units));
-				for (byte b : down.readFrame().getBitSet().toByteArray()) {
-					// System.out.println("Putting in inbox:  "+Arrays.toString(down.readFrame().units));
+				for (Unit u : down.readFrame().getUnits()) {
 					try {
-						inbox.put(b);
-						//System.out.print((char) (b & 0xFF));
+						if (!u.isFiller()) {
+							inbox.put(u);
+						} else {
+
+						}
 					} catch (InterruptedException e) {
 						// TODO hier iets doen?
 						e.printStackTrace();
@@ -87,7 +86,7 @@ public class DCFDXLLSSReadSendManager2000 extends BytewiseLinkLayer implements R
 	}
 
 	public void setRun(boolean keepRunning) {
-		System.out.println("Setting run to: "+keepRunning);
+		System.out.println("Setting run to: " + keepRunning);
 		this.keepRunning = keepRunning;
 
 	}
