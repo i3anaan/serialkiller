@@ -33,7 +33,9 @@ public class LinkLayerInHandler extends LinkLayerHandler {
         // Verify the integrity and offer it to the incoming queue or drop the
         // packet if it is malformed.
         if (p.verify()) {
-            in.offer(p);
+            if (!in.offer(p)) {
+                NetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
+            }
         } else {
             NetworkLayer.getLogger().warning("Link layer delivered malformed packet, packet dropped.");
         }

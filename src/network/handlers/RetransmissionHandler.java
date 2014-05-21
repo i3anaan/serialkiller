@@ -21,16 +21,16 @@ public class RetransmissionHandler extends Handler {
 
     @Override
     public void handle() throws InterruptedException {
-        // Make sure the queue is filled by checking for retransmissions
+        // Make sure the queue is filled by checking for retransmissions.
         parent.checkRetransmissions();
 
         Packet p = out.poll(NetworkLayer.TIMEOUT / 10, TimeUnit.MILLISECONDS);
 
         while (p != null) {
-            // Offer again
-            in.add(p);
+            // Offer again.
+            in.put(p);
 
-            // Mark packet as sent
+            // Mark packet as sent.
             parent.markSent(p);
 
             p = out.take();
