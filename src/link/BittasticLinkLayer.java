@@ -3,12 +3,15 @@ package link;
 import java.util.Arrays;
 import java.util.Random;
 
+import common.Stack;
+import common.Startable;
+
 import log.LogMessage;
 import log.Logger;
 import phys.PhysicalLayer;
 import stats.MonitoredQueue;
 
-public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
+public class BittasticLinkLayer extends FrameLinkLayer implements Runnable, Startable {
 	private PhysicalLayer down;
 	private MonitoredQueue<byte[]> inbox;
 	private MonitoredQueue<byte[]> outbox;
@@ -34,10 +37,8 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 	private Random r;
 	
 	/** The physical layer implementation under this link layer. */
-	public BittasticLinkLayer(PhysicalLayer phys) {
+	public BittasticLinkLayer() {
 		super();
-		down = phys;
-		
 		inbox = new MonitoredQueue<byte[]>("bittastic_in", 1024);
 		outbox = new MonitoredQueue<byte[]>("bittastic_out", 1024);
 		
@@ -45,6 +46,8 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		
 		r = new Random();
 	}
+	
+	
 	
 	@Override
 	public void sendFrame(byte[] data) {
@@ -292,5 +295,15 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable {
 		log.debug("Startup procedure: Set our clock to 1 and wait for other host to come online.");
 		setClock(true);
 		waitClock(true);
+	}
+
+
+
+	@Override
+	public Thread start(Stack stack) {
+		down = stack.physLayer;
+		Thread t = new Thread(this);
+		t.start();
+		return t;
 	}
 }
