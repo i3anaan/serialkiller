@@ -21,7 +21,7 @@ folder is different for various operating systems. For example:
 The syntax for the routes file is very easy. Each instruction should be placed
 on a new line.
 
-**```{keyword}={tpp_addr}```**
+### ```{keyword}={tpp_addr}```
 
 Assigns a TPP address to a specific host identified by the keyword.
 
@@ -31,7 +31,7 @@ serial cable)
 
 ```{tpp_addr}```: The valid TPP address for the host.
 
-**```{tpp_addr1}>{tpp_addr2}```**
+### ```{tpp_addr1}>{tpp_addr2}```
 
 A route in the network. Routes can be chained, for example ```1>2``` and
 ```2>3``` will route packets for host ```1``` through host ```3```.
@@ -41,7 +41,7 @@ A route in the network. Routes can be chained, for example ```1>2``` and
 ```{tpp_addr2}```: A valid TPP address for the host the packets need to be
 routed through.
 
-**```{tpp_addr}={ip_addr|hostname}```**
+### ```{tpp_addr}={ip_addr|hostname}```
 
 Assigns an IP address (or hostname) to a host. This will result in a tunnel
 between this host and the host determined by ```{tpp_addr}```.
