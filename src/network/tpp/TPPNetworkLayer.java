@@ -73,6 +73,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** The next available sequence number. */
     private int seqnum;
 
+    private Stack stack;
+
     /**
      * Constructs a new NetworkLayer instance.
      */
@@ -292,6 +294,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         // Destroy handlers.
         stopHandlers();
+
+        if (stack != null) {
+            // Force stack rebuild.
+            stack.smash();
+        }
     }
 
     /**
@@ -376,6 +383,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         r.update();
 
         // Update tunnels
+        tunnels.clear();
+
         for (Byte addr : routes.getTunnels().keySet()) {
             tunnels.create(routes.getTunnels().get(addr), addr < r.self());
         }
@@ -465,6 +474,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public Thread start(Stack stack) {
         // Check if the link layer of the stack is compatible with this network layer implementation.
         assert (stack.linkLayer instanceof FrameLinkLayer);
+        this.stack = stack;
 
         // Assign the link layer.
         this.link = (FrameLinkLayer) stack.linkLayer;
