@@ -1,16 +1,18 @@
-package network;
+package network.tpp;
 
-import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
 
 /** Unit tests for the PacketHeader class. */
-public class PacketHeaderTest extends TestCase {
+public class PacketHeaderTest {
     PacketHeader h;
 
+    @Before
     public void setUp() {
         h = new PacketHeader();
     }

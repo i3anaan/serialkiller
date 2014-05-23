@@ -8,8 +8,8 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 	private final int fileSize;
 	private final String fileName;
 	
-	public FileMessage(byte adress, byte[] data) {
-		super(adress, data);
+	public FileMessage(byte address, byte[] data) {
+		super(address, data);
 		byte [] size = Arrays.copyOfRange(data, 1, 5);
 		byte [] name = Arrays.copyOfRange(data, 5, data.length);
 		fileSize = Integer.parseInt(new String(size));

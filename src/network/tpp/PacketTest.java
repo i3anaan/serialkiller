@@ -1,15 +1,17 @@
-package network;
+package network.tpp;
 
-import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Random;
 
 /** Unit tests for the Packet class. */
-public class PacketTest extends TestCase {
+public class PacketTest {
     Packet p;
 
+    @Before
     public void setUp() {
         p = new Packet(0);
     }

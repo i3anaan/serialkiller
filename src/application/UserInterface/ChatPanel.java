@@ -54,8 +54,8 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 	}
 	
 	@Override
-	public void addMessage(final String name1, final String msg) {
-		taMessages.append("<" + name1 + "> " + msg + "\n");
+	public void addMessage(final String name1, final int host, final String msg) {
+		taMessages.append("<" + name1 + " @" + host + "> " + msg + "\n");
 
 	}
 
@@ -71,7 +71,7 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 		if (event.getKeyCode() == KeyEvent.VK_ENTER) {
 			// call Application Layer to send message
 			// temp debug line
-			addMessage("Henk", myMessage.getText());
+			addMessage("Henk", 6666,myMessage.getText());
 			myMessage.setText("");
 		}
 		

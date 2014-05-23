@@ -1,7 +1,9 @@
 package application.UserInterface;
 
 import java.awt.BorderLayout;
+import java.util.Map;
 
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -17,11 +19,15 @@ public class UserListPanel extends JPanel{
 	private GUI gui;
 	private JTextArea userList;
 	
+	private Map<Byte, String> hosts;
+	private JList hostList;
+	
 	public UserListPanel(GUI gu) {
 		super();
 		gui = gu;
 		this.setLayout(new BorderLayout());
 		// History Field
+		JList jlist = new JList();
 				userList = new JTextArea("", 15, 15);
 				userList.setEditable(false);
 				userList.setLineWrap(true);

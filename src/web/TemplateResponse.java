@@ -32,6 +32,7 @@ class TemplateResponse extends Response {
                 .append("    <a href='/files/'>Files</a>&nbsp; ")
                 .append("    <a href='/logs/'>Logs</a>&nbsp; ")
                 .append("    <a href='/threads/'>Threads</a>&nbsp; ")
+                .append("    <a href='/routes/'>Routes</a>&nbsp; ")
                 .append("    <a href='/status/'>Status</a>&nbsp; ")
                 .append("    <a href='' style='float: right'>Refresh</a>")
                 .append("    </div>")

@@ -3,7 +3,7 @@ package application.message;
 public class ApplicationLayerMessage implements Message {
 
 	// Private variables
-	private final byte adress;
+	private final byte address;
 	private final byte[] payload;
 	
 	/**
@@ -12,8 +12,8 @@ public class ApplicationLayerMessage implements Message {
 	 * The payload of the message is defined at construction and cannot be changed
 	 * @param data The payload for this message
 	 */
-	public ApplicationLayerMessage(byte adress, byte[] data){
-		this.adress = adress;
+	public ApplicationLayerMessage(byte address, byte[] data){
+		this.address = address;
 		this.payload = data;
 	}
 	
@@ -23,8 +23,8 @@ public class ApplicationLayerMessage implements Message {
 	}
 	
 	@Override
-	public byte getAdress() {
-		return adress;
+	public byte getAddress() {
+		return address;
 	}
 
 }
