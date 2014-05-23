@@ -44,10 +44,10 @@
         <delete dir="${build.dir}"/>
     </target>
 	
-    <target name="test">
+    <target name="test" depends="compile">
         <mkdir dir="${junit.dir}"/>
 
-    	<junit showoutput="true" enabletestlistenerevents="true" fork="true" forkmode="once" haltonfailure="yes">
+    	<junit showoutput="true" fork="true" forkmode="once" haltonfailure="yes">
     	    <formatter type="plain" usefile="false" />
     	    <classpath refid="classpath"/>
     	    <batchtest todir="${junit.dir}">
