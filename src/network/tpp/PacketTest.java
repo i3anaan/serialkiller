@@ -32,7 +32,6 @@ public class PacketTest {
 
         // Create packet.
         p = new Packet(raw);
-        byte[] compiled = p.compile();
 
         assertEquals("Packet payload size incorrect.", data.length, p.payload().length);
         assertTrue("Packet payload incorrect.", Arrays.equals(data, p.payload()));

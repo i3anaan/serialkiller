@@ -13,7 +13,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import application.ApplicationLayer;
+
 import common.Stack;
+import common.Startable;
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
@@ -21,7 +24,7 @@ import phys.diag.NullPhysicalLayer;
 import util.Environment;
 import web.WebService;
 import network.NetworkLayer;
-import application.ApplicationLayer;
+import network.tpp.TPPNetworkLayer;
 import link.BittasticLinkLayer;
 import link.LinkLayer;
 import link.BufferStufferLinkLayer;
@@ -40,7 +43,7 @@ public class Starter extends JFrame implements ActionListener {
 	// Options for all the combo boxes.
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
-	private Class<?> networkLayers[] = {NetworkLayer.class};
+	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
 	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class,JackTheRipper.class};
 	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, NullPhysicalLayer.class};
 	private String webOptions[] = {"Yes", "No"};
@@ -131,15 +134,24 @@ public class Starter extends JFrame implements ActionListener {
 		try {
 			Class<?> physClass = physLayers[physCombo.getSelectedIndex()];
 			stack.physLayer = (PhysicalLayer)physClass.newInstance();
+			log.debug("Got physical layer implementation.");
 			
 			Class<?> linkClass = linkLayers[linkCombo.getSelectedIndex()];
 			stack.linkLayer = (LinkLayer)linkClass.newInstance();
+			log.debug("Got link layer implementation.");
 			
 			Class<?> netClass = networkLayers[netCombo.getSelectedIndex()];
 			stack.networkLayer = (NetworkLayer)netClass.newInstance();
+			log.debug("Got network layer implementation.");
 			
 			Class<?> appClass = applicationLayers[appCombo.getSelectedIndex()];
 			stack.applicationLayer = (ApplicationLayer)appClass.newInstance();
+			log.debug("Got application layer implementation.");
+			
+			((Startable)stack.physLayer).start(stack);
+			((Startable)stack.linkLayer).start(stack);
+			((Startable)stack.networkLayer).start(stack);
+			((Startable)stack.applicationLayer).start(stack);
 			
 			if (webCombo.getSelectedIndex() == 0) {
 				stack.webService = new WebService(8080);
@@ -158,8 +170,6 @@ public class Starter extends JFrame implements ActionListener {
 			start.setEnabled(false);
 		} catch (InstantiationException e) {
 			throw new RuntimeException(e);
-			// This should not happen.
-			//log.emerg(e.toString());
 		} catch (IllegalAccessException e) {
 			// This should not happen at all ever.
 			log.emerg(e.toString());
