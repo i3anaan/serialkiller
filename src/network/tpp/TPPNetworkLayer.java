@@ -46,6 +46,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** The retransmission handler. */
     private Handler retransmissionHandler;
 
+    /** The tunneling handler. */
+    private Handler tunnelingHandler;
+
     /** The link layer that is used. */
     private FrameLinkLayer link;
 
@@ -70,6 +73,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** The next available sequence number. */
     private int seqnum;
 
+    private Stack stack;
+
     /**
      * Constructs a new NetworkLayer instance.
      */
@@ -84,9 +89,6 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         routerLock = new ReentrantLock(true);
 
         this.tunnels = new Tunneling(this);
-
-        // Load routes
-        loadDefaultRoutes();
 
         // Construct and run thread
         t = new Thread(this);
@@ -289,6 +291,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         // Destroy handlers.
         stopHandlers();
+
+        if (stack != null) {
+            // Force stack rebuild.
+            stack.smash();
+        }
     }
 
     /**
@@ -299,11 +306,22 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      */
     private void constructHandlers() {
         assert (router != null);
+        assert (tunnels != null);
 
         // Stop existing handlers (only if the network layer is running).
         if (t.isAlive()) {
             stopHandlers();
         }
+
+        // Add retransmission handler
+        handlers.remove(retransmissionHandler);
+        retransmissionHandler = new RetransmissionHandler(this);
+        handlers.add(retransmissionHandler);
+
+        // Add tunneling handler
+        handlers.remove(tunnelingHandler);
+        tunnelingHandler = new TunnelingHandler(this, tunnels, router);
+        handlers.add(tunnelingHandler);
 
         // Check all hosts for a possible handler.
         for (Host host : router.hosts()) {
@@ -328,15 +346,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Connect handler to host.
                 host.handler(out);
             } else if (host.IP() != null && !host.IP().equals("")) {
-                // TODO: Construct & connect tunnel handler
+                // Connect tunnelingHandler to host.
+                host.handler(tunnelingHandler);
             }
 
             TPPNetworkLayer.getLogger().debug(host.toString() + " connected with " + host.handler().toString() + ".");
         }
-
-        // Add retransmission handler
-        retransmissionHandler = new RetransmissionHandler(this);
-        handlers.add(retransmissionHandler);
 
         // Start new handlers (only if the network layer is running).
         if (t.isAlive()) {
@@ -363,6 +378,13 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         r.parse(routes);
         r.update();
+
+        // Update tunnels
+        tunnels.clear();
+
+        for (Byte addr : routes.getTunnels().keySet()) {
+            tunnels.create(routes.getTunnels().get(addr), addr < r.self());
+        }
 
         TPPNetworkLayer.getLogger().alert("Routes updated.");
     }
@@ -449,9 +471,13 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public Thread start(Stack stack) {
         // Check if the link layer of the stack is compatible with this network layer implementation.
         assert (stack.linkLayer instanceof FrameLinkLayer);
+        this.stack = stack;
 
         // Assign the link layer.
         this.link = (FrameLinkLayer) stack.linkLayer;
+
+        // Load routes
+        loadDefaultRoutes();
 
         // Run the thread(s).
         this.start();
