@@ -46,6 +46,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** The retransmission handler. */
     private Handler retransmissionHandler;
 
+    /** The tunneling handler. */
+    private Handler tunnelingHandler;
+
     /** The link layer that is used. */
     private FrameLinkLayer link;
 
@@ -299,11 +302,22 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      */
     private void constructHandlers() {
         assert (router != null);
+        assert (tunnels != null);
 
         // Stop existing handlers (only if the network layer is running).
         if (t.isAlive()) {
             stopHandlers();
         }
+
+        // Add retransmission handler
+        handlers.remove(retransmissionHandler);
+        retransmissionHandler = new RetransmissionHandler(this);
+        handlers.add(retransmissionHandler);
+
+        // Add tunneling handler
+        handlers.remove(tunnelingHandler);
+        tunnelingHandler = new TunnelingHandler(this, tunnels, router);
+        handlers.add(tunnelingHandler);
 
         // Check all hosts for a possible handler.
         for (Host host : router.hosts()) {
@@ -328,15 +342,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Connect handler to host.
                 host.handler(out);
             } else if (host.IP() != null && !host.IP().equals("")) {
-                // TODO: Construct & connect tunnel handler
+                // Connect tunnelingHandler to host.
+                host.handler(tunnelingHandler);
             }
 
             TPPNetworkLayer.getLogger().debug(host.toString() + " connected with " + host.handler().toString() + ".");
         }
-
-        // Add retransmission handler
-        retransmissionHandler = new RetransmissionHandler(this);
-        handlers.add(retransmissionHandler);
 
         // Start new handlers (only if the network layer is running).
         if (t.isAlive()) {
@@ -363,6 +374,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         r.parse(routes);
         r.update();
+
+        // Update tunnels
+        for (Byte addr : routes.getTunnels().keySet()) {
+            tunnels.create(routes.getTunnels().get(addr), addr < r.self());
+        }
 
         TPPNetworkLayer.getLogger().alert("Routes updated.");
     }

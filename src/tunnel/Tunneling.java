@@ -74,7 +74,7 @@ public class Tunneling implements Runnable {
         // Remove and stop the old tunnel if present.
         if (tunnels.containsKey(tunnel.ip())) {
             Tunnel old = tunnels.remove(tunnel.ip());
-            // TODO Handle tunnel threads
+            old.stop();
         }
 
         // Add the new tunnel to the collection.
@@ -83,7 +83,23 @@ public class Tunneling implements Runnable {
 
         // Start the new tunnel if necessary.
         if (tunnel.connected()) {
-            new Thread(tunnel).start();
+            tunnel.start();
+        }
+    }
+
+    /**
+     * Sends a packet over the matching tunnel. May drop the packet if a queue
+     * is full or no tunnel is known for the packet.
+     * @param p The packet.
+     * @param ip The IP address of the remote host.
+     */
+    public void send(Packet p, String ip) {
+        Tunnel t = tunnels.get(ip);
+
+        if (t != null) {
+            t.offer(p);
+        } else {
+            Tunneling.getLogger().warning(p.toString() + " dropped, no tunnel found.");
         }
     }
 
@@ -117,19 +133,34 @@ public class Tunneling implements Runnable {
         Tunneling.getLogger().warning("Tunneling stopped.");
     }
 
+    private void startTunnels() {
+        for (Tunnel t : tunnels.values()) {
+            t.start();
+        }
+    }
+
+    private void stopTunnels() {
+        for (Tunnel t: tunnels.values()) {
+            t.stop();
+        }
+    }
+
     public void start() {
         run = true;
         t.start();
+        startTunnels();
         Tunneling.getLogger().warning("Tunneling started.");
     }
 
     public void stop() {
+        stopTunnels();
+        run = false;
         try {
-            run = false;
             t.join();
         } catch (InterruptedException e) {
             // Do nothing.
         }
+        Tunneling.getLogger().warning("Tunneling stopped.");
     }
 
     public static Logger getLogger() {
