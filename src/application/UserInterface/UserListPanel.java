@@ -8,8 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import network.Host;
-
 /**
  * Panel for chat application that contains
  * a visual list of all chat users that the application is aware of

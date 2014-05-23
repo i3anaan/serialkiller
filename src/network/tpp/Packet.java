@@ -1,4 +1,4 @@
-package network;
+package network.tpp;
 
 import com.google.common.primitives.Bytes;
 
@@ -97,7 +97,7 @@ public class Packet {
      * @return The packet length in bytes.
      */
     public int length() {
-        return (int) header.getLength() + HEADER_LENGTH;
+        return header.getLength() + HEADER_LENGTH;
     }
 
     /**

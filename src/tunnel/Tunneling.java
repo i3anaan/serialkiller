@@ -2,8 +2,8 @@ package tunnel;
 
 import log.LogMessage;
 import log.Logger;
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -37,9 +37,11 @@ public class Tunneling implements Runnable {
     /** The logger. */
     private static Logger logger;
 
-    public Tunneling(NetworkLayer parent) {
+    public Tunneling(TPPNetworkLayer parent) {
         queue = parent.queue();
         tunnels = new TreeMap<String, Tunnel>();
+
+        t = new Thread(this);
     }
 
     /**
@@ -72,6 +74,7 @@ public class Tunneling implements Runnable {
         // Remove and stop the old tunnel if present.
         if (tunnels.containsKey(tunnel.ip())) {
             Tunnel old = tunnels.remove(tunnel.ip());
+            // TODO Handle tunnel threads
         }
 
         // Add the new tunnel to the collection.

@@ -1,9 +1,9 @@
 package tunnel;
 
 import com.google.common.primitives.Bytes;
-import network.NetworkLayer;
-import network.Packet;
-import network.PacketHeader;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
+import network.tpp.PacketHeader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +44,7 @@ public class Tunnel implements Runnable {
     private Tunnel(ArrayBlockingQueue<Packet> in, boolean autoconnect) {
         this.autoconnect = autoconnect;
         this.in = in;
-        out = new ArrayBlockingQueue<Packet>(NetworkLayer.QUEUE_SIZE);
+        out = new ArrayBlockingQueue<Packet>(TPPNetworkLayer.QUEUE_SIZE);
     }
 
     /**
@@ -113,7 +113,9 @@ public class Tunnel implements Runnable {
      * @param p The packet.
      */
     public void offer(Packet p) {
-        out.offer(p);
+        if (!out.offer(p)) {
+            Tunneling.getLogger().warning(p.toString() + " dropped, " + toString() + " queue full.");
+        }
     }
 
     /**

@@ -16,8 +16,7 @@ import common.Stack;
 import common.Startable;
 import log.LogMessage;
 import log.Logger;
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
 import network.Payload;
 import application.message.*;
 
@@ -32,7 +31,7 @@ import application.message.*;
 public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 	/** NetworkLayer that this ApplicationLayer communicates with */
-	private NetworkLayer networkLayer;
+	private TPPNetworkLayer networkLayer;
 
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
@@ -52,12 +51,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 	/** byte value of a fileTransfer flag */
 	private static final byte fileTransferCommand = 'S';
 
+
 	public ApplicationLayer(){
 		
 		// Construct and run thread
         thread = new Thread(this);
         thread.setName("APL " + this.hashCode());
-		
 	}
 
 
@@ -242,18 +241,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 		// Read payloads in the queue.
 		while (run) {
-			try {
-				Payload p = networkLayer.read();
+            Payload p = networkLayer.read();
 
-				// incoming payload
-				readPayload(p);
-				ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
-				return; // We are done.
-
-			} catch (InterruptedException e) {
-				// Exit gracefully.
-				run = false;
-			}
+            // incoming payload
+            readPayload(p);
+            ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
+            return; // We are done.
 		}
 		ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
 
@@ -279,7 +272,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 	@Override
 	public Thread start(Stack stack) {
-		networkLayer = stack.networkLayer;
+		networkLayer = (TPPNetworkLayer) stack.networkLayer;
 		ApplicationLayer.getLogger().warning("ApplicationLayer started.");
 		return thread;
 	}

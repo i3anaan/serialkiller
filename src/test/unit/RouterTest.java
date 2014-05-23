@@ -1,16 +1,15 @@
 package test.unit;
 
-import junit.framework.TestCase;
-import network.Host;
-import network.Packet;
-import network.Router;
-import network.RoutingTable;
+import network.tpp.Host;
+import network.tpp.Router;
+import network.tpp.RoutingTable;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
 
-public class RouterTest extends TestCase {
+public class RouterTest {
     Router r;
 
     public void setUp() {

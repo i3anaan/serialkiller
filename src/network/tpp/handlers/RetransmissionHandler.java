@@ -1,20 +1,17 @@
-package network.handlers;
+package network.tpp.handlers;
 
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
 
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Makes sure that packets are retransmitted.
  */
 public class RetransmissionHandler extends Handler {
-    private String name = "RetransmissionHandler";
+    TPPNetworkLayer parent;
 
-    NetworkLayer parent;
-
-    public RetransmissionHandler(NetworkLayer parent) {
+    public RetransmissionHandler(TPPNetworkLayer parent) {
         super(parent);
         this.parent = parent;
     }
@@ -24,7 +21,7 @@ public class RetransmissionHandler extends Handler {
         // Make sure the queue is filled by checking for retransmissions.
         parent.checkRetransmissions();
 
-        Packet p = out.poll(NetworkLayer.TIMEOUT / 10, TimeUnit.MILLISECONDS);
+        Packet p = out.poll(TPPNetworkLayer.TIMEOUT / 10, TimeUnit.MILLISECONDS);
 
         while (p != null) {
             // Offer again.
@@ -35,5 +32,9 @@ public class RetransmissionHandler extends Handler {
 
             p = out.take();
         }
+    }
+
+    public String toString() {
+        return "Retransmission" + super.toString();
     }
 }

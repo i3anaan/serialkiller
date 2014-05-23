@@ -1,6 +1,6 @@
-package network;
+package network.tpp;
 
-import network.handlers.Handler;
+import network.tpp.handlers.Handler;
 
 /**
  * Represents a host in the network.
