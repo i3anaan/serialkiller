@@ -21,7 +21,7 @@ public class RetransmissionHandler extends Handler {
         // Make sure the queue is filled by checking for retransmissions.
         parent.checkRetransmissions();
 
-        Packet p = out.poll(TPPNetworkLayer.TIMEOUT / 10, TimeUnit.MILLISECONDS);
+        Packet p = out.poll(TPPNetworkLayer.TIMEOUT / 2, TimeUnit.MILLISECONDS);
 
         while (p != null) {
             // Offer again.
