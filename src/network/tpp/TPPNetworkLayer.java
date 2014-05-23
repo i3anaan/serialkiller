@@ -350,7 +350,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 host.handler(tunnelingHandler);
             }
 
-            TPPNetworkLayer.getLogger().debug(host.toString() + " connected with " + host.handler().toString() + ".");
+            if (host.handler() != null) {
+                TPPNetworkLayer.getLogger().debug(host.toString() + " connected with " + host.handler().toString() + ".");
+            } else {
+                TPPNetworkLayer.getLogger().debug(host.toString() + " not connected with any handler.");
+            }
         }
 
         // Start new handlers (only if the network layer is running).
@@ -370,11 +374,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         RoutingTable routes;
 
-        try {
-            routes = new RoutingTable(filePath);
-        } catch (IOException e) {
-            routes = new RoutingTable();
-        }
+        routes = new RoutingTable(filePath);
 
         r.parse(routes);
         r.update();

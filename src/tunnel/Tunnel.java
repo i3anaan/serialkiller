@@ -98,7 +98,7 @@ public class Tunnel implements Runnable {
      * @return Whether this tunnel is connected.
      */
     public boolean connected() {
-        return socket.isConnected();
+        return socket != null && socket.isConnected();
     }
 
     /**

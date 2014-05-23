@@ -77,6 +77,9 @@ public class Router {
         self = t.getSelf();
         sibling = t.getSibling();
 
+        hosts.put(self, new Host(self));
+        hosts.put(sibling, new Host(sibling));
+
         // Fetch all hosts
         for (Byte addr : addrSet) {
             if (addr != null && !hosts.containsKey(addr)) {

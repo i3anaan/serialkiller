@@ -42,20 +42,24 @@ public class RoutingTable {
      * @param path The path to the file with the routing table.
      * @throws IOException There is an error with the file.
      */
-	public RoutingTable(String path) throws IOException {
-		this(new File(path));
-	}
+    public RoutingTable(String path) {
+        this(new File(path));
+    }
 
     /**
      * Creates a routing table and parses the given file.
      * @param file The file with the routing table.
      * @throws IOException There is an error with the file.
      */
-	public RoutingTable(File file) throws IOException {
+	public RoutingTable(File file) {
 		this();
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		this.fromReader(reader);
-		reader.close();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            this.fromReader(reader);
+            reader.close();
+        } catch (IOException e) {
+            die(String.format("Routes file [%s] does not exist! Exiting.", file.getAbsolutePath()));
+        }
 	}
 
     /**
@@ -100,6 +104,13 @@ public class RoutingTable {
             }
             lineNumber++;
 		}
+
+        if (self == null) {
+            die("Routes file invalid [no self address]! Exiting.");
+        }
+        if (sibling == null) {
+            die("Routes file invalid [no sibling address]! Exiting.");
+        }
 	}
 
     /**
