@@ -11,6 +11,8 @@ import java.util.Observable;
 
 import javax.naming.SizeLimitExceededException;
 
+import common.Stack;
+import common.Startable;
 import log.LogMessage;
 import log.Logger;
 import network.NetworkLayer;
@@ -26,7 +28,7 @@ import application.message.*;
  * @author msbruning
  *
  */
-public class ApplicationLayer extends Observable implements Runnable{
+public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 	/** NetworkLayer that this ApplicationLayer communicates with */
 	private NetworkLayer networkLayer;
@@ -46,8 +48,7 @@ public class ApplicationLayer extends Observable implements Runnable{
 	/** byte value of a fileTransfer flag */
 	private static final byte fileTransferCommand = 'S';
 
-	public ApplicationLayer(NetworkLayer nl){
-		this.networkLayer = nl;
+	public ApplicationLayer(){
 		
 	}
 
@@ -256,5 +257,12 @@ public class ApplicationLayer extends Observable implements Runnable{
 			logger = new Logger(LogMessage.Subsystem.NETWORK);
 		}
 		return logger;
+	}
+
+
+	@Override
+	public Thread start(Stack stack) {
+		networkLayer = stack.networkLayer;
+		return null;
 	}
 }

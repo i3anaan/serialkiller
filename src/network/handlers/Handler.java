@@ -52,8 +52,8 @@ public abstract class Handler implements Runnable {
      * Puts a packet in the outgoing queue.
      * @param p The packet.
      */
-    public void offer(Packet p) {
-        out.offer(p);
+    public boolean offer(Packet p) {
+        return out.offer(p);
     }
 
     /**
@@ -77,6 +77,7 @@ public abstract class Handler implements Runnable {
      */
     public void stop() {
         run = false;
+        t.interrupt();
         try {
             t.join();
         } catch (InterruptedException e) {

@@ -33,7 +33,7 @@ public class Tunnel implements Runnable {
     private TunnelReader reader;
     private TunnelWriter writer;
 
-    /** Whether to continue running. */
+    /** Whether to continue running this tunnel. */
     private boolean run;
 
     /**
@@ -153,20 +153,23 @@ public class Tunnel implements Runnable {
     @Override
     public void run() {
         try {
-            // Start reader and writer.
-            reader = new TunnelReader(this, socket.getInputStream());
-            writer = new TunnelWriter(this, socket.getOutputStream());
-            reader.start();
-            writer.start();
+            while (run) {
+                // Start reader and writer.
+                reader = new TunnelReader(this, socket.getInputStream());
+                writer = new TunnelWriter(this, socket.getOutputStream());
+                reader.start();
+                writer.start();
 
-            // Wait for interrupts, join threads.
-            reader.join();
-            writer.join();
+                // Wait for interrupts, join threads.
+                reader.join();
+                writer.join();
 
-            // Reconnect.
-            reconnect();
+                // Reconnect.
+                reconnect();
+            }
         } catch (IOException e) {
-            // TODO: Handle this
+            run = false;
+            Tunneling.getLogger().error(toString() + " cannot initialize the reader and/or writer.");
         }
     }
 
@@ -215,9 +218,9 @@ public class Tunnel implements Runnable {
                     // Connection closed, stop.
                     Tunneling.getLogger().warning(tunnel.toString() + " closed.");
                     run = false;
-                    tunnel.writer.interrupt();
                 }
             }
+            tunnel.writer.interrupt();
         }
 
         public void start() {
@@ -265,12 +268,12 @@ public class Tunnel implements Runnable {
                     // Connection closed, stop.
                     Tunneling.getLogger().warning(tunnel.toString() + " closed.");
                     run = false;
-                    tunnel.reader.interrupt();
                 } catch (InterruptedException e) {
                     // Some other error, stop.
                     run = false;
                 }
             }
+            tunnel.reader.interrupt();
         }
 
         public void start() {

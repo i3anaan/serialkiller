@@ -51,7 +51,8 @@ public class ApplicationLayerHandler extends Handler {
             // Check for overflow / DoS.
             if (segnum > SAFE_SEGNUM) {
                 // Drop whole sequence.
-                segments.remove(seqnum);
+                segments.get(sender).remove(seqnum);
+                NetworkLayer.getLogger().warning(p.toString() + " exceeds the safe segment number size. All segments dropped.");
                 return;
             }
             // Check for host in maps.
@@ -80,7 +81,7 @@ public class ApplicationLayerHandler extends Handler {
             // Check if we have all segments and concatenate data.
             if (sequenceSizes.get(sender).get(seqnum) == segments.get(sender).get(seqnum).size()) {
                 // Send concatenated payload to application.
-                appQueue.offer(new Payload(Packet.concatPayloads(segments.get(sender).get(seqnum).values()), sender));
+                appQueue.put(new Payload(Packet.concatPayloads(segments.get(sender).get(seqnum).values()), sender));
 
                 // Cleanup.
                 segments.get(sender).remove(seqnum);
@@ -88,7 +89,7 @@ public class ApplicationLayerHandler extends Handler {
             }
         } else {
             // Simple payload.
-            appQueue.offer(new Payload(p.payload(), sender));
+            appQueue.put(new Payload(p.payload(), sender));
         }
     }
 }

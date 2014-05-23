@@ -119,6 +119,7 @@ public class NetworkLayer extends Layer implements Runnable {
      */
     private int nextSeqnum() {
         seqnum = (seqnum + 1) % (Packet.MAX_SEQNUM + 1);
+        NetworkLayer.getLogger().debug(String.format("Current sequence number set to %d.", seqnum));
         return seqnum;
     }
 
@@ -143,26 +144,22 @@ public class NetworkLayer extends Layer implements Runnable {
      */
     public void send(byte[] data, byte destination) throws SizeLimitExceededException {
         int segments = (int) Math.ceil((double) data.length / Packet.MAX_PAYLOAD_LENGTH);
+        NetworkLayer.getLogger().debug(String.format("Data received for %d segments.", segments));
 
-        if (segments == 1) {
-            // Send a single packet.
-            Packet p = new Packet(nextSeqnum());
-            p.header().setSender(ADDRESS_SELF);
-            p.header().setDestination(destination);
-            p.setPayload(data);
-
-            sendPacket(p);
-        } else if (segments <= PacketHeader.MAX_SEGNUM) {
+        if (segments <= PacketHeader.MAX_SEGNUM) {
             int seqnum = nextSeqnum();
 
-            // Send each packet individually
+            // For each segment.
             for (int i = 0; i < segments; i++) {
+                // Build the packet.
                 Packet p = new Packet(seqnum);
                 p.header().setSegnum(i);
+                p.header().setMore(i + 1 != segments);
                 p.header().setSender(ADDRESS_SELF);
                 p.header().setDestination(destination);
                 p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), segments)));
 
+                // Send it.
                 sendPacket(p);
             }
         } else {
@@ -181,14 +178,16 @@ public class NetworkLayer extends Layer implements Runnable {
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
-            host.handler().offer(p);
+            if (!host.handler().offer(p)) {
+                NetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
+            }
 
             // Mark packet as sent when we are the original sender.
             if (p.header().getSender() == ADDRESS_SELF) {
                 markSent(p);
             }
         } else {
-            NetworkLayer.getLogger().error(p.toString() + " is not routable. Packet dropped.");
+            NetworkLayer.getLogger().error(p.toString() + " is not routeable. Packet dropped.");
         }
 
         routerLock.unlock();
@@ -206,9 +205,15 @@ public class NetworkLayer extends Layer implements Runnable {
 
                 // Only retransmit if the threshold is not exceeded.
                 if (MAX_RETRANSMISSIONS > 0 && p.retransmissions() < MAX_RETRANSMISSIONS) {
-                    p.retransmit(); // Mark packet as retransmitted once again.
-                    retransmissionHandler.offer(p); // Offer the packet again.
-                    NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
+                    // Offer packet to network.
+                    if (!retransmissionHandler.offer(p)) {
+                        // Keep in sent list and delay retransmission, queue full.
+                        sent.add(p);
+                        NetworkLayer.getLogger().debug(p.toString() + " is delayed for retransmission, NetworkLayer queue full.");
+                    } else {
+                        p.retransmit(); // Mark packet as retransmitted once again.
+                        NetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
+                    }
                 } else {
                     NetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()));
                 }
@@ -226,6 +231,20 @@ public class NetworkLayer extends Layer implements Runnable {
         p.timestamp(System.currentTimeMillis());
         sent.add(p);
         NetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
+    }
+
+    /**
+     * Returns a collection of all addresses known to the router.
+     * @return The collection of all known addresses.
+     */
+    public Collection<Byte> hosts() {
+        Collection<Byte> hosts = new ArrayList<Byte>();
+
+        for (Host h : router.hosts()) {
+            hosts.add(h.address());
+        }
+
+        return hosts;
     }
 
     @Override
@@ -277,9 +296,7 @@ public class NetworkLayer extends Layer implements Runnable {
 
         // Stop existing handlers (only if the network layer is running).
         if (t.isAlive()) {
-            for (Handler h : handlers) {
-                stopHandlers();
-            }
+            stopHandlers();
         }
 
         // Check all hosts for a possible handler.
