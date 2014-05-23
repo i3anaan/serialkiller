@@ -11,10 +11,11 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import application.ApplicationLayer;
-
+import application.UserInterface.GUI;
 import common.Stack;
 import common.Startable;
 import phys.LptErrorHardwareLayer;
@@ -160,6 +161,9 @@ public class Starter extends JFrame implements ActionListener {
 			
 			log.info("Got instances.");
 			
+			startGUI(stack);
+			
+			
 			// Disable all controls except the Quit button.
 			swingCombo.setEnabled(false);
 			appCombo.setEnabled(false);
@@ -218,5 +222,14 @@ public class Starter extends JFrame implements ActionListener {
 		}
 		
 		startStack();
+	}
+	
+	public void startGUI(final Stack stack){
+		SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+		    	
+		GUI gui = new GUI(stack.applicationLayer);
+		    }
+		});
 	}
 }
