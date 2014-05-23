@@ -14,6 +14,7 @@ import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -61,6 +62,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** A lock for the router. */
     private Lock routerLock;
 
+    private Lock sentLock;
+
     /** The router queue. */
     protected ArrayBlockingQueue<Packet> queue;
 
@@ -83,10 +86,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
         appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
-        sent = new TreeMap<Integer, HashMap<Integer, Packet>>();
+        sent = new ConcurrentHashMap<Integer, HashMap<Integer, Packet>>();
 
         router = new Router();
+
         routerLock = new ReentrantLock(true);
+        sentLock = new ReentrantLock(true);
 
         this.tunnels = new Tunneling(this);
 
@@ -193,8 +198,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Sends retransmissions to the RetransmissionHandler.
      */
     public void checkRetransmissions() {
+        sentLock.lock();
         TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
-
         for (Map<Integer, Packet> m : sent.values()) {
             for (Packet p : m.values()) {
                 if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
@@ -224,8 +229,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 }
             }
         }
-
         TPPNetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
+        sentLock.unlock();
     }
 
     /**
@@ -233,12 +238,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param p The packet.
      */
     public void markSent(Packet p) {
+        sentLock.lock();
         p.timestamp(System.currentTimeMillis());
         if (!sent.containsKey(p.header().getSeqnum())) {
             sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
         }
         sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
         TPPNetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
+        sentLock.unlock();
     }
 
     /**
@@ -270,7 +277,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
                 // Check if this is an acknowledgement or should be acknowledged.
                 if (p.header().getAck()) {
+                    sentLock.lock();
                     sent.remove(p.header().getAcknum());
+                    sentLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
                     return; // We are done.
                 } else if (p.header().getDestination() == router.self()) {

@@ -49,6 +49,10 @@ public class Tunnel implements Runnable {
         this.in = in;
         out = new ArrayBlockingQueue<Packet>(TPPNetworkLayer.QUEUE_SIZE);
         t = new Thread(this);
+
+        if (autoconnect) {
+            connect();
+        }
     }
 
     /**
