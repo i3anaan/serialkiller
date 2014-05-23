@@ -106,6 +106,10 @@ public class Host {
     }
 
     public String toString() {
-        return String.format("Host<%d>", address);
+        if (ip == null || ip.equals("")) {
+            return String.format("Host<Addr: %d>", address);
+        } else {
+            return String.format("Host<Addr: %d; IP: %s>", address, ip);
+        }
     }
 }

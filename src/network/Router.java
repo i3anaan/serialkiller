@@ -9,7 +9,7 @@ public class Router {
     Map<Byte, Host> hosts;
     Map<Host, Byte> routesCache;
 
-    protected Router() {
+    public Router() {
         hosts = new HashMap<Byte, Host>();
         routesCache = new HashMap<Host, Byte>();
     }
@@ -58,6 +58,7 @@ public class Router {
     public void parse(RoutingTable t) {
         Set<Byte> addrSet = new HashSet<Byte>();
         addrSet.addAll(t.getRoutes().keySet());
+        addrSet.addAll(t.getRoutes().values());
         addrSet.addAll(t.getTunnels().keySet());
 
         // Fetch all hosts

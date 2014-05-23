@@ -1,6 +1,7 @@
 package application.UserInterface;
 
 import java.awt.BorderLayout;
+import java.util.Map;
 
 import javax.swing.JList;
 import javax.swing.JPanel;
