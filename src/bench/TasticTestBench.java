@@ -3,6 +3,7 @@ package bench;
 import java.util.Arrays;
 
 import com.google.common.base.Charsets;
+import common.Stack;
 
 import phys.diag.BitErrorPhysicalLayer;
 import phys.diag.VirtualCable;
@@ -103,11 +104,17 @@ public class TasticTestBench {
 		
 		VirtualCablePhysicalLayer vpla = new VirtualCablePhysicalLayer(cable, 0);
 		VirtualCablePhysicalLayer vplb = new VirtualCablePhysicalLayer(cable, 1);
+		
+		Stack sa = new Stack();
+		Stack sb = new Stack();
+		
+		sa.physLayer = vpla;
+		sb.physLayer = vplb;
 
-		BittasticLinkLayer a = new BittasticLinkLayer(new BitErrorPhysicalLayer(vpla));
-		new Thread(a).start();
-		BittasticLinkLayer b = new BittasticLinkLayer(new BitErrorPhysicalLayer(vplb));
-		new Thread(b).start();
+		BittasticLinkLayer a = new BittasticLinkLayer();
+		a.start(sa);
+		BittasticLinkLayer b = new BittasticLinkLayer();
+		b.start(sb);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
