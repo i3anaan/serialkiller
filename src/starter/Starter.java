@@ -131,7 +131,7 @@ public class Starter extends JFrame implements ActionListener {
 			
 			// Application layer.
 			log.info("Starting application layer.");
-			ApplicationLayer al = new ApplicationLayer();
+			ApplicationLayer al = new ApplicationLayer(null);
 			
 			// Disable all controls except the Quit button.
 			swingCombo.setEnabled(false);

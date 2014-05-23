@@ -50,8 +50,6 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	private 	ApplicationLayer 	apl;
 	private 	ChatPanel 			cp; 					
 	private 	UserListPanel 		ulp;
-	private		JMenuBar 			menuBar;
-	private		JMenu 				menu, submenu;
 
 	public GUI(ApplicationLayer al){
 		super("G.A.R.G.L.E.");	
@@ -103,10 +101,10 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser c = new JFileChooser();
-				// Demonstrate "Open" dialog:
+				// Open dialog:
 				int rVal = c.showOpenDialog(GUI.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
-					// TODO call ApplicationLayer to send chosen file
+					apl.readFile(c.getSelectedFile().getAbsolutePath());
 				}
 				if (rVal == JFileChooser.CANCEL_OPTION) {
 
@@ -131,25 +129,8 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 				buildOptionMenu();
 			}
 		});
-		// RoutingTable item
-		JMenuItem routeItem = new JMenuItem("Set RoutingTable");
-
-		routeItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser c = new JFileChooser();
-				// Demonstrate "Open" dialog:
-				int rVal = c.showOpenDialog(GUI.this);
-				if (rVal == JFileChooser.APPROVE_OPTION) {
-					// TODO call network layer to load new routing table
-				}
-				if (rVal == JFileChooser.CANCEL_OPTION) {
-					// TODO maybe do something, don't think we should
-				}
-			}
-		});
+		
 		menu.add(sendFileItem);
-		//menu.add(routeItem);
 		menu.add(optionItem);
 		menu.add(exitItem);
 
@@ -172,38 +153,6 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		this.add(ulp, BorderLayout.EAST);
 
 	}
-//	DEPRICIATED
-//	/**
-//	 * Method to be called for saving files when a file transfer
-//	 * request is received
-//	 * @return the path to save the file to
-//	 */
-//	public String saveFile(){
-//
-//		int choice = JOptionPane.showConfirmDialog(GUI.this, "You are being offered a file, accept?", "File Offer",
-//				JOptionPane.YES_NO_OPTION);
-//
-//		if (choice == JOptionPane.YES_OPTION){
-//			System.out.println("yes");
-//			JFileChooser c = new JFileChooser();
-//			// Demonstrate "Open" dialog:
-//			int rVal = c.showOpenDialog(GUI.this);
-//			if (rVal == JFileChooser.APPROVE_OPTION) {
-//				File mostRecentOutputDirectory = c.getSelectedFile();
-//				prefs.put("LAST_OUTPUT_DIR", mostRecentOutputDirectory.getAbsolutePath());
-//				
-//			}
-//			if (rVal == JFileChooser.CANCEL_OPTION) {
-//				// TODO maybe do something, don't think we should
-//				System.exit(0);
-//			}
-//
-//		}else{
-//			System.out.println("no");
-//		}
-//		return null;
-//
-//	}
 	
 	/**
 	 * Method to be called for saving files when a file transfer
@@ -241,12 +190,12 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 
 		if(arg instanceof ChatMessage){
-			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getMessage());
+			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
 		}
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
-			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
+			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
 			saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 		}
 

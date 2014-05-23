@@ -10,7 +10,7 @@ package application.UserInterface;
 	 */
 	interface UIMessage {
 
-		public void addMessage(final String name, final String msg);
+		public void addMessage(final String name,final int host, final String msg);
 	}
 
 
