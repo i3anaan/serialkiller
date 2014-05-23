@@ -147,10 +147,18 @@ public class RoutingTable {
 	 */
 	public String toGraph() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("digraph{");
+		sb.append("graph{node [shape=box];");
+
+        Map<Byte, Byte> allRoutes = new TreeMap<Byte, Byte>();
+        allRoutes.putAll(routes);
+        allRoutes.put(sibling, self);
+
+        for (Byte b : tunnels.keySet()) {
+            allRoutes.put(b, self);
+        }
 		
-		for (Entry<Byte, Byte> e : routes.entrySet()) {
-			sb.append(String.format("%s->%s;", e.getValue(), e.getKey()));
+		for (Entry<Byte, Byte> e : allRoutes.entrySet()) {
+			sb.append(String.format("\"%s\"--\"%s\";", e.getValue(), e.getKey()));
 		}
 		
 		sb.append("}");
