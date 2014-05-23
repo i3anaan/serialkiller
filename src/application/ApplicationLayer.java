@@ -205,7 +205,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 	 * @return byte array containing payload for a chat message
 	 */
 
-	public byte[] writeChatMessage(String nickname, String message){
+	public void writeChatMessage(String nickname, String message, byte destination){
 		// convert String to UTF-8		
 		byte nullbyte = (byte) 0;
 		byte[] nick;
@@ -230,8 +230,13 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 			ApplicationLayer.getLogger().critical("UTF-8 is not supported: WTF?!?!?!" + ".");
 			e.printStackTrace();
 		}
-
-		return data;
+		
+		try {
+			networkLayer.send(data, destination);
+		} catch (SizeLimitExceededException e) {
+			ApplicationLayer.getLogger().warning("Size Limit Exceeded:" + ".");
+			e.printStackTrace();
+		}
 	}
 
 	@Override

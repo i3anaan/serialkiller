@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
 
 /**
@@ -31,13 +33,18 @@ public class TabbedChatPanel extends JPanel{
 		super();
 		gui = gu;
 		
+		tabIndex = new HashMap<String,JPanel>();
+		
 		setBackground( Color.gray );
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout( new BorderLayout() );
 		this.add(topPanel);
 		
-		JPanel homePanel = new JPanel();
 		
+		JPanel homePanel = new JPanel();
+		homePanel.setLayout(new BorderLayout());
+		JTextArea jtext = new JTextArea("", 15, 50);
+		homePanel.add(jtext);
 		// Create a tabbed pane
 				tabbedPane = new JTabbedPane();
 				tabIndex.put("Home", homePanel);
@@ -50,9 +57,9 @@ public class TabbedChatPanel extends JPanel{
 	 * adds a tab for a host with the specified hostName
 	 * @param name of the host
 	 */
-	public void addChatPanel(String hostName){
+	public void addChatPanel(String hostName, byte address){
 		
-		JPanel newPanel = new ChatPanel(gui);
+		JPanel newPanel = new ChatPanel(gui, address);
 		tabIndex.put(hostName, newPanel);
 		tabbedPane.addTab(hostName, newPanel);
 		

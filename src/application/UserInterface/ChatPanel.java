@@ -26,11 +26,13 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 	
 	// private variables
 	private GUI gui;
+	private byte address;
 	
 	
-	public ChatPanel(GUI gu) {
+	public ChatPanel(GUI gu, byte address) {
 		super();
 		gui = gu;
+		this.address = address;
 		this.setLayout(new BorderLayout());
 		
 		// Append Field
@@ -73,6 +75,7 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 			// temp debug line
 			String username = gui.getPreferences().get("USERNAME", "");
 			addMessage(username, 6666,myMessage.getText());
+			gui.getApplicationLayer().writeChatMessage(username, myMessage.getText(), address);
 			myMessage.setText("");
 		}
 		
