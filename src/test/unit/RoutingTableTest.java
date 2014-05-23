@@ -13,6 +13,8 @@ public class RoutingTableTest {
 		RoutingTable rt = new RoutingTable("src/test/routes.txt");
 		assertEquals(3, rt.getRoutes().size());
 		assertEquals(1, rt.getTunnels().size());
+        assertEquals((byte) 6, rt.getSelf());
+        assertEquals((byte) 7, rt.getSibling());
 	}
 	
 	@Test

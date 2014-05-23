@@ -1,5 +1,7 @@
 package network.tpp;
 
+import common.*;
+import common.Stack;
 import link.FrameLinkLayer;
 import log.LogMessage;
 import log.Logger;
@@ -27,8 +29,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public static final long TIMEOUT = 10000; // in milliseconds
     public static final int MAX_RETRANSMISSIONS = 10; // 0 for no maximum
-    public final byte ADDRESS_SELF;
-    public final byte ADDRESS_SIBLING;
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
 
     /** Size of the queue. */
@@ -72,18 +72,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
     /**
      * Constructs a new NetworkLayer instance.
-     * @param link The LinkLayer implementation instance to use. Only
-     *             FrameLinkLayer subclass instances are supported.
-     * @param address The TPP address of this host.
-     * @param sibling the TPP address of the sibling host, connected by the
-     *                serial cable.
      */
-    public TPPNetworkLayer(FrameLinkLayer link, byte address, byte sibling) {
-        ADDRESS_SELF = address;
-        ADDRESS_SIBLING = sibling;
-
-        this.link = link;
-
+    public TPPNetworkLayer() {
         handlers = new ArrayList<Handler>();
 
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
@@ -159,7 +149,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 Packet p = new Packet(seqnum);
                 p.header().setSegnum(i);
                 p.header().setMore(i + 1 != segments);
-                p.header().setSender(ADDRESS_SELF);
+                p.header().setSender(router.self());
                 p.header().setDestination(destination);
                 p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), segments)));
 
@@ -187,7 +177,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             }
 
             // Mark packet as sent when we are the original sender.
-            if (p.header().getSender() == ADDRESS_SELF) {
+            if (p.header().getSender() == router.self()) {
                 markSent(p);
             }
         } else {
@@ -281,7 +271,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     sent.remove(p.header().getAcknum());
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
                     return; // We are done.
-                } else if (p.header().getDestination() == ADDRESS_SELF) {
+                } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
                     queue.offer(ack);
@@ -317,7 +307,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         // Check all hosts for a possible handler.
         for (Host host : router.hosts()) {
-            if (host.address() == ADDRESS_SELF) {
+            if (host.address() == router.self()) {
                 // Construct ApplicationLayer handler.
                 Handler h = new ApplicationLayerHandler(this, appQueue);
 
@@ -326,7 +316,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
                 // Connect handler to host.
                 host.handler(h);
-            } else if (host.address() == ADDRESS_SIBLING) {
+            } else if (host.address() == router.sibling()) {
                 // Construct LinkLayer handlers.
                 Handler in = new LinkLayerInHandler(this, link);
                 Handler out = new LinkLayerOutHandler(this, link);
@@ -425,6 +415,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Starts the network layer.
      */
     public void start() {
+        assert (link != null);
         t.start();
         TPPNetworkLayer.getLogger().warning("NetworkLayer started.");
     }
@@ -454,4 +445,18 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         return logger;
     }
 
+    @Override
+    public Thread start(Stack stack) {
+        // Check if the link layer of the stack is compatible with this network layer implementation.
+        assert (stack.linkLayer instanceof FrameLinkLayer);
+
+        // Assign the link layer.
+        this.link = (FrameLinkLayer) stack.linkLayer;
+
+        // Run the thread(s).
+        this.start();
+
+        // Return the thread.
+        return this.t;
+    }
 }

@@ -6,8 +6,10 @@ import java.util.*;
  * Router class that keeps track of the hosts in the network and their routes.
  */
 public class Router {
-    Map<Byte, Host> hosts;
-    Map<Host, Byte> routesCache;
+    private Map<Byte, Host> hosts;
+    private Map<Host, Byte> routesCache;
+    private byte self;
+    private byte sibling;
 
     public Router() {
         hosts = new HashMap<Byte, Host>();
@@ -28,6 +30,14 @@ public class Router {
      */
     public Collection<Host> hosts() {
         return hosts.values();
+    }
+
+    public byte self() {
+        return self;
+    }
+
+    public byte sibling() {
+        return sibling;
     }
 
     /**
@@ -62,6 +72,10 @@ public class Router {
         addrSet.addAll(t.getRoutes().keySet());
         addrSet.addAll(t.getRoutes().values());
         addrSet.addAll(t.getTunnels().keySet());
+
+        // Set addresses
+        self = t.getSelf();
+        sibling = t.getSibling();
 
         // Fetch all hosts
         for (Byte addr : addrSet) {

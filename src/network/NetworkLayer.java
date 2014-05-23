@@ -1,6 +1,7 @@
 package network;
 
 import common.Layer;
+import common.Startable;
 
 import javax.naming.SizeLimitExceededException;
 
@@ -8,7 +9,7 @@ import javax.naming.SizeLimitExceededException;
  * Abstract class for network layers. Requires two methods to be implemented
  * that are responsible for communication with upper layers.
  */
-public abstract class NetworkLayer extends Layer {
+public abstract class NetworkLayer extends Layer implements Startable {
     /**
      * Blocking method that returns the next available payload for an upper
      * layer.

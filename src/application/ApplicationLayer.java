@@ -230,18 +230,12 @@ public class ApplicationLayer extends Observable implements Runnable{
 
 		// Read payloads in the queue.
 		while (run) {
-			try {
-				Payload p = networkLayer.read();
+            Payload p = networkLayer.read();
 
-				// incoming payload
-				readPayload(p);
-				ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
-				return; // We are done.
-
-			} catch (InterruptedException e) {
-				// Exit gracefully.
-				run = false;
-			}
+            // incoming payload
+            readPayload(p);
+            ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
+            return; // We are done.
 		}
 		ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
 

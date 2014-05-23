@@ -14,6 +14,8 @@ import java.util.Map.Entry;
  * tunnel IP addresses of hosts.
  * 
  * A routing table file looks like this:
+ * self=6
+ * sibling=7
  * 1>2
  * 3>2
  * 5>8
@@ -24,6 +26,8 @@ public class RoutingTable {
      * second element is the directly connected host. */
 	private Map<Byte, Byte> routes;
     private Map<Byte, String> tunnels;
+    private Byte self;
+    private Byte sibling;
 
     /**
      * Creates an empty routing table.
@@ -66,14 +70,32 @@ public class RoutingTable {
 
             parts = line.split(">");
             if (parts.length == 2) {
-                routes.put((byte) Integer.parseInt(parts[0]), (byte) Integer.parseInt(parts[1]));
-                // TODO: Validate addresses
+                try {
+                    routes.put((byte) Integer.parseInt(parts[0]), (byte) Integer.parseInt(parts[1]));
+                    // TODO: Validate addresses
+                } catch (NumberFormatException e) {
+                    // Wrong route, ignore.
+                }
             }
 
             parts = line.split("=");
             if (parts.length == 2) {
-                tunnels.put((byte) Integer.parseInt(parts[0]), parts[1]);
-                // TODO: Validate address, IP address
+                try {
+                    // Tunnel, if the first argument is an integer.
+                    tunnels.put((byte) Integer.parseInt(parts[0]), parts[1]);
+                    // TODO: Validate address, IP address
+                } catch (NumberFormatException e) {
+                    // First argument is not numeric, check for text types.
+                    try {
+                        if (parts[0].toLowerCase().equals("self")) {
+                            self = (byte) Integer.parseInt(parts[1]);
+                        } else if (parts[0].toLowerCase().equals("sibling")) {
+                            sibling = (byte) Integer.parseInt(parts[1]);
+                        }
+                    } catch (NumberFormatException f) {
+                        // Wrong entry in file, ignore.
+                    }
+                }
             }
 		}
 	}
@@ -130,6 +152,22 @@ public class RoutingTable {
      */
     public Map<Byte, String> getTunnels() {
         return tunnels;
+    }
+
+    /**
+     * Returns the address of this host.
+     * @return The address of this host.
+     */
+    public byte getSelf() {
+        return self;
+    }
+
+    /**
+     * Returns the address of the sibling host.
+     * @return The address of the sibling host.
+     */
+    public byte getSibling() {
+        return sibling;
     }
 	
 }
