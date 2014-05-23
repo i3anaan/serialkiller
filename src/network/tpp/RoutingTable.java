@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -42,20 +44,24 @@ public class RoutingTable {
      * @param path The path to the file with the routing table.
      * @throws IOException There is an error with the file.
      */
-	public RoutingTable(String path) throws IOException {
-		this(new File(path));
-	}
+    public RoutingTable(String path) {
+        this(new File(path));
+    }
 
     /**
      * Creates a routing table and parses the given file.
      * @param file The file with the routing table.
      * @throws IOException There is an error with the file.
      */
-	public RoutingTable(File file) throws IOException {
+	public RoutingTable(File file) {
 		this();
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		this.fromReader(reader);
-		reader.close();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            this.fromReader(reader);
+            reader.close();
+        } catch (IOException e) {
+            die(String.format("Routes file [%s] does not exist! Exiting.", file.getAbsolutePath()));
+        }
 	}
 
     /**
@@ -65,25 +71,38 @@ public class RoutingTable {
      */
 	public void fromReader(BufferedReader reader) throws IOException {
 		String line = null;
+        int lineNumber = 1;
 		while ((line = reader.readLine()) != null) {
 			String[] parts;
 
             parts = line.split(">");
             if (parts.length == 2) {
                 try {
-                    routes.put((byte) Integer.parseInt(parts[0]), (byte) Integer.parseInt(parts[1]));
-                    // TODO: Validate addresses
+                    byte from = (byte) Integer.parseInt(parts[0]);
+                    byte to = (byte) Integer.parseInt(parts[1]);
+
+                    if (from >= 0 && from <= 7 && to >=0 && to <= 7) {
+                        routes.put(from, to);
+                    } else {
+                        die(String.format("Routes file invalid [%d: invalid address]! Exiting.", lineNumber));
+                    }
                 } catch (NumberFormatException e) {
-                    // Wrong route, ignore.
+                    die(String.format("Routes file invalid [%d: non-numeric host(s)]! Exiting.", lineNumber));
                 }
             }
 
             parts = line.split("=");
             if (parts.length == 2) {
                 try {
+                    byte addr = (byte) Integer.parseInt(parts[0]);
+                    String ip = InetAddress.getByName(parts[1]).getHostAddress();
+
                     // Tunnel, if the first argument is an integer.
-                    tunnels.put((byte) Integer.parseInt(parts[0]), parts[1]);
-                    // TODO: Validate address, IP address
+                    if (addr >= 0 && addr <= 7) {
+                        tunnels.put(addr, ip);
+                    } else {
+                        die(String.format("Routes file invalid [%d: invalid address]! Exiting.", lineNumber));
+                    }
                 } catch (NumberFormatException e) {
                     // First argument is not numeric, check for text types.
                     try {
@@ -91,13 +110,27 @@ public class RoutingTable {
                             self = (byte) Integer.parseInt(parts[1]);
                         } else if (parts[0].toLowerCase().equals("sibling")) {
                             sibling = (byte) Integer.parseInt(parts[1]);
+                        } else {
+                            die(String.format("Routes file invalid [%d: unknown keyword]! Exiting.", lineNumber));
                         }
                     } catch (NumberFormatException f) {
-                        // Wrong entry in file, ignore.
+                        die(String.format("Routes file invalid [%d: invalid address]! Exiting.", lineNumber));
                     }
+                } catch (UnknownHostException e) {
+                    die(String.format("Routes file invalid [%d: unknown host]! Exiting.", lineNumber));
+                } catch (SecurityException e) {
+                    die(String.format("Routes file invalid [%d: host not allowed]! Exiting.", lineNumber));
                 }
             }
+            lineNumber++;
 		}
+
+        if (self == null) {
+            die("Routes file invalid [no self address]! Exiting.");
+        }
+        if (sibling == null) {
+            die("Routes file invalid [no sibling address]! Exiting.");
+        }
 	}
 
     /**
@@ -114,10 +147,18 @@ public class RoutingTable {
 	 */
 	public String toGraph() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("digraph{");
+		sb.append("graph{node [shape=box];");
+
+        Map<Byte, Byte> allRoutes = new TreeMap<Byte, Byte>();
+        allRoutes.putAll(routes);
+        allRoutes.put(sibling, self);
+
+        for (Byte b : tunnels.keySet()) {
+            allRoutes.put(b, self);
+        }
 		
-		for (Entry<Byte, Byte> e : routes.entrySet()) {
-			sb.append(String.format("%s->%s;", e.getValue(), e.getKey()));
+		for (Entry<Byte, Byte> e : allRoutes.entrySet()) {
+			sb.append(String.format("\"%s\"--\"%s\";", e.getValue(), e.getKey()));
 		}
 		
 		sb.append("}");
@@ -168,6 +209,11 @@ public class RoutingTable {
      */
     public byte getSibling() {
         return sibling;
+    }
+
+    private void die(String msg) {
+        TPPNetworkLayer.getLogger().bbq(msg);
+        System.exit(-1);
     }
 	
 }

@@ -1,10 +1,7 @@
 package link.jack;
 
-import java.util.Arrays;
 import util.BitSet2;
-import common.Layer;
 import phys.PhysicalLayer;
-import util.Bytes;
 
 /**
  * Do not use debouncer.
@@ -14,23 +11,23 @@ import util.Bytes;
  */
 public class DelayCorrectedFDXLinkLayerSectionSegment {
 
+	
 	boolean connectionSync;
 	byte lastSentSyncPing = 0;
 	byte previousByteSent = 0;
 	byte previousByteReceived = 0;
 	PhysicalLayer down;
 
-	private String connectionRole = "unkown"; // Debug
 
-	FlaggedFrame lastReceivedFrame = new FlaggedFrame();
-	FlaggedFrame frameToSendNext = new FlaggedFrame();
 
+	Frame lastReceivedFrame;
+	Frame frameToSendNext;
+	protected boolean readFrame = false;
+	protected boolean setFrameToSend = false;
+	
 	public static final String SENDER = "sender";
 	public static final String RECEIVER = "receiver";
 	public static final byte NO_BYTE = -1;
-
-	protected boolean readFrame;
-	protected boolean setFrameToSend;
 	
 	//TODO experiment with timeout values
 	public static final long TIMEOUT_NO_NEW_BIT_NANO = 10*1000000l;
@@ -42,6 +39,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	
 	private int framesStartedSending;
 	private int framesCompleted;
+	
+	private String connectionRole = "unkown"; // Debug
 
 	public DelayCorrectedFDXLinkLayerSectionSegment(PhysicalLayer down) {
 		this.down = down;
@@ -52,17 +51,15 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			readFrame = false;
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
-			BitSet2 outgoingData = frameToSendNext.getDataBitSet();
-			//log("Frame to send: " + frameToSendNext + "   outgoing bits: "
-			//		+ outgoingData.toString());
+			BitSet2 outgoingData = frameToSendNext.asBitSet();
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			boolean retry = false; //TODO uitzoeken waar deze gebruikt had moeten worden.
-
+			log("FrameToSendNext: "+frameToSendNext);
 			try {
 				framesStartedSending++;
-				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
-						|| bitsSent < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
+				while (bitsReceived < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()
+						|| bitsSent < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
 					//while it has bits to send or receive.
 
 					if (!connectionSync) {
@@ -80,7 +77,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 					try {
 						byte receivedByte = NO_BYTE;
-						if (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9) {
+						if (bitsReceived < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
 							receivedByte = readBit();
 						}
 						// Succsefully exchanged a bit.
@@ -105,7 +102,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					}
 				}
 				framesCompleted++;
-				log("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
+				//log("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				//e.printStackTrace();
@@ -116,7 +113,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				waitForSync();
 				//log("sync complete");
 			}
-			lastReceivedFrame = new FlaggedFrame(incomingData);
+			lastReceivedFrame = new Frame(incomingData);
 			
 			//log("Build received frame:  " + lastReceivedFrame.getPayload()
 			//		+ "   from bits: " + incomingData);
@@ -311,7 +308,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 	}
 
-	public void sendFrame(FlaggedFrame data) {
+	public void sendFrame(Frame data) {
 		frameToSendNext = data;
 		// log("Units to send next: "+Arrays.toString(data.payload.units));
 		setFrameToSend = true;
@@ -319,16 +316,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 	public Frame readFrame() {
 		readFrame = true;
-		// log("readFrame():  "+Arrays.toString(lastReceivedFrame.getPayload().units));
-
-		return lastReceivedFrame.getPayload().getClone();
+		return lastReceivedFrame;
 	}
 
 	public synchronized void log(String msg) {
-		System.out.println(System.nanoTime() + "\t"
-				+ Thread.currentThread().getId() + "\t" + msg);
+		//System.out.println(System.nanoTime() + "\t"
+		//		+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
-		System.err.flush();
 	}
 	
 	public class TimeOutException extends Exception{

@@ -33,6 +33,9 @@ public class Tunnel implements Runnable {
     private TunnelReader reader;
     private TunnelWriter writer;
 
+    /** The thread. */
+    private Thread t;
+
     /** Whether to continue running this tunnel. */
     private boolean run;
 
@@ -45,6 +48,7 @@ public class Tunnel implements Runnable {
         this.autoconnect = autoconnect;
         this.in = in;
         out = new ArrayBlockingQueue<Packet>(TPPNetworkLayer.QUEUE_SIZE);
+        t = new Thread(this);
     }
 
     /**
@@ -94,17 +98,7 @@ public class Tunnel implements Runnable {
      * @return Whether this tunnel is connected.
      */
     public boolean connected() {
-        return socket.isConnected();
-    }
-
-    /**
-     * Returns the next received, valid packet. Is a proxy for
-     * ArrayBlockingQueue.take().
-     * @return The packet.
-     * @throws InterruptedException
-     */
-    public Packet take() throws InterruptedException {
-        return in.take();
+        return socket != null && socket.isConnected();
     }
 
     /**
@@ -173,6 +167,19 @@ public class Tunnel implements Runnable {
             run = false;
             Tunneling.getLogger().error(toString() + " cannot initialize the reader and/or writer.");
         }
+    }
+
+    public void start() {
+        t.start();
+        Tunneling.getLogger().debug(toString() + " started.");
+    }
+
+    public void stop() {
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+        }
+        Tunneling.getLogger().debug(toString() + " stopped.");
     }
 
     /**

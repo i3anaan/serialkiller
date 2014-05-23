@@ -5,7 +5,7 @@ import phys.LptErrorHardwareLayer;
 
 public class ReceiveTest {
 
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		DCFDXLLSSReadSendManager2000 ll = new DCFDXLLSSReadSendManager2000(
 				new DelayCorrectedFDXLinkLayerSectionSegment(
 						new LptErrorHardwareLayer()));
@@ -17,5 +17,5 @@ public class ReceiveTest {
 			received = received + (char) (b & 0xFF);
 			System.out.println("Received so far:\n"+received);
 		}
-	}
+	}*/
 }

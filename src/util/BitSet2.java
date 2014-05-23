@@ -19,13 +19,25 @@ public class BitSet2 extends BitSet {
 		super();
 		this.length = 0;
 	}
+	public BitSet2(boolean[] arr){
+		super();
+		this.length = arr.length;
+		for(int i=0;i<arr.length;i++){
+			this.set(i,arr[i]);
+		}
+	}
+	
+	public BitSet2(byte b){
+		super();
+		for(int i=0;i<8;i++){
+			this.set(7-i,((b>>i)&1)==1);
+		}
+	}
 	
 	public BitSet2(BitSet bitset){
 		super();
-		System.out.println("Constructor bitset done");
 		this.length = 0;
 		for(int i=0;i<bitset.length();i++){
-			System.out.println("bitset.get("+i+")");
 			this.set(i,bitset.get(i));
 		}
 	}
@@ -71,7 +83,6 @@ public class BitSet2 extends BitSet {
 		for(int i=0;i<length();i++){
 			s = s + (this.get(i) ? "1" : "0");
 		}
-		
 		return s;
 	}
 	
