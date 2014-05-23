@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import common.Stack;
-
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
@@ -26,6 +25,7 @@ import application.ApplicationLayer;
 import link.BittasticLinkLayer;
 import link.LinkLayer;
 import link.BufferStufferLinkLayer;
+import link.jack.JackTheRipper;
 import log.LogMessage;
 import log.Logger;
 
@@ -41,7 +41,7 @@ public class Starter extends JFrame implements ActionListener {
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {NetworkLayer.class};
-	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class};
+	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class,JackTheRipper.class};
 	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, NullPhysicalLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
@@ -157,8 +157,9 @@ public class Starter extends JFrame implements ActionListener {
 			webCombo.setEnabled(false);
 			start.setEnabled(false);
 		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
 			// This should not happen.
-			log.emerg(e.toString());
+			//log.emerg(e.toString());
 		} catch (IllegalAccessException e) {
 			// This should not happen at all ever.
 			log.emerg(e.toString());
