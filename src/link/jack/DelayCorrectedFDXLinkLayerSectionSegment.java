@@ -52,13 +52,10 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			setFrameToSend = false;
 			BitSet2 incomingData = new BitSet2();
 			BitSet2 outgoingData = frameToSendNext.asBitSet();
-			//log("Frame to send: " + frameToSendNext + "   outgoing bits: "
-			//		+ outgoingData.toString());
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			boolean retry = false; //TODO uitzoeken waar deze gebruikt had moeten worden.
-			//log("Outgoing data: "+outgoingData);
-			//log("FrameToSendNext: "+frameToSendNext);
+			log("FrameToSendNext: "+frameToSendNext);
 			try {
 				framesStartedSending++;
 				while (bitsReceived < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()
@@ -323,10 +320,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	}
 
 	public synchronized void log(String msg) {
-		System.out.println(System.nanoTime() + "\t"
-				+ Thread.currentThread().getId() + "\t" + msg);
+		//System.out.println(System.nanoTime() + "\t"
+		//		+ Thread.currentThread().getId() + "\t" + msg);
 		System.out.flush();
-		System.err.flush();
 	}
 	
 	public class TimeOutException extends Exception{

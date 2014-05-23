@@ -22,7 +22,7 @@ import util.encoding.HammingCode;
  */
 public class HammingTest {
 
-	@Test
+	//@Test
 	public void testCorrect() {
 		for (int dataBitCount = 3; dataBitCount < 7; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);
@@ -39,7 +39,7 @@ public class HammingTest {
 		}
 	}
 
-	@Test
+	//@Test
 	public void testDetectSingleError() {
 		for (int dataBitCount = 3; dataBitCount < 17; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);
@@ -57,7 +57,7 @@ public class HammingTest {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void testDetectDoubleError() {
 		for (int dataBitCount = 3; dataBitCount < 17; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);

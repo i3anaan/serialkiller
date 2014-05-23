@@ -7,6 +7,7 @@ import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
 import link.jack.JackTheRipper;
 import phys.diag.DelayPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
+import util.Bytes;
 
 /**
  * A simple test bench application for testing layers of the SerialKiller stack.
@@ -24,8 +25,10 @@ public class SimpleTestbench {
 		public void run() {
 			while (true) {
 				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-					down.sendFrame(new byte[]{i});
+					//System.out.println("Sending Byte: "+Bytes.format((byte)(i)));
+					down.sendFrame(new byte[]{(byte)(i)});
 					byte in = down.readFrame()[0];
+					//System.out.println("ReceivedByte: "+Bytes.format(in));
 					
 					if (in == i) {
 						System.out.print(".");
@@ -42,37 +45,6 @@ public class SimpleTestbench {
 			}
 		}
 	}
-	
-	private class SeqThreadSmall extends Thread {
-		private BytewiseLinkLayer down;
-		int good = 0;
-		int bad = 0;
-
-		public SeqThreadSmall(BytewiseLinkLayer down) {
-			this.down = down;
-		}
-
-		public void run() {
-			for(int i=0;i<3;i++) {
-					down.sendByte((byte)(i+22));
-					System.out.println("Sending byte");
-					byte in = down.readByte();
-					
-					if (in == i) {
-						System.out.print(".");
-						good++;
-					} else {
-						System.out.print("X");
-						bad++;
-					}
-					
-					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
-					
-					System.out.flush();
-			}
-		}
-	}
-
 	private class EchoThread extends Thread {
 		private FrameLinkLayer down;
 

@@ -30,6 +30,7 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 		exchanger.start();
 	}
 	public void sendUnit(Unit unit) {
+		//down.log("Sending: "+unit);
 		try {
 			outbox.put(unit);
 		} catch (InterruptedException e) {

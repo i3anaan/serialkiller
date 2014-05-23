@@ -24,16 +24,15 @@ public class JackTheRipper extends FrameLinkLayer {
 
 	@Override
 	public void sendFrame(byte[] data) {
+		down.down.log("Sending data: "+Bytes.format(data[0]));
 		if (UNIT_IN_USE instanceof HammingUnit) {
 			//System.out.println("Data to send: " + Bytes.format(data[0]));
 			BitSet2 dataAsBitSet = ByteArrays.toBitSet(data);
 			for (int i = 0; i < data.length * 8; i = i + 4) {
-				down.sendUnit(new HammingUnit(dataAsBitSet.get(i, i + 3),
+				down.sendUnit(new HammingUnit(dataAsBitSet.get(i, i + 4),
 						false, HC));
-				//System.out
-				//		.println("Sent unit: "
-				//				+ new HammingUnit(dataAsBitSet.get(i, i + 3),
-				//						false, HC));
+				down.down.log("Sent Unit: "+new HammingUnit(dataAsBitSet.get(i, i + 4),
+						false, HC));
 			}
 			//System.out.println("Sending End Of Frames");
 			down.sendUnit(UNIT_IN_USE.getEndOfFrame());
@@ -52,8 +51,8 @@ public class JackTheRipper extends FrameLinkLayer {
 				HammingUnit u1 = (HammingUnit) down.readUnit();
 				HammingUnit u2 = (HammingUnit) down.readUnit();
 				BitSet2 fullByte = BitSet2.concatenate(
-						u2.getDecodedPayloadAsBitSet(),
-						u1.getDecodedPayloadAsBitSet());
+						u1.getDecodedPayloadAsBitSet(),
+						u2.getDecodedPayloadAsBitSet());
 				if (!u1.isSpecial() != !u1.isSpecial()) {// Error
 					// TODO ERROR, out of sync.
 					System.out.println("ERROR! out of sync");
@@ -65,6 +64,7 @@ public class JackTheRipper extends FrameLinkLayer {
 					//System.out.println("End of frame!!");
 				}
 			}
+			down.down.log("Delivering dataFrame: "+Bytes.format(ByteArrays.fromList(dataFrame)[0]));
 			return ByteArrays.fromList(dataFrame);
 		} else {
 			throw new NotImplementedException();
