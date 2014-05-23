@@ -1,7 +1,7 @@
-package network.handlers;
+package network.tpp.handlers;
 
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
 import network.Payload;
 
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Handler for the application layer.
  */
 public class ApplicationLayerHandler extends Handler {
-    private String name = "ApplicationHandler";
     public static final int SAFE_SEGNUM = (int) Math.min(Integer.MAX_VALUE, Packet.MAX_SEGNUM);
 
     /** The queue to the application layer. */
@@ -31,7 +30,7 @@ public class ApplicationLayerHandler extends Handler {
      * ApplicationLayer instance.
      * @param appQueue The queue for the application layer.
      */
-    public ApplicationLayerHandler(NetworkLayer parent, ArrayBlockingQueue<Payload> appQueue) {
+    public ApplicationLayerHandler(TPPNetworkLayer parent, ArrayBlockingQueue<Payload> appQueue) {
         super(parent);
         segments = new TreeMap<Byte, HashMap<Integer, TreeMap<Integer, Packet>>>();
         sequenceSizes = new TreeMap<Byte, HashMap<Integer, Integer>>();
@@ -52,7 +51,7 @@ public class ApplicationLayerHandler extends Handler {
             if (segnum > SAFE_SEGNUM) {
                 // Drop whole sequence.
                 segments.get(sender).remove(seqnum);
-                NetworkLayer.getLogger().warning(p.toString() + " exceeds the safe segment number size. All segments dropped.");
+                TPPNetworkLayer.getLogger().warning(p.toString() + " exceeds the safe segment number size. All segments dropped.");
                 return;
             }
             // Check for host in maps.
@@ -91,5 +90,9 @@ public class ApplicationLayerHandler extends Handler {
             // Simple payload.
             appQueue.put(new Payload(p.payload(), sender));
         }
+    }
+
+    public String toString() {
+        return "ApplicationLayer" +  super.toString();
     }
 }

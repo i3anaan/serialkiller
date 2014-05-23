@@ -1,4 +1,4 @@
-package network;
+package network.tpp;
 
 import java.util.*;
 
@@ -34,7 +34,7 @@ public class Router {
      * Gets the handler that can process the given packet. Returns null if the
      * packet is unroutable.
      * @param p The packet.
-     * @return The handler the packet should be send to or null if the packet is
+     * @return The host the packet should be send to or null if the packet is
      *         unroutable.
      */
     public Host route(Packet p) {
@@ -42,8 +42,10 @@ public class Router {
 
         if (destination != null) {
             while (destination.routeThrough() != null) {
-                return destination.routeThrough();
+                destination = destination.routeThrough();
             }
+
+            return destination;
         }
 
         return null;

@@ -1,4 +1,4 @@
-package network;
+package network.tpp;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.net.URL;
 
-import network.RoutingTable;
+import network.tpp.RoutingTable;
 import org.junit.Test;
 
 public class RoutingTableTest {

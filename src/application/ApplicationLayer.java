@@ -6,15 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Observable;
 
 import javax.naming.SizeLimitExceededException;
 
 import log.LogMessage;
 import log.Logger;
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
 import network.Payload;
 import application.message.*;
 
@@ -29,7 +27,7 @@ import application.message.*;
 public class ApplicationLayer extends Observable implements Runnable{
 
 	/** NetworkLayer that this ApplicationLayer communicates with */
-	private NetworkLayer networkLayer;
+	private TPPNetworkLayer networkLayer;
 
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
@@ -46,7 +44,7 @@ public class ApplicationLayer extends Observable implements Runnable{
 	/** byte value of a fileTransfer flag */
 	private static final byte fileTransferCommand = 'S';
 
-	public ApplicationLayer(NetworkLayer nl){
+	public ApplicationLayer(TPPNetworkLayer nl){
 		this.networkLayer = nl;
 	}
 

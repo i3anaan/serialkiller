@@ -1,16 +1,14 @@
-package network.handlers;
+package network.tpp.handlers;
 
 import link.FrameLinkLayer;
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
 
 /**
  * Handler for data to the link layer.
  */
 public class LinkLayerOutHandler extends LinkLayerHandler {
-    private String name = "LinkHandler<Out>";
-
-    public LinkLayerOutHandler(NetworkLayer parent, FrameLinkLayer link) {
+    public LinkLayerOutHandler(TPPNetworkLayer parent, FrameLinkLayer link) {
         super(parent, link);
     }
 
@@ -18,5 +16,9 @@ public class LinkLayerOutHandler extends LinkLayerHandler {
     public void handle() throws InterruptedException {
         Packet p = out.take();
         link.sendFrame(p.compile());
+    }
+
+    public String toString() {
+        return "LinkLayerOut" + super.toString();
     }
 }

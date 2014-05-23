@@ -1,7 +1,7 @@
-package network.handlers;
+package network.tpp.handlers;
 
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -22,7 +22,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public abstract class Handler implements Runnable {
     private static final int QUEUE_SIZE = 64;
-    private String name = "Handler";
     private Thread t;
     private boolean run;
 
@@ -40,7 +39,7 @@ public abstract class Handler implements Runnable {
      * Handles setup for new Handler subclass instances.
      * @param parent The parent NetworkLayer instance.
      */
-    public Handler(NetworkLayer parent) {
+    public Handler(TPPNetworkLayer parent) {
         this.in = parent.queue();
         this.out = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
 
@@ -68,7 +67,7 @@ public abstract class Handler implements Runnable {
     public void start() {
         run = true;
         t.start();
-        NetworkLayer.getLogger().alert(toString() + " started.");
+        TPPNetworkLayer.getLogger().alert(toString() + " started.");
     }
 
     /**
@@ -82,7 +81,7 @@ public abstract class Handler implements Runnable {
             t.join();
         } catch (InterruptedException e) {
         }
-        NetworkLayer.getLogger().alert(toString() + " stopped.");
+        TPPNetworkLayer.getLogger().alert(toString() + " stopped.");
     }
 
     @Override
@@ -92,13 +91,13 @@ public abstract class Handler implements Runnable {
                 handle();
             } catch (InterruptedException e) {
                 // Exit gracefully.
-                NetworkLayer.getLogger().error(toString() + " interrupted.");
+                TPPNetworkLayer.getLogger().error(toString() + " interrupted.");
                 stop();
             }
         }
     }
 
     public String toString() {
-        return String.format(name + " <" + hashCode() + ">");
+        return String.format("Handler<" + hashCode() + ">");
     }
 }

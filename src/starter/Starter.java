@@ -12,13 +12,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import network.tpp.TPPNetworkLayer;
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
 import phys.diag.NullPhysicalLayer;
 import util.Environment;
 import web.WebService;
-import network.NetworkLayer;
 import application.ApplicationLayer;
 import application.GUI;
 import link.BittasticLinkLayer;
@@ -37,7 +37,7 @@ public class Starter extends JFrame implements ActionListener {
 	// Options for all the combo boxes.
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
-	private Class<?> networkLayers[] = {NetworkLayer.class};
+	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
 	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class};
 	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, NullPhysicalLayer.class};
 	private String webOptions[] = {"Yes", "No"};
