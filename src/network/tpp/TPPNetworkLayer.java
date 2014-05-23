@@ -90,9 +90,6 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         this.tunnels = new Tunneling(this);
 
-        // Load routes
-        loadDefaultRoutes();
-
         // Construct and run thread
         t = new Thread(this);
         t.setName("TPP " + this.hashCode());
@@ -478,6 +475,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         // Assign the link layer.
         this.link = (FrameLinkLayer) stack.linkLayer;
+
+        // Load routes
+        loadDefaultRoutes();
 
         // Run the thread(s).
         this.start();
