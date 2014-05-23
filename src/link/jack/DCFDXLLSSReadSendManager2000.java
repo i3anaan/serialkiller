@@ -26,7 +26,7 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 		this.outbox = new ArrayBlockingQueue<Unit>(1024); // TODO capacity goed
 															// zo?
 
-		exchanger = new Thread(this, "Exchanger");
+		exchanger = new Thread(this, "Jack - Exchanger");
 		exchanger.start();
 	}
 	public void sendUnit(Unit unit) {
