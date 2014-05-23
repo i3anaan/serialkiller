@@ -1,5 +1,6 @@
 package network.tpp;
 
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -10,6 +11,7 @@ import java.util.Random;
 public class PacketTest {
     Packet p;
 
+    @Before
     public void setUp() {
         p = new Packet(0);
     }

@@ -3,6 +3,7 @@ package test.unit;
 import network.tpp.Host;
 import network.tpp.Router;
 import network.tpp.RoutingTable;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 public class RouterTest {
     Router r;
 
+    @Before
     public void setUp() {
         r = new Router();
     }
