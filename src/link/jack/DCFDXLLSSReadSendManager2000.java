@@ -54,10 +54,10 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 	public void run() {
 		down.readFrame();
 		while (true) {
-			Frame frameToSend = new Frame(outbox);
+			SimpleFrame frameToSend = new SimpleFrame(outbox);
 			down.sendFrame(frameToSend);
 			down.exchangeFrame();
-			Frame f = down.readFrame();
+			SimpleFrame f = down.readFrame();
 			// System.out.println(Arrays.toString(f.getUnits()));
 			for (Unit u : f.getUnits()) {
 				try {
