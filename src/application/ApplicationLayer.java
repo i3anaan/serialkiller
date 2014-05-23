@@ -35,7 +35,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
-	
+
 	/** The main thread of this class instance */
 	private Thread thread;
 
@@ -53,10 +53,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 
 	public ApplicationLayer(){
-		
+
 		// Construct and run thread
-        thread = new Thread(this);
-        thread.setName("APL " + this.hashCode());
+		thread = new Thread(this);
+		thread.setName("APL " + this.hashCode());
 	}
 
 
@@ -188,7 +188,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 		// TODO remove
 		byte destination = 1;
 		Payload p = new Payload(data, destination);
-		
+
 		try {
 			networkLayer.send(p);
 		} catch (SizeLimitExceededException e) {
@@ -211,7 +211,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 		byte[] nick;
 		byte[] msg;
 		byte[] data = null;
-		
+
 		try {
 			nick = nickname.getBytes("UTF-8");
 			msg = message.getBytes("UTF-8");
@@ -230,7 +230,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 			ApplicationLayer.getLogger().critical("UTF-8 is not supported: WTF?!?!?!" + ".");
 			e.printStackTrace();
 		}
-		
+
 		try {
 			networkLayer.send(data, destination);
 		} catch (SizeLimitExceededException e) {
@@ -246,17 +246,16 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 		// Read payloads in the queue.
 		while (run) {
-            Payload p = networkLayer.read();
+			Payload p = networkLayer.read();
 
-            // incoming payload
-            readPayload(p);
-            ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
-            //return; // We are done.
+			// incoming payload
+			readPayload(p);
+			ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
 		}
 		ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
 
 	}
-	
+
 	/**
 	 * Method to retrieve a listing of hosts from the networkLayer
 	 * for the application

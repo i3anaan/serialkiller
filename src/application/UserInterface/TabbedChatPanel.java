@@ -2,14 +2,12 @@ package application.UserInterface;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.util.ArrayList;
+import java.awt.Image;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 
@@ -22,65 +20,77 @@ import javax.swing.JTextArea;
 public class TabbedChatPanel extends JPanel{
 
 	// Class variables
-	private		JTabbedPane tabbedPane;
-	private		Map<String, JPanel> tabIndex;
-	
+	private		ClosableTabbedPane	 	tabbedPane;
+	private		Map<String, JPanel> 	tabIndex;
+
 	// private variables
 	private GUI gui;
-	
-	
+
+
 	public TabbedChatPanel(GUI gu) {
 		super();
 		gui = gu;
 		tabIndex = new HashMap<String,JPanel>();
-		
-		this.setLayout( new BorderLayout() );
+
+		setLayout( new BorderLayout() );
 		setBackground( Color.gray );
 		
-		JPanel topPanel = new JPanel();
+		Image image = new ImageIcon("logo.png").getImage();
+		BackgroundPanel topPanel = new BackgroundPanel(image);
 		topPanel.setLayout( new BorderLayout() );
 		this.add(topPanel);
-		
-		
-		JPanel homePanel = new JPanel();
-		homePanel.setLayout(new BorderLayout());
-		
+
 		// Create a tabbed pane
-				tabbedPane = new JTabbedPane();
-				tabIndex.put("Home", homePanel);
-				tabbedPane.addTab( "Home", homePanel );
-				topPanel.add( tabbedPane, BorderLayout.CENTER );
+		tabbedPane = new ClosableTabbedPane() {
+			public boolean tabAboutToClose(int tabIndex) {
+				String tab = tabbedPane.getTabTitleAt(tabIndex);
+				removeChatPanel(tab);
+				return true;
+			}
+		};
+		topPanel.add( tabbedPane, BorderLayout.CENTER );
 		
+
 	}
-	
+
 	/**
 	 * adds a tab for a host with the specified hostName
 	 * @param name of the host
 	 */
 	public void addChatPanel(String hostName, byte address){
+
+		// Alternative 1
 		
-		if(tabIndex.get(hostName) == null){
+		//		if(tabbedPane.indexOfComponent(tabIndex.get(hostName)) == -1){
+		//			if(tabIndex.get(hostName) != null){
+		//				tabIndex.remove(hostName);
+		//			}
+		//			JPanel newPanel = new ChatPanel(gui, address);
+		//			tabIndex.put(hostName, newPanel);
+		//			tabbedPane.addTab(hostName, newPanel);
+		//		}
+		
+		// Alternative 2
+		if(tabIndex.get(hostName) == null) {
+
 			JPanel newPanel = new ChatPanel(gui, address);
 			tabIndex.put(hostName, newPanel);
 			tabbedPane.addTab(hostName, newPanel);
 		}
-		
-		
+
 	}
-	
+
 	/**
 	 * removes a tab belonging to a host with the specified hostName
 	 * @param name of the host
 	 */
 	public void removeChatPanel(String hostName){
-		
+
 		if(tabIndex.get(hostName) != null){
-			ChatPanel removePanel = (ChatPanel) tabIndex.get(hostName);
-			tabIndex.remove(removePanel);
-			tabbedPane.remove(removePanel);
+			tabIndex.remove(hostName);
 		}
 	}
-	
+
 	/**
 	 * Parses a chat message to the tab belonging to the specified host
 	 * @param nickName of the user
@@ -91,10 +101,7 @@ public class TabbedChatPanel extends JPanel{
 		String hostName = gui.getUserList().findHostName(address);
 		ChatPanel cp = (ChatPanel) tabIndex.get(hostName);
 		cp.addMessage(nickName, address, message);
-		
+
 	}
-	
-
-
 
 }
