@@ -3,7 +3,6 @@ package link.diag;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import link.BytewiseLinkLayer;
 import util.Bytes;
 
 /**

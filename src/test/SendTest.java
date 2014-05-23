@@ -7,9 +7,10 @@ import link.jack.DCFDXLLSSReadSendManager2000;
 import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
 public class SendTest {
 
+	
 	/**
 	 * @param args
-	 */
+	 *//*
 	public static void main(String[] args) {
 		DCFDXLLSSReadSendManager2000 ll = new DCFDXLLSSReadSendManager2000(
 				new DelayCorrectedFDXLinkLayerSectionSegment(
@@ -30,5 +31,5 @@ public class SendTest {
 		}
 		System.out.println("Stopping exchanger thread");
 		//ll.setRun(false);
-	}
+	}*/
 }

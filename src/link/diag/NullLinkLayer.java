@@ -1,6 +1,5 @@
 package link.diag;
 
-import link.BytewiseLinkLayer;
 
 /**
  * A null implementation of a link layer. Reading from this link layer will

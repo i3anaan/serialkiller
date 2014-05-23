@@ -1,12 +1,8 @@
 package link.jack;
 
-import java.util.Arrays;
-
 import util.BitSet2;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import util.ByteArrays;
-import util.Bytes;
 
 /**
  * Sets starting from the left (MSB), reads starting from the right (LSB).
@@ -16,102 +12,63 @@ import util.Bytes;
  */
 public class Frame {
 
-	protected PureUnit[] units = new PureUnit[PAYLOAD_UNIT_COUNT];
+	private Unit[] units = new Unit[FRAME_UNIT_COUNT];
 
-	public static final int PAYLOAD_UNIT_COUNT = 10;
-	//public static final int PAYLOAD_SIZE_BITS = PAYLOAD_SIZE_BYTES * 8;
-
-	// Imagine this as a pointer pointing to the end of the bit sequence.
-	// To the left is the last placed, valid, bit.
-	// To the right a new bit would be placed;
-	// XXXXXXXXXXXXX ---------
-	// -------------^---------
-	// -------------|---------
-	int currentReaderIndex = 0;
-
-	public Frame() {
-		for(int i=0;i<units.length;i++){
-			units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
-		}
-		//System.out.println("Frame()  "+Arrays.toString(units));
-	}
+	public static final int FRAME_UNIT_COUNT = 10;
 	
-	public Frame(PureUnit[] units) {
-		for(int i=0;i<units.length;i++){
-			this.units[i] = units[i];
-		}
-		//Fill empty spots with Filler data flags.
-		for(int i=0;i<PAYLOAD_UNIT_COUNT;i++){
-			if(this.units[i]==null){
-				this.units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
+	/**
+	 * Constructs a frame, taking as much Units from the queue as possible.
+	 * @param outbox
+	 */
+	public Frame(ArrayBlockingQueue<Unit> outbox){
+		int added= 0;
+		while(added<FRAME_UNIT_COUNT){
+			Unit u = outbox.poll();
+			if(u!=null){
+				units[added] = u;				
+			}else{
+				units[added] = JackTheRipper.UNIT_IN_USE.getFiller();
 			}
+			added++;
 		}
-		//System.out.println("Frame(Unit[] units)  "+Arrays.toString(units));
-	}
-
-	public Frame(BitSet2 data){
-		//Put as much data as possible in units.
-		for(int i=0;i<data.length()-7;i=i+8){
-			this.units[i/8] = new PureUnit(Bytes.fromBitSet(data, i));
-		}
-		//Fill empty spots with Filler data flags.
-		for(int i=0;i<PAYLOAD_UNIT_COUNT;i++){
-			if(this.units[i]==null){
-				this.units[i] = new PureUnit(PureUnit.FLAG_FILLER_DATA);
-			}
-		}
-		//System.out.println("Frame(BitSet2 data)  "+Arrays.toString(units));
 	}
 	
 	/**
-	 * Returns only the data contained in this Frame.
-	 * (Flags and stuffings are filtered out).
-	 * @return
+	 * Constructs a Units from the received data, and saves those in this frame.
+	 * @param received
 	 */
-	public BitSet2 getDataBitSet(){
-		BitSet2 result = new BitSet2();
-		for(PureUnit u : units){
-			//System.out.println(result.length());
-				result = BitSet2.concatenate(result, u.dataAsBitSet());
+	public Frame(BitSet2 received){
+		int index=0;
+		int bitCount = JackTheRipper.UNIT_IN_USE.getSerializedBitCount();
+		while((index*bitCount<received.length()-bitCount+1) && index<FRAME_UNIT_COUNT*bitCount){
+			units[index] = JackTheRipper.UNIT_IN_USE.constructFromBitSet(received.get(index*bitCount,(index+1)*bitCount));
+			index++;
 		}
-		return result;
-	}
-	
-	/**
-	 * Returns all the bits in this payload
-	 * (Flags and stuffings are left in).
-	 * @return
-	 */
-	public BitSet2 getFullBitSet(){
-		BitSet2 result = new BitSet2();
-		for(PureUnit u : units){
-			//System.out.println(result.length());
-				result = BitSet2.concatenate(result, u.asBitSet());
-		}
-		return result;
-	}
-
-	public PureUnit getUnit(int unitIndex) {
-		if(unitIndex<units.length){
-			return units[unitIndex];
-		}else{
-			return null;
+		for(int i=0;i<FRAME_UNIT_COUNT;i++){
+			if(units[i]==null){
+				units[i] = JackTheRipper.UNIT_IN_USE.getFiller();
+			}
 		}
 	}
 	
-	public PureUnit[] getUnits(){
+	public Unit[] getUnits(){
 		return units;
 	}
-
-	public Frame getClone() {
-		PureUnit[] newUnits = new PureUnit[PAYLOAD_UNIT_COUNT];
-		for(int i=0;i<units.length;i++){
-			newUnits[i] = new PureUnit(units[i].b,units[i].isSpecial);
+	
+	public BitSet2 asBitSet(){
+		BitSet2 result = new BitSet2();
+		for(int i=0;i<FRAME_UNIT_COUNT;i++){
+			result = BitSet2.concatenate(result, units[i].serializeToBitSet());
 		}
-		return new Frame(newUnits);
+		return result;
 	}
+
 	
 	public String toString(){
-		return Arrays.toString(this.units);
+		String s = "["+units[0];
+		for(int i=1;i<units.length;i++){
+			s = s+", "+units[i];
+		}
+		return s;
 	}
 }

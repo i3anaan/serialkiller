@@ -1,12 +1,11 @@
 package bench;
 
 import link.*;
-import phys.diag.BitErrorPhysicalLayer;
-import phys.diag.CheckingPhysicalLayer;
-import phys.diag.DebouncePhysicalLayer;
+import link.diag.BytewiseLinkLayer;
+import link.jack.DCFDXLLSSReadSendManager2000;
+import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
+import link.jack.JackTheRipper;
 import phys.diag.DelayPhysicalLayer;
-import phys.diag.DumpingPhysicalLayer;
-import phys.diag.PerfectVirtualPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 import util.Bytes;
 
@@ -15,19 +14,21 @@ import util.Bytes;
  */
 public class SimpleTestbench {
 	private class SeqThread extends Thread {
-		private BytewiseLinkLayer down;
+		private FrameLinkLayer down;
 		int good = 0;
 		int bad = 0;
 
-		public SeqThread(BytewiseLinkLayer down) {
+		public SeqThread(FrameLinkLayer down) {
 			this.down = down;
 		}
 
 		public void run() {
 			while (true) {
 				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-					down.sendByte(i);
-					byte in = down.readByte();
+					//System.out.println("Sending Byte: "+Bytes.format((byte)(i)));
+					down.sendFrame(new byte[]{(byte)(i)});
+					byte in = down.readFrame()[0];
+					//System.out.println("ReceivedByte: "+Bytes.format(in));
 					
 					if (in == i) {
 						System.out.print(".");
@@ -44,48 +45,17 @@ public class SimpleTestbench {
 			}
 		}
 	}
-	
-	private class SeqThreadSmall extends Thread {
-		private BytewiseLinkLayer down;
-		int good = 0;
-		int bad = 0;
-
-		public SeqThreadSmall(BytewiseLinkLayer down) {
-			this.down = down;
-		}
-
-		public void run() {
-			for(int i=0;i<3;i++) {
-					down.sendByte((byte)(i+22));
-					System.out.println("Sending byte");
-					byte in = down.readByte();
-					
-					if (in == i) {
-						System.out.print(".");
-						good++;
-					} else {
-						System.out.print("X");
-						bad++;
-					}
-					
-					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
-					
-					System.out.flush();
-			}
-		}
-	}
-
 	private class EchoThread extends Thread {
-		private BytewiseLinkLayer down;
+		private FrameLinkLayer down;
 
-		public EchoThread(BytewiseLinkLayer down) {
+		public EchoThread(FrameLinkLayer down) {
 			this.down = down;
 		}
 
 		public void run() {
 			while (true) {
-				byte i = down.readByte();
-				down.sendByte(i);
+				byte i = down.readFrame()[0];
+				down.sendFrame(new byte[]{i});
 			}
 		}
 	}
@@ -109,8 +79,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		BytewiseLinkLayer a = null;// = new DCFDXLLSSRSM2000FrameReadSendManager3000(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vpla)))));
-		BytewiseLinkLayer b = null;// = new DCFDXLLSSRSM2000FrameReadSendManager3000(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new BitErrorPhysicalLayer(new DelayPhysicalLayer(vplb)))));
+		FrameLinkLayer a = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new DelayPhysicalLayer(vpla))));
+		FrameLinkLayer b = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new DelayPhysicalLayer(vplb))));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
