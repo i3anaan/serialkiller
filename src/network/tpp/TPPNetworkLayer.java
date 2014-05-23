@@ -203,30 +203,32 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public void checkRetransmissions() {
         TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
 
-        for (Packet p : sent) {
-            if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
-                // We handled this one.
-                sent.get(p.header().getSeqnum()).remove(p.header().getSegnum());
-                if (sent.get(p.header().getSeqnum()).size() == 0) {
-                    sent.remove(p.header().getSeqnum());
-                }
-
-                // Only retransmit if the threshold is not exceeded.
-                if (MAX_RETRANSMISSIONS > 0 && p.retransmissions() < MAX_RETRANSMISSIONS) {
-                    // Offer packet to network.
-                    if (!retransmissionHandler.offer(p)) {
-                        // Keep in sent list and delay retransmission, queue full.
-                        if (!sent.containsKey(p.header().getSeqnum())) {
-                            sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
-                        }
-                        sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
-                        TPPNetworkLayer.getLogger().debug(p.toString() + " is delayed for retransmission, NetworkLayer queue full.");
-                    } else {
-                        p.retransmit(); // Mark packet as retransmitted once again.
-                        TPPNetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
+        for (Map<Integer, Packet> m : sent.values()) {
+            for (Packet p : m.values()) {
+                if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
+                    // We handled this one.
+                    sent.get(p.header().getSeqnum()).remove(p.header().getSegnum());
+                    if (sent.get(p.header().getSeqnum()).size() == 0) {
+                        sent.remove(p.header().getSeqnum());
                     }
-                } else {
-                    TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()));
+
+                    // Only retransmit if the threshold is not exceeded.
+                    if (MAX_RETRANSMISSIONS > 0 && p.retransmissions() < MAX_RETRANSMISSIONS) {
+                        // Offer packet to network.
+                        if (!retransmissionHandler.offer(p)) {
+                            // Keep in sent list and delay retransmission, queue full.
+                            if (!sent.containsKey(p.header().getSeqnum())) {
+                                sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
+                            }
+                            sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
+                            TPPNetworkLayer.getLogger().debug(p.toString() + " is delayed for retransmission, NetworkLayer queue full.");
+                        } else {
+                            p.retransmit(); // Mark packet as retransmitted once again.
+                            TPPNetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
+                        }
+                    } else {
+                        TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()));
+                    }
                 }
             }
         }
