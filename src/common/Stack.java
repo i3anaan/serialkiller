@@ -19,6 +19,10 @@ public class Stack {
 	public WebService webService;
 	
 	private Starter starter;
+	
+	public Stack() {
+		this(null);
+	}
 
 	public Stack(Starter starter) {
 		super();
@@ -27,6 +31,6 @@ public class Stack {
 	
 	/** Request a restart of the entire stack. */
 	public void smash() {
-		starter.restart();
+		if (starter != null) starter.restart();
 	}
 }
