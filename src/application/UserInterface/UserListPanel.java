@@ -19,7 +19,9 @@ public class UserListPanel extends JPanel{
 	private GUI gui;
 	private JTextArea userList;
 	
-	private Map<Byte, String> hosts;
+	/** Map containing a list of hosts mapped to their hostNames */
+	private Map<Integer, String> hostMap;
+	/** Visual list containing a list of hostnames that have been mapped to their hosts */
 	private JList hostList;
 	
 	public UserListPanel(GUI gu) {
@@ -39,4 +41,8 @@ public class UserListPanel extends JPanel{
 				this.add(taScroll, BorderLayout.CENTER);	
 	}
 
+	/** Finds the hostName belonging to a specified host */
+	public String findHostName(int address){
+		return hostMap.get(address);
+	}
 }

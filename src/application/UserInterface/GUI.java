@@ -58,7 +58,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	// private variables
 	private		Preferences 		prefs; 					
 	private 	ApplicationLayer 	apl;
-	private 	ChatPanel 			cp; 					
+	private 	TabbedChatPanel 	cp; 					
 	private 	UserListPanel 		ulp;
 
 	public GUI(ApplicationLayer applicationLayer){
@@ -71,7 +71,8 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 		// Initialize initial variables
 		prefs 				= Preferences.userNodeForPackage(getClass());
-		cp 					= new ChatPanel(this);
+		//cp 					= new ChatPanel(this);
+		cp					= new TabbedChatPanel(this);
 		ulp 				= new UserListPanel(this);
 
 		// Layout main application Window
@@ -167,10 +168,35 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	private void buildChatMenu() {
 
 		this.add(cp, BorderLayout.CENTER);
+		cp.addChatPanel("host 5", (byte)5);
+		cp.addChatPanel("host 4", (byte)4);
 		this.add(ulp, BorderLayout.EAST);
 
 	}
+	
+	/**
+	 * getter for the UserListPanel containing a list of all the hosts
+	 * @return UserLisPanel
+	 */
+	public UserListPanel getUserList(){
+		return ulp;
+	}
 
+	/**
+	 * getter for the Preferences object belonging to this application
+	 * @return preferences
+	 */
+	public Preferences getPreferences(){
+		return prefs;
+	}
+	
+	/**
+	 * getter for the ApplicationLayer being used by this application
+	 * @return ApplicationLayer
+	 */
+	public ApplicationLayer getApplicationLayer(){
+		return apl;
+	}
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received, returns null when file offer is refused
@@ -207,12 +233,14 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 
 		if(arg instanceof ChatMessage){
-			cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
+			//cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
+			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
 		}
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
-			cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
+			
+			//cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
 			saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 		}
 
