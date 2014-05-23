@@ -1,5 +1,6 @@
 package tunnel;
 
+import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Bytes;
 import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
@@ -224,7 +225,7 @@ public class Tunnel implements Runnable {
                 try {
                     // Read the header data of the next packet.
                     byte[] rawHeader = new byte[Packet.HEADER_LENGTH];
-                    stream.read(rawHeader);
+                    ByteStreams.readFully(stream, rawHeader);
 
                     // Parse the header.
                     PacketHeader header = Packet.parseHeader(rawHeader);
