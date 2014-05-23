@@ -65,6 +65,7 @@ public class RoutingTable {
      */
 	public void fromReader(BufferedReader reader) throws IOException {
 		String line = null;
+        int lineNumber = 1;
 		while ((line = reader.readLine()) != null) {
 			String[] parts;
 
@@ -74,7 +75,7 @@ public class RoutingTable {
                     routes.put((byte) Integer.parseInt(parts[0]), (byte) Integer.parseInt(parts[1]));
                     // TODO: Validate addresses
                 } catch (NumberFormatException e) {
-                    // Wrong route, ignore.
+                    die(String.format("Routes file invalid [%d: non-numeric host(s)]! Exiting.", lineNumber));
                 }
             }
 
@@ -93,10 +94,11 @@ public class RoutingTable {
                             sibling = (byte) Integer.parseInt(parts[1]);
                         }
                     } catch (NumberFormatException f) {
-                        // Wrong entry in file, ignore.
+                        die(String.format("Routes file invalid [%d: unknown keyword]! Exiting.", lineNumber));
                     }
                 }
             }
+            lineNumber++;
 		}
 	}
 
@@ -168,6 +170,11 @@ public class RoutingTable {
      */
     public byte getSibling() {
         return sibling;
+    }
+
+    private void die(String msg) {
+        TPPNetworkLayer.getLogger().bbq(msg);
+        System.exit(-1);
     }
 	
 }
