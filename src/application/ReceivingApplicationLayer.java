@@ -44,7 +44,7 @@ public class ReceivingApplicationLayer {
 		boolean loop_continue = true;
 		
 		
-		ApplicationLayer al = new ApplicationLayer(null);
+		ApplicationLayer al = new ApplicationLayer();
 		GUI gui = new GUI(al);
 		al.addObserver(gui);
 		boolean doOnce = true;

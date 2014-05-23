@@ -264,7 +264,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 	/** Returns the Logger object for this ApplicationLayer */
 	public static Logger getLogger() {
 		if (logger == null) {
-			logger = new Logger(LogMessage.Subsystem.NETWORK);
+			logger = new Logger(LogMessage.Subsystem.APPLICATION);
 		}
 		return logger;
 	}

@@ -222,7 +222,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	/** Returns the Logger object for this GUI */
 	public static Logger getLogger() {
 		if (logger == null) {
-			logger = new Logger(LogMessage.Subsystem.NETWORK);
+			logger = new Logger(LogMessage.Subsystem.APPLICATION);
 		}
 		return logger;
 	}
