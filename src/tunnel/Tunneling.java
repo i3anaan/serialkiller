@@ -2,6 +2,8 @@ package tunnel;
 
 import log.LogMessage;
 import log.Logger;
+import network.NetworkLayer;
+import network.Packet;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,6 +11,7 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Class that manages tunnels.
@@ -22,6 +25,9 @@ public class Tunneling implements Runnable {
     /** The socket. */
     private ServerSocket socket;
 
+    /** The queue to the network layer. */
+    private ArrayBlockingQueue<Packet> queue;
+
     /** The thread for tunneling. */
     private Thread t;
 
@@ -31,7 +37,8 @@ public class Tunneling implements Runnable {
     /** The logger. */
     private static Logger logger;
 
-    public Tunneling() {
+    public Tunneling(NetworkLayer parent) {
+        queue = parent.queue();
         tunnels = new TreeMap<String, Tunnel>();
     }
 
@@ -43,7 +50,7 @@ public class Tunneling implements Runnable {
      */
     public Tunnel create(String ip, boolean autoconnect) {
         // Create the new tunnel.
-        Tunnel tunnel = new Tunnel(ip, autoconnect);
+        Tunnel tunnel = new Tunnel(ip, queue, autoconnect);
 
         // Perform tunnel create actions.
         _create(tunnel);
@@ -53,7 +60,7 @@ public class Tunneling implements Runnable {
 
     protected Tunnel create(Socket socket, boolean autoconnect) {
         // Create the new tunnel.
-        Tunnel tunnel = new Tunnel(socket, autoconnect);
+        Tunnel tunnel = new Tunnel(socket, queue, autoconnect);
 
         // Perform tunnel create actions.
         _create(tunnel);
@@ -65,7 +72,6 @@ public class Tunneling implements Runnable {
         // Remove and stop the old tunnel if present.
         if (tunnels.containsKey(tunnel.ip())) {
             Tunnel old = tunnels.remove(tunnel.ip());
-            old.stop();
         }
 
         // Add the new tunnel to the collection.
@@ -74,7 +80,6 @@ public class Tunneling implements Runnable {
 
         // Start the new tunnel if necessary.
         if (tunnel.connected()) {
-            tunnel.start();
         }
     }
 
