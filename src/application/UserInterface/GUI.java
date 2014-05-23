@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
@@ -73,7 +74,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		prefs 				= Preferences.userNodeForPackage(getClass());
 		//cp 					= new ChatPanel(this);
 		cp					= new TabbedChatPanel(this);
-		ulp 				= new UserListPanel(this);
+		ulp 				= new UserListPanel(this, loadHostList());
 
 		// Layout main application Window
 		this.setLayout(new BorderLayout());
@@ -181,6 +182,10 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	public UserListPanel getUserList(){
 		return ulp;
 	}
+	
+	public TabbedChatPanel getChatPanel(){
+		return cp;
+	}
 
 	/**
 	 * getter for the Preferences object belonging to this application
@@ -196,6 +201,10 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	 */
 	public ApplicationLayer getApplicationLayer(){
 		return apl;
+	}
+	
+	public Collection<Byte> loadHostList(){
+		return apl.getHosts();
 	}
 	/**
 	 * Method to be called for saving files when a file transfer

@@ -34,16 +34,17 @@ public class TabbedChatPanel extends JPanel{
 		gui = gu;
 		tabIndex = new HashMap<String,JPanel>();
 		
+		this.setLayout( new BorderLayout() );
 		setBackground( Color.gray );
+		
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout( new BorderLayout() );
-		this.add(topPanel, BorderLayout.CENTER);
+		this.add(topPanel);
 		
 		
 		JPanel homePanel = new JPanel();
 		homePanel.setLayout(new BorderLayout());
-		JTextArea jtext = new JTextArea("", 15, 50);
-		homePanel.add(jtext);
+		
 		// Create a tabbed pane
 				tabbedPane = new JTabbedPane();
 				tabIndex.put("Home", homePanel);
