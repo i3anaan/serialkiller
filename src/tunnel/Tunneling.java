@@ -80,11 +80,6 @@ public class Tunneling implements Runnable {
         // Add the new tunnel to the collection.
         tunnels.put(tunnel.ip(), tunnel);
         Tunneling.getLogger().debug(tunnel.toString() + " created.");
-
-        // Start the new tunnel if necessary.
-        if (tunnel.connected()) {
-            tunnel.start();
-        }
     }
 
     /**

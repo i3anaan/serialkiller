@@ -48,11 +48,6 @@ public class Tunnel implements Runnable {
         this.autoconnect = autoconnect;
         this.in = in;
         out = new ArrayBlockingQueue<Packet>(TPPNetworkLayer.QUEUE_SIZE);
-        t = new Thread(this);
-
-        if (autoconnect) {
-            connect();
-        }
     }
 
     /**
@@ -66,6 +61,9 @@ public class Tunnel implements Runnable {
         this(in, autoconnect);
         this.socket = socket;
         this.ip = socket.getInetAddress().getHostAddress();
+
+        t = new Thread(this);
+        t.setName(toString());
     }
 
     /**
@@ -79,6 +77,13 @@ public class Tunnel implements Runnable {
         this(in, autoconnect);
         this.ip = ip;
         this.autoconnect = false;
+
+        t = new Thread(this);
+        t.setName(toString());
+
+        if (autoconnect) {
+            connect();
+        }
     }
 
     /**
