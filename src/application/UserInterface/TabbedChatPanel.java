@@ -32,13 +32,12 @@ public class TabbedChatPanel extends JPanel{
 	public TabbedChatPanel(GUI gu) {
 		super();
 		gui = gu;
-		
 		tabIndex = new HashMap<String,JPanel>();
 		
 		setBackground( Color.gray );
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout( new BorderLayout() );
-		this.add(topPanel);
+		this.add(topPanel, BorderLayout.CENTER);
 		
 		
 		JPanel homePanel = new JPanel();
