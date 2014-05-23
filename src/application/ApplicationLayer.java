@@ -251,7 +251,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
             // incoming payload
             readPayload(p);
             ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
-            return; // We are done.
+            //return; // We are done.
 		}
 		ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
 
