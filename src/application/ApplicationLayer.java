@@ -48,6 +48,7 @@ public class ApplicationLayer extends Observable implements Runnable{
 
 	public ApplicationLayer(NetworkLayer nl){
 		this.networkLayer = nl;
+		
 	}
 
 

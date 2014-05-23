@@ -12,6 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import common.Stack;
+
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
@@ -20,8 +22,8 @@ import util.Environment;
 import web.WebService;
 import network.NetworkLayer;
 import application.ApplicationLayer;
-import application.GUI;
 import link.BittasticLinkLayer;
+import link.LinkLayer;
 import link.BufferStufferLinkLayer;
 import log.LogMessage;
 import log.Logger;
@@ -118,20 +120,28 @@ public class Starter extends JFrame implements ActionListener {
 		log.info("Starter starting stack.");
 		log.debug("How many stacks would a stack starter start if a stack starter could start stacks?");
 		
+		Stack stack = new Stack();
+		
 		// Instantiate and start the stack, bottom-up.
 		try {
-			// Physical layer.
-			log.info("Starting physical layer.");
 			Class<?> physClass = physLayers[physCombo.getSelectedIndex()];
-			log.info("Got class " + physClass);
-			PhysicalLayer phy = (PhysicalLayer)physClass.newInstance();
-			log.info("Got instance.");
-			phy.start();
-			log.info("Started " + phy);
+			stack.physLayer = (PhysicalLayer)physClass.newInstance();
 			
-			// Application layer.
-			log.info("Starting application layer.");
-			ApplicationLayer al = new ApplicationLayer(null);
+			Class<?> linkClass = linkLayers[linkCombo.getSelectedIndex()];
+			stack.linkLayer = (LinkLayer)linkClass.newInstance();
+			
+			Class<?> netClass = networkLayers[netCombo.getSelectedIndex()];
+			stack.networkLayer = (NetworkLayer)netClass.newInstance();
+			
+			Class<?> appClass = applicationLayers[appCombo.getSelectedIndex()];
+			stack.applicationLayer = (ApplicationLayer)appClass.newInstance();
+			
+			if (webCombo.getSelectedIndex() == 0) {
+				stack.webService = new WebService(8080);
+				new Thread(stack.webService).start();
+			}
+			
+			log.info("Got instances.");
 			
 			// Disable all controls except the Quit button.
 			swingCombo.setEnabled(false);
@@ -141,17 +151,6 @@ public class Starter extends JFrame implements ActionListener {
 			physCombo.setEnabled(false);
 			webCombo.setEnabled(false);
 			start.setEnabled(false);
-			
-			// Start the web service, if requested.
-			if (webCombo.getSelectedIndex() == 0) {
-				new Thread(new WebService(8080)).start();
-			}
-			
-			// Start the Swing app, if requested.
-			if (swingCombo.getSelectedIndex() == 0) {
-				GUI gui = new GUI();
-				al.addObserver(gui);
-			}
 		} catch (InstantiationException e) {
 			// This should not happen.
 			log.emerg(e.toString());

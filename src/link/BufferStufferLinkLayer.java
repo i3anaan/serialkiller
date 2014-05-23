@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import com.google.common.primitives.Bytes;
+import common.Stack;
+import common.Startable;
+
 import phys.PhysicalLayer;
 
 /**
@@ -11,7 +14,7 @@ import phys.PhysicalLayer;
  * 
  * The actual exchange of data is done in a seperate thread.
  */
-public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
+public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, Startable {
 	private PhysicalLayer down;
 	private ArrayBlockingQueue<byte[]> outbox;
 	private ArrayBlockingQueue<byte[]> inbox;
@@ -34,13 +37,16 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable {
 	private byte lastrecv = 0x00;
 	private byte lastsent = 0x00;
 	
-	public BufferStufferLinkLayer(PhysicalLayer down) {
-		this.down = down;
+	public BufferStufferLinkLayer() {
 		this.outbox = new ArrayBlockingQueue<byte[]>(MAX_WAITING_FRAMES);
 		this.inbox = new ArrayBlockingQueue<byte[]>(MAX_WAITING_FRAMES);
-		
+	}
+	
+	public Thread start(Stack stack) {
+		this.down = stack.physLayer;
 		t = new Thread(this);
 		t.setName("BufferStuffer " + this.hashCode());
+		return t;
 	}
 	
 	public void sendFrame(byte[] frame) {
