@@ -164,7 +164,7 @@ public class Tunnel implements Runnable {
     public void run() {
         try {
             while (run) {
-                while (!socket.isConnected()) {
+                while (socket == null || !socket.isConnected()) {
                     Thread.sleep(RECONNECT_TIMEOUT);
                     connect();
                 }
