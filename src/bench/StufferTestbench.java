@@ -1,6 +1,7 @@
 package bench;
 
 import com.google.common.base.Charsets;
+import common.Stack;
 
 import phys.diag.VirtualCable;
 import phys.diag.VirtualCablePhysicalLayer;
@@ -54,11 +55,17 @@ public class StufferTestbench {
 		
 		VirtualCablePhysicalLayer vpla = new VirtualCablePhysicalLayer(cable, 0);
 		VirtualCablePhysicalLayer vplb = new VirtualCablePhysicalLayer(cable, 1);
+		
+		Stack sa = new Stack();
+		Stack sb = new Stack();
+		
+		sa.physLayer = vpla;
+		sb.physLayer = vplb;
 
-		BufferStufferLinkLayer a = new BufferStufferLinkLayer(vpla);
-		a.start();
-		BufferStufferLinkLayer b = new BufferStufferLinkLayer(vplb);
-		b.start();
+		BufferStufferLinkLayer a = new BufferStufferLinkLayer();
+		a.start(sa);
+		BufferStufferLinkLayer b = new BufferStufferLinkLayer();
+		b.start(sb);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
