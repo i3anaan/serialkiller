@@ -231,6 +231,7 @@ public class Tunnel implements Runnable {
         }
 
         public void join() {
+            run = false;
             try {
                 t.join();
             } catch (InterruptedException e) {
