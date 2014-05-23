@@ -5,7 +5,7 @@ import util.Environment;
 
 import java.util.Date;
 
-import network.NetworkLayer;
+import network.tpp.TPPNetworkLayer;
 
 /**
  * A simple ServiceHandler that displays a table with known Stats-package
@@ -27,7 +27,7 @@ class StatusHandler extends ServiceHandler {
 
         r.out.append("<table>");
         row(r, "Working directory", Environment.getWorkingDir());
-        row(r, "Route file location", NetworkLayer.ROUTING_PATH);
+        row(r, "Route file location", TPPNetworkLayer.ROUTING_PATH);
         row(r, "Java version", Environment.getJavaVersion());
         row(r, "Date/time", new Date());
         row(r, "Git branch", Environment.getGitBranch());
