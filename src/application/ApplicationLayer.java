@@ -9,6 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Observable;
 
+import javax.naming.SizeLimitExceededException;
+
 import log.LogMessage;
 import log.Logger;
 import network.NetworkLayer;
@@ -154,9 +156,9 @@ public class ApplicationLayer extends Observable implements Runnable{
 	 * 
 	 * @requires filesize < 2GB
 	 * @param Path of the file to be read
-	 * @return byte array
+	 * 
 	 */
-	public byte[] readFile(String strFilePath){
+	public void readFile(String strFilePath){
 
 		File file = new File(strFilePath);
 		byte[] data = new byte[strFilePath.length()];
@@ -174,8 +176,16 @@ public class ApplicationLayer extends Observable implements Runnable{
 			System.out.println("Error Reading The File.");
 			e1.printStackTrace();
 		}
-
-		return data;
+		// TODO remove
+		byte destination = 1;
+		Payload p = new Payload(data, destination);
+		
+		try {
+			networkLayer.send(p);
+		} catch (SizeLimitExceededException e) {
+			ApplicationLayer.getLogger().debug("Size Limit Exceeded! " + p.toString() + ".");
+			e.printStackTrace();
+		}
 	}
 
 	/**
