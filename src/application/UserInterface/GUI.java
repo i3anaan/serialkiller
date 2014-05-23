@@ -23,9 +23,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.*;
 
+import common.Stack;
+import common.Startable;
 import application.*;
 import application.message.ChatMessage;
 import application.message.FileOfferMessage;
@@ -36,14 +39,21 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
 
+import log.LogMessage;
+import log.Logger;
 
-public class GUI extends JFrame implements ActionListener, ItemListener, Observer {
+
+public class GUI extends JFrame implements ActionListener, ItemListener, Observer{
+
+	/** The Logger object used by this layer to send log messages to the web interface */
+	private static Logger logger;
 
 	// private variables
 	private		Preferences 		prefs; 					
@@ -51,14 +61,19 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	private 	ChatPanel 			cp; 					
 	private 	UserListPanel 		ulp;
 
-	public GUI(ApplicationLayer al){
-		super("G.A.R.G.L.E.");	
+	public GUI(ApplicationLayer applicationLayer){
+		super("G.A.R.G.L.E.");
+		apl = applicationLayer;
+		
+		// Setup Observer/Observable relation
+		apl.addObserver(this);
+		
+
 		// Initialize initial variables
-		apl 				= al;
 		prefs 				= Preferences.userNodeForPackage(getClass());
 		cp 					= new ChatPanel(this);
 		ulp 				= new UserListPanel(this);
-		
+
 		// Layout main application Window
 		this.setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(800, 600));
@@ -80,9 +95,11 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		pack();
 		validate();
 		setVisible(true);
+		
+		GUI.getLogger().warning("GUI started.");
 
 	}
-	
+
 	private void buildBarMenu(){
 		// Create the menu bar
 		JMenuBar menuBar = new JMenuBar();
@@ -129,7 +146,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 				buildOptionMenu();
 			}
 		});
-		
+
 		menu.add(sendFileItem);
 		menu.add(optionItem);
 		menu.add(exitItem);
@@ -153,7 +170,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		this.add(ulp, BorderLayout.EAST);
 
 	}
-	
+
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received, returns null when file offer is refused
@@ -163,12 +180,12 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	 * @return path to save file to
 	 */
 	private String saveFile(String senderName, String fileName, int fileSize){
-		
+
 		FileOfferDialog fod = new FileOfferDialog(GUI.this, senderName, fileName, fileSize);
 		fod.setVisible(true);
-		
+
 		String rval = fod.getValue();
-		
+
 		return rval;
 	}
 
@@ -200,5 +217,31 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		}
 
 
+	}
+
+	/** Returns the Logger object for this GUI */
+	public static Logger getLogger() {
+		if (logger == null) {
+			logger = new Logger(LogMessage.Subsystem.APPLICATION);
+		}
+		return logger;
+	}
+
+	public static void main(String[] args) throws UnsupportedEncodingException {
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (Exception e) {
+			// If Nimbus is not available, fall back to cross-platform
+			try {
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			} catch (Exception ex) {
+
+			}
+		}
 	}
 }

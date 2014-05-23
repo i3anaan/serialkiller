@@ -6,10 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Observable;
 
 import javax.naming.SizeLimitExceededException;
 
+import common.Stack;
+import common.Startable;
 import log.LogMessage;
 import log.Logger;
 import network.tpp.TPPNetworkLayer;
@@ -24,13 +28,16 @@ import application.message.*;
  * @author msbruning
  *
  */
-public class ApplicationLayer extends Observable implements Runnable{
+public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 	/** NetworkLayer that this ApplicationLayer communicates with */
 	private TPPNetworkLayer networkLayer;
 
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
+	
+	/** The main thread of this class instance */
+	private Thread thread;
 
 	/** byte value of a chat flag */
 	private static final byte chatCommand = 'C';
@@ -44,8 +51,12 @@ public class ApplicationLayer extends Observable implements Runnable{
 	/** byte value of a fileTransfer flag */
 	private static final byte fileTransferCommand = 'S';
 
-	public ApplicationLayer(TPPNetworkLayer nl){
-		this.networkLayer = nl;
+
+	public ApplicationLayer(){
+		
+		// Construct and run thread
+        thread = new Thread(this);
+        thread.setName("APL " + this.hashCode());
 	}
 
 
@@ -240,12 +251,29 @@ public class ApplicationLayer extends Observable implements Runnable{
 		ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
 
 	}
+	
+	/**
+	 * Method to retrieve a listing of hosts from the networkLayer
+	 * for the application
+	 * @return collection of hosts
+	 */
+	public Collection<Byte> getHosts(){
+		return networkLayer.hosts();
+	}
 
 	/** Returns the Logger object for this ApplicationLayer */
 	public static Logger getLogger() {
 		if (logger == null) {
-			logger = new Logger(LogMessage.Subsystem.NETWORK);
+			logger = new Logger(LogMessage.Subsystem.APPLICATION);
 		}
 		return logger;
+	}
+
+
+	@Override
+	public Thread start(Stack stack) {
+		networkLayer = (TPPNetworkLayer) stack.networkLayer;
+		ApplicationLayer.getLogger().warning("ApplicationLayer started.");
+		return thread;
 	}
 }
