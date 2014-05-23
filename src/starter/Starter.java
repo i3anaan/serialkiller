@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -56,6 +57,9 @@ public class Starter extends JFrame implements ActionListener {
 	private JButton start;
 	private JButton quit;
 	
+	// Collection of threads managed by the starter.
+	private ArrayList<Thread> threads;
+	
 	/** Main entry point. This is the mainest main of all the mains. */
 	public static void main(String[] args) {
 		new Starter().run();
@@ -63,6 +67,7 @@ public class Starter extends JFrame implements ActionListener {
 	
 	public Starter() {
         log = new Logger(LogMessage.Subsystem.STARTER);
+        threads = new ArrayList<Thread>();
         
         // Build the combo's.
         swingCombo = combo(swingOptions);
@@ -120,7 +125,7 @@ public class Starter extends JFrame implements ActionListener {
 		log.info("Starter starting stack.");
 		log.debug("How many stacks would a stack starter start if a stack starter could start stacks?");
 		
-		Stack stack = new Stack();
+		Stack stack = new Stack(this);
 		
 		// Instantiate and start the stack, bottom-up.
 		try {
@@ -186,5 +191,21 @@ public class Starter extends JFrame implements ActionListener {
 		} else {
 			log.info("Received unknown action " + event);
 		}
+	}
+
+	public void restart() {
+		log.warning("Starter received a request to restart.");
+		
+		for (Thread t : threads) {
+			t.interrupt();
+			log.info("Interrupted and joining thread " + t);
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				log.warning("Interrupted ourselves while waiting for " + t);
+			}
+		}
+		
+		startStack();
 	}
 }
