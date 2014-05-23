@@ -1,6 +1,8 @@
 package application.UserInterface;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -13,11 +15,14 @@ extends 	Dialog
 	private		JPanel		panel1;
 	private		JPanel		panel2;
 	private		JPanel		panel3;
+	private		JTextField 	nameField;
+	private		GUI			gui;
 
 
 	public TabbedPreferencePane(GUI gui, String name, boolean modal)
 	{
 		super(gui, name, modal);
+		this.gui = gui;
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(final WindowEvent e) {
 				e.getWindow().dispose();
@@ -57,13 +62,20 @@ extends 	Dialog
 		label1.setBounds( 10, 15, 150, 20 );
 		panel1.add( label1 );
 
-		JTextField field = new JTextField();
-		field.setBounds( 10, 35, 150, 20 );
-		panel1.add( field );
+		nameField = new JTextField();
+		nameField.setBounds( 10, 35, 150, 25 );
+		panel1.add( nameField );
 
 		// Save preferences
 		JButton save = new JButton("Save");
 		save.setBounds( 10, 80, 150, 20 );
+		save.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gui.getPreferences().put("USERNAME", nameField.getText());
+				dispose();
+			}
+		});
 		panel1.add( save );
 	}
 

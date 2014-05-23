@@ -74,6 +74,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		cp 					= new ChatPanel(this);
 		ulp 				= new UserListPanel(this);
 
+		prefs.put("USERNAME", "LOL");
 		// Layout main application Window
 		this.setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(800, 600));
@@ -170,7 +171,22 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		this.add(ulp, BorderLayout.EAST);
 
 	}
+	
+	/**
+	 * getter for the UserListPanel containing a list of all the hosts
+	 * @return UserLisPanel
+	 */
+	public UserListPanel getUserList(){
+		return ulp;
+	}
 
+	/**
+	 * getter for the Preferences object belonging to this application
+	 * @return preferences
+	 */
+	public Preferences getPreferences(){
+		return prefs;
+	}
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received, returns null when file offer is refused
