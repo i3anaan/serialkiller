@@ -131,7 +131,7 @@ public class Starter extends JFrame implements ActionListener {
 			
 			// Application layer.
 			log.info("Starting application layer.");
-			ApplicationLayer al = new ApplicationLayer();
+			//ApplicationLayer al = new ApplicationLayer();
 			
 			// Disable all controls except the Quit button.
 			swingCombo.setEnabled(false);
@@ -150,7 +150,7 @@ public class Starter extends JFrame implements ActionListener {
 			// Start the Swing app, if requested.
 			if (swingCombo.getSelectedIndex() == 0) {
 				GUI gui = new GUI();
-				al.addObserver(gui);
+				//al.addObserver(gui);
 			}
 		} catch (InstantiationException e) {
 			// This should not happen.
