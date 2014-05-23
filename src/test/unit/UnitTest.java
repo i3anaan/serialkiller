@@ -32,7 +32,6 @@ public class UnitTest {
 	public void testTranslate(){
 		PureUnit rpu = pu.getRandomUnit();
 		HammingUnit rhu = hu.getRandomUnit();
-		System.out.println(pu.constructFromBitSet(rpu.serializeToBitSet())+"  ==  "+rpu);
 		assertEquals(rpu,pu.constructFromBitSet(rpu.serializeToBitSet()));
 		assertEquals(rhu,hu.constructFromBitSet(rhu.serializeToBitSet()));
 	}
