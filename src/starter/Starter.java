@@ -16,6 +16,7 @@ import javax.swing.border.EmptyBorder;
 import application.ApplicationLayer;
 
 import common.Stack;
+import common.Startable;
 
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
@@ -146,6 +147,11 @@ public class Starter extends JFrame implements ActionListener {
 			Class<?> appClass = applicationLayers[appCombo.getSelectedIndex()];
 			stack.applicationLayer = (ApplicationLayer)appClass.newInstance();
 			log.debug("Got application layer implementation.");
+			
+			((Startable)stack.physLayer).start(stack);
+			((Startable)stack.linkLayer).start(stack);
+			((Startable)stack.networkLayer).start(stack);
+			((Startable)stack.applicationLayer).start(stack);
 			
 			if (webCombo.getSelectedIndex() == 0) {
 				stack.webService = new WebService(8080);
