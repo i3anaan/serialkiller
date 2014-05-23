@@ -62,7 +62,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			int bitsReceived = 0;
 			int bitsSent = 0;
 			boolean retry = false; //TODO uitzoeken waar deze gebruikt had moeten worden.
-
+			log("Outgoing data: "+outgoingData);
 			try {
 				framesStartedSending++;
 				while (bitsReceived < FlaggedFrame.FLAGGED_FRAME_UNIT_COUNT * 9
@@ -109,7 +109,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 					}
 				}
 				framesCompleted++;
-				log("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
+				//log("Frame complete  ["+framesCompleted+"/"+framesStartedSending+"]");
 			} catch (InvalidByteTransitionException e) {
 				// TODO restart exchangeframe?
 				//e.printStackTrace();
@@ -324,7 +324,6 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 	public Frame readFrame() {
 		readFrame = true;
 		// log("readFrame():  "+Arrays.toString(lastReceivedFrame.getPayload().units));
-
 		return lastReceivedFrame.getPayload().getClone();
 	}
 

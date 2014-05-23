@@ -55,7 +55,8 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 				FlaggedFrame frameToSend = new FlaggedFrame(outbox);
 				down.sendFrame(frameToSend);
 				down.exchangeFrame();
-				for (Unit u : down.readFrame().getUnits()) {
+				Frame f = down.readFrame();
+				for (Unit u : f.getUnits()) {
 					try {
 						if (!u.isFiller()) {
 							inbox.put(u);

@@ -75,7 +75,7 @@ public class FrameTest {
 		arr0.add(new HammingUnit(bs2,JackTheRipper.HC));
 		arr1.add(new HammingUnit(bs2,JackTheRipper.HC));
 		for(int i=1;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			arr1.add(new HammingUnit(HammingUnit.FLAG_FILLER_DATA,JackTheRipper.HC));
+			arr1.add(new HammingUnit(HammingUnit.FLAG_FILLER_DATA,true,JackTheRipper.HC));
 		}
 		
 		FlaggedFrame ff0 = new FlaggedFrame(arr0);
@@ -100,5 +100,26 @@ public class FrameTest {
 		assertEquals(ff3.getDataBitSet(),ff4.getDataBitSet());
 		FlaggedFrame ff5 = new FlaggedFrame(ff2.getDataBitSet());
 		assertEquals(ff2.getDataBitSet(),ff5.getDataBitSet());	
+	}
+	
+	
+	@Test
+	public void testFrameConstructor(){
+		Unit[] units1 = new Unit[]{new HammingUnit(new BitSet2(new boolean[]{true,false,true,false}),JackTheRipper.HC)};
+		Unit[] units10 = new Unit[Frame.PAYLOAD_UNIT_COUNT];
+		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
+			units10[i] = JackTheRipper.UNIT_IN_USE.getFiller();
+		}
+		Frame frame0 =  new Frame();
+		Frame frame1 = new Frame(units1);
+		Frame frame10 = new Frame(units10);
+		Frame framebs = new Frame(new BitSet2(new boolean[30]));
+		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
+			assert(frame0.getUnit(i)!=null);
+			assert(frame1.getUnit(i)!=null);
+			assert(frame10.getUnit(i)!=null);
+			assert(framebs.getUnit(i)!=null);
+		}
+		
 	}
 }

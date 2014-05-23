@@ -2,6 +2,7 @@ package link.jack;
 
 import util.BitSet2;
 import util.ByteArrays;
+import util.Bytes;
 import util.encoding.HammingCode;
 
 public class HammingUnit implements Unit{
@@ -9,23 +10,29 @@ public class HammingUnit implements Unit{
 	public byte b;
 	private HammingCode hc;
 
-	public static final byte FLAG_FILLER_DATA = 1; //11111111
-	public static final byte FLAG_END_OF_FRAME = 2;
+	public static final byte FLAG_FILLER_DATA = -16; //11110000
+	public static final byte FLAG_END_OF_FRAME = -96;//10100000
 	public static final byte IS_SPECIAL_BIT = 1;
 	//1111000
+	
+	/**
+	 * Use this to Decode from 8 bits
+	 * @param data
+	 * @param hc
+	 */
 	public HammingUnit(BitSet2 data,HammingCode hc) {
 		this.hc = hc;
-		this.b =(byte) (hc.encode(data).toByteArray()[0]);
+		this.b = data.toByteArray()[0];
 	}
 	
 	//4 MSB
-	public HammingUnit(byte data,HammingCode hc) {
+	public HammingUnit(byte data, boolean special, HammingCode hc) {
 		BitSet2 dataBS = new BitSet2(hc.dataBitCount);
 		for(int i =0;i<hc.dataBitCount;i++){
-			dataBS.set(dataBS.length()-i-1,data>>i==1);
+			dataBS.set(i,((data>>>(7-i))&1)==1);
 		}
 		this.hc = hc;
-		this.b =(byte) (hc.encode(dataBS).toByteArray()[0] | 1);
+		this.b =(byte) (hc.encode(dataBS).toByteArray()[0] | (special ? 1 : 0));
 	}
 
 	public HammingUnit(BitSet2 data, boolean special, HammingCode hc) {
@@ -58,11 +65,11 @@ public class HammingUnit implements Unit{
 	
 	
 	public String toString(){
-		return (isSpecial() ? "F" : "D") +getEncodedPayloadAsBitSet2();
+		return (isSpecial() ? "F" : "D") +getDecodedPayloadAsBitSet2();
 	}
 	
-	public PureUnit getClone(){
-		return new PureUnit(getDecodedPayload(),isSpecial());
+	public Unit getClone(){
+		return new HammingUnit(getDecodedPayload(),this.isSpecial(),hc);
 	}
 	
 	public boolean equals(Object obj){
@@ -101,5 +108,10 @@ public class HammingUnit implements Unit{
 	
 	public byte getByte(){
 		return b;
+	}
+
+	@Override
+	public Unit getFiller() {
+		return new HammingUnit(HammingUnit.FLAG_FILLER_DATA,true ,JackTheRipper.HC);
 	}
 }

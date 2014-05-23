@@ -1,6 +1,8 @@
 package test.unit;
 
 import static org.junit.Assert.*;
+import link.jack.HammingUnit;
+import link.jack.JackTheRipper;
 import link.jack.PureUnit;
 
 import org.junit.Test;
@@ -41,6 +43,16 @@ public class UnitTest {
 		u2.b = (byte) 7;
 		assertNotEquals(u, u2);
 		assertEquals(u,new PureUnit((byte)3,true));		
+	}
+	
+	@Test
+	public void testHammingClone(){
+		HammingUnit u = new HammingUnit(new BitSet2(new boolean[]{true,false,true,false}),JackTheRipper.HC);
+		HammingUnit u2 = (HammingUnit) u.getClone();
+		assertEquals(u, u2);
+		u2.b = (byte) 7;
+		assertNotEquals(u, u2);
+		assertEquals(u,new HammingUnit(new BitSet2(new boolean[]{true,false,true,false}),JackTheRipper.HC));		
 	}
 
 }

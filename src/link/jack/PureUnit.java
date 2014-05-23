@@ -86,4 +86,9 @@ public class PureUnit implements Unit{
 	public byte getByte(){
 		return b;
 	}
+
+	@Override
+	public Unit getFiller() {
+		return new PureUnit(PureUnit.FLAG_FILLER_DATA);
+	}
 }

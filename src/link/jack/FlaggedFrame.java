@@ -74,8 +74,8 @@ public class FlaggedFrame extends Frame {
 				}
 			}
 		}else if(JackTheRipper.UNIT_IN_USE instanceof HammingUnit){
-			for (int i = 0; i < bits.length()-3; i = i + 4) {
-				HammingUnit unit = new HammingUnit(bits.get(i, i+4),JackTheRipper.HC);
+			for (int i = 0; i < bits.length()-7; i = i + 8) {
+				HammingUnit unit = new HammingUnit(bits.get(i, i+8),JackTheRipper.HC);
 				if (units.size() < Frame.PAYLOAD_UNIT_COUNT) {
 					units.add(unit);
 				} else {
@@ -96,7 +96,7 @@ public class FlaggedFrame extends Frame {
 		BitSet2 result = new BitSet2();
 		for (Unit u : payload.units) { // Should make this better;
 			// System.out.println(u.asBitSet());
-			result = BitSet2.concatenate(result, u.dataAsBitSet());
+			result = BitSet2.concatenate(result, u.fullAsBitSet());
 		}
 		return result;
 	}

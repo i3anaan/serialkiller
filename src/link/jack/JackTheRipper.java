@@ -1,10 +1,12 @@
 package link.jack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import link.FrameLinkLayer;
 import util.BitSet2;
 import util.ByteArrays;
+import util.Bytes;
 import util.encoding.HammingCode;
 
 public class JackTheRipper extends FrameLinkLayer{
@@ -20,22 +22,25 @@ public class JackTheRipper extends FrameLinkLayer{
 	
 	@Override
 	public void sendFrame(byte[] data) {
+		System.out.println("Data to send: "+Bytes.format(data[0]));
 		BitSet2 dataAsBitSet = ByteArrays.toBitSet(data);
 		for(int i=0;i<data.length*8;i=i+4){
-			down.sendUnit(new HammingUnit(dataAsBitSet.get(i, i+3),HC));
+			down.sendUnit(new HammingUnit(dataAsBitSet.get(i, i+3),false,HC));
+			System.out.println("Sent unit: "+new HammingUnit(dataAsBitSet.get(i, i+3),false ,HC));
 		}
-		down.sendUnit(new HammingUnit(HammingUnit.FLAG_END_OF_FRAME,HC));
+		System.out.println("Sending End Of Frames");
+		down.sendUnit(new HammingUnit(HammingUnit.FLAG_END_OF_FRAME,true,HC));
+		down.sendUnit(new HammingUnit(HammingUnit.FLAG_END_OF_FRAME,true,HC));
 	}
 
 	@Override
 	public byte[] readFrame() {
 		ArrayList<Byte> dataFrame = new ArrayList<Byte>();
 		boolean frameComplete = false;
-		while(frameComplete){
+		while(!frameComplete){
 			HammingUnit u1 = (HammingUnit) down.readUnit();
 			HammingUnit u2 = (HammingUnit) down.readUnit();
 			BitSet2 fullByte = BitSet2.concatenate(u2.getDecodedPayloadAsBitSet2(),u1.getDecodedPayloadAsBitSet2());
-			
 			if(!u1.isSpecial() != !u1.isSpecial()){//Error
 				//TODO ERROR, out of sync.
 				System.out.println("ERROR!");
@@ -43,6 +48,7 @@ public class JackTheRipper extends FrameLinkLayer{
 				dataFrame.add(fullByte.toByteArray()[0]);
 			}else if(u1.getDecodedPayload()==u2.getDecodedPayload() && u1.isEndOfFrame()){ //flag
 				frameComplete = true;
+				System.out.println("End of frame!!");
 			}
 		}
 		return ByteArrays.fromList(dataFrame);
