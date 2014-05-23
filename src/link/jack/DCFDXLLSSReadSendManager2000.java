@@ -1,4 +1,5 @@
 package link.jack;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -52,10 +53,11 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 		down.readFrame();
 		while (true) {
 			if (keepRunning) {
-				FlaggedFrame frameToSend = new FlaggedFrame(outbox);
+				Frame frameToSend = new Frame(outbox);
 				down.sendFrame(frameToSend);
 				down.exchangeFrame();
 				Frame f = down.readFrame();
+				//System.out.println(Arrays.toString(f.getUnits()));
 				for (Unit u : f.getUnits()) {
 					try {
 						if (!u.isFiller()) {

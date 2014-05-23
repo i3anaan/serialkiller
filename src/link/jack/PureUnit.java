@@ -1,80 +1,29 @@
 package link.jack;
 
-import java.util.Arrays;
+import java.util.Random;
+
 import util.BitSet2;
-import util.ByteArrays;
 import util.Bytes;
 
-public class PureUnit implements Unit{
+public class PureUnit extends Unit{
 
 	public boolean isSpecial;
 	public byte b;
 
-	public static final int FLAG_FILLER_DATA = -1; //11111111
-	public static final int FLAG_END_OF_FRAME = -2;
+	public static final byte FLAG_FILLER_DATA = -1; //11111111
+	public static final byte FLAG_END_OF_FRAME = -2;
+	public static final byte FLAG_DUMMY = -3;
 	public static final byte IS_SPECIAL_BIT = 1;
 
-	public PureUnit(byte b) {
-		this.b = b;
-		isSpecial = false;
-	}
-
 	public PureUnit(byte b, boolean special) {
-		//System.out.println(Thread.currentThread().getId()+"  New Unit: "+Bytes.format(b)+"  Special: "+special);
 		this.b = b;
 		this.isSpecial = special;
 	}
-
-	public PureUnit(int type) {
-		this.isSpecial = true;
-		if (type == FLAG_FILLER_DATA) {
-			this.b = FLAG_FILLER_DATA;
-		}else if(type==FLAG_END_OF_FRAME){
-			this.b = FLAG_END_OF_FRAME;
-		}
-	}
-
-	public BitSet2 fullAsBitSet() {
-		byte[] arr = new byte[] { b };
-		BitSet2 specialBit = new BitSet2();
-		specialBit.set(0,isSpecial);
-		return BitSet2.concatenate(BitSet2.valueOf(arr), specialBit);
-	}
-	
-	public BitSet2 dataAsBitSet(){
-		if(!isSpecial){
-			byte[] arr = new byte[] { b };
-			return BitSet2.valueOf(arr);
-		}else{
-			return new BitSet2();
-		}
-	}
-
-	public boolean isDataOrFill() {
-		return !isSpecial || b==FLAG_FILLER_DATA;
-	}
-	
 	public boolean isFiller(){
 		return isSpecial && b==FLAG_FILLER_DATA;
 	}
 	
 	
-	public String toString(){
-		return (isSpecial ? "F" : "D") +Bytes.format(b);
-	}
-	
-	public PureUnit getClone(){
-		return new PureUnit(b,isSpecial);
-	}
-	
-	public boolean equals(Object obj){
-		if(obj==null){
-			return false;
-		}else{
-			return (obj instanceof PureUnit) && ((PureUnit) obj).b==this.b && ((PureUnit) obj).isSpecial == this.isSpecial;
-		}
-	}
-
 	public boolean isEndOfFrame() {
 		return isSpecial&&b==FLAG_END_OF_FRAME;
 	}
@@ -83,12 +32,62 @@ public class PureUnit implements Unit{
 	public boolean isSpecial() {
 		return isSpecial;
 	}
-	public byte getByte(){
-		return b;
+
+	@Override
+	public Unit getFlag(byte flag) {
+		return new PureUnit(flag,true);
 	}
 
 	@Override
+	public BitSet2 serializeToBitSet() {
+		byte[] arr = new byte[] { b };
+		BitSet2 specialBit = new BitSet2();
+		specialBit.set(0,isSpecial);
+		return BitSet2.concatenate(BitSet2.valueOf(arr), specialBit);
+		//DDDDDDDDDS
+	}
+
+	@Override
+	public Unit constructFromBitSet(BitSet2 bs) {
+		if(bs.length()!=getSerializedBitCount()){
+			return null;
+		}else{
+			return new PureUnit(bs.toByteArray()[0],bs.get(8));
+		}
+	}
+
+	@Override
+	public int getSerializedBitCount() {
+		return 9;
+	}
+	
+	@Override
+	public PureUnit getRandomUnit(){
+		byte[] b = new byte[1];
+		JackTheRipper.R.nextBytes(b);
+		return new PureUnit(b[0],JackTheRipper.R.nextBoolean());
+	}
+	
+	public String toString(){
+		return ("P"+(isSpecial ? "F" : "D")) +Bytes.format(b);
+	}
+	public boolean equals(Object obj){
+		if(obj==null){
+			return false;
+		}else{
+			return (obj instanceof PureUnit) && ((PureUnit) obj).b==this.b && ((PureUnit) obj).isSpecial == this.isSpecial;
+		}
+	}
+
+	public static PureUnit getDummy(){
+		return new PureUnit(FLAG_DUMMY,true);
+	}
+	@Override
 	public Unit getFiller() {
-		return new PureUnit(PureUnit.FLAG_FILLER_DATA);
+		return getFlag(FLAG_FILLER_DATA);
+	}
+	@Override
+	public Unit getEndOfFrame() {
+		return getFlag(FLAG_END_OF_FRAME);
 	}
 }

@@ -2,57 +2,47 @@ package test.unit;
 
 import static org.junit.Assert.*;
 import link.jack.HammingUnit;
-import link.jack.JackTheRipper;
 import link.jack.PureUnit;
 
 import org.junit.Test;
 
-import util.BitSet2;
-import util.Bytes;
-
 public class UnitTest {
 
+	PureUnit pu = PureUnit.getDummy();
+	HammingUnit hu = HammingUnit.getDummy();
+	
 	@Test
-	public void test() {
-		byte b = -128;
-		//System.out.println(Bytes.format((byte)-128));
-		assertEquals("10000000",Bytes.format((byte)-128));
-		PureUnit unit0 = new PureUnit(b);
-		PureUnit unit1 = new PureUnit(b,true);
-		PureUnit unit2 = new PureUnit(b,false);
-		assertEquals(Bytes.format(b),Bytes.format(unit0.b));
-		assertEquals(Bytes.format(b),Bytes.format(unit1.b));
-		assertEquals(Bytes.format(b),Bytes.format(unit2.b));
-		assertEquals("D"+Bytes.format(b),unit0.toString());
-		assertEquals("F"+Bytes.format(b),unit1.toString());
-		assertEquals("D"+Bytes.format(b),unit2.toString());
+	public void testFlags() {
 		
-		BitSet2 bs = unit0.dataAsBitSet();
-		bs.set(8,false);
-		assertEquals(Bytes.format(b),Bytes.format(Bytes.fromBitSet(bs, 0)));
-		PureUnit unit3 = new PureUnit(Bytes.fromBitSet(bs, 0),bs.get(8));
-		assertEquals(Bytes.format(b),Bytes.format(unit3.b));
-		assertEquals("D"+Bytes.format(b),unit3.toString());
+		assertTrue (hu.getFlag(HammingUnit.FLAG_FILLER_DATA).isSpecial());
+		assertTrue (hu.getFlag(HammingUnit.FLAG_FILLER_DATA).isFiller());
+		assertTrue (hu.getFlag(HammingUnit.FLAG_END_OF_FRAME).isEndOfFrame());
+		assertTrue (!hu.getFlag(HammingUnit.FLAG_END_OF_FRAME).isFiller());
+		assertTrue (hu.getFlag(HammingUnit.FLAG_DUMMY).isSpecial());
+		assertTrue (!hu.getFlag(HammingUnit.FLAG_DUMMY).isFiller());
+		assertTrue (pu.getFlag(PureUnit.FLAG_FILLER_DATA).isSpecial());
+		assertTrue (pu.getFlag(PureUnit.FLAG_FILLER_DATA).isFiller());
+		assertTrue (pu.getFlag(PureUnit.FLAG_END_OF_FRAME).isEndOfFrame());
+		assertTrue (!pu.getFlag(PureUnit.FLAG_END_OF_FRAME).isFiller());
+		assertTrue (pu.getFlag(PureUnit.FLAG_DUMMY).isSpecial());
+		assertTrue (!pu.getFlag(PureUnit.FLAG_DUMMY).isFiller());
 	}
 	
 	@Test
-	public void testClone(){
-		PureUnit u = new PureUnit((byte)3,true);
-		PureUnit u2 = u.getClone();
-		assertEquals(u, u2);
-		u2.b = (byte) 7;
-		assertNotEquals(u, u2);
-		assertEquals(u,new PureUnit((byte)3,true));		
+	public void testTranslate(){
+		PureUnit rpu = pu.getRandomUnit();
+		HammingUnit rhu = hu.getRandomUnit();
+		System.out.println(pu.constructFromBitSet(rpu.serializeToBitSet())+"  ==  "+rpu);
+		assertEquals(rpu,pu.constructFromBitSet(rpu.serializeToBitSet()));
+		assertEquals(rhu,hu.constructFromBitSet(rhu.serializeToBitSet()));
 	}
 	
+	
 	@Test
-	public void testHammingClone(){
-		HammingUnit u = new HammingUnit(new BitSet2(new boolean[]{true,false,true,false}),JackTheRipper.HC);
-		HammingUnit u2 = (HammingUnit) u.getClone();
-		assertEquals(u, u2);
-		u2.b = (byte) 7;
-		assertNotEquals(u, u2);
-		assertEquals(u,new HammingUnit(new BitSet2(new boolean[]{true,false,true,false}),JackTheRipper.HC));		
+	public void testMisc(){
+		assertTrue(pu.getSerializedBitCount()==9);
+		assertTrue(pu.getSerializedBitCount()==pu.serializeToBitSet().length());
+		assertTrue(hu.getSerializedBitCount()==8);
+		assertTrue(hu.getSerializedBitCount()==hu.serializeToBitSet().length());
 	}
-
 }

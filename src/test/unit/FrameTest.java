@@ -2,124 +2,60 @@ package test.unit;
 
 import static org.junit.Assert.*;
 
-import java.util.BitSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import link.jack.FlaggedFrame;
 import link.jack.Frame;
 import link.jack.HammingUnit;
 import link.jack.JackTheRipper;
-import link.jack.PureUnit;
 import link.jack.Unit;
 
 import org.junit.Test;
 
 import util.BitSet2;
-import util.Bytes;
 
 public class FrameTest {
-
 	
 	@Test
 	public void testConstructors(){
-		Frame f = new Frame();
-		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			assert(f.getUnit(i).isFiller());
-		}
-		assertNull(f.getUnit(Frame.PAYLOAD_UNIT_COUNT+1));
-		
-		BitSet2 bs0 = new BitSet2();
-		BitSet2 bs1 = new BitSet2();
-		BitSet2 bs2 = new BitSet2();
-		
-		bs0.set(0,79,true);
-		bs1.set(0,80,true);
-		bs2.set(0,12,true);
-		boolean exception = false;
-		
-		Frame f0 = new Frame(bs0);
-		Frame f1 = new Frame(bs1);
-		Frame f2 = new Frame(bs2);
-		
-		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			assert(f0.getUnit(i).getByte()==(byte)-1);
-		}
-		assert(f2.getUnit(0).getByte()==(byte)-1);
-		for(int i=2;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			assert(f2.getUnit(i).isFiller());
-		}		
-	}
-	
-	@Test
-	public void testFlaggedFrameConstructorHammingUnit(){
-		BitSet2 bs0 = new BitSet2(new boolean[]{true,true,false,true});
-		BitSet2 bs1 = new BitSet2(new boolean[]{false,true,false,false});
-		BitSet2 bs2 = new BitSet2(new boolean[]{true,true,true,true});
-		
-		ArrayBlockingQueue<Unit> arr0 = new ArrayBlockingQueue<Unit>(Frame.PAYLOAD_UNIT_COUNT);
-		ArrayBlockingQueue<Unit> arr1 = new ArrayBlockingQueue<Unit>(Frame.PAYLOAD_UNIT_COUNT);
-		ArrayBlockingQueue<Unit> arr2 = new ArrayBlockingQueue<Unit>(Frame.PAYLOAD_UNIT_COUNT);
-		ArrayBlockingQueue<Unit> arr3 = new ArrayBlockingQueue<Unit>(Frame.PAYLOAD_UNIT_COUNT);
-		arr2.add(new HammingUnit(bs0,JackTheRipper.HC));
-		arr3.add(new HammingUnit(bs0,JackTheRipper.HC));
-		arr3.add(new HammingUnit(bs0,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs0,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs1,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs2,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs0,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs1,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs2,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs0,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs1,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs2,JackTheRipper.HC));
-		arr0.add(new HammingUnit(bs2,JackTheRipper.HC));
-		arr1.add(new HammingUnit(bs2,JackTheRipper.HC));
-		for(int i=1;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			arr1.add(new HammingUnit(HammingUnit.FLAG_FILLER_DATA,true,JackTheRipper.HC));
+		ArrayBlockingQueue<Unit> arr = new ArrayBlockingQueue<Unit>(1024);
+		arr.add(JackTheRipper.UNIT_IN_USE.getRandomUnit());
+		Frame f = new Frame(arr);
+		for(int i=0;i<Frame.FRAME_UNIT_COUNT;i++){
+			assertTrue(f.getUnits()[i]!=null);
 		}
 		
-		FlaggedFrame ff0 = new FlaggedFrame(arr0);
-		FlaggedFrame ff2 = new FlaggedFrame(arr2);
-		FlaggedFrame ff3 = new FlaggedFrame(arr3);
-		
-		assert(ff2.getPayload().getUnit(0).getByte()==new HammingUnit(bs0,JackTheRipper.HC).getByte());
-		for(int i=0;i<10;i=i+3){
-			assert(ff0.getPayload().getUnit(i).getByte() == new HammingUnit(bs0,JackTheRipper.HC).getByte());
-			assert(ff0.getPayload().getUnit(i+1).getByte() == new HammingUnit(bs1,JackTheRipper.HC).getByte());
-			assert(ff0.getPayload().getUnit(i+2).getByte() == new HammingUnit(bs2,JackTheRipper.HC).getByte());
-			assert(ff0.getPayload().getUnit(i).getByte() != (byte)-1);
-			assert(ff0.getPayload().getUnit(i+1).getByte() != (byte)-1);
-			assert(ff0.getPayload().getUnit(i+2).getByte() != (byte)-1);
+		arr = new ArrayBlockingQueue<Unit>(1024);
+		ArrayList<Unit> arr2 = new ArrayList<Unit>();
+		for(int i=0;i<Frame.FRAME_UNIT_COUNT;i++){
+			Unit u = JackTheRipper.UNIT_IN_USE.getRandomUnit();
+			arr2.add(u);
+			arr.add(u);
 		}
-		for(int i=1;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			assert(ff0.getPayload().getUnit(i).isFiller());
+		f = new Frame(arr);
+		for(int i=0;i<Frame.FRAME_UNIT_COUNT;i++){
+			assertTrue(f.getUnits()[i]==arr2.get(i));
+			assertTrue(f.getUnits()[i]!=null);
 		}
 		
-		assertNotEquals(ff2.getDataBitSet(), ff3.getDataBitSet());
-		FlaggedFrame ff4 = new FlaggedFrame(ff3.getDataBitSet());
-		assertEquals(ff3.getDataBitSet(),ff4.getDataBitSet());
-		FlaggedFrame ff5 = new FlaggedFrame(ff2.getDataBitSet());
-		assertEquals(ff2.getDataBitSet(),ff5.getDataBitSet());	
-	}
-	
-	
-	@Test
-	public void testFrameConstructor(){
-		Unit[] units1 = new Unit[]{new HammingUnit(new BitSet2(new boolean[]{true,false,true,false}),JackTheRipper.HC)};
-		Unit[] units10 = new Unit[Frame.PAYLOAD_UNIT_COUNT];
-		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			units10[i] = JackTheRipper.UNIT_IN_USE.getFiller();
+		
+		BitSet2 bs = new BitSet2();
+		for(Unit u : arr2){
+			bs = BitSet2.concatenate(bs, u.serializeToBitSet());
 		}
-		Frame frame0 =  new Frame();
-		Frame frame1 = new Frame(units1);
-		Frame frame10 = new Frame(units10);
-		Frame framebs = new Frame(new BitSet2(new boolean[30]));
-		for(int i=0;i<Frame.PAYLOAD_UNIT_COUNT;i++){
-			assert(frame0.getUnit(i)!=null);
-			assert(frame1.getUnit(i)!=null);
-			assert(frame10.getUnit(i)!=null);
-			assert(framebs.getUnit(i)!=null);
+		Frame f2 = new Frame(bs);
+		for(int i = 0;i<Frame.FRAME_UNIT_COUNT;i++){
+			assertTrue(f2.getUnits()[i]!=null);
+			assertEquals(arr2.get(i),f2.getUnits()[i]);
 		}
 		
+		
+		bs = new BitSet2();
+		bs= BitSet2.concatenate(bs, HammingUnit.getDummy().serializeToBitSet());
+		f2 = new Frame(bs);
+		for(int i = 0;i<Frame.FRAME_UNIT_COUNT;i++){
+			assertTrue(f2.getUnits()[i]!=null);
+		}
 	}
 }

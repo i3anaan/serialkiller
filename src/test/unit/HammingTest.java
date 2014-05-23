@@ -22,10 +22,9 @@ import util.encoding.HammingCode;
  */
 public class HammingTest {
 
-	//@Test
+	@Test
 	public void testCorrect() {
 		for (int dataBitCount = 3; dataBitCount < 7; dataBitCount++) {
-			System.out.println("Testing for data bit amount: "+dataBitCount);
 			HammingCode hc = new HammingCode(dataBitCount);
 			for (BitSet2 data : buildBitSets(dataBitCount)) {
 				BitSet2 encoded = hc.encode(data);
@@ -40,7 +39,7 @@ public class HammingTest {
 		}
 	}
 
-	//@Test
+	@Test
 	public void testDetectSingleError() {
 		for (int dataBitCount = 3; dataBitCount < 17; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);
@@ -58,7 +57,7 @@ public class HammingTest {
 		}
 	}
 	
-	//@Test
+	@Test
 	public void testDetectDoubleError() {
 		for (int dataBitCount = 3; dataBitCount < 17; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);

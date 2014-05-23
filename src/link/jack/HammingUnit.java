@@ -1,75 +1,81 @@
 package link.jack;
 
 import util.BitSet2;
-import util.ByteArrays;
 import util.Bytes;
 import util.encoding.HammingCode;
 
-public class HammingUnit implements Unit{
+public class HammingUnit extends Unit{
 
 	public byte b;
 	private HammingCode hc;
-
+	public static final byte FLAG_DUMMY = -112; //10010000
 	public static final byte FLAG_FILLER_DATA = -16; //11110000
 	public static final byte FLAG_END_OF_FRAME = -96;//10100000
 	public static final byte IS_SPECIAL_BIT = 1;
-	//1111000
-	
-	/**
-	 * Use this to Decode from 8 bits
-	 * @param data
-	 * @param hc
-	 */
-	public HammingUnit(BitSet2 data,HammingCode hc) {
-		this.hc = hc;
-		this.b = data.toByteArray()[0];
-	}
-	
-	//4 MSB
-	public HammingUnit(byte data, boolean special, HammingCode hc) {
-		BitSet2 dataBS = new BitSet2(hc.dataBitCount);
-		for(int i =0;i<hc.dataBitCount;i++){
-			dataBS.set(i,((data>>>(7-i))&1)==1);
-		}
-		this.hc = hc;
-		this.b =(byte) (hc.encode(dataBS).toByteArray()[0] | (special ? 1 : 0));
-	}
 
 	public HammingUnit(BitSet2 data, boolean special, HammingCode hc) {
 		this.hc = hc;
-		this.b =(byte) (hc.encode(data).toByteArray()[0] | (special ? 1 : 0));
+		this.b =(byte) ((hc.encode(data).toByteArray()[0] & -2) | (special ? 1 : 0));
 	}
 
-	public BitSet2 fullAsBitSet() {
-		byte[] arr = new byte[] { b };
-		BitSet2 specialBit = new BitSet2();
-		specialBit.set(0,isSpecial());
-		return BitSet2.concatenate(BitSet2.valueOf(arr), specialBit);
-	}
-	
-	public BitSet2 dataAsBitSet(){
-		if(!isSpecial()){
-			return hc.decode(getEncodedPayloadAsBitSet2());
-		}else{
-			return new BitSet2();
-		}
-	}
-
-	public boolean isDataOrFill() {
-		return !isSpecial() || getDecodedPayload()==FLAG_FILLER_DATA;
-	}
-	
 	public boolean isFiller(){
-		return isSpecial() && getDecodedPayload()==FLAG_FILLER_DATA;
+		return isSpecial() && getDecodedPayloadAsByte()==FLAG_FILLER_DATA;
+	}
+		
+	public boolean isSpecial(){
+		return (b&1)==1;
 	}
 	
+	@Override
+	public boolean isEndOfFrame() {
+		return isSpecial() && getDecodedPayloadAsByte()==FLAG_END_OF_FRAME;
+	}
+	
+	public byte getEncodedPayloadAsByte(){
+		return (byte)(b&-2);
+	}
+	
+	public BitSet2 getEncodedPayloadAsBitSet(){
+		BitSet2 bs2 = new BitSet2(7);
+		for(int i=0;i<7;i++){
+			bs2.set(bs2.length()-i-1,((b>>(i+1))&1)==1);
+		}
+		return bs2;
+	}
+	public byte getDecodedPayloadAsByte(){
+		return hc.decode(getEncodedPayloadAsBitSet()).toByteArray()[0];
+	}
+	public BitSet2 getDecodedPayloadAsBitSet(){
+		return hc.decode(getEncodedPayloadAsBitSet());
+	}
+	
+	public byte getByte(){
+		return b;
+	}
+
+	@Override
+	public Unit getFlag(byte flag) {
+		return new HammingUnit(new BitSet2(flag),true ,JackTheRipper.HC);
+	}
+
+	@Override
+	public BitSet2 serializeToBitSet() {
+		return BitSet2.concatenate(getEncodedPayloadAsBitSet(), new BitSet2(new boolean[]{isSpecial()}));
+	}
+
+	@Override
+	public Unit constructFromBitSet(BitSet2 bs) {
+		//bs has length 8, should work with decode() (should ignore extra bits);
+		return new HammingUnit(hc.decode(hc.getCorrected(bs)),bs.get(7),hc);
+	}
+
+	@Override
+	public int getSerializedBitCount() {
+		return 8;
+	}
 	
 	public String toString(){
-		return (isSpecial() ? "F" : "D") +getDecodedPayloadAsBitSet2();
-	}
-	
-	public Unit getClone(){
-		return new HammingUnit(getDecodedPayload(),this.isSpecial(),hc);
+		return ("H"+(isSpecial() ? "F" : "D")) +getDecodedPayloadAsBitSet();
 	}
 	
 	public boolean equals(Object obj){
@@ -80,38 +86,23 @@ public class HammingUnit implements Unit{
 		}
 	}
 
-	public boolean isEndOfFrame() {
-		return isSpecial()&&getDecodedPayload()==FLAG_END_OF_FRAME;
+	@Override
+	public HammingUnit getRandomUnit() {
+		return new HammingUnit(new BitSet2(new boolean[]{JackTheRipper.R.nextBoolean(),JackTheRipper.R.nextBoolean(),JackTheRipper.R.nextBoolean(),JackTheRipper.R.nextBoolean()}),JackTheRipper.R.nextBoolean(),hc);
 	}
+
 	
-	public boolean isSpecial(){
-		return (b&1)==1;
-	}
-	
-	public byte getEncodedPayload(){
-		return (byte)(b&-2);
-	}
-	
-	public BitSet2 getEncodedPayloadAsBitSet2(){
-		BitSet2 bs2 = new BitSet2(7);
-		for(int i=0;i<7;i++){
-			bs2.set(bs2.length()-i-1,((b>>(i+1))&1)==1);
-		}
-		return bs2;
-	}
-	public byte getDecodedPayload(){
-		return hc.decode(getEncodedPayloadAsBitSet2()).toByteArray()[0];
-	}
-	public BitSet2 getDecodedPayloadAsBitSet2(){
-		return hc.decode(getEncodedPayloadAsBitSet2());
-	}
-	
-	public byte getByte(){
-		return b;
+	public static HammingUnit getDummy(){
+		return new HammingUnit(new BitSet2(FLAG_DUMMY),true ,JackTheRipper.HC);
 	}
 
 	@Override
 	public Unit getFiller() {
-		return new HammingUnit(HammingUnit.FLAG_FILLER_DATA,true ,JackTheRipper.HC);
+		return getFlag(FLAG_FILLER_DATA);
 	}
+	@Override
+	public Unit getEndOfFrame() {
+		return getFlag(FLAG_END_OF_FRAME);
+	}
+	
 }
