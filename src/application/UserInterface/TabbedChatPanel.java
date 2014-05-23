@@ -59,9 +59,12 @@ public class TabbedChatPanel extends JPanel{
 	 */
 	public void addChatPanel(String hostName, byte address){
 		
-		JPanel newPanel = new ChatPanel(gui, address);
-		tabIndex.put(hostName, newPanel);
-		tabbedPane.addTab(hostName, newPanel);
+		if(tabIndex.get(hostName) == null){
+			JPanel newPanel = new ChatPanel(gui, address);
+			tabIndex.put(hostName, newPanel);
+			tabbedPane.addTab(hostName, newPanel);
+		}
+		
 		
 	}
 	
@@ -71,10 +74,11 @@ public class TabbedChatPanel extends JPanel{
 	 */
 	public void removeChatPanel(String hostName){
 		
-		ChatPanel removePanel = (ChatPanel) tabIndex.get(hostName);
-		tabIndex.remove(removePanel);
-		tabbedPane.remove(removePanel);
-		
+		if(tabIndex.get(hostName) != null){
+			ChatPanel removePanel = (ChatPanel) tabIndex.get(hostName);
+			tabIndex.remove(removePanel);
+			tabbedPane.remove(removePanel);
+		}
 	}
 	
 	/**
