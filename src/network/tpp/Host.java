@@ -1,6 +1,6 @@
-package network;
+package network.tpp;
 
-import network.handlers.Handler;
+import network.tpp.handlers.Handler;
 
 /**
  * Represents a host in the network.
@@ -106,6 +106,10 @@ public class Host {
     }
 
     public String toString() {
-        return String.format("Host<%d>", address);
+        if (ip == null || ip.equals("")) {
+            return String.format("Host<Addr: %d>", address);
+        } else {
+            return String.format("Host<Addr: %d; IP: %s>", address, ip);
+        }
     }
 }

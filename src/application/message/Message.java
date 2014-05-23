@@ -13,5 +13,5 @@ public interface Message {
 	 * Returns the sender of this message
 	 * @return byte adress;
 	 */
-	public byte getAdress();
+	public byte getAddress();
 }

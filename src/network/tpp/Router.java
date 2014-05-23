@@ -1,4 +1,4 @@
-package network;
+package network.tpp;
 
 import java.util.*;
 
@@ -6,10 +6,12 @@ import java.util.*;
  * Router class that keeps track of the hosts in the network and their routes.
  */
 public class Router {
-    Map<Byte, Host> hosts;
-    Map<Host, Byte> routesCache;
+    private Map<Byte, Host> hosts;
+    private Map<Host, Byte> routesCache;
+    private byte self;
+    private byte sibling;
 
-    protected Router() {
+    public Router() {
         hosts = new HashMap<Byte, Host>();
         routesCache = new HashMap<Host, Byte>();
     }
@@ -30,11 +32,19 @@ public class Router {
         return hosts.values();
     }
 
+    public byte self() {
+        return self;
+    }
+
+    public byte sibling() {
+        return sibling;
+    }
+
     /**
      * Gets the handler that can process the given packet. Returns null if the
      * packet is unroutable.
      * @param p The packet.
-     * @return The handler the packet should be send to or null if the packet is
+     * @return The host the packet should be send to or null if the packet is
      *         unroutable.
      */
     public Host route(Packet p) {
@@ -42,8 +52,10 @@ public class Router {
 
         if (destination != null) {
             while (destination.routeThrough() != null) {
-                return destination.routeThrough();
+                destination = destination.routeThrough();
             }
+
+            return destination;
         }
 
         return null;
@@ -58,7 +70,12 @@ public class Router {
     public void parse(RoutingTable t) {
         Set<Byte> addrSet = new HashSet<Byte>();
         addrSet.addAll(t.getRoutes().keySet());
+        addrSet.addAll(t.getRoutes().values());
         addrSet.addAll(t.getTunnels().keySet());
+
+        // Set addresses
+        self = t.getSelf();
+        sibling = t.getSibling();
 
         // Fetch all hosts
         for (Byte addr : addrSet) {

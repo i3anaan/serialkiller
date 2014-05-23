@@ -1,8 +1,8 @@
-package network.handlers;
+package network.tpp.handlers;
 
 import link.FrameLinkLayer;
-import network.NetworkLayer;
-import network.Packet;
+import network.tpp.TPPNetworkLayer;
+import network.tpp.Packet;
 
 import java.util.Arrays;
 
@@ -10,9 +10,7 @@ import java.util.Arrays;
  * Handler for data from the link layer.
  */
 public class LinkLayerInHandler extends LinkLayerHandler {
-    private String name = "LinkHandler<In>";
-
-    public LinkLayerInHandler(NetworkLayer parent, FrameLinkLayer link) {
+    public LinkLayerInHandler(TPPNetworkLayer parent, FrameLinkLayer link) {
         super(parent, link);
     }
 
@@ -24,6 +22,7 @@ public class LinkLayerInHandler extends LinkLayerHandler {
         // Make sure the data fits in a packet, otherwise crop it.
         if (data.length > Packet.MAX_PACKET_LENGTH) {
             data = Arrays.copyOfRange(data, 0, Packet.MAX_PACKET_LENGTH);
+            TPPNetworkLayer.getLogger().warning("Link layer delivered a packet that is too long, packet cropped.");
         }
 
         // Reconstruct the packet.
@@ -32,7 +31,15 @@ public class LinkLayerInHandler extends LinkLayerHandler {
         // Verify the integrity and offer it to the incoming queue or drop the
         // packet if it is malformed.
         if (p.verify()) {
-            in.offer(p);
+            if (!in.offer(p)) {
+                TPPNetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
+            }
+        } else {
+            TPPNetworkLayer.getLogger().warning("Link layer delivered malformed packet, packet dropped.");
         }
+    }
+
+    public String toString() {
+        return "LinkLayerIn" + super.toString();
     }
 }

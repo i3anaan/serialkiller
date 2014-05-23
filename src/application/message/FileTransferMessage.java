@@ -7,8 +7,8 @@ public class FileTransferMessage extends FileMessage {
 	// Private variables
 	private final byte[] fileBytes;
 	
-	public FileTransferMessage(byte adress, byte[] data) {
-		super(adress, data);
+	public FileTransferMessage(byte address, byte[] data) {
+		super(address, data);
 		fileBytes = Arrays.copyOfRange(data, 1, data.length);
 		
 	}

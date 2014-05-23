@@ -21,8 +21,8 @@ public class ChatMessage extends ApplicationLayerMessage {
 	/**
 	 * @param message payload
 	 */
-	public ChatMessage(byte adress, byte[] data) {
-		super(adress, data);
+	public ChatMessage(byte address, byte[] data) {
+		super(address, data);
 		// Nickname used by the message sender, this is found by using the fact
 		// that nul bytes terminate strings
 		int i;

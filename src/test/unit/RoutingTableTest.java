@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.net.URL;
 
-import network.RoutingTable;
+import network.tpp.RoutingTable;
 import org.junit.Test;
 
 public class RoutingTableTest {
@@ -13,6 +13,8 @@ public class RoutingTableTest {
 		RoutingTable rt = new RoutingTable("src/test/routes.txt");
 		assertEquals(3, rt.getRoutes().size());
 		assertEquals(1, rt.getTunnels().size());
+        assertEquals((byte) 6, rt.getSelf());
+        assertEquals((byte) 7, rt.getSibling());
 	}
 	
 	@Test
