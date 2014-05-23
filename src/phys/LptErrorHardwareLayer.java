@@ -1,6 +1,9 @@
 package phys;
 
-public class LptErrorHardwareLayer extends HardwareLayer {
+import common.Stack;
+import common.Startable;
+
+public class LptErrorHardwareLayer extends HardwareLayer implements Startable {
 	private lpt.ErrorLpt lpt;
 
 	public LptErrorHardwareLayer() {
@@ -17,4 +20,9 @@ public class LptErrorHardwareLayer extends HardwareLayer {
 		return shuftRight(lpt.readLPT());
 	}
 
+	@Override
+	public Thread start(Stack stack) {
+		/* Does nothing. */
+		return null;
+	}
 }
