@@ -16,6 +16,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Represents a tunnel with another host.
  */
 public class Tunnel implements Runnable {
+    public static final int RECONNECT_TIMEOUT = 100;
+
     /** The IP address of the host this tunnel connects to. */
     private String ip;
 
@@ -136,7 +138,7 @@ public class Tunnel implements Runnable {
                 Tunneling.getLogger().error("Unable to connect " + toString() + " (host " + ip + " unknown).");
                 success = false;
             } catch (IOException e) {
-                Tunneling.getLogger().error("Unable to connect " + toString() + " (unknown error).");
+                Tunneling.getLogger().error("Unable to connect " + toString() + " (" + e + ").");
                 success = false;
             }
         }
@@ -150,7 +152,9 @@ public class Tunnel implements Runnable {
 
     private void reconnect() throws IOException {
         if (autoconnect) {
-            socket.close();
+            if (socket.isConnected()) {
+                socket.close();
+            }
             socket.connect(socket.getRemoteSocketAddress());
         }
     }
@@ -159,6 +163,11 @@ public class Tunnel implements Runnable {
     public void run() {
         try {
             while (run) {
+                while (!socket.isConnected()) {
+                    Thread.sleep(RECONNECT_TIMEOUT);
+                    connect();
+                }
+
                 // Start reader and writer.
                 reader = new TunnelReader(this, socket.getInputStream());
                 writer = new TunnelWriter(this, socket.getOutputStream());
@@ -175,10 +184,12 @@ public class Tunnel implements Runnable {
         } catch (IOException e) {
             run = false;
             Tunneling.getLogger().error(toString() + " cannot initialize the reader and/or writer.");
+        } catch (InterruptedException e) {
         }
     }
 
     public void start() {
+        run = true;
         t.start();
         Tunneling.getLogger().debug(toString() + " started.");
     }
@@ -204,6 +215,7 @@ public class Tunnel implements Runnable {
             this.tunnel = tunnel;
             stream = in;
             t = new Thread(this);
+            t.setName(toString());
         }
 
         @Override
@@ -244,6 +256,7 @@ public class Tunnel implements Runnable {
         public void start() {
             run = true;
             t.start();
+            Tunneling.getLogger().debug(toString() + " started.");
         }
 
         public void join() {
@@ -256,6 +269,10 @@ public class Tunnel implements Runnable {
 
         public void interrupt() {
             t.interrupt();
+        }
+
+        public String toString() {
+            return "TunnelReader<" + tunnel.hashCode() + ">";
         }
     }
 
@@ -272,6 +289,7 @@ public class Tunnel implements Runnable {
             this.tunnel = tunnel;
             stream = in;
             t = new Thread(this);
+            t.setName(toString());
         }
 
         @Override
@@ -280,6 +298,8 @@ public class Tunnel implements Runnable {
                 try {
                     // Get packet.
                     Packet p = tunnel.out.take();
+
+                    Tunneling.getLogger().debug(p.toString() + " received by " + toString());
 
                     // Send packet.
                     stream.write(p.compile());
@@ -298,6 +318,7 @@ public class Tunnel implements Runnable {
         public void start() {
             run = true;
             t.start();
+            Tunneling.getLogger().debug(toString() + " started.");
         }
 
         public void join() {
@@ -309,6 +330,10 @@ public class Tunnel implements Runnable {
 
         public void interrupt() {
             t.interrupt();
+        }
+
+        public String toString() {
+            return "TunnelWriter<" + tunnel.hashCode() + ">";
         }
     }
 }

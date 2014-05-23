@@ -42,6 +42,7 @@ public class Tunneling implements Runnable {
         tunnels = new TreeMap<String, Tunnel>();
 
         t = new Thread(this);
+        t.setName("TPP Tunneling " + hashCode());
     }
 
     /**
@@ -90,6 +91,8 @@ public class Tunneling implements Runnable {
      */
     public void send(Packet p, String ip) {
         Tunnel t = tunnels.get(ip);
+
+        Tunneling.getLogger().debug(p.toString() + " received by tunneling.");
 
         if (t != null) {
             t.offer(p);
