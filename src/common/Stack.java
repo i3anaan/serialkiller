@@ -3,6 +3,7 @@ package common;
 import link.LinkLayer;
 import network.NetworkLayer;
 import phys.PhysicalLayer;
+import starter.Starter;
 import web.WebService;
 import application.ApplicationLayer;
 
@@ -16,4 +17,16 @@ public class Stack {
 	public LinkLayer linkLayer;
 	public PhysicalLayer physLayer;
 	public WebService webService;
+	
+	private Starter starter;
+
+	public Stack(Starter starter) {
+		super();
+		this.starter = starter;
+	}
+	
+	/** Request a restart of the entire stack. */
+	public void smash() {
+		starter.restart();
+	}
 }
