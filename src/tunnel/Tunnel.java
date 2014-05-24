@@ -83,10 +83,6 @@ public class Tunnel implements Runnable {
 
         t = new Thread(this);
         t.setName(toString());
-
-        if (autoconnect) {
-            connect();
-        }
     }
 
     /**
@@ -226,6 +222,11 @@ public class Tunnel implements Runnable {
                     // Read the header data of the next packet.
                     byte[] rawHeader = new byte[Packet.HEADER_LENGTH];
                     ByteStreams.readFully(stream, rawHeader);
+
+                    for (byte b : rawHeader) {
+                        System.out.print(b);
+                    }
+                    System.out.println();
 
                     // Parse the header.
                     PacketHeader header = Packet.parseHeader(rawHeader);

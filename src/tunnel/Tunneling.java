@@ -97,7 +97,7 @@ public class Tunneling implements Runnable {
         if (t != null) {
             t.offer(p);
         } else {
-            Tunneling.getLogger().warning(p.toString() + " dropped, no tunnel found.");
+            Tunneling.getLogger().warning(p.toString() + " dropped, no tunnel found (IP: " + ip + ").");
         }
     }
 
