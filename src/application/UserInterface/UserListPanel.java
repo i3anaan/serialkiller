@@ -58,13 +58,13 @@ public class UserListPanel extends JPanel implements ListSelectionListener{
 				        if (!listSelectionEvent.getValueIsAdjusting()) {
 				          JList list = (JList) listSelectionEvent.getSource();
 				          int selections[] = list.getSelectedIndices();
-				          List selectionValues = list.getSelectedValuesList();
+				          Object[] selectionValues = list.getSelectedValues();
 				          for (int i = 0, n = selections.length; i < n; i++) {
 				            if (i == 0) {
 				              
 				            }
 				            String hostName =  String.valueOf(list.getSelectedValue());
-				            gui.getChatPanel().addChatPanel(hostName, (byte) list.getSelectedValue());
+				            gui.getChatPanel().addChatPanel(hostName, (Byte) list.getSelectedValue());
 				          }
 				        }
 				      }
