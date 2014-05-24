@@ -128,6 +128,8 @@ public class Tunnel implements Runnable {
     public boolean connect() {
         boolean success = true;
 
+        Tunneling.getLogger().warning("Connecting " + toString() + ".");
+
         if (socket == null || (!socket.isConnected()) && autoconnect) {
             try {
                 socket = new Socket(ip, Tunneling.PORT);
@@ -140,6 +142,10 @@ public class Tunnel implements Runnable {
             }
         }
 
+        if (success) {
+            Tunneling.getLogger().warning(toString() + " connected.");
+        }
+
         return success;
     }
 
@@ -148,12 +154,11 @@ public class Tunnel implements Runnable {
     }
 
     private void reconnect() throws IOException {
-        if (autoconnect) {
-            if (socket.isConnected()) {
-                socket.close();
-            }
-            socket.connect(socket.getRemoteSocketAddress());
+        if (socket.isConnected()) {
+            socket.close();
+            Tunneling.getLogger().warning(toString() + " closed.");
         }
+        connect();
     }
 
     @Override
