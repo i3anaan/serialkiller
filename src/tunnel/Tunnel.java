@@ -133,11 +133,8 @@ public class Tunnel implements Runnable {
         if (socket == null || (!socket.isConnected()) && autoconnect) {
             try {
                 socket = new Socket(ip, Tunneling.PORT);
-            } catch (UnknownHostException e) {
-                Tunneling.getLogger().error("Unable to connect " + toString() + " (host " + ip + " unknown).");
-                success = false;
             } catch (IOException e) {
-                Tunneling.getLogger().error("Unable to connect " + toString() + " (" + e + ").");
+                Tunneling.getLogger().error("Unable to connect " + toString() + " (" + e.getMessage() + ").");
                 success = false;
             }
         }
@@ -153,18 +150,11 @@ public class Tunnel implements Runnable {
         return "Tunnel<" + ip + ">";
     }
 
-    private void reconnect() throws IOException {
-        if (socket.isConnected()) {
-            socket.close();
-            Tunneling.getLogger().warning(toString() + " closed.");
-        }
-        connect();
-    }
-
     @Override
     public void run() {
         try {
             while (run) {
+                // Try to connect the socket, or wait until it becomes connected.
                 while (socket == null || !socket.isConnected()) {
                     Thread.sleep(RECONNECT_TIMEOUT);
                     connect();
@@ -180,8 +170,8 @@ public class Tunnel implements Runnable {
                 reader.join();
                 writer.join();
 
-                // Reconnect.
-                reconnect();
+                socket.close();
+                Tunneling.getLogger().warning(toString() + " closed.");
             }
         } catch (IOException e) {
             run = false;
@@ -197,6 +187,7 @@ public class Tunnel implements Runnable {
     }
 
     public void stop() {
+        run = false;
         try {
             t.join();
         } catch (InterruptedException e) {
