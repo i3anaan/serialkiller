@@ -12,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
 import application.ApplicationLayer;
@@ -66,6 +68,21 @@ public class Starter extends JFrame implements ActionListener {
 	
 	/** Main entry point. This is the mainest main of all the mains. */
 	public static void main(String[] args) {
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (Exception e) {
+			// If Nimbus is not available, fall back to cross-platform
+			try {
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			} catch (Exception ex) {
+
+			}
+		}
 		new Starter().run();
 	}
 	
@@ -227,7 +244,6 @@ public class Starter extends JFrame implements ActionListener {
 	public void startGUI(final Stack stack){
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		    	
 		GUI gui = new GUI(stack.applicationLayer);
 		    }
 		});
