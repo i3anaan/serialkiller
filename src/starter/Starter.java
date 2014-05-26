@@ -210,6 +210,7 @@ public class Starter extends JFrame implements ActionListener {
 	}
 	
 	/** Make a new JComboBox and add ourselves as the ActionListener. */
+	@SuppressWarnings("unchecked")
 	private JComboBox combo(Object[] items) {
 		return new JComboBox(items);
 	}
@@ -244,7 +245,7 @@ public class Starter extends JFrame implements ActionListener {
 	public void startGUI(final Stack stack){
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		GUI gui = new GUI(stack.applicationLayer);
+		    	new GUI(stack.applicationLayer);
 		    }
 		});
 	}
