@@ -29,7 +29,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	private NetworkLayer networkLayer;
 
 	/** The Logger object used by this layer. */
-	private static Logger logger;
+	private Logger logger;
 
 	/** The main thread of this class instance. */
 	private Thread thread;
