@@ -3,6 +3,8 @@ package link.diag;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import common.Stack;
+import common.Startable;
 import link.FrameLinkLayer;
 
 /**
@@ -12,16 +14,16 @@ import link.FrameLinkLayer;
  * Both readFrame and sendFrame potentially block, with readFrame blocking being
  * much more likely.
  */
-public class MockLinkLayer extends FrameLinkLayer {
+public class MockLinkLayer extends FrameLinkLayer implements Startable {
 	private static final int queue_sz = 1024;
 	private MockLinkLayer that;
 	private BlockingQueue<byte[]> bq;
-
+	
 	/** Connects this MockLinkLayer to a peer. */
-	public MockLinkLayer connect(MockLinkLayer that) {
-		this.that = that;
+	public Thread start(Stack stack) {
+		this.that = (MockLinkLayer)stack.linkLayer;
 		this.bq = new ArrayBlockingQueue<byte[]>(queue_sz);
-		return this;
+		return null;
 	}
 
 	@Override
