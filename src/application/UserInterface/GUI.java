@@ -127,7 +127,11 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 				// Open dialog:
 				int rVal = c.showOpenDialog(GUI.this);
 				if (rVal == JFileChooser.APPROVE_OPTION) {
-					apl.readFile(c.getSelectedFile().getAbsolutePath());
+					try {
+						apl.readFile(c.getSelectedFile().getAbsolutePath());
+					} catch (IOException ex) {
+						JOptionPane.showMessageDialog(cp, ex.toString());
+					}
 				}
 				if (rVal == JFileChooser.CANCEL_OPTION) {
 

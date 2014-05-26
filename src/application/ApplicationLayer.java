@@ -1,42 +1,37 @@
 package application;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Observable;
 
 import javax.naming.SizeLimitExceededException;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
 import common.Stack;
 import common.Startable;
 import log.LogMessage;
 import log.Logger;
-import network.tpp.TPPNetworkLayer;
+import network.NetworkLayer;
 import network.Payload;
 import application.message.*;
 
 /**
- * Main ApplicationLayer class, responsible for writing and
- * reading payload data and in turn delivering them to either
- * the NetworkLayer or the application.
- * 
- * @author msbruning
- *
+ * Main ApplicationLayer class, responsible for writing and reading payload 
+ * data and in turn delivering them to the NetworkLayer below or the 
+ * application above.
  */
-public class ApplicationLayer extends Observable implements Runnable, Startable{
+public class ApplicationLayer extends Observable implements Runnable, Startable {
 
-	/** NetworkLayer that this ApplicationLayer communicates with */
-	private TPPNetworkLayer networkLayer;
+	/** NetworkLayer that this ApplicationLayer communicates with. */
+	private NetworkLayer networkLayer;
 
-	/** The Logger object used by this layer to send log messages to the web interface */
+	/** The Logger object used by this layer. */
 	private static Logger logger;
 
-	/** The main thread of this class instance */
+	/** The main thread of this class instance. */
 	private Thread thread;
 
 	/** byte value of a chat flag */
@@ -50,210 +45,143 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 
 	/** byte value of a fileTransfer flag */
 	private static final byte fileTransferCommand = 'S';
-
-
-	public ApplicationLayer(){
-
-		// Construct and run thread
+	
+	public ApplicationLayer() {
+		// Construct our own thread
 		thread = new Thread(this);
 		thread.setName("APL " + this.hashCode());
+		
+		logger = new Logger(LogMessage.Subsystem.APPLICATION);
 	}
-
 
 	/**
 	 * Reads payload by checking the payload for commands
-	 * @param data
-	 * @return
-	 * @throws CommandNotFoundException 
+	 * @param p  The input data as a Payload (addressed byte array) object.
 	 */
-	public void readPayload(Payload p){
-
+	public void readPayload(Payload p) {
 		try {
-
-			// Retrieves command char from payload
-			char command = getCommand(p.data);
-
-			// Chat message
-			if(command == 'C'){
-				// Creates a new chat message object and notifies the gui
+			byte command = p.getCommand();
+			
+			switch(command) {
+			case chatCommand:
+				// Received a chat message.
+				// Create a new chat message object and notifies the GUI
 				ChatMessage cm = new ChatMessage(p.address, p.data);
 				setChanged();
 				notifyObservers(cm);
-
-			}
-			// Request to transfer file
-			else if(command == 'F'){
-
-				FileOfferMessage fm = new FileOfferMessage(p.address, p.data);
+				break;
+				
+			case fileOfferCommand: 
+				// Received a file transfer offer.
+				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
 				setChanged();
-				notifyObservers(fm);
+				notifyObservers(offer);
+				logger.debug("Received FileOffer: " + p);
+				break;
+			
+			case fileAcceptCommand:
+				// Someone accepted our file offer.
+				// TODO Make sure we actually offered this file.
+				// TODO Actually send the file we offered.
+				FileAcceptMessage accept = new FileAcceptMessage(p.address, p.data);
+				readFile("test/bunny.txt");
+				logger.debug("Accepted File Transfer for file " + accept.getFileName() + ": " + p);
+				break;
 
-				ApplicationLayer.getLogger().debug("Received FileOffer: " + p.toString() + ".");
-			}
-			// Accept file transfer
-			else if(command == 'A'){
-				FileAcceptMessage fm = new FileAcceptMessage(p.address, p.data);
-				//TODO start file transfer
-				//byte[] send = readFile(rootDir + "/downloads");
-
-				ApplicationLayer.getLogger().debug("Accepted File Transfer: " + p.toString() + ".");
-
-			}
-			// Transfer file
-			else if(command == 'S'){
+			case fileTransferCommand:
+				// Someone is sending us a file. Write the file to our disk.
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
-				//Writes the file to requested path
 
-				//TODO call gui to request filepath
-				//writeFile(fm.getFileBytes(), (rootDir + "/downloads"));
+				//TODO call GUI to request file path
+				Files.write(fm.getFileBytes(), new File("test/received.bin"));
 
-				ApplicationLayer.getLogger().debug("Started File Transfer: " + p.toString() + ".");
-
-			}
-			else{
+				logger.debug("Started File Transfer: " + p);
+				break;
+			
+			default:
 				// TODO find ways to catch invalid commands in a more refined manner
 				throw new CommandNotFoundException(String.format("command: %c", command));
-
 			}
+		} catch (IOException e) {
+			logger.warning("Caught IOException " + e + " while handling payload " + p);
+			/* Do nothing else (i.e. drop the payload). */
 		} catch (CommandNotFoundException e) {
-			ApplicationLayer.getLogger().debug("CommandNotFoundException on: " + p.toString() + ".");
+			logger.debug("CommandNotFoundException on: " + p);
 			e.printStackTrace();
 		}
 
 	}
 
-
 	/**
-	 * Retrieves the first byte from the payload and converts it to a Char.
-	 * @param data
-	 * @return The Char representing the command in this payload
-	 */
-	private char getCommand(byte[] data){
-
-		return (char)data[0];
-	}
-
-	/**
-	 * Writes data from a byte array as a file to the given path
-	 * @param Byte array to write from
-	 * @param Path to write to
-	 * @return True if successfull
-	 */
-	private boolean writeFile(byte[] data, String strFilePath){
-
-		boolean result = false;
-		try {
-			FileOutputStream fos = new FileOutputStream(strFilePath);
-			fos.write(data);
-			fos.close();
-			result = true;
-		}
-		catch(FileNotFoundException ex)   {
-			System.out.println("FileNotFoundException : " + ex);
-		}
-		catch(IOException ioe)  {
-			System.out.println("IOException : " + ioe);
-		}
-
-		return result;
-	}
-
-	/**
-	 * Reads a file from local directory
-	 * as long as the filesize is less than 2GB
-	 * and wraps it as a payload.
+	 * Reads a file from local directory and sends it to a host on the network.
 	 * 
-	 * @requires filesize < 2GB
+	 * @requires file size < 2GB
 	 * @param Path of the file to be read
 	 * 
 	 */
-	public void readFile(String strFilePath){
+	public void readFile(String strFilePath) throws IOException {
+		byte[] data = Files.toByteArray(new File(strFilePath));
 
-		File file = new File(strFilePath);
-		byte[] data = new byte[strFilePath.length()];
-
-		try {
-			FileInputStream fileInputStream = new FileInputStream(file);
-			fileInputStream.read(data);
-			fileInputStream.close();
-
-		} catch (FileNotFoundException e) {
-			System.out.println("File Not Found.");
-			e.printStackTrace();
-		}
-		catch (IOException e1) {
-			System.out.println("Error Reading The File.");
-			e1.printStackTrace();
-		}
-		// TODO remove
+		// TODO Add a file transfer flag.
+		// TODO Make it possible to actually set the destination.
 		byte destination = 1;
 		Payload p = new Payload(data, destination);
 
 		try {
 			networkLayer.send(p);
 		} catch (SizeLimitExceededException e) {
-			ApplicationLayer.getLogger().debug("Size Limit Exceeded! " + p.toString() + ".");
+			logger.debug("Size Limit Exceeded! " + p.toString() + ".");
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Reads a chat message from the chat application
-	 * and converts it into a byte array
+	 * Reads a chat message from the chat application and converts it to a byte
+	 * array.
+	 * 
 	 * @param String containing nickname
 	 * @param String containing chat message
-	 * @return byte array containing payload for a chat message
+	 * @param byte   the destination of the chat message as an address
 	 */
+	public void writeChatMessage(String nickname, String message, byte destination) {
+		byte nullbyte = 0;
 
-	public void writeChatMessage(String nickname, String message, byte destination){
-		// convert String to UTF-8		
-		byte nullbyte = (byte) 0;
-		byte[] nick;
-		byte[] msg;
-		byte[] data = null;
+		byte[] nick = nickname.getBytes(Charsets.UTF_8);
+		byte[] msg = message.getBytes(Charsets.UTF_8);
 
-		try {
-			nick = nickname.getBytes("UTF-8");
-			msg = message.getBytes("UTF-8");
+		// create new byte[] with minimum length needed
+		byte[] data = new byte[nick.length + 2 + msg.length];
 
-
-			// create new byte[] with minimum length needed
-			data = new byte[nick.length + 2 + msg.length];
-
-			// connoctate byte arrays into a new byte array
-			data[0] = chatCommand;
-			System.arraycopy(nick, 0, data, 1, nick.length);
-			data[nick.length+1] = nullbyte;
-			System.arraycopy(msg, 0, data, (nick.length+2), msg.length);
-
-		} catch (UnsupportedEncodingException e) {
-			ApplicationLayer.getLogger().critical("UTF-8 is not supported: WTF?!?!?!" + ".");
-			e.printStackTrace();
-		}
+		// concatenate byte arrays into a new byte array
+		data[0] = chatCommand;
+		System.arraycopy(nick, 0, data, 1, nick.length);
+		data[nick.length+1] = nullbyte;
+		System.arraycopy(msg, 0, data, (nick.length+2), msg.length);
 
 		try {
-			networkLayer.send(data, destination);
+			networkLayer.send(new Payload(data, destination));
 		} catch (SizeLimitExceededException e) {
-			ApplicationLayer.getLogger().warning("Size Limit Exceeded:" + ".");
+			logger.warning("Size Limit Exceeded:" + ".");
 			e.printStackTrace();
+			/* Drop the message. */
 		}
 	}
 
 	@Override
 	public void run() {
-
+		// TODO shut down cleanly
 		boolean run = true;
 
-		// Read payloads in the queue.
+		// Read all payload objects in the queue.
 		while (run) {
 			Payload p = networkLayer.read();
 
 			// incoming payload
 			readPayload(p);
-			ApplicationLayer.getLogger().debug("Received Payload: " + p.toString() + ".");
+			logger.debug("Received Payload: " + p.toString() + ".");
 		}
-		ApplicationLayer.getLogger().warning("ApplicationLayer stopped.");
-
+		
+		logger.warning("ApplicationLayer stopped.");
 	}
 
 	/**
@@ -261,23 +189,15 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 	 * for the application
 	 * @return collection of hosts
 	 */
-	public Collection<Byte> getHosts(){
+	public Collection<Byte> getHosts() {
 		return networkLayer.hosts();
 	}
 
-	/** Returns the Logger object for this ApplicationLayer */
-	public static Logger getLogger() {
-		if (logger == null) {
-			logger = new Logger(LogMessage.Subsystem.APPLICATION);
-		}
-		return logger;
-	}
-
-
 	@Override
 	public Thread start(Stack stack) {
-		networkLayer = (TPPNetworkLayer) stack.networkLayer;
-		ApplicationLayer.getLogger().warning("ApplicationLayer started.");
+		networkLayer = stack.networkLayer;
+		logger.info(networkLayer.toString());
+		logger.info("ApplicationLayer started.");
 		return thread;
 	}
 }

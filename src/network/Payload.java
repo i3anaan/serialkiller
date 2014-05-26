@@ -21,4 +21,13 @@ public class Payload {
     public Payload clone() {
         return new Payload(data, address);
     }
+    
+	/**
+	 * Retrieves the first byte from the payload.
+	 * @param data A Payload object from an incoming packet.
+	 * @return The byte representing the command in this payload
+	 */
+	public byte getCommand() {
+		return data[0];
+	}
 }
