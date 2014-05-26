@@ -52,12 +52,12 @@ public class Starter extends JFrame implements ActionListener {
 	private String webOptions[] = {"Yes", "No"};
 	
 	// Combo boxes for all the options.
-	private JComboBox swingCombo;
-	private JComboBox appCombo;
-	private JComboBox netCombo; 
-	private JComboBox linkCombo;
-	private JComboBox physCombo;
-	private JComboBox webCombo;
+	private JComboBox<String> swingCombo;
+	private JComboBox<Class<?>> appCombo;
+	private JComboBox<Class<?>> netCombo; 
+	private JComboBox<Class<?>> linkCombo;
+	private JComboBox<Class<?>> physCombo;
+	private JComboBox<String> webCombo;
 	
 	// Main buttons.
 	private JButton start;
@@ -210,8 +210,8 @@ public class Starter extends JFrame implements ActionListener {
 	}
 	
 	/** Make a new JComboBox and add ourselves as the ActionListener. */
-	private JComboBox combo(Object[] items) {
-		return new JComboBox(items);
+	private <T> JComboBox<T> combo(T[] items) {
+		return new JComboBox<T>(items);
 	}
 	
 	@Override
@@ -244,7 +244,7 @@ public class Starter extends JFrame implements ActionListener {
 	public void startGUI(final Stack stack){
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		GUI gui = new GUI(stack.applicationLayer);
+		    	new GUI(stack.applicationLayer);
 		    }
 		});
 	}
