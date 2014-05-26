@@ -25,6 +25,9 @@ public class MockLinkLayerTest {
 		
 		mla.sendFrame(test);
 		assertTrue(Arrays.equals(test, mlb.readFrame()));
+		
+		mlb.sendFrame(test);
+		assertTrue(Arrays.equals(test, mla.readFrame()));
 	}
 
 }

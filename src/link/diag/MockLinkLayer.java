@@ -19,7 +19,12 @@ public class MockLinkLayer extends FrameLinkLayer implements Startable {
 	private MockLinkLayer that;
 	private BlockingQueue<byte[]> bq;
 	
-	/** Connects this MockLinkLayer to a peer. */
+	/**
+	 * Connects this MockLinkLayer to a peer.
+	 * 
+	 * Note that this method takes the other side's stack, i.e. the stack we're
+	 * planning on communicating with, instead of our own stack.
+	 */
 	public Thread start(Stack stack) {
 		this.that = (MockLinkLayer)stack.linkLayer;
 		this.bq = new ArrayBlockingQueue<byte[]>(queue_sz);
@@ -36,7 +41,6 @@ public class MockLinkLayer extends FrameLinkLayer implements Startable {
 		try {
 			return bq.take();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -46,7 +50,6 @@ public class MockLinkLayer extends FrameLinkLayer implements Startable {
 		try {
 			bq.put(data);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 }

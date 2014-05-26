@@ -29,6 +29,15 @@ public class Stack {
 		this.starter = starter;
 	}
 	
+	public Stack(ApplicationLayer applicationLayer, NetworkLayer networkLayer,
+			LinkLayer linkLayer, PhysicalLayer physLayer) {
+		super();
+		this.applicationLayer = applicationLayer;
+		this.networkLayer = networkLayer;
+		this.linkLayer = linkLayer;
+		this.physLayer = physLayer;
+	}
+
 	/** Request a restart of the entire stack. */
 	public void smash() {
 		if (starter != null) starter.restart();

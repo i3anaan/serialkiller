@@ -117,7 +117,7 @@ public class Tunneling implements Runnable {
         try {
             socket = new ServerSocket(PORT);
         } catch (IOException e) {
-            Tunneling.getLogger().critical(String.format("Cannot listen on port %d, exiting...", PORT));
+            Tunneling.getLogger().critical(String.format("Cannot listen on port %d: %s", PORT, e));
             run = false;
         }
 

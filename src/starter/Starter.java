@@ -242,7 +242,7 @@ public class Starter extends JFrame implements ActionListener {
 		startStack();
 	}
 	
-	public void startGUI(final Stack stack){
+	public static void startGUI(final Stack stack){
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
 		    	new GUI(stack.applicationLayer);

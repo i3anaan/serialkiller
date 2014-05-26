@@ -386,21 +386,29 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             tunnels.create(routes.getTunnels().get(addr), addr < r.self());
         }
 
-        TPPNetworkLayer.getLogger().alert("Routes updated.");
+        TPPNetworkLayer.getLogger().alert("Routes updated, we are " + routes.getSelf());
     }
-
+    
     /**
      * Loads the default routes file into the router. All existing data in the
      * router will be lost.
      */
     public void loadDefaultRoutes() {
-        TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
+    	loadRoutes(ROUTING_PATH);
+    }
+
+    /**
+     * Loads a routes file into the router. All existing data in the
+     * router will be lost.
+     */
+    public void loadRoutes(String path) {
+        TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + path + ").");
 
         // Lock router
         routerLock.lock();
 
         // Create new routes
-        constructRoutes(new Router(), ROUTING_PATH);
+        constructRoutes(new Router(), path);
         constructHandlers();
 
         // Free router
