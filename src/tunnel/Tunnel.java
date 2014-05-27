@@ -81,7 +81,6 @@ public class Tunnel implements Runnable {
     public Tunnel(String ip, ArrayBlockingQueue<Packet> in, boolean autoconnect) {
         this(in, autoconnect);
         this.ip = ip;
-        this.autoconnect = false;
 
         t = new Thread(this);
         t.setName(toString());
@@ -128,13 +127,17 @@ public class Tunnel implements Runnable {
      * @return Whether the connection is successful.
      */
     public boolean connect() {
+        return connect(false);
+    }
+
+    public boolean connect(boolean force) {
         boolean success = true;
 
         Tunneling.getLogger().debug("Connecting " + toString() + ".");
 
-        if (socket == null) {
+        if (socket == null || force) {
             try {
-                socket = new Socket(ip, Tunneling.PORT);
+                resetSocket();
             } catch (IOException e) {
                 Tunneling.getLogger().error("Unable to set up " + toString() + " (" + e.getMessage() + ").");
                 success = false;
@@ -157,23 +160,31 @@ public class Tunnel implements Runnable {
         return success;
     }
 
+    private void resetSocket() throws IOException {
+        if (socket != null && socket.isConnected()) {
+            socket.close();
+        }
+
+        socket = new Socket(ip, Tunneling.PORT);
+    }
+
     public String toString() {
-        return "Tunnel<" + ip + ">";
+        return "Tunnel<" + ip + "; auto:" + String.valueOf(autoconnect) + ">";
     }
 
     @Override
     public void run() {
-        try {
-            while (run) {
+        while (run) {
+            try {
+                connect(true);
+
                 // Try to connect the socket, or wait until it becomes connected.
-                while (run && (socket == null || !socket.isConnected())) {
+                while (run && autoconnect && (socket == null || !socket.isConnected())) {
                     Thread.sleep(RECONNECT_TIMEOUT);
                     connect();
                 }
 
-                if (run) {
-                    Tunneling.getLogger().debug(toString() + String.format(" socket:<bound: %b; connected: %b>", socket.isBound(), socket.isConnected()));
-
+                if (run && socket.isConnected()) {
                     // Start reader and writer.
                     reader = new TunnelReader(this, socket.getInputStream());
                     writer = new TunnelWriter(this, socket.getOutputStream());
@@ -186,12 +197,14 @@ public class Tunnel implements Runnable {
 
                     socket.close();
                     Tunneling.getLogger().warning(toString() + " socket closed.");
+
+                    run = autoconnect;
                 }
+            } catch (IOException e) {
+                run = autoconnect;
+            } catch (InterruptedException e) {
+                run = false;
             }
-        } catch (IOException e) {
-            run = false;
-            Tunneling.getLogger().error(toString() + " cannot initialize the reader and/or writer.");
-        } catch (InterruptedException e) {
         }
 
         Tunneling.getLogger().warning(toString() + " stopped.");
@@ -199,6 +212,7 @@ public class Tunnel implements Runnable {
 
     public void start() {
         t = new Thread(this);
+        t.setName(toString());
         run = true;
         t.start();
         Tunneling.getLogger().debug(toString() + " started.");
@@ -269,6 +283,8 @@ public class Tunnel implements Runnable {
         }
 
         public void start() {
+            t = new Thread(this);
+            t.setName(toString());
             run = true;
             t.start();
             Tunneling.getLogger().debug(toString() + " started.");
@@ -332,6 +348,8 @@ public class Tunnel implements Runnable {
         }
 
         public void start() {
+            t = new Thread(this);
+            t.setName(toString());
             run = true;
             t.start();
             Tunneling.getLogger().debug(toString() + " started.");

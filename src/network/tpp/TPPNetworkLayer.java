@@ -458,12 +458,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         for (Handler h : handlers) {
             h.start();
         }
+        tunnels.start();
     }
 
     /**
      * Stops all handlers.
      */
     private void stopHandlers() {
+        tunnels.stop();
         for (Handler h : handlers) {
             h.stop();
         }

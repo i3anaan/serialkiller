@@ -95,8 +95,6 @@ public class Tunneling implements Runnable {
             tunnel.socket = socket;
             tunnel.ip = socket.getInetAddress().getHostAddress();
             tunnel.autoconnect = autoconnect;
-
-            if (running) { tunnel.start(); }
         }
 
         return tunnel;
