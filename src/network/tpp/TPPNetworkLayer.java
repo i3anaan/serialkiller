@@ -276,20 +276,19 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.header().decreaseTTL(); // Decrease the TTL for this hop.
 
                 // Check if this is an acknowledgement or should be acknowledged.
-                if (p.header().getAck()) {
+                if (p.header().getAck() && p.header().getDestination() == router.self()) {
                     sentLock.lock();
                     sent.remove(p.header().getAcknum());
                     sentLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
-                    return; // We are done.
-                } else if (p.header().getDestination() == router.self() && !p.header().getAck()) {
+                } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
                     queue.offer(ack);
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
+                } else {
+                    sendPacket(p);
                 }
-
-                sendPacket(p);
             } catch (InterruptedException e) {
                 // Exit gracefully.
                 run = false;
