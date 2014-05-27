@@ -140,7 +140,7 @@ public class Tunnel implements Runnable {
             }
         }
 
-        if (!socket.isConnected() && autoconnect) {
+        if (socket != null && !socket.isConnected() && autoconnect) {
             try {
                 socket.connect(new InetSocketAddress(ip, Tunneling.PORT));
             } catch (IOException e) {
