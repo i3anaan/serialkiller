@@ -51,5 +51,9 @@ public abstract class Frame {
 	public int getMinimumBitCount() {
 		return getFullBitCount();
 	}
+	
+	public String toCoolString(){
+		return "Just a normal abstract Frame, special in its own way.";
+	}
 
 }

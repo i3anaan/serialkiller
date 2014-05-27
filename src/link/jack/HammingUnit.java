@@ -1,5 +1,7 @@
 package link.jack;
 
+import java.util.Arrays;
+
 import util.BitSet2;
 import util.Bytes;
 import util.encoding.HammingCode;
@@ -108,6 +110,10 @@ public class HammingUnit extends Unit{
 	@Override
 	public boolean isCorrect(){
 		return !hc.hasError(getEncodedPayloadAsBitSet());
+	}
+	@Override
+	public String toCoolString(){
+		return "HammingUnit, its time to hammer out the errors. ("+hc+")";
 	}
 	
 }

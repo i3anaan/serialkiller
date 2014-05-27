@@ -90,4 +90,10 @@ public class PureUnit extends Unit{
 	public Unit getEndOfFrame() {
 		return getFlag(FLAG_END_OF_FRAME);
 	}
+	
+	
+	@Override
+	public String toCoolString(){
+		return "PureUnit, much data many compress such error. wow.";
+	}
 }

@@ -340,4 +340,8 @@ public class HammingCode {
 		}
 		return -1;
 	}
+	@Override
+	public String toString(){
+		return "HammingCode("+dataBitCount+","+encodedBitCount+")";
+	}
 }

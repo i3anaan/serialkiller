@@ -19,4 +19,7 @@ public abstract class Unit {
 	
 	//Useful for testing;
 	public abstract Unit getRandomUnit();
+	public String toCoolString(){
+		return "Just a normal abstract Unit, special in its own way.";
+	}
 }

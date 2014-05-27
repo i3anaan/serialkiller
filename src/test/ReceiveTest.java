@@ -12,6 +12,7 @@ public class ReceiveTest {
 
 	public static void main(String[] args) {
 		FrameLinkLayer jkr = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new LptHardwareLayer())));
+		System.out.println(jkr);
 		System.out.println("BEGIN TEST");
 		
 		while (true) {

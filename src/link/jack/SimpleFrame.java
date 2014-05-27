@@ -48,4 +48,9 @@ public class SimpleFrame extends Frame{
 	public static Frame getDummy() {
 		return new SimpleFrame(new BitSet2());
 	}
+	
+	@Override
+	public String toCoolString(){
+		return "SimpleFrame, so simple it should work... should...";
+	}
 }

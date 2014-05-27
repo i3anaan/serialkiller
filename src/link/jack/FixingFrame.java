@@ -1,5 +1,6 @@
 package link.jack;
 
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSet2;
@@ -166,5 +167,16 @@ public class FixingFrame extends Frame {
 	public class NotAbleToImproveException extends Exception{
 		
 	}
+	
+	@Override
+	public String toString(){
+		return "FixingFrame, Units = "+Arrays.toString(units);
+	}
+	@Override
+	public String toCoolString(){
+		return "FixingFrame, the selfrepairing Unit container.";
+	}
+	
+	
 	
 }
