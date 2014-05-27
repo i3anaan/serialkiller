@@ -130,9 +130,18 @@ public class Tunnel implements Runnable {
 
         Tunneling.getLogger().warning("Connecting " + toString() + ".");
 
-        if (socket == null || (!socket.isConnected()) && autoconnect) {
+        if (socket == null) {
             try {
                 socket = new Socket(ip, Tunneling.PORT);
+            } catch (IOException e) {
+                Tunneling.getLogger().error("Unable to set up " + toString() + " (" + e.getMessage() + ").");
+                success = false;
+            }
+        }
+
+        if (!socket.isConnected() && autoconnect) {
+            try {
+                socket.connect(socket.getRemoteSocketAddress());
             } catch (IOException e) {
                 Tunneling.getLogger().error("Unable to connect " + toString() + " (" + e.getMessage() + ").");
                 success = false;
