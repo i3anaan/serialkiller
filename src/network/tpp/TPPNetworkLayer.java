@@ -284,7 +284,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
-                    queue.offer(ack);
+                    sendPacket(ack);
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
                 } else {
                     sendPacket(p);
