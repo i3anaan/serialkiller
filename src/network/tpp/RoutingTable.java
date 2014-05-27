@@ -147,7 +147,7 @@ public class RoutingTable {
 	 */
 	public String toGraph() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("graph{node [shape=box];");
+		sb.append("graph{node[shape=box];");
 
         Map<Byte, Byte> allRoutes = new TreeMap<Byte, Byte>();
         allRoutes.putAll(routes);
