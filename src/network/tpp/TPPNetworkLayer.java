@@ -184,7 +184,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             }
 
             // Mark packet as sent when we are the original sender.
-            if (p.header().getSender() == router.self() && p.header().getDestination() != router.self()) {
+            if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
                 markSent(p);
             }
         } else {
@@ -284,7 +284,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
+                    routerLock.lock();
                     sendPacket(ack);
+                    routerLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
                 } else {
                     sendPacket(p);
