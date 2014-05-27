@@ -52,45 +52,59 @@ public class Tunneling implements Runnable {
      * @return The tunnel.
      */
     public Tunnel create(String ip, boolean autoconnect) {
-        // Create the new tunnel.
-        Tunnel tunnel = new Tunnel(ip, queue, autoconnect);
+        // Get existing tunnel.
+        Tunnel tunnel = tunnels.get(ip);
 
-        // Perform tunnel create actions.
-        register(tunnel);
+        if (tunnel == null) {
+            // Create the new tunnel.
+            tunnel = new Tunnel(ip, queue, autoconnect);
+
+            // Perform tunnel create actions.
+            register(tunnel);
+        } else {
+            boolean running = tunnel.isAlive();
+            if (running) { tunnel.stop(); }
+
+            // Update tunnel. TODO: Maybe implement something fancy for this.
+            tunnel.socket = null;
+            tunnel.ip = ip;
+            tunnel.autoconnect = autoconnect;
+
+            if (running) { tunnel.start(); }
+        }
 
         return tunnel;
     }
 
     protected Tunnel create(Socket socket, boolean autoconnect) {
-        // Create the new tunnel.
-        Tunnel tunnel = new Tunnel(socket, queue, autoconnect);
+        // Get exiting tunnel.
+        Tunnel tunnel = tunnels.get(socket.getInetAddress().getHostAddress());
 
-        // Perform tunnel create actions.
-        register(tunnel);
+        if (tunnel == null) {
+            // Create the new tunnel.
+            tunnel = new Tunnel(socket, queue, autoconnect);
+
+            // Perform tunnel create actions.
+            register(tunnel);
+        } else {
+            boolean running = tunnel.isAlive();
+            if (running) { tunnel.stop(); }
+
+            // Update tunnel. TODO: Maybe implement something fancy for this.
+            tunnel.socket = socket;
+            tunnel.ip = socket.getInetAddress().getHostAddress();
+            tunnel.autoconnect = autoconnect;
+
+            if (running) { tunnel.start(); }
+        }
 
         return tunnel;
     }
 
     private void register(Tunnel tunnel) {
-        boolean running = false;
-
-        // Remove and stop the old tunnel if present.
-        if (tunnels.containsKey(tunnel.ip())) {
-            Tunnel old = tunnels.remove(tunnel.ip());
-            running = old.isAlive();
-
-            if (running) {
-                old.stop();
-            }
-        }
-
         // Add the new tunnel to the collection.
         tunnels.put(tunnel.ip(), tunnel);
         Tunneling.getLogger().debug(tunnel.toString() + " created.");
-
-        if (running) {
-            tunnel.start();
-        }
     }
 
     /**

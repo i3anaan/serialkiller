@@ -21,13 +21,13 @@ public class Tunnel implements Runnable {
     public static final int RECONNECT_TIMEOUT = 100;
 
     /** The IP address of the host this tunnel connects to. */
-    private String ip;
+    protected String ip;
 
     /** Whether this tunnel should automatically (re)connect. */
-    private boolean autoconnect;
+    protected boolean autoconnect;
 
     /** The socket for the tunnel. */
-    private Socket socket;
+    protected Socket socket;
 
     /** The packet queues for this tunnel. */
     private ArrayBlockingQueue<Packet> in;
@@ -169,6 +169,8 @@ public class Tunnel implements Runnable {
                     Thread.sleep(RECONNECT_TIMEOUT);
                     connect();
                 }
+
+                Tunneling.getLogger().debug(toString() + String.format(" socket:<bound: %b; connected: %b>", socket.isBound(), socket.isConnected()));
 
                 // Start reader and writer.
                 reader = new TunnelReader(this, socket.getInputStream());
