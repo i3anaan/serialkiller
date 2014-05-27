@@ -18,7 +18,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Represents a tunnel with another host.
  */
 public class Tunnel implements Runnable {
-    public static final int RECONNECT_TIMEOUT = 100;
+    public static final int CONNECT_TIMEOUT = 2000;
+    public static final int RECONNECT_TIMEOUT = 2000;
 
     /** The IP address of the host this tunnel connects to. */
     protected String ip;
@@ -129,7 +130,7 @@ public class Tunnel implements Runnable {
     public boolean connect() {
         boolean success = true;
 
-        Tunneling.getLogger().warning("Connecting " + toString() + ".");
+        Tunneling.getLogger().debug("Connecting " + toString() + ".");
 
         if (socket == null) {
             try {
@@ -142,9 +143,9 @@ public class Tunnel implements Runnable {
 
         if (socket != null && !socket.isConnected() && autoconnect) {
             try {
-                socket.connect(new InetSocketAddress(ip, Tunneling.PORT));
+                socket.connect(new InetSocketAddress(ip, Tunneling.PORT), CONNECT_TIMEOUT);
             } catch (IOException e) {
-                Tunneling.getLogger().error("Unable to connect " + toString() + " (" + e.getMessage() + ").");
+                Tunneling.getLogger().warning("Unable to connect " + toString() + " (" + e.getMessage() + ").");
                 success = false;
             }
         }
