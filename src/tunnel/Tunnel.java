@@ -266,10 +266,16 @@ public class Tunnel implements Runnable {
                     if (p.verify()) {
                         // Add packet to queue.
                         tunnel.in.add(p);
-                    } else {
+                    } else if (p.reason() != null) {
                         // We are out of sync, stop.
-                        Tunneling.getLogger().error(tunnel.toString() + " received invalid packet, tunnel may be out of sync.");
-                        run = false;
+                        Tunneling.getLogger().error(tunnel.toString() + " received invalid packet (" + p.reason().toString() + ").");
+
+                        if (p.reason() == Packet.RejectReason.LENGTH) {
+                            Tunneling.getLogger().warning("Restarting " + tunnel.toString() + ", tunnel may be out of sync.");
+                            run = false;
+                        }
+                    } else {
+                        Tunneling.getLogger().error(tunnel.toString() + " received invalid packet (unknown error).");
                     }
                 } catch (IOException e) {
                     // Connection closed, stop.

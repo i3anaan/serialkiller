@@ -35,6 +35,9 @@ public class Packet {
     /** Number of retransmissions. */
     private int retransmissions;
 
+    /** The reason for rejecting the packet. */
+    private RejectReason reason = RejectReason.UNKNOWN;
+
     /**
      * Constructs a new, empty Packet object with a new, empty header.
      */
@@ -143,6 +146,10 @@ public class Packet {
         // Verify length
         if (valid) {
             valid = payload().length == header().getLength();
+
+            if (!valid) {
+                reason = RejectReason.LENGTH;
+            }
         }
 
         // Verify checksum
@@ -158,6 +165,10 @@ public class Packet {
 
             // Restore original checksum.
             this.header().setChecksum(checksum);
+
+            if (!valid) {
+                reason = RejectReason.CHECKSUM;
+            }
         }
 
         return valid;
@@ -221,7 +232,32 @@ public class Packet {
         retransmissions++;
     }
 
+    /**
+     * Returns the reason for rejecting the packet. This method is only useful
+     * right after running the verify() method.
+     * @return The reason for rejecting the packet.
+     */
+    public RejectReason reason() {
+        return reason;
+    }
+
     public String toString() {
         return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d;>", header().getSender(), header().getDestination(), header().getSeqnum(), header.getSegnum());
+    }
+
+    public enum RejectReason {
+        UNKNOWN ("Unknown"),
+        LENGTH ("Length"),
+        CHECKSUM ("Checksum");
+
+        private String description;
+
+        RejectReason(String description) {
+            this.description = description;
+        }
+
+        public String toString() {
+            return description;
+        }
     }
 }
