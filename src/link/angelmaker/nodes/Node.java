@@ -1,0 +1,129 @@
+package link.angelmaker.nodes;
+
+import util.BitSet2;
+
+/**
+ * The basic Node class.
+ * This class accepts a BitSet2, stores a BitSet2 internally, and can then give a BitSet2 back.
+ * These 3 BitSet2 can be different.
+ * The implementation can fully decide what to do with the bits, including the storage method.
+ * The implementation can either be a leaf or have child nodes itself.
+ * The implementation may or may not have error detection or correction.
+ * 
+ * The following pieces of pseudo code should hold (with no errors occurring):
+ * n = giveConverted(n.getConverted());
+ * 
+ * n = giveOriginal(n.getOriginal());
+ * 
+ * sent.giveOriginal(data)
+ * received.giveConverted(sent.getConverted());
+ * data = received.getOriginal();
+ * 
+ * sent.giveConverted(data)
+ * received.giveOriginal(sent.getOriginal());
+ * data = received.getConverted();
+ * 
+ * In diagram form:
+ * 
+ * 	[ 1		 0		 1 ]	giveOriginal()
+ * 	[111	000		111]	getConverted()
+ * 
+ * 			 V
+ * 
+ * 	[111	000		111] 	giveConverted()
+ * 	[ 1		 0		 1 ]	getOriginal()
+ * 
+ * 			 V
+ * 
+ * 	[ 1		 0		 1 ]	giveOriginal()
+ * 	[111	000		111]	getConverted()
+ * etc...
+ * 
+ * 
+ * This should NOT be implemented directly.
+ * Implement indirectly through either LeafNode or InternalNode, or both.
+ * @author I3anaan
+ */
+public interface Node {
+	
+	/**
+	 * Give the Node original bits.
+	 * Generally the Node will >NOT< try to correct errors in this input.
+	 * Similar to giveConverted();
+	 * Will return the unused bits.
+	 * (so if you give it more than it needs,it returns the unused rest which can then for example be given to the next Node).
+	 * It is not specified whether or not this method keeps consuming bits, even when isComplete() is true.
+	 * @require bits!=null;
+	 * @ensure	result!=null;
+	 * @ensure 	Let bits consist of xy (with both being a BitSequence)
+	 * 			x is the part internally consumed, y is left over, unused.
+	 * 			|x| +|y| = |bits|
+	 * 			will return y, 0<=|y|<=|bits|
+	 * 			0<=|x|<=|bits| 			
+	 */
+	public BitSet2 giveOriginal(BitSet2 bits);
+	
+	/**
+	 * Get the original bits from the Node
+	 * Does it best to correct the bits before returning.
+	 * @return	The bits stored in this Node.
+	 * @ensure	result!=null
+	 * No guarantees are given about this result when !isComplete().
+	 */
+	public BitSet2 getOriginal();
+	
+	/**
+	 * Give the Node bits that were previously converted, or received converted.
+	 * Generally the Node will try to correct errors in this input.
+	 * Similar to giveOriginal();
+	 * Will return the unused bits.
+	 * (so if you give it more than it needs,it returns the unused rest which can then for example be given to the next Node).
+	 * It is not specified whether or not this method keeps consuming bits, even when isComplete() is true.
+	 * @require bits!=null;
+	 * @ensure	result!=null;
+	 * @ensure 	Let bits consist of xy (with both being a BitSequence)
+	 * 			x is the part internally consumed, y is left over, unused.
+	 * 			|x| +|y| = |bits|
+	 * 			will return y, 0<=|y|<=|bits|
+	 * 			0<=|x|<=|bits| 			
+	 */
+	public BitSet2 giveConverted(BitSet2 bits);
+	
+	/**
+	 * Get the converted bits from the Node.
+	 * Generally these bits are more error resilient.
+	 * (Usually because these bits contain redundancy).
+	 * @return	The bits stored in this Node.
+	 * @ensure	result!=null
+	 * No guarantees are given about this result when !isComplete().
+	 */
+	public BitSet2 getConverted();
+	
+	/**
+	 * @return The parent of this Node, or null if it does not have a parent.
+	 */
+	public Node getParent();
+	
+	/**
+	 * @return Whether or not this Node has received enough bits to consider itself complete.
+	 * (it has filled its dataStorage).
+	 * Does not in any way has something to do with isCorrect().
+	 */
+	public boolean isComplete();
+	
+	/**
+	 * @return Whether or not this Node considers itself correct.
+	 * This is based on the current state, the currently stored data.
+	 * The result of this is obviously limited by the errorDetection used internally.
+	 * If the Node implementation does not have a form of errorDetection, this should return true.
+	 */
+	public boolean isCorrect();
+	
+	/**
+	 * @return An identical (but separate) clone of this instance.
+	 * Be very wary when using this, the clone will have the same parent as the Node that was cloned.
+	 * However, the parent only considers the non-clone to be its child.
+	 * Realistically should only be used on top level Nodes, ie where parent==null.
+	 */
+	public Node getClone();
+}
