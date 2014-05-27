@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
@@ -52,15 +53,20 @@ import log.Logger;
 
 public class GUI extends JFrame implements ActionListener, ItemListener, Observer{
 
+	// private variables
+	
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
-
-	// private variables
-	private		Preferences 		prefs; 					
+	/** The preferences object used by this application */
+	private		Preferences 		prefs; 
+	/** The application layer this application communicates with */
 	private 	ApplicationLayer 	apl;
+	
 	private 	TabbedChatPanel 	cp; 					
 	private 	UserListPanel 		ulp;
 
+	// Constructors
+	
 	public GUI(ApplicationLayer applicationLayer){
 		super("G.A.R.G.L.E.");
 		apl = applicationLayer;
@@ -71,9 +77,8 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 		// Initialize initial variables
 		prefs 				= Preferences.userNodeForPackage(getClass());
-		//cp 					= new ChatPanel(this);
 		cp					= new TabbedChatPanel(this);
-		ulp 				= new UserListPanel(this);
+		ulp 				= new UserListPanel(this, loadHostList());
 
 		// Layout main application Window
 		this.setLayout(new BorderLayout());
@@ -168,35 +173,11 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	private void buildChatMenu() {
 
 		this.add(cp, BorderLayout.CENTER);
-		cp.addChatPanel("host 5", (byte)5);
-		cp.addChatPanel("host 4", (byte)4);
 		this.add(ulp, BorderLayout.EAST);
 
 	}
 	
-	/**
-	 * getter for the UserListPanel containing a list of all the hosts
-	 * @return UserLisPanel
-	 */
-	public UserListPanel getUserList(){
-		return ulp;
-	}
-
-	/**
-	 * getter for the Preferences object belonging to this application
-	 * @return preferences
-	 */
-	public Preferences getPreferences(){
-		return prefs;
-	}
 	
-	/**
-	 * getter for the ApplicationLayer being used by this application
-	 * @return ApplicationLayer
-	 */
-	public ApplicationLayer getApplicationLayer(){
-		return apl;
-	}
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received, returns null when file offer is refused
@@ -215,6 +196,56 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		return rval;
 	}
 
+	
+
+	//	Getter methods
+	/**
+	 * getter for the UserListPanel containing a list of all the hosts
+	 * @return UserLisPanel
+	 */
+	public UserListPanel getUserList(){
+		return ulp;
+	}
+	
+	/**
+	 * getter for the main chat panel in this application
+	 * @return TabbedChatPanel
+	 */
+	public TabbedChatPanel getChatPanel(){
+		return cp;
+	}
+
+	/**
+	 * getter for the Preferences object belonging to this application
+	 * @return preferences
+	 */
+	public Preferences getPreferences(){
+		return prefs;
+	}
+	
+	/**
+	 * getter for the ApplicationLayer being used by this application
+	 * @return ApplicationLayer
+	 */
+	public ApplicationLayer getApplicationLayer(){
+		return apl;
+	}
+	
+	/** Returns the Logger object for this GUI */
+	public static Logger getLogger() {
+		if (logger == null) {
+			logger = new Logger(LogMessage.Subsystem.APPLICATION);
+		}
+		return logger;
+	}
+	
+	/** Loads a collection holding a list of hosts into the gui */
+	public Collection<Byte> loadHostList(){
+		return apl.getHosts();
+	}
+	
+	// Event Methods
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		// TODO Auto-generated method stub
@@ -247,29 +278,4 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 	}
 
-	/** Returns the Logger object for this GUI */
-	public static Logger getLogger() {
-		if (logger == null) {
-			logger = new Logger(LogMessage.Subsystem.APPLICATION);
-		}
-		return logger;
-	}
-
-	public static void main(String[] args) throws UnsupportedEncodingException {
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (Exception e) {
-			// If Nimbus is not available, fall back to cross-platform
-			try {
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			} catch (Exception ex) {
-
-			}
-		}
-	}
 }
