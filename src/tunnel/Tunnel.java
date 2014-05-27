@@ -237,12 +237,6 @@ public class Tunnel implements Runnable {
         public void run() {
             while (run) {
                 try {
-                    boolean x = true;
-                    while (x) {
-                        System.out.print(stream.read());
-                        System.out.println();
-                    }
-
                     // Read the header data of the next packet.
                     byte[] rawHeader = new byte[Packet.HEADER_LENGTH];
                     ByteStreams.readFully(stream, rawHeader);
