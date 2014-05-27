@@ -48,7 +48,7 @@ public class TabbedChatPanel extends JPanel{
 				return true;
 			}
 		};
-		topPanel.add( tabbedPane, BorderLayout.CENTER );
+		topPanel.add(tabbedPane, BorderLayout.CENTER);
 		
 
 	}
@@ -101,7 +101,6 @@ public class TabbedChatPanel extends JPanel{
 		String hostName = gui.getUserList().findHostName(address);
 		ChatPanel cp = (ChatPanel) tabIndex.get(hostName);
 		cp.addMessage(nickName, address, message);
-
 	}
 
 }

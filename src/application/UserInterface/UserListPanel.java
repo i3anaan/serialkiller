@@ -3,6 +3,8 @@ package application.UserInterface;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,84 +17,84 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
+
 /**
  * Panel for chat application that contains
  * a visual list of all chat users that the application is aware of
  */
 
-public class UserListPanel extends JPanel implements ListSelectionListener{
+public class UserListPanel extends JPanel{
 
 	// Private variables
 	private GUI gui;
 	private JTextArea userList;
-	
+
 	/** Map containing a list of hosts mapped to their hostNames */
-	private Map<Integer, String> hostMap;
+	private HashBiMap<Byte, String> hostMap;
 	/** Visual list containing a list of hostnames that have been mapped to their hosts */
 	private JList hostList;
 	
+
 	public UserListPanel(GUI gu, Collection<Byte> hostCollection) {
 		super();
 		gui = gu;
-		
-		Object[] hosts = hostCollection.toArray();
+
+		hostMap = HashBiMap.create();
+		for (Byte h : hostCollection) {
+			hostMap.put(h, String.format("%d", h));
+		}
+
 		this.setLayout(new BorderLayout());
 		this.setMinimumSize((new Dimension(100, 600)));
 		this.setPreferredSize((new Dimension(100, 600)));
 		// History Field
-		JList jlist = new JList(hosts);
+		Collection<String> nicknames = hostMap.values();
+		hostList = new JList(nicknames.toArray());
 
-				userList = new JTextArea("", 15, 15);
-				userList.setEditable(false);
-				userList.setLineWrap(true);
-				
-				JScrollPane taScroll = new JScrollPane(jlist, 
-						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		userList = new JTextArea("", 15, 15);
+		userList.setEditable(false);
+		userList.setLineWrap(true);
 
-				this.add(taScroll, BorderLayout.CENTER);	
+		JScrollPane taScroll = new JScrollPane(hostList, 
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+		this.add(taScroll, BorderLayout.CENTER);	
+
+
+		ListSelectionListener listSelectionListener = new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
 				
-				
-				ListSelectionListener listSelectionListener = new ListSelectionListener() {
-				      public void valueChanged(ListSelectionEvent listSelectionEvent) {
-				        if (!listSelectionEvent.getValueIsAdjusting()) {
-				          JList list = (JList) listSelectionEvent.getSource();
-				          int selections[] = list.getSelectedIndices();
-				          Object[] selectionValues = list.getSelectedValues();
-				          for (int i = 0, n = selections.length; i < n; i++) {
-				            if (i == 0) {
-				              
-				            }
-				            String hostName =  String.valueOf(list.getSelectedValue());
-				            gui.getChatPanel().addChatPanel(hostName, (Byte) list.getSelectedValue());
-				          }
-				        }
-				      }
-				    };
-				    jlist.addListSelectionListener(listSelectionListener);
+				if (!e.getValueIsAdjusting()) {
+					int selection[] = hostList.getSelectedIndices();
+					for (int i = 0; i< selection.length; i++) {
+						String hostName =  String.valueOf(hostList.getSelectedValue());
+						gui.getChatPanel().addChatPanel(hostName, findValueAddress((String) hostList.getSelectedValue()));
+					}
+				}
+			}
+		};
+		hostList.addListSelectionListener(listSelectionListener);
 	}
 
 	/** Finds the hostName belonging to a specified host */
 	public String findHostName(int address){
 		return hostMap.get(address);
+
+	}
+
+	/** Finds the address key belonging to the hostName value */
+	public byte findValueAddress(String name){
+		return hostMap.inverse().get(name);
+		
 	}
 	
-	@Override
-	public void valueChanged(final ListSelectionEvent e) {
-		ListSelectionModel lsm = (ListSelectionModel) e.getSource();
-
-		if (lsm.isSelectionEmpty()) {
-			System.out.println("emtpy!");
-		} else {
-			// Find out which indexes are selected.
-			int minIndex = lsm.getMinSelectionIndex();
-			int maxIndex = lsm.getMaxSelectionIndex();
-			for (int i = minIndex; i <= maxIndex; i++) {
-				if (lsm.isSelectedIndex(i)) {
-					System.out.println("selected something!");
-				}
-			}
-		}
-
+	/** Updates the local hostMap with a new hostName belonging to an address */
+	public void setHostName(byte address, byte[] hostName){
+		hostMap.put(address, new String(hostName));
+		
 	}
 }
