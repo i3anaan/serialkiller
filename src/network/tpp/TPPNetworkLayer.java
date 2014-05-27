@@ -199,7 +199,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      */
     public void checkRetransmissions() {
         sentLock.lock();
-        TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
+//        TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
         for (Map<Integer, Packet> m : sent.values()) {
             for (Packet p : m.values()) {
                 if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
@@ -229,7 +229,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 }
             }
         }
-        TPPNetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
+//        TPPNetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
         sentLock.unlock();
     }
 
