@@ -35,6 +35,7 @@ public class FixingFrame extends Frame {
 				}
 			}
 		}catch(NotAbleToImproveException e){
+			e.printStackTrace();
 			//Improving the data failed.
 			//TODO drop frame.
 		}
