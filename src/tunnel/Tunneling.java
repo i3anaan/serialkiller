@@ -174,7 +174,7 @@ public class Tunneling implements Runnable {
 
     private void startTunnels() {
         for (Tunnel t : tunnels.values()) {
-            if (t.socket != null) {
+            if (t.socket != null || t.autoconnect()) {
                 t.start();
             }
         }
