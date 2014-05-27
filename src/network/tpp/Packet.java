@@ -242,7 +242,7 @@ public class Packet {
     }
 
     public String toString() {
-        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d;>", header().getSender(), header().getDestination(), header().getSeqnum(), header.getSegnum());
+        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d; Ack: %d>", header().getSender(), header().getDestination(), header().getSeqnum(), header.getSegnum(), header.getAcknum());
     }
 
     public enum RejectReason {

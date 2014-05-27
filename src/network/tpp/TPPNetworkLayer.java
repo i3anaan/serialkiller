@@ -278,7 +278,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Check if this is an acknowledgement or should be acknowledged.
                 if (p.header().getAck() && p.header().getDestination() == router.self()) {
                     sentLock.lock();
-                    sent.remove(p.header().getAcknum());
+                    sent.get(p.header().getAcknum()).remove(p.header().getSegnum());
                     sentLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
                 } else if (p.header().getDestination() == router.self()) {
