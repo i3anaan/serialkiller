@@ -176,8 +176,6 @@ public class Tunnel implements Runnable {
     public void run() {
         while (run) {
             try {
-                connect(true);
-
                 // Try to connect the socket, or wait until it becomes connected.
                 while (run && autoconnect && (socket == null || !socket.isConnected())) {
                     Thread.sleep(RECONNECT_TIMEOUT);
@@ -243,8 +241,8 @@ public class Tunnel implements Runnable {
         public TunnelReader(Tunnel tunnel, InputStream in) {
             this.tunnel = tunnel;
             stream = in;
-            t = new Thread(this);
-            t.setName(toString());
+            this.t = new Thread(this);
+            this.t.setName(toString());
         }
 
         @Override
@@ -283,10 +281,10 @@ public class Tunnel implements Runnable {
         }
 
         public void start() {
-            t = new Thread(this);
-            t.setName(toString());
+            this.t = new Thread(this);
+            this.t.setName(toString());
             run = true;
-            t.start();
+            this.t.start();
             Tunneling.getLogger().debug(toString() + " started.");
         }
 
@@ -319,8 +317,8 @@ public class Tunnel implements Runnable {
         public TunnelWriter(Tunnel tunnel, OutputStream in) {
             this.tunnel = tunnel;
             stream = in;
-            t = new Thread(this);
-            t.setName(toString());
+            this.t = new Thread(this);
+            this.t.setName(toString());
         }
 
         @Override
@@ -348,10 +346,10 @@ public class Tunnel implements Runnable {
         }
 
         public void start() {
-            t = new Thread(this);
-            t.setName(toString());
+            this.t = new Thread(this);
+            this.t.setName(toString());
             run = true;
-            t.start();
+            this.t.start();
             Tunneling.getLogger().debug(toString() + " started.");
         }
 
