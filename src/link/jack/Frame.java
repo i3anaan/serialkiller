@@ -44,8 +44,12 @@ public abstract class Frame {
 	}
 	public abstract int getUnitCount();
 	
-	public int minimumBits() {
-		return getUnitCount()*JackTheRipper.UNIT_IN_USE.getSerializedBitCount()-5;
+	
+	public int getFullBitCount(){
+		return getUnitCount()*JackTheRipper.UNIT_IN_USE.getSerializedBitCount();
+	}
+	public int getMinimumBitCount() {
+		return getFullBitCount();
 	}
 
 }

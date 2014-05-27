@@ -16,6 +16,7 @@ import util.encoding.HammingCode;
 public class JackTheRipper extends FrameLinkLayer implements Startable {
 	public static final HammingCode HC = new HammingCode(4);
 	public static final Unit UNIT_IN_USE = HammingUnit.getDummy();
+	public static final Frame FRAME_IN_USE = FixingFrame.getDummy();
 
 	public static final Random R = new Random();
 	private boolean readyForUse;

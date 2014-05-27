@@ -117,13 +117,44 @@ public class BitSet2 extends BitSet {
 	/**
 	 * Removes a boolean value, moving every subsequent boolean 1 index down.
 	 * @param index
-	 * @param b
 	 */
-	public void remove(int index, boolean b) {
+	public void remove(int index) {
 		for(int i=index;i<this.length();i++){
 			this.set(i,this.get(i+1));
 		}
 		this.length--;
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		boolean isEqual = true;
+		if(object instanceof BitSet2){
+			BitSet2 other = (BitSet2) object;
+			if(this.length()==other.length()){
+				for(int i=0;i<this.length() && isEqual;i++){
+					if(this.get(i)!=other.get(i)){
+						isEqual = false;
+					}
+				}
+			}else{
+				isEqual = false;
+			}
+		}else{
+			isEqual = false;
+		}
+		return isEqual;
+	}
+	
+	public boolean contains(BitSet2 bs){
+		if(bs.length()>this.length()){
+			return false;
+		}
+		for(int i=0;i<this.length()-bs.length()+1;i++){
+			if(this.get(i,i+bs.length()).equals(bs)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

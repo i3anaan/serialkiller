@@ -20,8 +20,9 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 
 
-	SimpleFrame lastReceivedFrame;
-	SimpleFrame frameToSendNext;
+	//CHANGE THESE TO FRAME WANTED, THEN FIX ERRORS.
+	Frame lastReceivedFrame;
+	Frame frameToSendNext;
 	protected boolean readFrame = false;
 	protected boolean setFrameToSend = false;
 	
@@ -54,12 +55,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			BitSet2 outgoingData = frameToSendNext.asBitSet();
 			int bitsReceived = 0;
 			int bitsSent = 0;
-			boolean retry = false; //TODO uitzoeken waar deze gebruikt had moeten worden.
+			boolean minimumBitsExchanged =false;
 			log("FrameToSendNext: "+frameToSendNext);
 			try {
 				framesStartedSending++;
-				while (bitsReceived < SimpleFrame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()
-						|| bitsSent < SimpleFrame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
+				while ((bitsReceived < JackTheRipper.FRAME_IN_USE.getFullBitCount()
+						|| bitsSent < JackTheRipper.FRAME_IN_USE.getFullBitCount()) && !minimumBitsExchanged) {
 					//while it has bits to send or receive.
 
 					if (!connectionSync) {
@@ -77,7 +78,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 					try {
 						byte receivedByte = NO_BYTE;
-						if (bitsReceived < SimpleFrame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
+						if (bitsReceived < JackTheRipper.FRAME_IN_USE.getFullBitCount()) {
 							receivedByte = readBit();
 						}
 						// Succsefully exchanged a bit.
@@ -94,11 +95,12 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 							//log("Read byte ["+bitsReceived+"]: " + previousByteReceived);
 						}
 						bitsReceived++;
-
-						retry = false;
 						
 					} catch (TimeOutException e) {
-						retry = true;
+						if(!(bitsReceived < JackTheRipper.FRAME_IN_USE.getMinimumBitCount()
+						|| bitsSent < JackTheRipper.FRAME_IN_USE.getMinimumBitCount())){
+							minimumBitsExchanged = true;
+						}
 					}
 				}
 				framesCompleted++;
@@ -113,7 +115,11 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				waitForSync();
 				//log("sync complete");
 			}
-			lastReceivedFrame = new SimpleFrame(incomingData);
+			if(JackTheRipper.FRAME_IN_USE instanceof FixingFrame){
+				lastReceivedFrame = new FixingFrame(incomingData);
+			}else if(JackTheRipper.FRAME_IN_USE instanceof SimpleFrame){
+				lastReceivedFrame = new SimpleFrame(incomingData);
+			}
 			
 			//log("Build received frame:  " + lastReceivedFrame.getPayload()
 			//		+ "   from bits: " + incomingData);
@@ -308,13 +314,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 	}
 
-	public void sendFrame(SimpleFrame data) {
+	public void sendFrame(Frame data) {
 		frameToSendNext = data;
 		// log("Units to send next: "+Arrays.toString(data.payload.units));
 		setFrameToSend = true;
 	}
 
-	public SimpleFrame readFrame() {
+	public Frame readFrame() {
 		readFrame = true;
 		return lastReceivedFrame;
 	}

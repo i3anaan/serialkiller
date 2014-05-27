@@ -45,8 +45,7 @@ public class SimpleFrame extends Frame{
 		return FRAME_UNIT_COUNT;
 	}
 
-	@Override
-	public int minimumBits() {
-		return getUnitCount()*JackTheRipper.UNIT_IN_USE.getSerializedBitCount()-5;
+	public static Frame getDummy() {
+		return new SimpleFrame(new BitSet2());
 	}
 }

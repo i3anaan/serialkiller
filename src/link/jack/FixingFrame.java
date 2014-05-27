@@ -7,6 +7,7 @@ import util.BitSet2;
 public class FixingFrame extends Frame {
 	
 	public static final int FRAME_UNIT_COUNT = 10;
+	public static final BitSet2 FLAG_END_OF_FRAME = new BitSet2(new boolean[]{true,true,true,true,true,true,true,true,true,true}); 
 
 	public FixingFrame(ArrayBlockingQueue<Unit> outbox){
 		instertUnits(outbox);
@@ -58,8 +59,8 @@ public class FixingFrame extends Frame {
 			if(hasSubsequentCorrectUnits(copy0, i)){
 				return copy0;
 			}else{
-				BitSet2 copy1 = (BitSet2) data.clone();
-				copy1.insert(i,true);
+				BitSet2 copy1 = (BitSet2) copy0.clone();
+				copy1.flip(i);
 				if(hasSubsequentCorrectUnits(copy1, i));
 			}
 			
@@ -70,15 +71,10 @@ public class FixingFrame extends Frame {
 	private BitSet2 fixDataByAdding(BitSet2 data, int startFrom) throws NotAbleToImproveException{
 		for(int i =startFrom;i<data.length();i++){
 			BitSet2 copy0 = (BitSet2) data.clone();
-			copy0.remove(i,true);
+			copy0.remove(i);
 			if(hasSubsequentCorrectUnits(copy0, i)){
 				return copy0;
-			}else{
-				BitSet2 copy1 = (BitSet2) data.clone();
-				copy1.remove(i,true);
-				if(hasSubsequentCorrectUnits(copy1, i));
-			}
-			
+			}			
 		}
 		throw new NotAbleToImproveException();
 	}
@@ -108,18 +104,66 @@ public class FixingFrame extends Frame {
 		return FRAME_UNIT_COUNT;
 	}
 	
-	public BitSet2 addBitStuffing(BitSet2 bs){
-		return bs;
+	@Override
+	public int getFullBitCount(){
+		return getUnitCount()*JackTheRipper.UNIT_IN_USE.getSerializedBitCount() + FLAG_END_OF_FRAME.length();
 	}
-	public BitSet2 removeBitStuffing(BitSet2 bs){
-		return bs;
-	}
-	public BitSet2 addEndFlag(BitSet2 bs){
-		return bs;
+	@Override
+	public int getMinimumBitCount() {
+		return getFullBitCount() - FLAG_END_OF_FRAME.length()/2;
 	}
 	
+	public static Frame getDummy() {
+		return new FixingFrame(new BitSet2());
+	}
+	
+	/**
+	 * Adds bitstuffing to escape the FLAG_END_OF_FRAME
+	 * Returns a new BitSet2 with the stuffing.
+	 */
+	public static BitSet2 addBitStuffing(BitSet2 bs){
+		int index = 0;
+		BitSet2 result = (BitSet2)bs.clone();
+		while(index<=result.length()-FLAG_END_OF_FRAME.length()){
+			if(result.get(index,index+FLAG_END_OF_FRAME.length()).equals(FLAG_END_OF_FRAME)){
+				result.insert(index+FLAG_END_OF_FRAME.length()-1, !FLAG_END_OF_FRAME.get(FLAG_END_OF_FRAME.length()-1));
+			}
+			index++;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Removes bitstuffing (as done by addBitStuffing()).
+	 * Returns a new BitSet2 containing the data without bitstuffing.
+	 * @param bs
+	 * @return
+	 */
+	public static BitSet2 removeBitStuffing(BitSet2 bs){
+		int index = 0;
+		BitSet2 result = (BitSet2)bs.clone();
+		BitSet2 flag = FLAG_END_OF_FRAME.get(0,FLAG_END_OF_FRAME.length()-1);
+		while(index<=result.length()-FLAG_END_OF_FRAME.length()-1){//1 lower, since the flaglike data is now length flag+1
+			if(result.get(index,index+FLAG_END_OF_FRAME.length()-1).equals(flag)){
+				result.remove(index+FLAG_END_OF_FRAME.length()-1);
+				index = index+FLAG_END_OF_FRAME.length();
+			}else{
+			index++;
+			}
+		}
+		return result;
+	}
+	/**
+	 * Adds the end flag to a bitset.
+	 * Returns a new BitSet2 consisting of the original + flag.
+	 */
+	public static BitSet2 addEndFlag(BitSet2 bs){
+		return BitSet2.concatenate(bs, FLAG_END_OF_FRAME);
+	}
 
 	public class NotAbleToImproveException extends Exception{
 		
 	}
+	
 }
