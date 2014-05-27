@@ -6,6 +6,7 @@ import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
@@ -143,6 +144,8 @@ public class Tunneling implements Runnable {
         // Connect the socket.
         try {
             socket = new ServerSocket(PORT);
+        } catch (BindException e) {
+            Tunneling.getLogger().bbq(String.format("Port %d is already in use! Tunnels set up by other hosts will not be accepted.", Tunneling.PORT));
         } catch (IOException e) {
             Tunneling.getLogger().critical(String.format("Cannot listen on port %d, exiting...", PORT));
             run = false;

@@ -166,34 +166,39 @@ public class Tunnel implements Runnable {
         try {
             while (run) {
                 // Try to connect the socket, or wait until it becomes connected.
-                while (socket == null || !socket.isConnected()) {
+                while (run && (socket == null || !socket.isConnected())) {
                     Thread.sleep(RECONNECT_TIMEOUT);
                     connect();
                 }
 
-                Tunneling.getLogger().debug(toString() + String.format(" socket:<bound: %b; connected: %b>", socket.isBound(), socket.isConnected()));
+                if (run) {
+                    Tunneling.getLogger().debug(toString() + String.format(" socket:<bound: %b; connected: %b>", socket.isBound(), socket.isConnected()));
 
-                // Start reader and writer.
-                reader = new TunnelReader(this, socket.getInputStream());
-                writer = new TunnelWriter(this, socket.getOutputStream());
-                reader.start();
-                writer.start();
+                    // Start reader and writer.
+                    reader = new TunnelReader(this, socket.getInputStream());
+                    writer = new TunnelWriter(this, socket.getOutputStream());
+                    reader.start();
+                    writer.start();
 
-                // Wait for interrupts, join threads.
-                reader.join();
-                writer.join();
+                    // Wait for interrupts, join threads.
+                    reader.join();
+                    writer.join();
 
-                socket.close();
-                Tunneling.getLogger().warning(toString() + " closed.");
+                    socket.close();
+                    Tunneling.getLogger().warning(toString() + " socket closed.");
+                }
             }
         } catch (IOException e) {
             run = false;
             Tunneling.getLogger().error(toString() + " cannot initialize the reader and/or writer.");
         } catch (InterruptedException e) {
         }
+
+        Tunneling.getLogger().warning(toString() + " stopped.");
     }
 
     public void start() {
+        t = new Thread(this);
         run = true;
         t.start();
         Tunneling.getLogger().debug(toString() + " started.");
@@ -232,14 +237,15 @@ public class Tunnel implements Runnable {
         public void run() {
             while (run) {
                 try {
+                    boolean x = true;
+                    while (x) {
+                        System.out.print(stream.read());
+                        System.out.println();
+                    }
+
                     // Read the header data of the next packet.
                     byte[] rawHeader = new byte[Packet.HEADER_LENGTH];
                     ByteStreams.readFully(stream, rawHeader);
-
-                    for (byte b : rawHeader) {
-                        System.out.print(b);
-                    }
-                    System.out.println();
 
                     // Parse the header.
                     PacketHeader header = Packet.parseHeader(rawHeader);
@@ -318,6 +324,7 @@ public class Tunnel implements Runnable {
 
                     // Send packet.
                     stream.write(p.compile());
+                    stream.flush();
                 } catch (IOException e) {
                     // Connection closed, stop.
                     Tunneling.getLogger().warning(tunnel.toString() + " closed.");
