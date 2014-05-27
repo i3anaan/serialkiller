@@ -12,7 +12,7 @@ public class SendTest {
 	 */
 	public static void main(String[] args) {
 		FrameLinkLayer jkr = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new LptHardwareLayer())));
-		System.out.println(jkr);
+		System.out.println(jkr.toCoolString());
 		System.out.println("Sending:  Such test, such amazing, wow, up to 420 gigadoge! #swag\n");
 		System.out.println("START SENDING");
 		

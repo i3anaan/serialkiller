@@ -306,4 +306,9 @@ public class BittasticLinkLayer extends FrameLinkLayer implements Runnable, Star
 		t.start();
 		return t;
 	}
+	
+	@Override
+	public String toCoolString(){
+		return "TODO: Not cool"; //TODO Wander;
+	}
 }

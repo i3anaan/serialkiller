@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import com.google.common.primitives.Bytes;
+
 import common.Stack;
 import common.Startable;
-
 import phys.PhysicalLayer;
 
 /**
@@ -287,6 +287,11 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 			//System.out.printf("[%8x] [%s] " + msg + "%n", this.hashCode(), System.nanoTime(), arguments);
 			System.out.flush();
 		}
+	}
+	
+	@Override
+	public String toCoolString(){
+		return "TODO: Not cool"; //TODO Wander;
 	}
 	
 	public class PanicException extends RuntimeException{
