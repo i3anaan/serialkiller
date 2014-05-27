@@ -278,6 +278,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable{
 	public Thread start(Stack stack) {
 		networkLayer = (TPPNetworkLayer) stack.networkLayer;
 		ApplicationLayer.getLogger().warning("ApplicationLayer started.");
+        thread.start();
 		return thread;
 	}
 }
