@@ -280,7 +280,7 @@ public class Tunnel implements Runnable {
                     }
                 } catch (IOException e) {
                     // Connection closed, stop.
-                    Tunneling.getLogger().warning(tunnel.toString() + " closed.");
+                    Tunneling.getLogger().warning(tunnel.toString() + " closed (" + e.getMessage() + ").");
                     run = false;
                 }
             }
@@ -342,7 +342,7 @@ public class Tunnel implements Runnable {
                     stream.flush();
                 } catch (IOException e) {
                     // Connection closed, stop.
-                    Tunneling.getLogger().warning(tunnel.toString() + " closed.");
+                    Tunneling.getLogger().warning(tunnel.toString() + " closed (" + e.getMessage() + ").");
                     run = false;
                 } catch (InterruptedException e) {
                     // Some other error, stop.
