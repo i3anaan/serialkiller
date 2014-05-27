@@ -20,7 +20,7 @@ public class FixingFrame extends Frame {
 		int index=0;
 		int bitCount = JackTheRipper.UNIT_IN_USE.getSerializedBitCount();
 		try{
-			while((index*bitCount<data.length()-bitCount+1) && index<FRAME_UNIT_COUNT*bitCount){
+			while((index*bitCount<data.length()-bitCount+1) && index<FRAME_UNIT_COUNT){
 				Unit u = JackTheRipper.UNIT_IN_USE.constructFromBitSet(data.get(index*bitCount,(index+1)*bitCount));
 				if(u.isCorrect()){
 					units[index] = u;
