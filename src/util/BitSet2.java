@@ -101,6 +101,32 @@ public class BitSet2 extends BitSet {
 		return (Object) new BitSet2(this);
 	}
 	
+	/**
+	 * Inserts a boolean value on the given index.
+	 * This means that the boolean previously on the index will now be on index+1
+	 * @param index
+	 * @param b
+	 */
+	public void insert(int index, boolean b) {
+		for(int i=this.length()-1;i>=index;i--){
+			this.set(i+1,this.get(i));
+		}
+		this.set(index,b);
+	}
+	
+	/**
+	 * Removes a boolean value, moving every subsequent boolean 1 index down.
+	 * @param index
+	 * @param b
+	 */
+	public void remove(int index, boolean b) {
+		for(int i=index;i<this.length();i++){
+			this.set(i,this.get(i+1));
+		}
+		this.length--;
+	}
+	
+	
 	//Utility methods from java 7
 	
 	/**
@@ -164,4 +190,5 @@ public class BitSet2 extends BitSet {
     	
     	return result;
     }
+	
 }
