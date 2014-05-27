@@ -258,6 +258,7 @@ public class Tunnel implements Runnable {
 
                     // Fetch the payload.
                     byte[] rawPayload = new byte[header.getLength()];
+                    ByteStreams.readFully(stream, rawPayload);
 
                     // Build packet.
                     Packet p = new Packet(Bytes.concat(rawHeader, rawPayload));
