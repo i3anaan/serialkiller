@@ -184,7 +184,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             }
 
             // Mark packet as sent when we are the original sender.
-            if (p.header().getSender() == router.self()) {
+            if (p.header().getSender() == router.self() && p.header().getDestination() != router.self()) {
                 markSent(p);
             }
         } else {
