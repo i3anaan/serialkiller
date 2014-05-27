@@ -98,6 +98,11 @@ public class Tunneling implements Runnable {
             t.offer(p);
         } else {
             Tunneling.getLogger().warning(p.toString() + " dropped, no tunnel found (IP: " + ip + ").");
+            String tunnelsString = "";
+            for (String tunnelIP : tunnels.keySet()) {
+                tunnelsString += " " + tunnelIP + ": " + tunnels.get(tunnelIP).ip() + ",";
+            }
+            Tunneling.getLogger().debug("Known tunnels:" + tunnelsString);
         }
     }
 
