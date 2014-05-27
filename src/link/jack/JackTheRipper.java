@@ -103,8 +103,8 @@ public class JackTheRipper extends FrameLinkLayer implements Startable {
 	public String toString(){
 		return "##> JACK THE RIPPER <## \n"
 				+ "Also previously known as DelayCorrectedFullDuplesLinkLayerSectionSegmentReadSendManaer2000FrameReadSendManager3000"
-				+ "Using Frame:\n\t"+FRAME_IN_USE.toCoolString()
-				+ "Using Units:\n\t"+UNIT_IN_USE.toCoolString()
-				+ "Ready to rip.\n\n";
+				+ "\nUsing Frame:\n\t"+FRAME_IN_USE.toCoolString()
+				+ "\nUsing Units:\n\t"+UNIT_IN_USE.toCoolString()
+				+ "\nReady to rip.\n\n";
 	}
 }
