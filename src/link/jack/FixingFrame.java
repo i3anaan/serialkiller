@@ -5,6 +5,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSet2;
 
+/**
+ * Currently works on Real Error-less links.
+ * @author I3anaan
+ *
+ */
 public class FixingFrame extends Frame {
 	
 	public static final int FRAME_UNIT_COUNT = 10;
