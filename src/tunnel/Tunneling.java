@@ -96,7 +96,7 @@ public class Tunneling implements Runnable {
             tunnel.ip = socket.getInetAddress().getHostAddress();
             tunnel.autoconnect = autoconnect;
 
-            if (running && autoconnect) { tunnel.start(); }
+            if (running) { tunnel.start(); }
         }
 
         return tunnel;
@@ -174,7 +174,9 @@ public class Tunneling implements Runnable {
 
     private void startTunnels() {
         for (Tunnel t : tunnels.values()) {
-            t.start();
+            if (t.socket != null) {
+                t.start();
+            }
         }
     }
 
