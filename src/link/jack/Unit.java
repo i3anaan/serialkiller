@@ -6,6 +6,9 @@ public abstract class Unit {
 	public abstract boolean isFiller();
 	public abstract boolean isSpecial();
 	public abstract boolean isEndOfFrame();
+	public boolean isCorrect(){
+		return true; // Return true if not sure.
+	}
 	
 	public abstract BitSet2 serializeToBitSet();
 	public abstract Unit getFlag(byte flag);

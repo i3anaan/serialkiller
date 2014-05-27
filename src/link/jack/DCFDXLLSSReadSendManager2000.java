@@ -1,4 +1,5 @@
 package link.jack;
+
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -16,7 +17,6 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 	private ArrayBlockingQueue<Unit> inbox; // TODO frames van maken;
 	private ArrayBlockingQueue<Unit> outbox; // TODO frames van maken;
 	private Thread exchanger;
-	private boolean keepRunning = true;
 
 	public DCFDXLLSSReadSendManager2000(
 			DelayCorrectedFDXLinkLayerSectionSegment down) {
@@ -29,8 +29,9 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 		exchanger = new Thread(this, "Jack - Exchanger");
 		exchanger.start();
 	}
+
 	public void sendUnit(Unit unit) {
-		//down.log("Sending: "+unit);
+		// down.log("Sending: "+unit);
 		try {
 			outbox.put(unit);
 		} catch (InterruptedException e) {
@@ -53,31 +54,23 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 	public void run() {
 		down.readFrame();
 		while (true) {
-			if (keepRunning) {
-				Frame frameToSend = new Frame(outbox);
-				down.sendFrame(frameToSend);
-				down.exchangeFrame();
-				Frame f = down.readFrame();
-				//System.out.println(Arrays.toString(f.getUnits()));
-				for (Unit u : f.getUnits()) {
-					try {
-						if (!u.isFiller()) {
-							inbox.put(u);
-						} else {
+			SimpleFrame frameToSend = new SimpleFrame(outbox);
+			down.sendFrame(frameToSend);
+			down.exchangeFrame();
+			SimpleFrame f = down.readFrame();
+			// System.out.println(Arrays.toString(f.getUnits()));
+			for (Unit u : f.getUnits()) {
+				try {
+					if (!u.isFiller()) {
+						inbox.put(u);
+					} else {
 
-						}
-					} catch (InterruptedException e) {
-						// TODO hier iets doen?
-						e.printStackTrace();
 					}
+				} catch (InterruptedException e) {
+					// TODO hier iets doen?
+					e.printStackTrace();
 				}
 			}
 		}
-	}
-
-	public void setRun(boolean keepRunning) {
-		System.out.println("Setting run to: " + keepRunning);
-		this.keepRunning = keepRunning;
-
 	}
 }

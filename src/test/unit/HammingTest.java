@@ -21,13 +21,11 @@ import util.encoding.HammingCode;
  *
  */
 public class HammingTest {
-
-	private static boolean runTests;
 	
 	
 	@Test
 	public void testCorrect() {
-		if(runTests){
+		if(System.getenv("TRAVIS")!=null){
 		for (int dataBitCount = 3; dataBitCount < 7; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);
 			for (BitSet2 data : buildBitSets(dataBitCount)) {
@@ -46,7 +44,7 @@ public class HammingTest {
 
 	@Test
 	public void testDetectSingleError() {
-		if(runTests){
+		if(System.getenv("TRAVIS")!=null){
 		for (int dataBitCount = 3; dataBitCount < 17; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);
 			for (BitSet2 data : buildBitSets(dataBitCount)) {
@@ -66,7 +64,7 @@ public class HammingTest {
 	
 	@Test
 	public void testDetectDoubleError() {
-		if(runTests){
+		if(System.getenv("TRAVIS")!=null){
 		for (int dataBitCount = 3; dataBitCount < 17; dataBitCount++) {
 			HammingCode hc = new HammingCode(dataBitCount);
 			for (BitSet2 data : buildBitSets(dataBitCount)) {

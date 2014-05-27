@@ -7,7 +7,6 @@ import common.NotReadyForUseException;
 import common.Stack;
 import common.Startable;
 import link.FrameLinkLayer;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.BitSet2;
 import util.ByteArrays;
 import util.Bytes;
@@ -49,7 +48,7 @@ public class JackTheRipper extends FrameLinkLayer implements Startable {
 				down.sendUnit(UNIT_IN_USE.getEndOfFrame());
 				down.sendUnit(UNIT_IN_USE.getEndOfFrame());
 			} else {
-				throw new NotImplementedException();
+				throw new UnsupportedOperationException();
 			}
 		} else {
 			throw new NotReadyForUseException();
@@ -83,7 +82,7 @@ public class JackTheRipper extends FrameLinkLayer implements Startable {
 						+ Bytes.format(ByteArrays.fromList(dataFrame)[0]));
 				return ByteArrays.fromList(dataFrame);
 			} else {
-				throw new NotImplementedException();
+				throw new UnsupportedOperationException();
 			}
 		} else {
 			throw new NotReadyForUseException();
