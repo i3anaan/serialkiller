@@ -101,7 +101,14 @@ public class JackTheRipper extends FrameLinkLayer implements Startable {
 	
 	@Override
 	public String toString(){
-		return "##> JACK THE RIPPER <## \n"
+		String jkr = 
+				 "     ██╗ █████╗  ██████╗██╗  ██╗    ████████╗██╗  ██╗███████╗    ██████╗ ██╗██████╗ ██████╗ ███████╗██████╗ \n"
+				+"     ██║██╔══██╗██╔════╝██║ ██╔╝    ╚══██╔══╝██║  ██║██╔════╝    ██╔══██╗██║██╔══██╗██╔══██╗██╔════╝██╔══██╗\n"
+				+"     ██║███████║██║     █████╔╝        ██║   ███████║█████╗      ██████╔╝██║██████╔╝██████╔╝█████╗  ██████╔╝\n"
+				+"██   ██║██╔══██║██║     ██╔═██╗        ██║   ██╔══██║██╔══╝      ██╔══██╗██║██╔═══╝ ██╔═══╝ ██╔══╝  ██╔══██╗\n"
+				+"╚█████╔╝██║  ██║╚██████╗██║  ██╗       ██║   ██║  ██║███████╗    ██║  ██║██║██║     ██║     ███████╗██║  ██║\n"
+				+" ╚════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝       ╚═╝   ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝\n\n";
+		return jkr
 				+ "Also previously known as DelayCorrectedFullDuplexLinkLayerSectionSegmentReadSendManager2000FrameReadSendManager3000"
 				+ "\n##> Using Frame:\n\t"+FRAME_IN_USE.toCoolString()
 				+ "\n##> Using Units:\n\t"+UNIT_IN_USE.toCoolString()
