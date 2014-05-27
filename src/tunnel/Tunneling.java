@@ -95,6 +95,8 @@ public class Tunneling implements Runnable {
             tunnel.socket = socket;
             tunnel.ip = socket.getInetAddress().getHostAddress();
             tunnel.autoconnect = autoconnect;
+
+            if (running) { tunnel.start(); }
         }
 
         return tunnel;
@@ -152,7 +154,8 @@ public class Tunneling implements Runnable {
         while(run) {
             try {
                 Socket s = socket.accept();
-                this.create(s, false);
+                Tunnel tunnel = this.create(s, false);
+                tunnel.start();
             } catch (IOException e) {
                 Tunneling.getLogger().error("Error with accepting a new connection.");
             }
