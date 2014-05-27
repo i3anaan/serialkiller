@@ -9,6 +9,7 @@ import network.tpp.PacketHeader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -141,7 +142,7 @@ public class Tunnel implements Runnable {
 
         if (!socket.isConnected() && autoconnect) {
             try {
-                socket.connect(socket.getRemoteSocketAddress());
+                socket.connect(new InetSocketAddress(ip, Tunneling.PORT));
             } catch (IOException e) {
                 Tunneling.getLogger().error("Unable to connect " + toString() + " (" + e.getMessage() + ").");
                 success = false;
@@ -202,6 +203,10 @@ public class Tunnel implements Runnable {
         } catch (InterruptedException e) {
         }
         Tunneling.getLogger().debug(toString() + " stopped.");
+    }
+
+    public boolean isAlive() {
+        return t.isAlive();
     }
 
     /**

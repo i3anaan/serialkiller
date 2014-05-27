@@ -72,15 +72,25 @@ public class Tunneling implements Runnable {
     }
 
     private void register(Tunnel tunnel) {
+        boolean running = false;
+
         // Remove and stop the old tunnel if present.
         if (tunnels.containsKey(tunnel.ip())) {
             Tunnel old = tunnels.remove(tunnel.ip());
-            old.stop();
+            running = old.isAlive();
+
+            if (running) {
+                old.stop();
+            }
         }
 
         // Add the new tunnel to the collection.
         tunnels.put(tunnel.ip(), tunnel);
         Tunneling.getLogger().debug(tunnel.toString() + " created.");
+
+        if (running) {
+            tunnel.start();
+        }
     }
 
     /**
