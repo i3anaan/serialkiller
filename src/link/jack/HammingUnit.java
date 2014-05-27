@@ -107,7 +107,7 @@ public class HammingUnit extends Unit{
 	
 	@Override
 	public boolean isCorrect(){
-		return hc.hasError(getEncodedPayloadAsBitSet());
+		return !hc.hasError(getEncodedPayloadAsBitSet());
 	}
 	
 }

@@ -66,7 +66,7 @@ public class DCFDXLLSSReadSendManager2000 implements Runnable {
 			down.sendFrame(frameToSend);
 			down.exchangeFrame();
 			Frame f = down.readFrame();
-			System.out.println(Arrays.toString(f.getUnits()));
+			//System.out.println(Arrays.toString(f.getUnits()));
 			for (Unit u : f.getUnits()) {
 				try {
 					if (!u.isFiller()) {
