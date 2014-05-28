@@ -261,7 +261,9 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			//TODO test if this actually works
 			String filePath = saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
-				apl.writeFile((FileTransferMessage) arg, filePath);
+				//TODO temporary, look for prettier solution
+				FileTransferMessage fm = new FileTransferMessage(((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getPayload());
+				apl.writeFile(fm, filePath);
 			}
 		}
 		else if(arg instanceof IdentificationMessage){

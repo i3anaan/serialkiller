@@ -191,7 +191,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 		// Split the string and retrieve only the filename in bytes
 		String[] nameParts = strFilePath.split("\\\\");
-		String fileName = nameParts[nameParts.length];
+		String fileName = nameParts[nameParts.length -1];
 		byte[] byteName = fileName.getBytes(Charsets.UTF_8);
 
 		// FileSize
@@ -299,6 +299,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 */
 	public Collection<Byte> getHosts() {
 		Collection<Byte> hostCollection = networkLayer.hosts();
+		
+		//TODO fix NPE for WHOIS
 //		for (Byte h : hostCollection) {
 //			byte[] data = new byte[1];
 //			System.out.println("DEBUG--------- Value of data = " + data);
