@@ -48,7 +48,7 @@ public class Starter extends JFrame implements ActionListener {
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
 	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class,JackTheRipper.class};
-	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, NullPhysicalLayer.class};
+	private Class<?> physLayers[] = {NullPhysicalLayer.class, LptHardwareLayer.class, LptErrorHardwareLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
 	// Combo boxes for all the options.

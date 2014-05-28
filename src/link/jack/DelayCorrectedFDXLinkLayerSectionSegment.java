@@ -20,8 +20,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 
 
-	Frame lastReceivedFrame;
-	Frame frameToSendNext;
+	SimpleFrame lastReceivedFrame;
+	SimpleFrame frameToSendNext;
 	protected boolean readFrame = false;
 	protected boolean setFrameToSend = false;
 	
@@ -58,8 +58,8 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 			log("FrameToSendNext: "+frameToSendNext);
 			try {
 				framesStartedSending++;
-				while (bitsReceived < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()
-						|| bitsSent < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
+				while (bitsReceived < SimpleFrame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()
+						|| bitsSent < SimpleFrame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
 					//while it has bits to send or receive.
 
 					if (!connectionSync) {
@@ -77,7 +77,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 
 					try {
 						byte receivedByte = NO_BYTE;
-						if (bitsReceived < Frame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
+						if (bitsReceived < SimpleFrame.FRAME_UNIT_COUNT * JackTheRipper.UNIT_IN_USE.getSerializedBitCount()) {
 							receivedByte = readBit();
 						}
 						// Succsefully exchanged a bit.
@@ -113,7 +113,7 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 				waitForSync();
 				//log("sync complete");
 			}
-			lastReceivedFrame = new Frame(incomingData);
+			lastReceivedFrame = new SimpleFrame(incomingData);
 			
 			//log("Build received frame:  " + lastReceivedFrame.getPayload()
 			//		+ "   from bits: " + incomingData);
@@ -308,13 +308,13 @@ public class DelayCorrectedFDXLinkLayerSectionSegment {
 		}
 	}
 
-	public void sendFrame(Frame data) {
+	public void sendFrame(SimpleFrame data) {
 		frameToSendNext = data;
 		// log("Units to send next: "+Arrays.toString(data.payload.units));
 		setFrameToSend = true;
 	}
 
-	public Frame readFrame() {
+	public SimpleFrame readFrame() {
 		readFrame = true;
 		return lastReceivedFrame;
 	}

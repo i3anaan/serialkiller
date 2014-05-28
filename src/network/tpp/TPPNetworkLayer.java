@@ -14,6 +14,7 @@ import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public static final long TIMEOUT = 10000; // in milliseconds
-    public static final int MAX_RETRANSMISSIONS = 10; // 0 for no maximum
+    public static final int MAX_RETRANSMISSIONS = 3; // 0 for no maximum
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
 
     /** Size of the queue. */
@@ -61,6 +62,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** A lock for the router. */
     private Lock routerLock;
 
+    private Lock sentLock;
+
     /** The router queue. */
     protected ArrayBlockingQueue<Packet> queue;
 
@@ -83,10 +86,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
         appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
-        sent = new TreeMap<Integer, HashMap<Integer, Packet>>();
+        sent = new ConcurrentHashMap<Integer, HashMap<Integer, Packet>>();
 
         router = new Router();
+
         routerLock = new ReentrantLock(true);
+        sentLock = new ReentrantLock(true);
 
         this.tunnels = new Tunneling(this);
 
@@ -153,7 +158,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.header().setMore(i + 1 != segments);
                 p.header().setSender(router.self());
                 p.header().setDestination(destination);
-                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), segments)));
+                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), data.length - (Packet.MAX_PAYLOAD_LENGTH * i))));
 
                 // Send it.
                 sendPacket(p);
@@ -179,7 +184,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             }
 
             // Mark packet as sent when we are the original sender.
-            if (p.header().getSender() == router.self()) {
+            if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
                 markSent(p);
             }
         } else {
@@ -193,8 +198,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Sends retransmissions to the RetransmissionHandler.
      */
     public void checkRetransmissions() {
-        TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
-
+        sentLock.lock();
+//        TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
         for (Map<Integer, Packet> m : sent.values()) {
             for (Packet p : m.values()) {
                 if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
@@ -224,8 +229,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 }
             }
         }
-
-        TPPNetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
+//        TPPNetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
+        sentLock.unlock();
     }
 
     /**
@@ -233,12 +238,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param p The packet.
      */
     public void markSent(Packet p) {
+        sentLock.lock();
         p.timestamp(System.currentTimeMillis());
         if (!sent.containsKey(p.header().getSeqnum())) {
             sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
         }
         sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
         TPPNetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
+        sentLock.unlock();
     }
 
     /**
@@ -269,18 +276,21 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.header().decreaseTTL(); // Decrease the TTL for this hop.
 
                 // Check if this is an acknowledgement or should be acknowledged.
-                if (p.header().getAck()) {
-                    sent.remove(p.header().getAcknum());
+                if (p.header().getAck() && p.header().getDestination() == router.self()) {
+                    sentLock.lock();
+                    sent.get(p.header().getAcknum()).remove(p.header().getSegnum());
+                    sentLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
-                    return; // We are done.
                 } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
-                    queue.offer(ack);
+                    routerLock.lock();
+                    sendPacket(ack);
+                    routerLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
+                } else {
+                    sendPacket(p);
                 }
-
-                sendPacket(p);
             } catch (InterruptedException e) {
                 // Exit gracefully.
                 run = false;
@@ -449,12 +459,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         for (Handler h : handlers) {
             h.start();
         }
+        tunnels.start();
     }
 
     /**
      * Stops all handlers.
      */
     private void stopHandlers() {
+        tunnels.stop();
         for (Handler h : handlers) {
             h.stop();
         }

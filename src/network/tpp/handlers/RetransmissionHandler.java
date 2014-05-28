@@ -27,10 +27,7 @@ public class RetransmissionHandler extends Handler {
             // Offer again.
             in.put(p);
 
-            // Mark packet as sent.
-            parent.markSent(p);
-
-            p = out.take();
+            p = out.poll();
         }
     }
 

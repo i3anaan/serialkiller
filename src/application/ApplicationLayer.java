@@ -12,7 +12,6 @@ import javax.naming.SizeLimitExceededException;
 import com.google.common.base.Charsets;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.HashBiMap;
 import com.google.common.io.Files;
 
 import common.Stack;
@@ -315,8 +314,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	@Override
 	public Thread start(Stack stack) {
 		networkLayer = stack.networkLayer;
+		
 		logger.info(networkLayer.toString());
 		logger.info("ApplicationLayer started.");
+		
+        thread.start();
+
 		return thread;
 	}
 }

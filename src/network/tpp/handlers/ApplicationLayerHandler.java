@@ -45,8 +45,11 @@ public class ApplicationLayerHandler extends Handler {
         byte sender = p.header().getSender();
         boolean more = p.header().getMore();
 
+        TPPNetworkLayer.getLogger().debug(toString() + " received " + p.toString() + ".");
+
         // Check if the payload is segmented.
         if (more || segnum != 0) {
+            TPPNetworkLayer.getLogger().debug(p.toString() + " is segmented.");
             // Check for overflow / DoS.
             if (segnum > SAFE_SEGNUM) {
                 // Drop whole sequence.
@@ -79,8 +82,11 @@ public class ApplicationLayerHandler extends Handler {
 
             // Check if we have all segments and concatenate data.
             if (sequenceSizes.get(sender).get(seqnum) == segments.get(sender).get(seqnum).size()) {
+                TPPNetworkLayer.getLogger().debug(p.toString() + " is final packet for segment.");
+
                 // Send concatenated payload to application.
                 appQueue.put(new Payload(Packet.concatPayloads(segments.get(sender).get(seqnum).values()), sender));
+                TPPNetworkLayer.getLogger().debug("Payload added to application queue.");
 
                 // Cleanup.
                 segments.get(sender).remove(seqnum);
@@ -89,6 +95,7 @@ public class ApplicationLayerHandler extends Handler {
         } else {
             // Simple payload.
             appQueue.put(new Payload(p.payload(), sender));
+            TPPNetworkLayer.getLogger().debug("Payload added to application queue.");
         }
     }
 
