@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public static final long TIMEOUT = 10000; // in milliseconds
-    public static final int MAX_RETRANSMISSIONS = 10; // 0 for no maximum
+    public static final int MAX_RETRANSMISSIONS = 3; // 0 for no maximum
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
 
     /** Size of the queue. */
