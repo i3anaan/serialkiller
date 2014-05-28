@@ -258,7 +258,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	}
 
 	/**
-	 * Method to write files from filetransfers to our
+	 * Method to write files from fileTransfers to our
 	 * disk.
 	 * @param FileTransferMessage
 	 * @param Path to write to
