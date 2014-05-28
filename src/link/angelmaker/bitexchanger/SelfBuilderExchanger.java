@@ -7,19 +7,24 @@ import link.angelmaker.AngelMaker;
 import link.angelmaker.nodes.BasicLeafNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
-import link.angelmaker.nodes.SelfBuildingNode;
 
+/**
+ * Threaded class that delegates frame building to the Node.
+ * Constantly tries to build Nodes, puts it in public queues.
+ * @author I3anaan
+ *
+ */
 public class SelfBuilderExchanger extends Thread{
 	
-	MasterSlaveBitExchanger exchanger;
-	public ArrayBlockingQueue<SelfBuildingNode.Duplex> queueOut;
-	public ArrayBlockingQueue<SelfBuildingNode.Duplex> queueIn;
+	BitExchanger exchanger;
+	public ArrayBlockingQueue<Node.SelfBuilding> queueOut;
+	public ArrayBlockingQueue<Node.SelfBuilding> queueIn;
 	
-	public SelfBuilderExchanger(MasterSlaveBitExchanger exchanger){
+	public SelfBuilderExchanger(BitExchanger exchanger){
 		this.exchanger = exchanger;
 	}
-	public void exchangeNode(SelfBuildingNode.Duplex nodeToSend){
-		SelfBuildingNode.Duplex received = (SelfBuildingNode.Duplex)AngelMaker.TOP_NODE_IN_USE.getClone();
+	public void exchangeNode(Node.SelfBuilding nodeToSend){
+		Node.SelfBuilding received = (Node.SelfBuilding)AngelMaker.TOP_NODE_IN_USE.getClone();
 		received.buildSelf(exchanger,nodeToSend);
 		
 		try {

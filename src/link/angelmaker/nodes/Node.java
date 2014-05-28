@@ -1,5 +1,6 @@
 package link.angelmaker.nodes;
 
+import link.angelmaker.bitexchanger.BitExchanger;
 import util.BitSet2;
 
 /**
@@ -126,4 +127,66 @@ public interface Node {
 	 * Realistically should only be used on top level Nodes, ie where parent==null.
 	 */
 	public Node getClone();
+	
+	
+	
+	/*Following are some extensions to the interface.
+	 * Node implementations should ALWAYS implement at least 1 of these.
+	 * These however are not mutually exclusive, and a single class may implement all.
+	 */
+	
+	
+	/**
+	 * A Node that does NOT have child nodes itself, it is a leaf.
+	 * @author I3anaan
+	 *
+	 */
+	public interface Leaf extends Node{
+
+	}
+	
+	/**
+	 * Nodes that implement this Interface recognize the ability to have childNodes.
+	 * No guarantees given if it actually does have childNodes.
+	 * @author I3anaan
+	 *
+	 */
+	public interface Internal extends Node{
+		
+		/**
+		 * @return the childNodes of this InternalNode.
+		 * |result| is not specified, this may be 0.
+		 */
+		public Node[] getChildNodes();
+	}
+	
+	/**
+	 * An interface to indicate that this Node can build itself if given a BitExchanger.
+	 * @author I3anaan
+	 *
+	 */
+	public interface SelfBuilding extends Node {
+
+		/**
+		 * Hands the BitExchanger instance to the Node, to build itself.
+		 * This way the Node has more control on how to build itself.
+		 * (With aspect to blocking, reacting to received bits, etc)
+		 * 
+		 * The node that this method is called on will change it self, to match the received node.
+		 * It needs a Node to send to the other side.
+		 * 
+		 * @param exchanger	The BitExchanger to communicate on.
+		 * @param nodeToSend	The Node containing data to be send.
+		 */
+		public void buildSelf(BitExchanger exchanger,Node nodeToSend);
+		
+		/**
+		 * @author I3anaan
+		 * @Requires	BitExchanger.MasterSlave
+		 */
+		public interface TurnedBased extends SelfBuilding{
+			
+		}
+	}
+	
 }

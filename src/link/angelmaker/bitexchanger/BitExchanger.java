@@ -8,6 +8,13 @@ import util.BitSet2;
  * An implementation of this should NEVER get stuck (freeze/hang).
  * 
  * This should run in an separate thread. No method of this class should be blocking.
+ * 
+ * This should always act like it is duplex.
+ * Meaning that you should be able to call read while still sending bits.
+ * It is then up to the implementation to decide whether to be duplex or not.
+ * It can even choose to simulate duplex (half rate, take turns).
+ * But may also just return null when it is still sending.
+ * 
  * @author I3anaan
  *
  */
@@ -26,12 +33,24 @@ public interface BitExchanger {
 	 */
 	public void emptyQueue();
 	
-	public void queueCount();
-	
 	/**
 	 * @return bits read.
 	 * Will not block on read, meaning that it can return an empty BitSet2.
 	 * @ensure |result|>=0
 	 */
 	public BitSet2 readBits();
+	
+	
+	/**
+	 * An extension to the BitExchanger, an exchanger that has roles specified.
+	 * Generally Master should be the one initiating things (sending)
+	 * While Slave follows.
+	 * @author I3anaan
+	 *
+	 */
+	public interface MasterSlaveBitExchanger extends BitExchanger {
+
+		public boolean isMaster();
+		public boolean isSlave();
+	}
 }

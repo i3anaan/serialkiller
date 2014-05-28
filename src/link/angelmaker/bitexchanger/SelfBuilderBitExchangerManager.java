@@ -2,28 +2,30 @@ package link.angelmaker.bitexchanger;
 
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
-import link.angelmaker.nodes.SelfBuildingNode;
-import link.angelmaker.nodes.SelfBuildingNode.Duplex;
 
 /**
  * Not blocking, self-building meaning it delegates the building to the node.
  * @author I3anaan
- *
+ * @Requires Node.SelfBuilding
  */
 public class SelfBuilderBitExchangerManager implements BitExchangerManager {
 
 	SelfBuilderExchanger sbExchanger;
 	
-	public SelfBuilderBitExchangerManager(MasterSlaveBitExchanger exchanger){
+	public SelfBuilderBitExchangerManager(BitExchanger exchanger){
 		sbExchanger= new SelfBuilderExchanger(exchanger);
 		sbExchanger.start();
 	}
 	
+	/**
+	 * Non blocking. Queues up the given node for sending.
+	 * @param node Node to send.
+	 */
 	@Override
 	public void sendNode(Node node) throws NotSupportedNodeException {
-		if(node instanceof SelfBuildingNode.Duplex){
+		if(node instanceof Node.SelfBuilding){
 			try {
-				sbExchanger.queueOut.put((SelfBuildingNode.Duplex) node);
+				sbExchanger.queueOut.put((Node.SelfBuilding) node);
 			} catch (InterruptedException e) {
 				// TODO HALP??
 				e.printStackTrace();
@@ -33,6 +35,12 @@ public class SelfBuilderBitExchangerManager implements BitExchangerManager {
 		}
 	}
 
+	
+	/**
+	 * Non blocking.
+	 * @return null when nothing new to read, otherwise 1 Node.
+	 * 
+	 */
 	@Override
 	public Node readNode() {
 		return sbExchanger.queueIn.poll();

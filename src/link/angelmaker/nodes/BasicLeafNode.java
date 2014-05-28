@@ -9,7 +9,7 @@ import util.BitSet2;
  * @author I3anaan
  *
  */
-public class BasicLeafNode implements LeafNode {
+public class BasicLeafNode implements Node.Leaf {
 
 	private BitSet2 stored;
 	private Node parent;
