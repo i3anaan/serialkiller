@@ -67,4 +67,8 @@ public class PureNode implements Node.Leaf {
 		clone.giveConverted(stored);
 		return clone;
 	}
+	@Override
+	public String toString(){
+		return "PureNode["+stored+"]";
+	}
 }

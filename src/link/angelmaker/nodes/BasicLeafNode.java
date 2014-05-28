@@ -2,12 +2,21 @@ package link.angelmaker.nodes;
 
 import util.BitSet2;
 
+/***
+ *    ██████╗ ███████╗██████╗ ██████╗ ███████╗ ██████╗ █████╗ ████████╗███████╗██████╗ 
+ *    ██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔══██╗╚══██╔══╝██╔════╝██╔══██╗
+ *    ██║  ██║█████╗  ██████╔╝██████╔╝█████╗  ██║     ███████║   ██║   █████╗  ██║  ██║
+ *    ██║  ██║██╔══╝  ██╔═══╝ ██╔══██╗██╔══╝  ██║     ██╔══██║   ██║   ██╔══╝  ██║  ██║
+ *    ██████╔╝███████╗██║     ██║  ██║███████╗╚██████╗██║  ██║   ██║   ███████╗██████╔╝
+ *    ╚═════╝ ╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═════╝ 
+ *                                                                                     
+ */
+
 /**
  * The most basic leaf node possible.
  * Does not error correction, thus converted and original are equal.
  * Accepts a 1 time insertion, then considers itself full.
  * @author I3anaan
- *
  */
 public class BasicLeafNode implements Node.Leaf {
 
@@ -69,7 +78,7 @@ public class BasicLeafNode implements Node.Leaf {
 
 	@Override
 	public String toString(){
-		return "BasicLeafNode, containing: "+stored;
+		return "BasicLeafNode["+stored+"]";
 	}
 
 }

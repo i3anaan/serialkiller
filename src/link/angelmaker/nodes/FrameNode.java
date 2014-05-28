@@ -1,5 +1,7 @@
 package link.angelmaker.nodes;
 
+import java.util.Arrays;
+
 import util.BitSet2;
 
 /**
@@ -12,7 +14,7 @@ import util.BitSet2;
  * underlying Nodes. Meaning that the array of underlying nodes stores 1 more
  * bit (flag bit) than this Node.getOriginal() returns.
  * 
- * If the first bit in the first childNode is 1, it is considerd to be a filler
+ * If the first bit in the first childNode is 1, it is considered to be a filler
  * flag. This Node will then return an empty BitSet2
  * 
  * @author I3anaan
@@ -22,10 +24,10 @@ import util.BitSet2;
  */
 public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 
-	private Node[] nodes;
-	private Node parent;
-	private boolean unchanged;
-	private static final BitSet2 FLAG_FILLER = new BitSet2(new boolean[] {
+	protected Node[] nodes;
+	protected Node parent;
+	protected boolean unchanged;
+	public static final BitSet2 FLAG_FILLER = new BitSet2(new boolean[] {
 			true, true, true, true, true, true });
 
 	public FrameNode(Node parent, int childNodeCount) {
@@ -149,5 +151,8 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 	public boolean isFiller() {
 		return unchanged;
 	}
-
+	@Override
+	public String toString(){
+		return "FrameNode"+Arrays.toString(nodes)+"";
+	}
 }

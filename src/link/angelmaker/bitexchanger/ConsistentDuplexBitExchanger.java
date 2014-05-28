@@ -56,6 +56,7 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 			throw new IncompatibleModulesException();
 		}
 		this.start();
+		
 	}
 	
 	
@@ -94,6 +95,7 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 	}
 
 	public void run() {
+		Thread.currentThread().setName("BitExchanger");
 		while (true) {
 			boolean bitExchangeSuccesful = false;
 			Boolean bitToSendNext = queueOut.poll();
@@ -135,6 +137,7 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 				}
 			}
 		}
+		//AngelMaker.logger.bbq("TRUE NOT TRUE ANYMORE");
 	}
 
 	private byte sendBit(boolean bit) {

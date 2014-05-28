@@ -53,7 +53,7 @@ public interface Node {
 	 * Similar to giveConverted();
 	 * Will return the unused bits in a >NEW< bitset2.
 	 * (so if you give it more than it needs,it returns the unused rest which can then for example be given to the next Node).
-	 * It is not specified whether or not this method keeps consuming bits, even when isComplete() is true.
+	 * This method should not consume any bits when isComplete() holds.
 	 * @require bits!=null;
 	 * @ensure	result!=null;
 	 * @ensure 	Let bits consist of xy (with both being a BitSequence)
@@ -79,7 +79,7 @@ public interface Node {
 	 * Similar to giveOriginal();
 	 * Will return the unused bits.
 	 * (so if you give it more than it needs,it returns the unused rest which can then for example be given to the next Node).
-	 * It is not specified whether or not this method keeps consuming bits, even when isComplete() is true.
+	 * This method should not consume any bits when isComplete() holds.
 	 * @require bits!=null;
 	 * @ensure	result!=null;
 	 * @ensure 	Let bits consist of xy (with both being a BitSequence)

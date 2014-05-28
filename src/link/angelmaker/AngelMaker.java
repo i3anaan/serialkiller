@@ -1,5 +1,10 @@
 package link.angelmaker;
 
+import java.io.File;
+
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 import phys.diag.VirtualPhysicalLayer;
 import util.BitSet2;
 import common.Stack;
@@ -24,18 +29,25 @@ import log.LogMessage.Subsystem;
  */
 //TODO implement this class more serious.
 public class AngelMaker extends FrameLinkLayer implements Startable{
+	
+	public static final String ASCII_ART_ANGEL_MAKER_1 = "\n"
+			+ " █████╗ ███╗   ██╗ ██████╗ ███████╗██╗             ███╗   ███╗ █████╗ ██╗  ██╗███████╗██████╗ \n"
+			+ "██╔══██╗████╗  ██║██╔════╝ ██╔════╝██║             ████╗ ████║██╔══██╗██║ ██╔╝██╔════╝██╔══██╗\n"
+			+ "███████║██╔██╗ ██║██║  ███╗█████╗  ██║             ██╔████╔██║███████║█████╔╝ █████╗  ██████╔╝\n"
+			+ "██╔══██║██║╚██╗██║██║   ██║██╔══╝  ██║             ██║╚██╔╝██║██╔══██║██╔═██╗ ██╔══╝  ██╔══██╗\n"
+			+ "██║  ██║██║ ╚████║╚██████╔╝███████╗███████╗███████╗██║ ╚═╝ ██║██║  ██║██║  ██╗███████╗██║  ██║\n"
+			+ "╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝\n\n";
+	public static final String ASCII_ART_ANGEL_MAKER_2 = "\n"
+			+ "  _          _   ___                _        ___  __  \n"
+			+ " /_)  )\\ )  / _  )_   )      )\\/)  /_)  )_/  )_   )_) \n"
+			+ "/ /  (  (  (__/ (__  (__    (  (  / /  /  ) (__  / \\  \n"
+			+ "                         __                           \n\n";
+	
 	public static Node TOP_NODE_IN_USE;
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
 	public BitExchanger bitExchanger;
-	
-	public static void main(String[] args){
-		//test
-		AngelMaker am = new AngelMaker();
-		am.start(null);
-		//System.out.println(am);
-		am.sendFrame(new byte[]{1,5,3,7,34,59});
-	}
+	private Stack stack;
 	
 	@Override
 	public void sendFrame(byte[] data) {
@@ -64,28 +76,31 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 
 	@Override
 	public Thread start(Stack stack) {
+		this.stack = stack;
 		setup();
 		return null;
 	}
 	
 	
 	public void setup(){
-		//TODO severities set correct?
 		
-		logger.notice("Setting up ANGEL_MAKER");
+		//TODO severities set correct?
+		//TODO thread name on AMManger is TPPHandler, why is this?
+		logger.info("Setting up ANGEL_MAKER");
 		try{
 		TOP_NODE_IN_USE = new FrameNode<Node>(null, 10);
-		logger.info("Top Node build.");
+		logger.debug("Top Node build.");
 		manager = new BlockingAMManagerServer();
-		logger.info("Manager constructed.");
-		bitExchanger = new ConsistentDuplexBitExchanger(new VirtualPhysicalLayer(), manager);
-		logger.info("BitExchanger constructed.");
+		logger.debug("Manager constructed.");
+		bitExchanger = new ConsistentDuplexBitExchanger(stack.physLayer, manager);
+		logger.debug("BitExchanger constructed.");
 		manager.setExchanger(bitExchanger);
-		logger.info("Handed exchanger to manager.");
+		logger.debug("Handed exchanger to manager.");
 		manager.enable();
-		logger.info("Manager enabled.");
+		logger.debug("Manager enabled.");
 		
-		logger.notice("All done and ready for use.");
+		AngelMaker.play("src/link/angelmaker/not_a_sound.wav");
+		logger.info("All done and ready for use.");
 		}catch(IncompatibleModulesException e){
 			logger.bbq("Incompatible modules. ANGEL_MAKER could not start.");
 			//e.printStackTrace();
@@ -99,7 +114,24 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 				+ "\n\tBitExchanger:\t"+bitExchanger.toString()
 				+ "\n\tNode:\t\t"+TOP_NODE_IN_USE.toString()+"\n";
 		
-		return s;
+		return ASCII_ART_ANGEL_MAKER_2;
 	}
 
+	
+	
+	
+	//Much needed
+	public static void play(String filename)
+	{
+	    try
+	    {
+	        Clip clip = AudioSystem.getClip();
+	        clip.open(AudioSystem.getAudioInputStream(new File(filename)));
+	        clip.start();
+	    }
+	    catch (Exception exc)
+	    {
+	        exc.printStackTrace(System.out);
+	    }
+	}
 }
