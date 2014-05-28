@@ -11,7 +11,6 @@ import util.BitSet2;
  */
 public class PureNode implements Node.Leaf {
 
-	//First 8 indices are data bits, index 8 contains special flag.
 	private BitSet2 stored;
 	private int dataBitCount;
 	private Node parent;

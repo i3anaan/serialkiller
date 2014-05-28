@@ -98,6 +98,12 @@ public class NodeTest {
 				assertEquals(receiver.getOriginal().length(),queueOriginalTotal.length());
 				assertEquals(receiver.getOriginal(),queueOriginalTotal);
 			}
+			
+			//TODO Continue testing.
+			//Allong the lines of:
+			if(base instanceof Node.Fillable){
+				//test filling.
+			}
 		}
 	}
 

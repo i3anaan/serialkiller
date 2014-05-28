@@ -8,7 +8,7 @@ package link.angelmaker.nodes;
  */
 public class FrameCeptionNode<N extends Node> extends FrameNode<N> {
 	public FrameCeptionNode(Node parent,int count){
-		super(parent,10);
+		super(parent,3);
 		if(count>0){
 			for(int i=0;i<nodes.length;i++){
 				nodes[i] = new FrameCeptionNode<Node>(this, count-1);

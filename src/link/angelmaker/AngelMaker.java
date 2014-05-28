@@ -16,6 +16,7 @@ import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
 import link.angelmaker.nodes.BasicLeafNode;
+import link.angelmaker.nodes.FrameCeptionNode;
 import link.angelmaker.nodes.FrameNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
@@ -48,6 +49,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	public AMManager manager;
 	public BitExchanger bitExchanger;
 	private Stack stack;
+	private static int graphID;
 	
 	@Override
 	public void sendFrame(byte[] data) {
@@ -88,7 +90,8 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		//TODO thread name on AMManger is TPPHandler, why is this?
 		logger.info("Setting up ANGEL_MAKER");
 		try{
-		TOP_NODE_IN_USE = new FrameNode<Node>(null, 10);
+		//TOP_NODE_IN_USE = new FrameNode<Node>(null, 10);
+			TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 1);
 		logger.debug("Top Node build.");
 		manager = new BlockingAMManagerServer();
 		logger.debug("Manager constructed.");
@@ -98,7 +101,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		logger.debug("Handed exchanger to manager.");
 		manager.enable();
 		logger.debug("Manager enabled.");
-		
+		System.out.println("\n\n"+toGraph(TOP_NODE_IN_USE)+"\n\n");
 		AngelMaker.play("src/link/angelmaker/not_a_sound.wav");
 		logger.info("All done and ready for use.");
 		}catch(IncompatibleModulesException e){
@@ -118,6 +121,30 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	}
 
 	
+	public static String toGraph(Node node){
+		graphID=0;
+		String graph = "digraph g{"+addGraphVertice(node,graphID)+"}";
+		return graph;
+	}
+	
+	public static String addGraphVertice(Node base, int parentID){
+		String graph = "";
+		String color = "AliceBlue";
+		if(base.getParent()!=null){
+			graphID++;
+			graph = graph + (graphID+"->"+parentID+";");
+		}
+		String label = base.toString().substring(0, Math.min(20,base.toString().length()));
+		graph = graph + graphID+"[label=\""+label+"\",shape=ellipse,fillcolor=\""+ color+ "\",style=\"filled\"];";
+		
+		if(base instanceof Node.Internal){
+			int thisID = graphID;
+			for(Node n : ((Node.Internal)base).getChildNodes()){
+				graph = graph+addGraphVertice(n, thisID);
+			}
+		}
+		return graph;
+	}
 	
 	
 	//Much needed
