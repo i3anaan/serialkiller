@@ -22,6 +22,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
+import com.google.common.base.Charsets;
+
 import log.LogMessage;
 import log.Logger;
 import application.ApplicationLayer;
@@ -248,7 +250,9 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 
 		if(arg instanceof ChatMessage){
+			//TODO also NPE, ULP DOES exist though
 			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
+			
 		}
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
@@ -261,6 +265,9 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			}
 		}
 		else if(arg instanceof IdentificationMessage){
+			// TODO Debug UserList is still null here
+			System.out.println(getUserList());
+			
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
 		}
 

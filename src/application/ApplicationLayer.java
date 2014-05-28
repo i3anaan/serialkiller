@@ -138,11 +138,13 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
 				//TODO investigate if current handling by GUI is desired
 				logger.debug("Started File Transfer: " + p);
+				setChanged();
+				notifyObservers(fm);
 				break;
 
 			case WHOISrequestCommand:
 				// Someone is requesting our identification
-				IdentificationMessage id = new IdentificationMessage(p.address, p.data);
+				//IdentificationMessage id = new IdentificationMessage(p.address, p.data);
 
 				byte[] data = new byte[1 + identification.length];
 				data[0] = WHOISresponseCommand;
@@ -297,17 +299,19 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 */
 	public Collection<Byte> getHosts() {
 		Collection<Byte> hostCollection = networkLayer.hosts();
-		for (Byte h : hostCollection) {
-			byte[] data = new byte[1];
-			data[0] = WHOISrequestCommand;
-			try {
-				networkLayer.send(new Payload(data, h));
-				logger.debug("WHOIS Request Sent to: " + h + ".");
-			} catch (SizeLimitExceededException e) {
-				logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
-				e.printStackTrace();
-			}
-		}
+//		for (Byte h : hostCollection) {
+//			byte[] data = new byte[1];
+//			System.out.println("DEBUG--------- Value of data = " + data);
+//			System.out.println(h);
+//			data[0] = WHOISrequestCommand;
+//			try {
+//				networkLayer.send(new Payload(data, h));
+//				logger.debug("WHOIS Request Sent to: " + h + ".");
+//			} catch (SizeLimitExceededException e) {
+//				logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
+//				e.printStackTrace();
+//			}
+//		}
 		return hostCollection;
 	}
 

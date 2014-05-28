@@ -74,7 +74,7 @@ public class UserListPanel extends JPanel{
 
 	/** Finds the hostName belonging to a specified host */
 	public String findHostName(int address){
-		return hostMap.get(address);
+		return hostMap.get((byte)address);
 
 	}
 

@@ -36,7 +36,7 @@ public class TabbedChatPanel extends JPanel{
 
 		setLayout( new BorderLayout() );
 		setBackground( Color.gray );
-		
+
 		Image image = new ImageIcon("logo.png").getImage();
 		BackgroundPanel topPanel = new BackgroundPanel(image);
 		topPanel.setLayout( new BorderLayout() );
@@ -51,7 +51,7 @@ public class TabbedChatPanel extends JPanel{
 			}
 		};
 		topPanel.add(tabbedPane, BorderLayout.CENTER);
-		
+
 
 	}
 
@@ -62,7 +62,7 @@ public class TabbedChatPanel extends JPanel{
 	public void addChatPanel(String hostName, byte address){
 
 		// Alternative 1
-		
+
 		//		if(tabbedPane.indexOfComponent(tabIndex.get(hostName)) == -1){
 		//			if(tabIndex.get(hostName) != null){
 		//				tabIndex.remove(hostName);
@@ -71,7 +71,7 @@ public class TabbedChatPanel extends JPanel{
 		//			tabIndex.put(hostName, newPanel);
 		//			tabbedPane.addTab(hostName, newPanel);
 		//		}
-		
+
 		// Alternative 2
 		if(tabIndex.get(hostName) == null) {
 
@@ -92,7 +92,7 @@ public class TabbedChatPanel extends JPanel{
 			tabIndex.remove(hostName);
 		}
 	}
-	
+
 	/**
 	 * Method to get the name of the host related to the active panel
 	 * @return hostName
@@ -107,10 +107,19 @@ public class TabbedChatPanel extends JPanel{
 	 * @param address of the user
 	 * @param chat message to be parsed
 	 */
-	public void parseMessage(String nickName, int address, String message){
+	public void parseMessage(String nickName, Byte address, String message){
 		String hostName = gui.getUserList().findHostName(address);
+		int adr = address;
+		
+		//TODO same NPE as in GUI cp is still null
+		//TODO might be fixed now
 		ChatPanel cp = (ChatPanel) tabIndex.get(hostName);
-		cp.addMessage(nickName, address, message);
+		if(cp != null){
+				cp.addMessage(nickName, adr, message);
+		}else {
+			//TODO throw error
+			System.out.println("ChatPanel has failed to initialize");
+		}
 	}
 
 }
