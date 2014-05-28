@@ -1,5 +1,7 @@
-package link.angelmaker.bitexchanger;
+package link.angelmaker.manager;
 
+import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.bitexchanger.SelfBuilderExchanger;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
 
@@ -8,12 +10,15 @@ import link.angelmaker.nodes.NotSupportedNodeException;
  * @author I3anaan
  * @Requires Node.SelfBuilding
  */
-public class SelfBuilderBitExchangerManager implements BitExchangerManager {
+public class SelfBuilderAMManager implements AMManager {
 
 	SelfBuilderExchanger sbExchanger;
-	
-	public SelfBuilderBitExchangerManager(BitExchanger exchanger){
+	@Override
+	public void setExchanger(BitExchanger exchanger){
 		sbExchanger= new SelfBuilderExchanger(exchanger);
+	}
+	@Override
+	public void enable(){
 		sbExchanger.start();
 	}
 	

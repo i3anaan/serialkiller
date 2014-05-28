@@ -114,6 +114,13 @@ public class BitSet2 extends BitSet {
 	}
 	
 	/**
+	 * Adds a bit at the end of this bitset2, same as set(length(), boolean)
+	 */
+	public void addAtEnd(boolean bit){
+		this.set(length,bit);
+	}
+	
+	/**
 	 * Inserts a boolean value on the given index.
 	 * This means that the boolean previously on the index will now be on index+1
 	 * @param index

@@ -16,6 +16,7 @@ public class BasicLeafNode implements Node.Leaf {
 	
 	public BasicLeafNode(Node parent){
 		this.parent = parent;
+		stored = new BitSet2();
 	}
 	
 	@Override
@@ -62,7 +63,13 @@ public class BasicLeafNode implements Node.Leaf {
 	public Node getClone() {
 		BasicLeafNode node = new BasicLeafNode(parent);
 		
-		return null;
+		return node;
+	}
+	
+
+	@Override
+	public String toString(){
+		return "BasicLeafNode, containing: "+stored;
 	}
 
 }

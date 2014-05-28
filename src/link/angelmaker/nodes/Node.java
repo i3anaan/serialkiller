@@ -51,7 +51,7 @@ public interface Node {
 	 * Give the Node original bits.
 	 * Generally the Node will >NOT< try to correct errors in this input.
 	 * Similar to giveConverted();
-	 * Will return the unused bits.
+	 * Will return the unused bits in a >NEW< bitset2.
 	 * (so if you give it more than it needs,it returns the unused rest which can then for example be given to the next Node).
 	 * It is not specified whether or not this method keeps consuming bits, even when isComplete() is true.
 	 * @require bits!=null;
@@ -158,6 +158,17 @@ public interface Node {
 		 * |result| is not specified, this may be 0.
 		 */
 		public Node[] getChildNodes();
+	}
+	
+	/**
+	 * An Interface to indicate whether or not this Node has the ability to send filler data.
+	 * This ability means calling getConverted() on an empty node returns a non empty BitSet2.
+	 * And when inputting received FillerData in getOriginal(), it wont return anything.
+	 * @author I3anaan
+	 *
+	 */
+	public interface Fillable extends Node{
+		public boolean isFiller();
 	}
 	
 	/**

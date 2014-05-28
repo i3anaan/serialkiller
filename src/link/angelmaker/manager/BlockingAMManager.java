@@ -1,6 +1,8 @@
-package link.angelmaker.bitexchanger;
+package link.angelmaker.manager;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.IncompatibleModulesException;
+import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.BasicLeafNode;
 import link.angelmaker.nodes.Node;
 import util.BitSet2;
@@ -12,16 +14,24 @@ import util.BitSet2;
  * @author I3anaan
  *
  */
-public class BlockingExchangerManager implements BitExchangerManager{
+public class BlockingAMManager implements AMManager{
 	BitExchanger exchanger;
+	boolean enabled = false;
 	
-	public BlockingExchangerManager(BitExchanger exchanger){
+	public BlockingAMManager(){
+	}
+	@Override
+	public void setExchanger(BitExchanger exchanger){
 		this.exchanger = exchanger;
 	}
-
+	@Override
+	public void enable(){
+		enabled = true;
+	}
+	
 	@Override
 	public void sendNode(Node node) {
-		exchanger.sentBits(node.getConverted());
+		exchanger.sendBits(node.getConverted());
 	}
 
 	@Override
@@ -35,5 +45,8 @@ public class BlockingExchangerManager implements BitExchangerManager{
 		}
 		return node;
 	}
+	
+	
+	
 	
 }

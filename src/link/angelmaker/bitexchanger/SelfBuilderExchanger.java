@@ -12,6 +12,9 @@ import link.angelmaker.nodes.NotSupportedNodeException;
  * Threaded class that delegates frame building to the Node.
  * Constantly tries to build Nodes, puts it in public queues.
  * @author I3anaan
+ * @Requires Node.SelfBuilding
+ *
+ *TODO make this also an interface?
  *
  */
 public class SelfBuilderExchanger extends Thread{
