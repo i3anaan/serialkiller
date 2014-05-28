@@ -2,12 +2,17 @@ package application;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Observable;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.SizeLimitExceededException;
 
 import com.google.common.base.Charsets;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.HashBiMap;
 import com.google.common.io.Files;
 
 import common.Stack;
@@ -33,6 +38,9 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 	/** The main thread of this class instance. */
 	private Thread thread;
+
+	/** Cash containing all the hosts we are offering files, mapped to the FileOfferPayload we made them */
+	Cache<String, Payload> fileOfferCache;
 
 	/** byte value of a chat flag */
 	private static final byte chatCommand = 'C';
@@ -66,6 +74,15 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		thread = new Thread(this);
 		thread.setName("APL " + this.hashCode());
 
+		// Construct our fileOfferCache
+		fileOfferCache = CacheBuilder.newBuilder()
+				// No more than 42 file offers outstanding.
+				.maximumSize(42)
+				// All file offers expire after 30 minutes.
+				.expireAfterWrite(30, TimeUnit.MINUTES)
+				.build();
+
+
 
 		logger = new Logger(LogMessage.Subsystem.APPLICATION);
 	}
@@ -92,25 +109,35 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
 				setChanged();
 				notifyObservers(offer);
-				logger.debug("Received FileOffer: " + p);
+				logger.debug("Received FileOffer: " + p + "From host: " + p.address);
 				break;
 
 			case fileAcceptCommand:
 				// Someone accepted our file offer.
-				// TODO Make sure we actually offered this file.
-				// TODO Actually send the file we offered.
 				FileAcceptMessage accept = new FileAcceptMessage(p.address, p.data);
-				readFile("test/bunny.txt");
+				//Get key from FileMessage
+				byte [] nameByte = new byte[p.data.length -32];
+				System.arraycopy(p.data, 32, nameByte, 1, p.data.length - 32);
+				String key = Arrays.toString(nameByte);
+
+				// Check if fileOffer exists and if so send it
+				Payload ftp = fileOfferCache.getIfPresent(key);
+				if(ftp != null){
+					try {
+						networkLayer.send(ftp);
+					} catch (SizeLimitExceededException e) {
+						logger.warning("Size Limit Exceeded:" + p + ".");
+						e.printStackTrace();
+					}
+				}
+
 				logger.debug("Accepted File Transfer for file " + accept.getFileName() + ": " + p);
 				break;
 
 			case fileTransferCommand:
 				// Someone is sending us a file. Write the file to our disk.
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
-
-				//TODO call GUI to request file path
-				Files.write(fm.getFileBytes(), new File("test/received.bin"));
-
+				//TODO investigate if current handling by GUI is desired
 				logger.debug("Started File Transfer: " + p);
 				break;
 
@@ -142,10 +169,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// TODO find ways to catch invalid commands in a more refined manner
 				throw new CommandNotFoundException(String.format("command: %c", command));
 			}
-		} catch (IOException e) {
-			logger.warning("Caught IOException " + e + " while handling payload " + p);
-			/* Do nothing else (i.e. drop the payload). */
-		} catch (CommandNotFoundException e) {
+		}  catch (CommandNotFoundException e) {
 			logger.debug("CommandNotFoundException on: " + p);
 			e.printStackTrace();
 		}
@@ -153,24 +177,51 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	}
 
 	/**
-	 * Reads a file from local directory and sends it to a host on the network.
+	 * Reads a file from local directory and places it in our file offer queue.
+	 * A file offer is then sent to the destination host.
 	 * 
 	 * @requires file size < 2GB
 	 * @param Path of the file to be read
+	 * @param Destination host to offer the file to
 	 * 
 	 */
-	public void readFile(String strFilePath) throws IOException {
-		byte[] data = Files.toByteArray(new File(strFilePath));
+	public void readFile(String strFilePath, byte destination) throws IOException {
+		byte[] fileData = Files.toByteArray(new File(strFilePath));
 
-		// TODO Add a file transfer flag.
-		// TODO Make it possible to actually set the destination.
-		byte destination = 1;
-		Payload p = new Payload(data, destination);
+		// Split the string and retrieve only the filename in bytes
+		String[] nameParts = strFilePath.split("\\\\");
+		String fileName = nameParts[nameParts.length];
+		byte[] byteName = fileName.getBytes(Charsets.UTF_8);
+
+		// FileSize
+		String fileSize = Integer.toBinaryString(fileData.length);
+		byte[] byteFileSize = fileSize.getBytes(Charsets.UTF_8);
+
+		// Form the data byte array for the offer payload
+		byte[] data2 = new byte[5 + byteName.length];
+		data2[0] = fileOfferCommand;
+		System.arraycopy(byteFileSize, 0, data2, 1, 4);
+		System.arraycopy(byteName, 0, data2, 5, byteName.length);
+
+		// Use the data from the offer to form the filetransfer data
+		byte[] fileTransferData = new byte[data2.length + fileData.length];
+		fileTransferData[0] = fileTransferCommand;
+		System.arraycopy(data2, 0, fileTransferData, 1, (data2.length -1) );
+		System.arraycopy(fileData, 0, fileTransferData, data2.length, fileData.length);
+
+		// Put the original Payload in the fileOfferCache for later sending
+		Payload p = new Payload(fileTransferData, destination);
+		String key = Byte.toString(destination) + fileName;
+		fileOfferCache.put(key, p);
+
+		// Put the offer in a new payload and send it
+		Payload offer = new Payload(data2, destination);
+
 
 		try {
-			networkLayer.send(p);
+			networkLayer.send(offer);
 		} catch (SizeLimitExceededException e) {
-			logger.debug("Size Limit Exceeded! " + p.toString() + ".");
+			logger.debug("Size Limit Exceeded! " + offer.toString() + ".");
 			e.printStackTrace();
 		}
 	}
@@ -204,6 +255,23 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			e.printStackTrace();
 			/* Drop the message. */
 		}
+	}
+
+	/**
+	 * Method to write files from filetransfers to our
+	 * disk.
+	 * @param FileTransferMessage
+	 * @param Path to write to
+	 */
+	public void writeFile(FileTransferMessage fm, String path){
+
+		try {
+			Files.write(fm.getFileBytes(), new File(path));
+		}catch (IOException e) {
+			logger.warning("Caught IOException " + e + " while handling fileMessage " + fm);
+			/* Do nothing else (i.e. drop the payload). */
+		}
+		//logger.debug("Started File Transfer: " + fm);
 	}
 
 	@Override

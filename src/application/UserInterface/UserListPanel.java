@@ -3,23 +3,15 @@ package application.UserInterface;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import javax.swing.AbstractListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Maps;
 
 /**
  * Panel for chat application that contains
@@ -35,7 +27,7 @@ public class UserListPanel extends JPanel{
 	/** Map containing a list of hosts mapped to their hostNames */
 	private HashBiMap<Byte, String> hostMap;
 	/** Visual list containing a list of hostnames that have been mapped to their hosts */
-	private JList hostList;
+	private JList<Object> hostList;
 	
 
 	public UserListPanel(GUI gu, Collection<Byte> hostCollection) {
@@ -52,7 +44,7 @@ public class UserListPanel extends JPanel{
 		this.setPreferredSize((new Dimension(100, 600)));
 		// History Field
 		Collection<String> nicknames = hostMap.values();
-		hostList = new JList(nicknames.toArray());
+		hostList = new JList<Object>(nicknames.toArray());
 
 		userList = new JTextArea("", 15, 15);
 		userList.setEditable(false);

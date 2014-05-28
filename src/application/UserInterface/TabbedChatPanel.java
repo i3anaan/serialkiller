@@ -10,6 +10,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+import com.google.common.collect.HashBiMap;
+
 
 /**
  * Main Chat Panel 'controller' that holds all of the future
@@ -21,7 +23,7 @@ public class TabbedChatPanel extends JPanel{
 
 	// Class variables
 	private		ClosableTabbedPane	 	tabbedPane;
-	private		Map<String, JPanel> 	tabIndex;
+	private		HashBiMap<String, JPanel> 	tabIndex;
 
 	// private variables
 	private GUI gui;
@@ -30,7 +32,7 @@ public class TabbedChatPanel extends JPanel{
 	public TabbedChatPanel(GUI gu) {
 		super();
 		gui = gu;
-		tabIndex = new HashMap<String,JPanel>();
+		tabIndex = HashBiMap.create();
 
 		setLayout( new BorderLayout() );
 		setBackground( Color.gray );
@@ -89,6 +91,14 @@ public class TabbedChatPanel extends JPanel{
 		if(tabIndex.get(hostName) != null){
 			tabIndex.remove(hostName);
 		}
+	}
+	
+	/**
+	 * Method to get the name of the host related to the active panel
+	 * @return hostName
+	 */
+	public String getActiveHost(){
+		return tabIndex.inverse().get(tabbedPane.getSelectedComponent());
 	}
 
 	/**

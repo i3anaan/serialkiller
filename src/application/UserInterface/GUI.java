@@ -41,6 +41,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	
 	private 	TabbedChatPanel 	cp; 					
 	private 	UserListPanel 		ulp;
+	private JMenuItem sendFileItem;
 
 	// Constructors
 	
@@ -96,23 +97,27 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		menuBar.add(menu);
 
 		// SendFile Item
-		JMenuItem sendFileItem = new JMenuItem("Send File");
+		sendFileItem = new JMenuItem("Send File");
 		sendFileItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser c = new JFileChooser();
 				// Open dialog:
-				int rVal = c.showOpenDialog(GUI.this);
-				if (rVal == JFileChooser.APPROVE_OPTION) {
-					try {
-						apl.readFile(c.getSelectedFile().getAbsolutePath());
-					} catch (IOException ex) {
-						JOptionPane.showMessageDialog(cp, ex.toString());
+				if(cp.getActiveHost() != null){
+					int rVal = c.showOpenDialog(GUI.this);
+					if (rVal == JFileChooser.APPROVE_OPTION) {
+						try {
+							apl.readFile(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
+						} catch (IOException ex) {
+							JOptionPane.showMessageDialog(cp, ex.toString());
+						}
+					}
+					if (rVal == JFileChooser.CANCEL_OPTION) {
+
 					}
 				}
-				if (rVal == JFileChooser.CANCEL_OPTION) {
-
-				}
+				
+				
 			}
 		});
 		// Exit item
@@ -229,9 +234,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-
-
+		
 	}
 
 	@Override
@@ -245,15 +248,17 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 
 		if(arg instanceof ChatMessage){
-			//cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
 			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
 		}
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
 			
-			//cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
-			saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+			//TODO test if this actually works
+			String filePath = saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+			if(filePath != null){
+				apl.writeFile((FileTransferMessage) arg, filePath);
+			}
 		}
 		else if(arg instanceof IdentificationMessage){
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
