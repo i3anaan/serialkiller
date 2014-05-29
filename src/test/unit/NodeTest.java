@@ -38,7 +38,7 @@ public class NodeTest {
 				assertTrue(data!=unused);
 				assertEquals(stored,n.getOriginal());
 				clone.giveConverted(n.getConverted());
-				if(n.isComplete()){
+				if(n.isFull()){
 					assertEquals(n.getOriginal(),clone.getOriginal());
 					assertTrue(n.isCorrect());
 				}
@@ -56,7 +56,7 @@ public class NodeTest {
 				BitSet2 queueOriginalTotal = new BitSet2(); //Contains all the data added.
 				
 				boolean tookBits = false;
-				while(!sender.isComplete()){
+				while(!sender.isFull()){
 					//Add in parts, simulate network behaviour.
 					BitSet2 before = (BitSet2) queueOriginal.clone();
 					queueOriginal = sender.giveOriginal(queueOriginal);
@@ -72,19 +72,21 @@ public class NodeTest {
 					}
 					b++;
 				}
+				assertTrue(sender.isReady());
 				assertTrue(tookBits);
 				//Is full, dont consume anymore
 				assertEquals(new BitSet2((byte)5),sender.giveOriginal(new BitSet2((byte)5)));
 				BitSet2 queueConvertedTotal = sender.getConverted();
 				BitSet2 queueConvertedReceived = new BitSet2();
 				int from = 0;
-				while(!receiver.isComplete()){
+				while(!receiver.isFull()){
 					//Add in parts, simulate network behaviour.
 					queueConvertedReceived = receiver.giveConverted(queueConvertedReceived);
 					int to = Math.min((int)(Math.random()*8),queueConvertedTotal.length()-from);
 					queueConvertedReceived = BitSet2.concatenate(queueConvertedReceived, queueConvertedTotal.get(from, from+to));
 					from = from+to;
 				}
+				assertTrue(receiver.isReady());
 				
 				assertEquals(queueConvertedTotal.length(),from);
 				assertEquals(new BitSet2((byte)5),receiver.giveConverted(new BitSet2((byte)5)));
@@ -100,6 +102,7 @@ public class NodeTest {
 			}
 			
 			//TODO Continue testing.
+			//TODO check if split from isComplete() into isFull() and isReady() was succesfully completed.
 			//Allong the lines of:
 			if(base instanceof Node.Fillable){
 				//test filling.

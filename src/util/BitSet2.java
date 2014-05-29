@@ -95,6 +95,9 @@ public class BitSet2 extends BitSet {
 		for(int i=0;i<length();i++){
 			s = s + (this.get(i) ? "1" : "0");
 		}
+		if(s.equals("")){
+			s = "[empty]";
+		}
 		return s;
 	}
 	

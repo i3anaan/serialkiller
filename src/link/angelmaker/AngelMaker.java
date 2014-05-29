@@ -7,6 +7,7 @@ import javax.sound.sampled.Clip;
 
 import phys.diag.VirtualPhysicalLayer;
 import util.BitSet2;
+import common.Graph;
 import common.Stack;
 import common.Startable;
 import link.FrameLinkLayer;
@@ -30,19 +31,6 @@ import log.LogMessage.Subsystem;
  */
 //TODO implement this class more serious.
 public class AngelMaker extends FrameLinkLayer implements Startable{
-	
-	public static final String ASCII_ART_ANGEL_MAKER_1 = "\n"
-			+ " █████╗ ███╗   ██╗ ██████╗ ███████╗██╗             ███╗   ███╗ █████╗ ██╗  ██╗███████╗██████╗ \n"
-			+ "██╔══██╗████╗  ██║██╔════╝ ██╔════╝██║             ████╗ ████║██╔══██╗██║ ██╔╝██╔════╝██╔══██╗\n"
-			+ "███████║██╔██╗ ██║██║  ███╗█████╗  ██║             ██╔████╔██║███████║█████╔╝ █████╗  ██████╔╝\n"
-			+ "██╔══██║██║╚██╗██║██║   ██║██╔══╝  ██║             ██║╚██╔╝██║██╔══██║██╔═██╗ ██╔══╝  ██╔══██╗\n"
-			+ "██║  ██║██║ ╚████║╚██████╔╝███████╗███████╗███████╗██║ ╚═╝ ██║██║  ██║██║  ██╗███████╗██║  ██║\n"
-			+ "╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝\n\n";
-	public static final String ASCII_ART_ANGEL_MAKER_2 = "\n"
-			+ "  _          _   ___                _        ___  __  \n"
-			+ " /_)  )\\ )  / _  )_   )      )\\/)  /_)  )_/  )_   )_) \n"
-			+ "/ /  (  (  (__/ (__  (__    (  (  / /  /  ) (__  / \\  \n"
-			+ "                         __                           \n\n";
 	
 	public static Node TOP_NODE_IN_USE;
 	public static final Logger logger =  new Logger(Subsystem.LINK);
@@ -91,7 +79,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		logger.info("Setting up ANGEL_MAKER");
 		try{
 		//TOP_NODE_IN_USE = new FrameNode<Node>(null, 10);
-			TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 1);
+		TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 1);
 		logger.debug("Top Node build.");
 		manager = new BlockingAMManagerServer();
 		logger.debug("Manager constructed.");
@@ -101,8 +89,8 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		logger.debug("Handed exchanger to manager.");
 		manager.enable();
 		logger.debug("Manager enabled.");
-		System.out.println("\n\n"+toGraph(TOP_NODE_IN_USE)+"\n\n");
-		AngelMaker.play("src/link/angelmaker/not_a_sound.wav");
+		
+		System.out.println("\n\n"+Graph.getFullGraphForNode(TOP_NODE_IN_USE,true)+"\n\n");
 		logger.info("All done and ready for use.");
 		}catch(IncompatibleModulesException e){
 			logger.bbq("Incompatible modules. ANGEL_MAKER could not start.");
@@ -117,48 +105,6 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 				+ "\n\tBitExchanger:\t"+bitExchanger.toString()
 				+ "\n\tNode:\t\t"+TOP_NODE_IN_USE.toString()+"\n";
 		
-		return ASCII_ART_ANGEL_MAKER_2;
-	}
-
-	
-	public static String toGraph(Node node){
-		graphID=0;
-		String graph = "digraph g{"+addGraphVertice(node,graphID)+"}";
-		return graph;
-	}
-	
-	public static String addGraphVertice(Node base, int parentID){
-		String graph = "";
-		String color = "AliceBlue";
-		if(base.getParent()!=null){
-			graphID++;
-			graph = graph + (graphID+"->"+parentID+";");
-		}
-		String label = base.toString().substring(0, Math.min(20,base.toString().length()));
-		graph = graph + graphID+"[label=\""+label+"\",shape=ellipse,fillcolor=\""+ color+ "\",style=\"filled\"];";
-		
-		if(base instanceof Node.Internal){
-			int thisID = graphID;
-			for(Node n : ((Node.Internal)base).getChildNodes()){
-				graph = graph+addGraphVertice(n, thisID);
-			}
-		}
-		return graph;
-	}
-	
-	
-	//Much needed
-	public static void play(String filename)
-	{
-	    try
-	    {
-	        Clip clip = AudioSystem.getClip();
-	        clip.open(AudioSystem.getAudioInputStream(new File(filename)));
-	        clip.start();
-	    }
-	    catch (Exception exc)
-	    {
-	        exc.printStackTrace(System.out);
-	    }
+		return s;
 	}
 }

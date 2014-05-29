@@ -59,7 +59,7 @@ public class BasicLeafNode implements Node.Leaf {
 	}
 
 	@Override
-	public boolean isComplete() {
+	public boolean isFull() {
 		return stored.length()!=0;
 	}
 
@@ -79,6 +79,11 @@ public class BasicLeafNode implements Node.Leaf {
 	@Override
 	public String toString(){
 		return "BasicLeafNode["+stored+"]";
+	}
+
+	@Override
+	public boolean isReady() {
+		return isFull();
 	}
 
 }

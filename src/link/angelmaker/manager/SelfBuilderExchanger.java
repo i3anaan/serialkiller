@@ -1,9 +1,10 @@
-package link.angelmaker.bitexchanger;
+package link.angelmaker.manager;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
+import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.BasicLeafNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
@@ -31,7 +32,12 @@ public class SelfBuilderExchanger extends Thread{
 		received.buildSelf(exchanger,nodeToSend);
 		
 		try {
-			queueIn.put(received);
+			if(received.isReady()){
+				queueIn.put(received);
+			}else{
+				AngelMaker.logger.error("Node received is not ready to be read.");
+				//TODO;
+			}
 		} catch (InterruptedException e) {
 			//TODO halp?
 			e.printStackTrace();

@@ -11,6 +11,8 @@ import util.BitSet2;
  * The implementation can either be a leaf or have child nodes itself.
  * The implementation may or may not have error detection or correction.
  * 
+ * A Node that isReady() but not isFull() should be a flag, the other way around is not set in stone.
+ * 
  * The following pieces of pseudo code should hold (with no errors occurring):
  * n = giveConverted(n.getConverted());
  * 
@@ -106,11 +108,18 @@ public interface Node {
 	public Node getParent();
 	
 	/**
-	 * @return Whether or not this Node has received enough bits to consider itself complete.
+	 * @return Whether or not this Node has its dataStorage filled, meaning it no longer accepts new data.
 	 * (it has filled its dataStorage).
 	 * Does not in any way has something to do with isCorrect().
 	 */
-	public boolean isComplete();
+	public boolean isFull();
+	
+	/**
+	 * While this usually will be the same as isFull(), in some cases a Node might be a flag.
+	 * A flag Node will not always consider itself to be full, but it is ready to send.
+	 * @return Whether or not this Node is ready to be either send or read out.
+	 */
+	public boolean isReady();
 	
 	/**
 	 * @return Whether or not this Node considers itself correct.

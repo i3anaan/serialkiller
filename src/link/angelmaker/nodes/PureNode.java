@@ -51,7 +51,7 @@ public class PureNode implements Node.Leaf {
 	}
 
 	@Override
-	public boolean isComplete() {
+	public boolean isFull() {
 		return stored.length()==dataBitCount;
 	}
 
@@ -69,5 +69,10 @@ public class PureNode implements Node.Leaf {
 	@Override
 	public String toString(){
 		return "PureNode["+stored+"]";
+	}
+
+	@Override
+	public boolean isReady() {
+		return isFull();
 	}
 }

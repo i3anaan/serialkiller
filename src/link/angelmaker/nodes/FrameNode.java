@@ -50,7 +50,7 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 		int taken = 0;
 		BitSet2 bitsLeft = (BitSet2) bits.clone();
 		for (int i = 0; i < nodes.length && taken < bits.length(); i++) {
-			if (!nodes[i].isComplete()) {
+			if (!nodes[i].isFull()) {
 				bitsLeft = nodes[i].giveOriginal(bitsLeft);
 			}
 		}
@@ -84,7 +84,7 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 		BitSet2 bitsLeft = (BitSet2) bits.clone();
 		if (!unchanged) {
 			for (int i = 0; i < nodes.length && taken < bits.length(); i++) {
-				if (!nodes[i].isComplete()) {
+				if (!nodes[i].isFull()) {
 					bitsLeft = nodes[i].giveConverted(bitsLeft);
 				}
 			}
@@ -111,10 +111,10 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 	}
 
 	@Override
-	public boolean isComplete() {
+	public boolean isFull() {
 		boolean complete = true;
 		for(Node n: nodes){
-			if(!n.isComplete()){
+			if(!n.isFull()){
 				complete = false;
 			}
 		}
@@ -154,5 +154,18 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 	@Override
 	public String toString(){
 		return "FrameNode"+Arrays.toString(nodes)+"";
+	}
+
+	@Override
+	public boolean isReady() {
+		//TODO FRAME ISREADY NOT WORKING AS EXPECTED.
+		//SEE GRAPH FOR BETTER UNDERSTANDING.
+		boolean ready = true;
+		for(Node n: nodes){
+			if(n.isFull() || n.isReady() || (n instanceof Node.Fillable && ((Node.Fillable)n).isFiller())){
+				ready = false;
+			}
+		}
+		return ready;
 	}
 }

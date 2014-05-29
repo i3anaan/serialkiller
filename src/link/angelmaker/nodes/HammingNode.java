@@ -98,7 +98,7 @@ public class HammingNode implements Node.Fillable, Node.Leaf{
 	}
 
 	@Override
-	public boolean isComplete() {
+	public boolean isFull() {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -118,6 +118,11 @@ public class HammingNode implements Node.Fillable, Node.Leaf{
 	@Override
 	public boolean isFiller() {
 		return stored==FLAG_FILLER_DATA;
+	}
+	@Override
+	public boolean isReady() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

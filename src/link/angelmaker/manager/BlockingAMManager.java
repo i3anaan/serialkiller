@@ -1,5 +1,7 @@
 package link.angelmaker.manager;
 
+import com.sun.media.sound.AlawCodec;
+
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
@@ -31,17 +33,26 @@ public class BlockingAMManager implements AMManager{
 	
 	@Override
 	public void sendNode(Node node) {
-		exchanger.sendBits(node.getConverted());
+		if(node.isReady()){
+			exchanger.sendBits(node.getConverted());
+		}else{
+			AngelMaker.logger.error("Node trying to send is not ready to be send");
+			//TODO;
+		}
 	}
 
 	@Override
 	public Node readNode() {
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
-		while(!node.isComplete()){
+		while(!node.isReady() && !node.isFull()){
 			BitSet2 received = exchanger.readBits();
 			if(received.length()!=0){
 				node.giveConverted(received);
 			}
+		}
+		if(node.isFull() && !node.isReady()){
+			AngelMaker.logger.error("Node full, but not ready to be read.");
+			//TODO;
 		}
 		return node;
 	}

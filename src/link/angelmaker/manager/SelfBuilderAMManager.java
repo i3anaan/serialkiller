@@ -1,7 +1,8 @@
 package link.angelmaker.manager;
 
+import link.angelmaker.AngelMaker;
+import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
-import link.angelmaker.bitexchanger.SelfBuilderExchanger;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
 
@@ -27,16 +28,21 @@ public class SelfBuilderAMManager implements AMManager {
 	 * @param node Node to send.
 	 */
 	@Override
-	public void sendNode(Node node) throws NotSupportedNodeException {
+	public void sendNode(Node node){
 		if(node instanceof Node.SelfBuilding){
-			try {
-				sbExchanger.queueOut.put((Node.SelfBuilding) node);
-			} catch (InterruptedException e) {
-				// TODO HALP??
-				e.printStackTrace();
+			if(node.isReady()){
+				try {
+					sbExchanger.queueOut.put((Node.SelfBuilding) node);
+				} catch (InterruptedException e) {
+					// TODO HALP??
+					e.printStackTrace();
+				}
+			}else{
+				AngelMaker.logger.error("Node trying to send is not ready to be send");
+				//TODO;
 			}
 		}else{
-			throw new NotSupportedNodeException();
+			throw new IncompatibleModulesException();
 		}
 	}
 
