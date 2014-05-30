@@ -51,6 +51,18 @@ public interface AMManager {
 	
 	
 	/**
+	 * @return The Node (most likely) currently being Send.
+	 * Can return null if no Node send yet or unknown.
+	 * TODO check if this works like this, re-think again, maybe do different.
+	 * TODO ALSO: THREAD SAFETY!.
+	 */
+	public Node getCurrentSendingNode();
+	
+	
+	
+	//Extension interfaces
+	
+	/**
 	 * This AMManager works a bit different.
 	 * Instead of just pushing the Nodes to the BitExchanger, this manager waits and only gives a Node when asked for one.
 	 * This is useful (needed) for BitExchanger.AlwaysSending, as these require FillerData if there is no data to send.

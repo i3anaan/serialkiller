@@ -23,12 +23,14 @@ public class SelfBuilderExchanger extends Thread{
 	BitExchanger exchanger;
 	public ArrayBlockingQueue<Node.SelfBuilding> queueOut;
 	public ArrayBlockingQueue<Node.SelfBuilding> queueIn;
+	private Node lastNodeSend;
 	
 	public SelfBuilderExchanger(BitExchanger exchanger){
 		this.exchanger = exchanger;
 	}
 	public void exchangeNode(Node.SelfBuilding nodeToSend){
 		Node.SelfBuilding received = (Node.SelfBuilding)AngelMaker.TOP_NODE_IN_USE.getClone();
+		lastNodeSend = nodeToSend;
 		received.buildSelf(exchanger,nodeToSend);
 		
 		try {
@@ -53,5 +55,12 @@ public class SelfBuilderExchanger extends Thread{
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * @return Node currently being send.
+	 */
+	public Node getCurrentSendingNode(){
+		return lastNodeSend;
 	}
 }

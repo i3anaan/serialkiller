@@ -107,4 +107,12 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		
 		return s;
 	}
+	
+	/**
+	 * Can return null. Depends on AMManager.
+	 * @return The (most likely) currently being send Node. (Or last to have been sent)
+	 */
+	public Node getCurrentSendingNode(){
+		return manager.getCurrentSendingNode();
+	}
 }

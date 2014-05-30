@@ -124,5 +124,9 @@ public class HammingNode implements Node.Fillable, Node.Leaf{
 		// TODO Auto-generated method stub
 		return false;
 	}
+	@Override
+	public String getStateString() {
+		return "CLASS NOT FINISHED";
+	}
 
 }

@@ -158,14 +158,30 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 
 	@Override
 	public boolean isReady() {
-		//TODO FRAME ISREADY NOT WORKING AS EXPECTED.
-		//SEE GRAPH FOR BETTER UNDERSTANDING.
 		boolean ready = true;
 		for(Node n: nodes){
-			if(n.isFull() || n.isReady() || (n instanceof Node.Fillable && ((Node.Fillable)n).isFiller())){
+			if(!(n.isFull() || n.isReady() || this.isFiller())){
 				ready = false;
 			}
 		}
 		return ready;
+	}
+
+	@Override
+	public String getStateString() {
+		String s;
+		if(this.isFull()){
+			s = "Full";
+		}else if(this.isFiller()){
+			s = "Filler";
+		}else if(this.isReady()){
+			s = "Ready";
+		}else if(this.getOriginal().length()==0){
+			s = "Empty";
+		}else{
+			s = "Incomplete";
+		}
+		
+		return s;
 	}
 }

@@ -19,6 +19,7 @@ import util.BitSet2;
 public class BlockingAMManager implements AMManager{
 	BitExchanger exchanger;
 	boolean enabled = false;
+	Node lastNodeSend;
 	
 	public BlockingAMManager(){
 	}
@@ -34,6 +35,7 @@ public class BlockingAMManager implements AMManager{
 	@Override
 	public void sendNode(Node node) {
 		if(node.isReady()){
+			lastNodeSend = node;
 			exchanger.sendBits(node.getConverted());
 		}else{
 			AngelMaker.logger.error("Node trying to send is not ready to be send");
@@ -55,6 +57,11 @@ public class BlockingAMManager implements AMManager{
 			//TODO;
 		}
 		return node;
+	}
+	
+	@Override
+	public Node getCurrentSendingNode() {
+		return lastNodeSend;
 	}
 	
 	

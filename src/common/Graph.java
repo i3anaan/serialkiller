@@ -1,5 +1,7 @@
 package common;
 
+import java.io.File;
+
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.nodes.FrameCeptionNode;
@@ -19,13 +21,18 @@ public class Graph {
 	
 	public static void main(String[] args){
 		//Make example graph.
-		Node node = new FrameCeptionNode<Node>(null, 4);
+		Node node = new FrameCeptionNode<Node>(null, 2);
 		BitSet2 bs = new BitSet2();
-		for(int i=0;i<1570;i++){
+		for(int i=0;i<155;i++){
 			bs.addAtEnd(Math.random()>0.5);
 		}
 		node.giveOriginal(bs);
 		System.out.println(getFullGraphForNode(node, true));
+		
+		String type = "png";
+		File out = new File("graphTest." + type);
+		GraphViz gv = new GraphViz();
+		gv.writeGraphToFile( gv.getGraph( getFullGraphForNode(node, true), type ), out );
 	}
 	
 	
@@ -51,7 +58,7 @@ public class Graph {
 				+ "\n\tflag[label=\""+"Ready, but not full"+"\",fillcolor=\""+readyColor+"\"];"
 				+ "\n\tincomplete[label=\""+"Not full or ready"+"\",fillcolor=\""+notFullColor+"\"];"
 				+ "\n\tfiller[style=\"invis\"];"
-				+ "\n\ttext[label=\""+(sendingNode ? "Class\\nOriginal\\nConverted" : "Class\\nConverted\\nOriginal")+"\",fillcolor=\""+notFullColor+"\"];"
+				+ "\n\ttext[label=\""+(sendingNode ? "Class\\nOriginal\\nConverted\\nState" : "Class\\nConverted\\nOriginal\\nState")+"\",fillcolor=\""+notFullColor+"\"];"
 				+ "\n\t};";
 		return s;
 		
@@ -77,7 +84,8 @@ public class Graph {
 		}
 		String label = base.getClass().getSimpleName()
 				+"\\n"+(sendingNode ? base.getOriginal() : base.getConverted())
-				+"\\n"+(sendingNode ? base.getConverted() : base.getOriginal());
+				+"\\n"+(sendingNode ? base.getConverted() : base.getOriginal())
+				+"\\n"+base.getStateString();
 		String colorToUse = base.isFull() ? (base.isCorrect() ? correctColor : inCorrectColor) : notFullColor;
 		if(colorToUse.equals(notFullColor) && base.isReady()){
 			colorToUse = readyColor;

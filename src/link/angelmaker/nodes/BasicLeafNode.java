@@ -85,5 +85,16 @@ public class BasicLeafNode implements Node.Leaf {
 	public boolean isReady() {
 		return isFull();
 	}
+	
+	@Override
+	public String getStateString() {
+		String s;
+		if (this.isFull()) {
+			s = "Full+Ready";
+		} else {
+			s = "unkown";
+		}
+		return s;
+	}
 
 }
