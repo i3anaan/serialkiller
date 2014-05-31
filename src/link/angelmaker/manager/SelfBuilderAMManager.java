@@ -1,5 +1,6 @@
 package link.angelmaker.manager;
 
+import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
@@ -28,7 +29,9 @@ public class SelfBuilderAMManager implements AMManager {
 	 * @param node Node to send.
 	 */
 	@Override
-	public void sendNode(Node node){
+	public void sendBytes(byte[] bytes){
+		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+		node.giveOriginal(new BitSet2(bytes));
 		if(node instanceof Node.SelfBuilding){
 			if(node.isReady()){
 				try {

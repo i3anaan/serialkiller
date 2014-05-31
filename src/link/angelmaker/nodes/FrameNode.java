@@ -34,7 +34,7 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 		this.parent = parent;
 		nodes = new Node[childNodeCount];
 		for(int i=0;i<nodes.length;i++){
-			nodes[i] = new PureNode(this,8);
+			nodes[i] = new PureNode(this,3);
 			//TODO build childNode from type N > ask Wander.
 		}
 		unchanged = true;

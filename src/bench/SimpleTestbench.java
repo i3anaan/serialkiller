@@ -1,6 +1,9 @@
 package bench;
 
+import common.Graph;
+
 import link.*;
+import link.angelmaker.AngelMaker;
 import link.diag.BytewiseLinkLayer;
 import link.jack.DCFDXLLSSReadSendManager2000;
 import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
@@ -27,9 +30,14 @@ public class SimpleTestbench {
 				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
 					//System.out.println("Sending Byte: "+Bytes.format((byte)(i)));
 					down.sendFrame(new byte[]{(byte)(i)});
-					byte in = down.readFrame()[0];
-					//System.out.println("ReceivedByte: "+Bytes.format(in));
+					byte[] bytes = down.readFrame();
+					if(bytes.length>0){
+					byte in = bytes[0];
 					
+					//System.out.println("ReceivedByte: "+Bytes.format(in));
+					if(down instanceof AngelMaker){
+						//Graph.makeImage(Graph.getFullGraphForNode(((AngelMaker) down).getCurrentSendingNode(), true));
+					}
 					if (in == i) {
 						System.out.print(".");
 						good++;
@@ -41,6 +49,7 @@ public class SimpleTestbench {
 					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
 					
 					System.out.flush();
+					}
 				}
 			}
 		}
@@ -54,8 +63,11 @@ public class SimpleTestbench {
 
 		public void run() {
 			while (true) {
-				byte i = down.readFrame()[0];
+				byte[] bytes = down.readFrame();
+				if(bytes.length>0){
+				byte i = bytes[0];
 				down.sendFrame(new byte[]{i});
+				}
 			}
 		}
 	}
@@ -79,8 +91,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		FrameLinkLayer a = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new DelayPhysicalLayer(vpla))));
-		FrameLinkLayer b = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new DelayPhysicalLayer(vplb))));
+		FrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(vpla));
+		FrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(vplb));
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

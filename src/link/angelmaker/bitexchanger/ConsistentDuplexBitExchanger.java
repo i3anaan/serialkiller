@@ -6,6 +6,7 @@ import phys.PhysicalLayer;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.manager.AMManager;
+import link.angelmaker.nodes.Node;
 import link.jack.Frame;
 import util.BitSet2;
 
@@ -56,14 +57,16 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 			throw new IncompatibleModulesException();
 		}
 		this.start();
-		
 	}
 	
 	
 	@Override
 	public void sendBits(BitSet2 bits) {
 		for (int i = 0; i < bits.length(); i++) {
-			queueOut.add(bits.get(i));
+			//if(!queueOut.offer(bits.get(i))){
+			//	AngelMaker.logger.warning("BitExchanger Queue Full!");;
+			//}
+			//TODO when full.
 		}
 	}
 
@@ -77,11 +80,16 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 	public BitSet2 readBits() {
 		BitSet2 result = new BitSet2();
 		Boolean bit = queueIn.poll();
+		
 		while (bit != null) {
 			result.addAtEnd(bit);
 			bit = queueIn.poll();
 		}
-		return result;
+		//return result;
+		//TODO debug toolish:
+		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+		node.giveOriginal(new BitSet2(new byte[]{22}));
+		return node.getConverted();
 	}
 
 	@Override
@@ -96,13 +104,17 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 
 	public void run() {
 		Thread.currentThread().setName("BitExchanger");
+		
+		
 		while (true) {
 			boolean bitExchangeSuccesful = false;
 			Boolean bitToSendNext = queueOut.poll();
-			
+			boolean sentFirstBit = false;
+			//System.out.print(bitToSendNext ? "1" : "0");
 			if (bitToSendNext == null) {
-				sendBits(manager.getNextNode().getConverted());
+				//sendBits(manager.getNextNode().getConverted());
 			} else {
+				
 				while (!bitExchangeSuccesful) {
 					try {
 						if (!connectionSync) {
@@ -110,22 +122,28 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 						}
 
 						byte byteSent = NO_BYTE;
-						if (connectionRole == MASTER) {
+						if (connectionRole == MASTER || sentFirstBit) {
 							byteSent = sendBit(bitToSendNext);
 						}
 
 						try {
 							byte receivedByte = NO_BYTE;
 							receivedByte = readByte();
+							if(connectionRole == MASTER){
+								//System.out.print(previousByteReceived);
+							}
 							// Succsefully exchanged a bit.
 							if (byteSent != NO_BYTE) {
 								previousByteSent = byteSent;
 							}
 							if (receivedByte != NO_BYTE) {
-								queueIn.add(extractBitFromInput(receivedByte) == 1);
+								boolean bitReceived = extractBitFromInput(receivedByte) == 1;
+								
+								queueIn.offer(bitReceived);
 								previousByteReceived = receivedByte;
 							}
 							bitExchangeSuccesful = true;
+							sentFirstBit = true;
 						} catch (TimeOutException e) {
 							// Timedout in reading, try again (send same byte
 							// again).
@@ -143,13 +161,15 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 	private byte sendBit(boolean bit) {
 		byte byteToSend = adaptBitToPrevious(bit);
 		down.sendByte(byteToSend);
+		
 		return byteToSend;
 	}
 
 	private byte readByte() throws TimeOutException {
 		byte input = down.readByte();
 		long waitTime = TIMEOUT_NO_NEW_BIT_NANO + System.nanoTime();
-		while (!(getStableInput() == previousByteReceived)) {
+		
+		while (!(getStableInput() != previousByteReceived)) {
 			input = down.readByte();
 			if (System.nanoTime() > waitTime) {
 				throw new TimeOutException();

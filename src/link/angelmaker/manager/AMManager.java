@@ -38,10 +38,12 @@ public interface AMManager {
 	public void enable();
 	
 	/**
-	 * Sends the Converted data from a node.
-	 * @param node	Node to send.
+	 * Give the AMManager bytes (data) to be send.
+	 * Its up to the AMManager to decide how and when to send this.
+	 * Usually however this gets put into a Node, and then the converted data will be gotten.
+	 * @param bytes	bytes[] to send.
 	 */
-	public void sendNode(Node node)  throws NotSupportedNodeException;
+	public void sendBytes(byte[] bytes);
 	
 	/**
 	 * @return A completed Node.

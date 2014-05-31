@@ -1,18 +1,22 @@
 package link.angelmaker;
 
 import java.io.File;
+import java.util.Arrays;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
+import phys.PhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 import util.BitSet2;
+import util.Bytes;
 import common.Graph;
 import common.Stack;
 import common.Startable;
 import link.FrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.ConsistentDuplexBitExchanger;
+import link.angelmaker.bitexchanger.DummyBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
@@ -32,30 +36,32 @@ import log.LogMessage.Subsystem;
 //TODO implement this class more serious.
 public class AngelMaker extends FrameLinkLayer implements Startable{
 	
-	public static Node TOP_NODE_IN_USE;
+	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
 	public BitExchanger bitExchanger;
 	private Stack stack;
-	private static int graphID;
+	
+	public AngelMaker(PhysicalLayer phys){
+		setup(phys);
+	}
+	
 	
 	@Override
 	public void sendFrame(byte[] data) {
-		Node newNode = TOP_NODE_IN_USE.getClone();
-		newNode.giveOriginal(new BitSet2(data));
-		System.out.println("NewNode = "+newNode);
-		try {
-			manager.sendNode(newNode);
-		} catch (NotSupportedNodeException e) {
-			//Incompatible modules.
-			//TODO maybe make this impossible, this is kind of ugly.
-			e.printStackTrace();
-		}		
+		//System.out.println("ANGEL_MAKER sending data: "+Bytes.format(data[0]));
+		manager.sendBytes(data);
 	}
 
 	@Override
 	public byte[] readFrame() {
-		return manager.readNode().getOriginal().toByteArray();
+		
+		byte[] result = manager.readNode().getOriginal().toByteArray();
+		//while(result.length==0){
+		//	result = manager.readNode().getOriginal().toByteArray();
+		//}
+		//System.out.println("Returning bytes:  "+Arrays.toString(result));
+		return result;
 	}
 
 	@Override
@@ -67,30 +73,31 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	@Override
 	public Thread start(Stack stack) {
 		this.stack = stack;
-		setup();
+		setup(stack.physLayer);
 		return null;
 	}
 	
 	
-	public void setup(){
+	public void setup(PhysicalLayer phys){
 		
 		//TODO severities set correct?
 		//TODO thread name on AMManger is TPPHandler, why is this?
 		logger.info("Setting up ANGEL_MAKER");
 		try{
 		//TOP_NODE_IN_USE = new FrameNode<Node>(null, 10);
-		TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 1);
+		TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
 		logger.debug("Top Node build.");
 		manager = new BlockingAMManagerServer();
 		logger.debug("Manager constructed.");
-		bitExchanger = new ConsistentDuplexBitExchanger(stack.physLayer, manager);
+		//bitExchanger = new ConsistentDuplexBitExchanger(phys, manager);
+		bitExchanger = new DummyBitExchanger();
 		logger.debug("BitExchanger constructed.");
 		manager.setExchanger(bitExchanger);
 		logger.debug("Handed exchanger to manager.");
 		manager.enable();
 		logger.debug("Manager enabled.");
 		
-		System.out.println("\n\n"+Graph.getFullGraphForNode(TOP_NODE_IN_USE,true)+"\n\n");
+		//System.out.println("\n\n"+Graph.getFullGraphForNode(TOP_NODE_IN_USE,true)+"\n\n");
 		logger.info("All done and ready for use.");
 		}catch(IncompatibleModulesException e){
 			logger.bbq("Incompatible modules. ANGEL_MAKER could not start.");

@@ -30,7 +30,7 @@ public class BitSet2 extends BitSet {
 	public BitSet2(byte[] arr){
 		for(int i=0;i<arr.length;i++){
 			for(int bit=0;bit<8;bit++){
-				this.set(i*8+bit,((arr[i]>>bit)&1)==1);
+				this.set(i*8 +(7-bit),((arr[i]>>bit)&1)==1);
 			}
 		}
 		//TODO unit test dit.

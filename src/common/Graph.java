@@ -41,6 +41,13 @@ public class Graph {
 		return "node[shape=\""+shape+"\",fillcolor=\""+baseColor+"\",style=\""+style+"\",fontname=\""+fontName+"\"];";
 	}
 	
+	public static void makeImage(String graph){
+		String type = "png";
+		File out = new File("graphTest." + type);
+		GraphViz gv = new GraphViz();
+		gv.writeGraphToFile( gv.getGraph( graph, type ), out );
+	}
+	
 	public static String getFullGraphForNode(Node node,boolean sendingNode){
 		StringBuilder sb = new StringBuilder();
 		sb.append("digraph status{"+"\n");
