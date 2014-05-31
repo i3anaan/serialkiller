@@ -1,7 +1,5 @@
 package link.angelmaker.manager;
 
-import com.sun.media.sound.AlawCodec;
-
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
@@ -22,6 +20,7 @@ public class BlockingAMManager implements AMManager{
 	BitExchanger exchanger;
 	boolean enabled = false;
 	Node lastNodeSend;
+	Node lastNodeReceived;
 	
 	public BlockingAMManager(){
 	}
@@ -37,10 +36,7 @@ public class BlockingAMManager implements AMManager{
 	@Override
 	public void sendBytes(byte[]  bytes) {
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
-		//System.out.println("BlockingAMManager: "+Bytes.format(bytes[0]));
-		//System.out.println("BlockingAMManager: "+new BitSet2(bytes));
 		node.giveOriginal(new BitSet2(bytes));
-		//AngelMaker.logger.debug("Sending new Node: "+node);
 		if(node.isReady()){
 			lastNodeSend = node;
 			exchanger.sendBits(node.getConverted());
@@ -53,6 +49,7 @@ public class BlockingAMManager implements AMManager{
 	@Override
 	public Node readNode() {
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+		lastNodeReceived = node;
 		do{
 			BitSet2 received = exchanger.readBits();
 			if(received.length()!=0){
@@ -70,4 +67,9 @@ public class BlockingAMManager implements AMManager{
 	public Node getCurrentSendingNode() {
 		return lastNodeSend;
 	}	
+	
+	@Override
+	public Node getCurrentReceivingNode() {
+		return lastNodeReceived;
+	}
 }

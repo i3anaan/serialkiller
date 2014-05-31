@@ -35,22 +35,15 @@ public class BitExchangerTest {
 		for(int bit = 0;bit<300;bit++){
 			send.addAtEnd(Math.random()>0.5);
 		}
-		//System.out.println("Sending: "+send);
-		System.out.println(send);
 		beA.sendBits(send);
 		beB.sendBits(send);
 		BitSet2 received = new BitSet2();
 		while(received.length()<300){
 			received = BitSet2.concatenate(received, beB.readBits());
 			if(received.length()>0){
-
-				//System.out.println("Send:\t"+send);
-				//System.out.println("Rcved:\t"+received);
 			}
 		}
-		
-		//System.out.println("Send:\t"+send);
-		//System.out.println("Rcved:\t"+received);
+		assertEquals(send,received);
 	}
 
 }

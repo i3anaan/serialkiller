@@ -60,6 +60,14 @@ public interface AMManager {
 	 */
 	public Node getCurrentSendingNode();
 	
+	/**
+	 * @return The Node (most likely) currently being Received.
+	 * Can return null if no Node received yet or unknown.
+	 * TODO check if this works like this, re-think again, maybe do different.
+	 * TODO ALSO: THREAD SAFETY!.
+	 */
+	public Node getCurrentReceivingNode();
+	
 	
 	
 	//Extension interfaces

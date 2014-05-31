@@ -61,7 +61,12 @@ public class SelfBuilderAMManager implements AMManager {
 	}
 	@Override
 	public Node getCurrentSendingNode() {
-		return null;
+		return sbExchanger.getCurrentSendingNode();
+	}
+	@Override
+	public Node getCurrentReceivingNode() {
+		// TODO Auto-generated method stub
+		return sbExchanger.getCurrentReceivingNode();
 	}
 
 }
