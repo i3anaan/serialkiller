@@ -287,6 +287,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 if (p.header().getAck() && p.header().getDestination() == router.self()) {
                     sentLock.lock();
                     sent.get(p.header().getAcknum()).remove(p.header().getSegnum());
+
+                    if (!inRoute.containsKey(p.header().getSender())) {
+                        inRoute.put(p.header().getSender(), 0);
+                    }
+                    inRoute.put(p.header().getSender(), Math.max(inRoute.get(p.header().getSender()) - 1, 0));
+
                     sentLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
                 } else if (p.header().getDestination() == router.self()) {
