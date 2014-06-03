@@ -1,6 +1,7 @@
 package test;
 
 import com.google.common.base.Charsets;
+import common.Graph;
 
 import link.FrameLinkLayer;
 import link.angelmaker.AngelMaker;
@@ -13,6 +14,7 @@ import link.jack.JackTheRipper;
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
+import util.Bytes;
 
 public class ReceiveTest {
 
@@ -26,9 +28,11 @@ public class ReceiveTest {
 
 		while (true) {
 			byte[] receivedBytes = am.readFrame();
+			
 			if (receivedBytes.length > 0) {
+				System.out.println(Bytes.format(receivedBytes[0]));
 				String received = new String(receivedBytes, Charsets.US_ASCII);
-				System.out.println(received);
+				//System.out.println(received);
 			}
 		}
 	}

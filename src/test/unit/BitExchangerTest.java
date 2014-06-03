@@ -9,15 +9,26 @@ import link.angelmaker.manager.BlockingAMManagerServer;
 
 import org.junit.Test;
 
+import phys.diag.NullPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 import util.BitSet2;
 
 public class BitExchangerTest {
 	
 	@Test
+	public void testSimpleBitExchanger(){
+		SimpleBitExchanger e = new SimpleBitExchanger(new NullPhysicalLayer(), new BlockingAMManagerServer());
+		for(int i=0;i<4;i++){
+			for(int b=0;b<2;b++){
+				assertTrue((b==1)==e.extractBitFromInput(e.adaptBitToPrevious(((byte)i),b==1)));
+			}
+		}
+	}
+	
+	@Test
 	public void testBitExchanger() {
 		VirtualPhysicalLayer vpla, vplb;
-		int bitAmount = 300;
+		int bitAmount = 1000;
 		
 		vpla = new VirtualPhysicalLayer();
 		vplb = new VirtualPhysicalLayer();
@@ -39,13 +50,26 @@ public class BitExchangerTest {
 		}
 		beA.sendBits(send);
 		beB.sendBits(send);
-		BitSet2 received = new BitSet2();
-		while(received.length()<bitAmount){
-			received = BitSet2.concatenate(received, beB.readBits());
-			if(received.length()>0){
+		BitSet2 receivedA = new BitSet2();
+		while(receivedA.length()<bitAmount){
+			receivedA = BitSet2.concatenate(receivedA, beA.readBits());
+			if(receivedA.length()>0){
 			}
 		}
-		assertEquals(send,received);
+		receivedA = receivedA.get(0,bitAmount);
+		BitSet2 receivedB = new BitSet2();
+		while(receivedB.length()<bitAmount){
+			BitSet2 read = beB.readBits();
+			receivedB = BitSet2.concatenate(receivedB, read);
+			if(read.length()>0){
+			}
+		}
+		receivedB = receivedB.get(0,bitAmount);
+		System.out.println("Original:\t"+send);
+		System.out.println("A:\t\t"+receivedA);
+		System.out.println("B:\t\t"+receivedB);
+		assertEquals(receivedA,receivedB);
+		assertEquals(send,receivedA);
 	}
 
 }

@@ -182,8 +182,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @param nextData The next dataBit to be send.
 	 * @return	The byte representing this dataBit to be placed on the physical layer.
 	 */
-	public byte adaptBitToPrevious(boolean nextData) {
-		return (byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0));
+	public byte adaptBitToPrevious(byte previousByte,boolean nextData) {
+		return (byte)(((previousByte^2)&-2)|(nextData ? 1 : 0));
 		//TODO test.
 	}
 	
@@ -191,7 +191,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @param input The byte read from the physical layer.
 	 * @return	The data bit this byte represents.
 	 */
-	private boolean extractBitFromInput(byte input){
+	public boolean extractBitFromInput(byte input){
 		return (input&1)==1;
 		//TODO test;
 	}
@@ -214,7 +214,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 					this.sendBits(requested.getConverted());
 					sendNext = queueOut.poll();
 				}
-				byte byteToSendNext = adaptBitToPrevious(sendNext);
+				byte byteToSendNext = adaptBitToPrevious(previousByteSent,sendNext);
 				down.sendByte(byteToSendNext);
 				previousByteSent = byteToSendNext;
 			}

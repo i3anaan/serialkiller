@@ -1,5 +1,7 @@
 package link.angelmaker.manager;
 
+import common.Graph;
+
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
