@@ -35,14 +35,17 @@ public class BlockingAMManager implements AMManager{
 	
 	@Override
 	public void sendBytes(byte[]  bytes) {
-		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
-		node.giveOriginal(new BitSet2(bytes));
-		if(node.isReady()){
-			lastNodeSend = node;
-			exchanger.sendBits(node.getConverted());
-		}else{
-			AngelMaker.logger.error("Node trying to send is not ready to be send");
-			//TODO;
+		BitSet2 remaining = new BitSet2(bytes);
+		while(remaining.length()>0){
+			Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+			remaining = node.giveOriginal(remaining);
+			if(node.isReady()){
+				lastNodeSend = node;
+				exchanger.sendBits(node.getConverted());
+			}else{
+				AngelMaker.logger.error("Node trying to send is not ready to be send");
+				//TODO;
+			}
 		}
 	}
 

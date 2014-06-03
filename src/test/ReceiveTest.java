@@ -17,14 +17,14 @@ import phys.PhysicalLayer;
 public class ReceiveTest {
 
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptErrorHardwareLayer();
+		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
 		FrameLinkLayer am = new AngelMaker(phys, null, manager, new SimpleBitExchanger(phys, manager));
 		System.out.println(am);
 		System.out.println("BEGIN TEST");
 		
 		while (true) {
-			String received = new String(am.readFrame(),Charsets.UTF_8);
+			String received = new String(am.readFrame(),Charsets.US_ASCII);
 			System.out.println(received);
 		}
 	}

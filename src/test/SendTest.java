@@ -1,4 +1,6 @@
 package test;
+import com.google.common.base.Charsets;
+
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
@@ -17,15 +19,17 @@ public class SendTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptErrorHardwareLayer();
+		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
 		FrameLinkLayer am = new AngelMaker(phys, null, manager, new SimpleBitExchanger(phys, manager));
 		System.out.println(am.toString());
-		System.out.println("Sending:\nSuch test, such amazing, wow, up to 420 gigadoge! #swag\n");
+		String stringToSend = "Sending:\nSuch test, such amazing, wow, up to 420 gigadoge! #swag\n";
+		byte[] bytesToSend = stringToSend.getBytes(Charsets.US_ASCII);
+		System.out.println(stringToSend+"\n["+stringToSend.length()+","+bytesToSend.length+"]\n");
 		System.out.println("START SENDING");
 		
 		while(true){
-			am.sendFrame("Such test, such amazing, wow, up to 420 gigadoge! #swag\n".getBytes());
+			am.sendFrame(bytesToSend);
 		}
 	}
 }

@@ -8,6 +8,7 @@ import link.angelmaker.manager.AMManager;
 import link.angelmaker.nodes.Node;
 import phys.PhysicalLayer;
 import util.BitSet2;
+import util.Bytes;
 
 /**
  * Right bit is always the data bit.
@@ -181,7 +182,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @param nextData The next dataBit to be send.
 	 * @return	The byte representing this dataBit to be placed on the physical layer.
 	 */
-	private byte adaptBitToPrevious(boolean nextData) {
+	public byte adaptBitToPrevious(boolean nextData) {
+		System.out.println("PreviousByteSent = "+Bytes.format(previousByteSent));
+		System.out.println("Sending: "+Bytes.format((byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0))));
+		System.out.println(Bytes.format((byte)(previousByteSent^2)));
+		System.out.println(Bytes.format((byte)((previousByteSent^2)&-2)));
+		System.out.println(Bytes.format((byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0))));
 		return (byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0));
 		//TODO test.
 	}
@@ -191,6 +197,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return	The data bit this byte represents.
 	 */
 	private boolean extractBitFromInput(byte input){
+		System.out.println("Reading: "+(((input&1)==1) ? "1" : "0"));
 		return (input&1)==1;
 		//TODO test;
 	}
@@ -215,6 +222,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				}
 				byte byteToSendNext = adaptBitToPrevious(sendNext);
 				down.sendByte(byteToSendNext);
+				previousByteSent = byteToSendNext;
 			}
 			
 			
