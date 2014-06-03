@@ -16,6 +16,8 @@ extends 	Dialog
 	private		JPanel		panel2;
 	private		JPanel		panel3;
 	private		JTextField 	nameField;
+	
+	/** The Application GUI parent of this Component */
 	private		GUI			gui;
 
 

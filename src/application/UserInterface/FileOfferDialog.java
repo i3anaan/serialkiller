@@ -15,7 +15,6 @@ import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -27,7 +26,6 @@ public class FileOfferDialog extends Dialog implements EventListener{
 	
 	
 	// Private variables
-	private		boolean		done = false;
 	private		String 		result = null;
 	private 	Preferences prefs;
 	private		JPanel		panel1;
@@ -68,19 +66,19 @@ public class FileOfferDialog extends Dialog implements EventListener{
 		labelSender.setBounds( 10, 5, 150, 20 );
 		panel1.add( labelSender );
 		JLabel lsender 		= new JLabel(sender);
-		lsender.setBounds( 160, 5, 150, 20 );
+		lsender.setBounds( 100, 5, 250, 20 );
 		panel1.add( lsender );
 		JLabel labelName 	= new JLabel("File Name:");
 		labelName.setBounds( 10, 20, 150, 20 );
 		panel1.add( labelName );
 		JLabel lname 		= new JLabel(name);
-		lname.setBounds( 160, 20, 150, 20 );
+		lname.setBounds( 100, 20, 250, 20 );
 		panel1.add( lname );
 		JLabel labelSize 	= new JLabel("File Size:");
 		labelSize.setBounds( 10, 35, 150, 20 );
 		panel1.add( labelSize );
-		JLabel lsize 		= new JLabel(Integer.toString(size) + " byte");
-		lsize.setBounds( 160, 35, 150, 20 );
+		JLabel lsize 		= new JLabel(Integer.toString(size) + " Bytes");
+		lsize.setBounds( 100, 35, 250, 20 );
 		panel1.add( lsize );
 		JSeparator sep = new JSeparator();
 		sep.setBounds( 10, 55, 380, 20 );
@@ -92,7 +90,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 		label1.setBounds( 10, 65, 150, 20 );
 		panel1.add( label1 );
 		field.setText(prefs.get("LAST_OUTPUT_DIR", ""));
-		field.setBounds( 10, 85, 250, 20 );
+		field.setBounds( 10, 85, 250, 25 );
 		panel1.add( field );
 
 		// Cancel Transfer
@@ -116,10 +114,10 @@ public class FileOfferDialog extends Dialog implements EventListener{
 				jFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				int rVal = jFileChooser.showDialog(FileOfferDialog.this, "Select");
 				if (rVal == JFileChooser.APPROVE_OPTION) {
-					File mostRecentOutputDirectory = jFileChooser.getSelectedFile();
-				    field.setText(mostRecentOutputDirectory.getAbsolutePath());
-				    prefs.put("LAST_OUTPUT_DIR", mostRecentOutputDirectory.getAbsolutePath());
-				    result = mostRecentOutputDirectory.getAbsolutePath();
+					File lastOutputDir = jFileChooser.getSelectedFile();
+				    field.setText(lastOutputDir.getAbsolutePath());
+				    prefs.put("LAST_OUTPUT_DIR", lastOutputDir.getAbsolutePath());
+				    result = lastOutputDir.getAbsolutePath();
 
 				}
 			}
@@ -153,7 +151,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 	 * @return path to save file to OR null if the offer is rejected
 	 */
 	public String openFileOfferDialog(String sender, String name, int size){
-		
+		//TODO fix redundancy
 		return null;
 		
 	}

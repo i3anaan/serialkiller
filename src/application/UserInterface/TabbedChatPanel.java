@@ -3,12 +3,9 @@ package application.UserInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 
 import com.google.common.collect.HashBiMap;
 
@@ -27,6 +24,9 @@ public class TabbedChatPanel extends JPanel{
 
 	// private variables
 	private GUI gui;
+	
+	/** Indicates if this components has finished initializing */
+	private boolean isReady;
 
 
 	public TabbedChatPanel(GUI gu) {
@@ -52,7 +52,8 @@ public class TabbedChatPanel extends JPanel{
 		};
 		topPanel.add(tabbedPane, BorderLayout.CENTER);
 
-
+		// Set component to ready
+		isReady = true;
 	}
 
 	/**
@@ -120,6 +121,14 @@ public class TabbedChatPanel extends JPanel{
 			//TODO throw error
 			System.out.println("ChatPanel has failed to initialize");
 		}
+	}
+	
+	/** 
+	 * Method determine if this component has finished initializing
+	 * @return boolean
+	 */
+	public boolean isReady(){
+		return isReady;
 	}
 
 }

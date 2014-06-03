@@ -1,13 +1,18 @@
 package application;
 
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Observable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.SizeLimitExceededException;
+import javax.swing.Timer;
 
 import com.google.common.base.Charsets;
 import com.google.common.cache.Cache;
@@ -39,8 +44,11 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	private Thread thread;
 
 	/** Cash containing all the hosts we are offering files, mapped to the FileOfferPayload we made them */
-	Cache<String, Payload> fileOfferCache;
+	private Cache<String, Payload> fileOfferCache;
 
+	/** Cash containing all the hosts that are offering files, mapped to the FileOfferPayload they made us */
+	private Cache<String, Payload> offeredFileCache;
+	
 	/** byte value of a chat flag */
 	private static final byte chatCommand = 'C';
 
@@ -80,6 +88,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// All file offers expire after 30 minutes.
 				.expireAfterWrite(30, TimeUnit.MINUTES)
 				.build();
+		
+		// Construct our offeredFileCache
+				offeredFileCache = CacheBuilder.newBuilder()
+						.maximumSize(42)
+						.expireAfterWrite(30, TimeUnit.MINUTES)
+						.build();
 
 
 
@@ -106,6 +120,9 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			case fileOfferCommand: 
 				// Received a file transfer offer.
 				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
+				
+				//TODO 01 BUILD CACHE HERE?
+				
 				setChanged();
 				notifyObservers(offer);
 				logger.debug("Received FileOffer: " + p + "From host: " + p.address);
@@ -136,7 +153,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			case fileTransferCommand:
 				// Someone is sending us a file. Write the file to our disk.
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
-				//TODO investigate if current handling by GUI is desired
+				
+				//TODO 01 check if file was offered before
+				
+				//TODO 02 investigate if current handling by GUI is desired
 				logger.debug("Started File Transfer: " + p);
 				setChanged();
 				notifyObservers(fm);
@@ -167,7 +187,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 
 			default:
-				// TODO find ways to catch invalid commands in a more refined manner
+				// TODO 03 find ways to catch invalid commands in a more refined manner
 				throw new CommandNotFoundException(String.format("command: %c", command));
 			}
 		}  catch (CommandNotFoundException e) {
@@ -190,7 +210,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		byte[] fileData = Files.toByteArray(new File(strFilePath));
 
 		// Split the string and retrieve only the filename in bytes
-		String[] nameParts = strFilePath.split("\\\\");
+		String[] nameParts = strFilePath.split("/");
 		String fileName = nameParts[nameParts.length -1];
 		byte[] byteName = fileName.getBytes(Charsets.UTF_8);
 
@@ -299,32 +319,68 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 */
 	public Collection<Byte> getHosts() {
 		Collection<Byte> hostCollection = networkLayer.hosts();
-		
-		//TODO fix NPE for WHOIS
-//		for (Byte h : hostCollection) {
-//			byte[] data = new byte[1];
-//			System.out.println("DEBUG--------- Value of data = " + data);
-//			System.out.println(h);
-//			data[0] = WHOISrequestCommand;
-//			try {
-//				networkLayer.send(new Payload(data, h));
-//				logger.debug("WHOIS Request Sent to: " + h + ".");
-//			} catch (SizeLimitExceededException e) {
-//				logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
-//				e.printStackTrace();
-//			}
-//		}
+
+		// Send a WHOIS for each host in the collection
+		for (Byte h : hostCollection) {
+			byte[] data = new byte[1];
+			data[0] = WHOISrequestCommand;
+			try {
+				networkLayer.send(new Payload(data, h));
+				logger.debug("WHOIS Request Sent to: " + h + ".");
+			} catch (SizeLimitExceededException e) {
+				logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
+				e.printStackTrace();
+			}
+		}
 		return hostCollection;
+	}
+
+	/**
+	 * CURRENTLY DEPRECIATED
+	 * Sends out a WHOIS message to all hosts in our hostCollection after
+	 * a given delay in seconds.
+	 * @param delay
+	 */
+	public void sendWHOIS(int delay){
+
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+		// Create a runnable that we can execute
+		final Runnable WHOIS = new Runnable() {
+			public void run() {
+				// Get the collection of all the hosts so we can WHOIS them
+				Collection<Byte> hostCollection = getHosts();
+
+				// Send a WHOIS for each host in the collection
+				for (Byte h : hostCollection) {
+					byte[] data = new byte[1];
+					System.out.println("DEBUG--------- Value of data = " + data);
+					System.out.println(h);
+					data[0] = WHOISrequestCommand;
+					try {
+						networkLayer.send(new Payload(data, h));
+						logger.debug("WHOIS Request Sent to: " + h + ".");
+					} catch (SizeLimitExceededException e) {
+						logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+
+		ScheduledFuture<?> scheduledWHOIS = scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
+		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
+		//scheduledWHOIS.cancel(false);
 	}
 
 	@Override
 	public Thread start(Stack stack) {
 		networkLayer = stack.networkLayer;
-		
+
 		logger.info(networkLayer.toString());
 		logger.info("ApplicationLayer started.");
-		
-        thread.start();
+
+		thread.start();
 
 		return thread;
 	}

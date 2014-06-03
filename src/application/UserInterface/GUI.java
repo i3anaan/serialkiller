@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -22,15 +20,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
-import com.google.common.base.Charsets;
-
 import log.LogMessage;
 import log.Logger;
 import application.ApplicationLayer;
 import application.message.*;
 
 
-public class GUI extends JFrame implements ActionListener, ItemListener, Observer{
+public class GUI extends JFrame implements Observer{
 
 	// private variables
 	
@@ -50,10 +46,6 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	public GUI(ApplicationLayer applicationLayer){
 		super("G.A.R.G.L.E.");
 		apl = applicationLayer;
-		
-		// Setup Observer/Observable relation
-		apl.addObserver(this);
-		
 
 		// Initialize initial variables
 		prefs 				= Preferences.userNodeForPackage(getClass());
@@ -78,6 +70,8 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		}
 				);
 
+		// Start observable relation and make GUI ready for interaction
+		Start();
 		pack();
 		validate();
 		setVisible(true);
@@ -230,46 +224,49 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	/** Loads a collection holding a list of hosts into the gui */
 	public Collection<Byte> loadHostList(){
 		return apl.getHosts();
-	}
-	
-	// Event Methods
-	
-	@Override
-	public void itemStateChanged(ItemEvent e) {
 		
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
+	
+	// Starter of the GUI
+	private void Start(){
+		while(!cp.isReady() || !ulp.isReady()){
+			System.out.println("NOT READY!");
+		}
+	// Setup Observer/Observable relation
+			apl.addObserver(this);
+			loadHostList();
+			System.out.println("READY!!!");
 	}
+	// Update Event Methods
 
 	@Override
 	public void update(Observable o, Object arg) {
 
-
+		// Chat message has been received
+		
 		if(arg instanceof ChatMessage){
-			//TODO also NPE, ULP DOES exist though
 			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
 			
 		}
+		
+		// File offer has been received
+		
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
 			
-			//TODO test if this actually works
-			String filePath = saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+			//TODO test MORE
+			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
 				//TODO temporary, look for prettier solution
 				FileTransferMessage fm = new FileTransferMessage(((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getPayload());
 				apl.writeFile(fm, filePath);
 			}
 		}
+		
+		// WHOIS response has been received
+		
 		else if(arg instanceof IdentificationMessage){
-			// TODO Debug UserList is still null here
-			System.out.println(getUserList());
-			
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
 		}
 
