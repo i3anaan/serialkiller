@@ -26,15 +26,22 @@ public class ReceiveTest {
 		System.out.println(am);
 		System.out.println("BEGIN TEST");
 
+		byte[] totalReceived = new byte[65];
+		int currentIndex = 0;
+		
 		while (true) {
 			byte[] receivedBytes = am.readFrame();
 			
 			if (receivedBytes.length > 0) {
+				System.arraycopy(receivedBytes, 0, totalReceived, currentIndex, receivedBytes.length);
+				currentIndex = currentIndex + receivedBytes.length;
 				for(byte b : receivedBytes){
 					System.out.println(Bytes.format(b));
 				}
-				String received = new String(receivedBytes, Charsets.US_ASCII);
-				//System.out.println(received);
+				String received = new String(totalReceived, Charsets.UTF_8);
+				System.out.println(received);
+				//Se, 420 gigadoge! #swag
+
 			}
 		}
 	}

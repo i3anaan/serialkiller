@@ -6,8 +6,6 @@ import link.angelmaker.nodes.FrameCeptionNode;
 import link.angelmaker.nodes.FrameNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.PureNode;
-
-import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
 
 import util.BitSet2;
@@ -17,7 +15,7 @@ public class NodeTest {
 	@Test
 	public void testGeneral() {
 		Node root = new PureNode(null,1);
-		Node[] nodes = new Node[]{new PureNode(root,80),new FrameNode<Node>(root, 10),new FrameCeptionNode<Node>(root,2)};
+		Node[] nodes = new Node[]{new PureNode(root,80),new FrameNode<Node>(root, 10),new FrameCeptionNode<Node>(root,2),new FrameCeptionNode<Node>(root, 0)};
 		BitSet2 data = new BitSet2(new byte[]{0,-7,127,-128,-1,10,4,-6,2,8,3,7});
 		for(Node base : nodes){
 			System.out.println("Testing: " +base);
@@ -37,6 +35,7 @@ public class NodeTest {
 				}
 				assertTrue(data!=unused);
 				assertEquals(stored,n.getOriginal());
+				assertEquals(data,BitSet2.concatenate(n.getOriginal(), unused));
 				clone.giveConverted(n.getConverted());
 				if(n.isFull()){
 					assertEquals(n.getOriginal(),clone.getOriginal());
@@ -108,6 +107,10 @@ public class NodeTest {
 				//test filling.
 			}
 		}
+	}
+	
+	@Test
+	public void testPureNode(){
 	}
 
 }

@@ -256,4 +256,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public class TimeOutException extends Exception{
 		
 	}
+	
+	public String toString(){
+		return "SimpleBitExchanger, using: "+down.toString();
+	}
 }

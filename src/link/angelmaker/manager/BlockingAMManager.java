@@ -57,7 +57,7 @@ public class BlockingAMManager implements AMManager{
 		lastNodeReceived = node;
 		do{
 			BitSet2 received = exchanger.readBits();
-			if(received.length()!=0){
+			if(received.length()>0){
 				node.giveConverted(received);
 			}
 		}while(!(node.isReady() || node.isFull()));
