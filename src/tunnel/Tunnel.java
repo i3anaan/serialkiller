@@ -266,7 +266,9 @@ public class Tunnel implements Runnable {
                     // Verify packet.
                     if (p.verify()) {
                         // Add packet to queue.
-                        tunnel.in.add(p);
+                        if (!tunnel.in.offer(p)) {
+                            Tunneling.getLogger().error(p.toString() + " dropped, queue full.");
+                        }
                     } else if (p.reason() != null) {
                         // We are out of sync, stop.
                         Tunneling.getLogger().alert(tunnel.toString() + " received invalid packet (" + p.reason().toString() + ").");
