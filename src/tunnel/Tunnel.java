@@ -117,7 +117,7 @@ public class Tunnel implements Runnable {
      */
     public void offer(Packet p) {
         if (!out.offer(p)) {
-            Tunneling.getLogger().warning(p.toString() + " dropped, " + toString() + " queue full.");
+            Tunneling.getLogger().alert(p.toString() + " dropped, " + toString() + " queue full.");
         }
     }
 
@@ -133,13 +133,13 @@ public class Tunnel implements Runnable {
     public boolean connect(boolean force) {
         boolean success = true;
 
-        Tunneling.getLogger().debug("Connecting " + toString() + ".");
+        Tunneling.getLogger().info("Connecting " + toString() + ".");
 
         if (socket == null || force) {
             try {
                 resetSocket();
             } catch (IOException e) {
-                Tunneling.getLogger().error("Unable to set up " + toString() + " (" + e.getMessage() + ").");
+                Tunneling.getLogger().warning("Unable to set up " + toString() + " (" + e.getMessage() + ").");
                 success = false;
             }
         }
@@ -154,7 +154,7 @@ public class Tunnel implements Runnable {
         }
 
         if (success) {
-            Tunneling.getLogger().warning(toString() + " connected.");
+            Tunneling.getLogger().info(toString() + " connected.");
         }
 
         return success;
@@ -213,7 +213,7 @@ public class Tunnel implements Runnable {
         t.setName(toString());
         run = true;
         t.start();
-        Tunneling.getLogger().debug(toString() + " started.");
+        Tunneling.getLogger().info(toString() + " started.");
     }
 
     public void stop() {
@@ -222,7 +222,7 @@ public class Tunnel implements Runnable {
             t.join();
         } catch (InterruptedException e) {
         }
-        Tunneling.getLogger().debug(toString() + " stopped.");
+        Tunneling.getLogger().info(toString() + " stopped.");
     }
 
     public boolean isAlive() {
@@ -269,14 +269,14 @@ public class Tunnel implements Runnable {
                         tunnel.in.add(p);
                     } else if (p.reason() != null) {
                         // We are out of sync, stop.
-                        Tunneling.getLogger().error(tunnel.toString() + " received invalid packet (" + p.reason().toString() + ").");
+                        Tunneling.getLogger().alert(tunnel.toString() + " received invalid packet (" + p.reason().toString() + ").");
 
                         if (p.reason() == Packet.RejectReason.LENGTH) {
-                            Tunneling.getLogger().warning("Restarting " + tunnel.toString() + ", tunnel may be out of sync.");
+                            Tunneling.getLogger().info("Restarting " + tunnel.toString() + ", tunnel may be out of sync.");
                             run = false;
                         }
                     } else {
-                        Tunneling.getLogger().error(tunnel.toString() + " received invalid packet (unknown error).");
+                        Tunneling.getLogger().alert(tunnel.toString() + " received invalid packet (unknown error).");
                     }
                 } catch (IOException e) {
                     // Connection closed, stop.
@@ -292,7 +292,7 @@ public class Tunnel implements Runnable {
             this.t.setName(toString());
             run = true;
             this.t.start();
-            Tunneling.getLogger().debug(toString() + " started.");
+            Tunneling.getLogger().info(toString() + " started.");
         }
 
         public void join() {
@@ -356,7 +356,7 @@ public class Tunnel implements Runnable {
             this.t.setName(toString());
             run = true;
             this.t.start();
-            Tunneling.getLogger().debug(toString() + " started.");
+            Tunneling.getLogger().info(toString() + " started.");
         }
 
         public void join() {

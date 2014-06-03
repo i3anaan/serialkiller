@@ -164,7 +164,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 sendPacket(p);
             }
         } else {
-            TPPNetworkLayer.getLogger().error(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
+            TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
             throw new SizeLimitExceededException("The data is too long for the packets.");
         }
     }
@@ -180,7 +180,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         if (host != null && host.handler() != null) {
             if (!host.handler().offer(p)) {
-                TPPNetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
+                TPPNetworkLayer.getLogger().error(p.toString() + " dropped, NetworkLayer queue full.");
             }
 
             // Mark packet as sent when we are the original sender.
@@ -396,7 +396,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             tunnels.create(routes.getTunnels().get(addr), addr < r.self());
         }
 
-        TPPNetworkLayer.getLogger().alert("Routes updated.");
+        TPPNetworkLayer.getLogger().warning("Routes updated.");
     }
 
     /**
@@ -404,7 +404,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * router will be lost.
      */
     public void loadDefaultRoutes() {
-        TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
+        TPPNetworkLayer.getLogger().info("Reloading routes from file (" + ROUTING_PATH + ").");
 
         // Lock router
         routerLock.lock();
@@ -430,7 +430,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param filePath The routes file.
      */
     public void patchRoutes(String filePath) {
-        TPPNetworkLayer.getLogger().warning("Patching routes from file (" + filePath + ").");
+        TPPNetworkLayer.getLogger().info("Patching routes from file (" + filePath + ").");
 
         // Lock router
         routerLock.lock();
@@ -449,7 +449,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public void start() {
         assert (link != null);
         t.start();
-        TPPNetworkLayer.getLogger().warning("NetworkLayer started.");
+        TPPNetworkLayer.getLogger().info("NetworkLayer started.");
     }
 
     /**

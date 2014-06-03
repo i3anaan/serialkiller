@@ -105,7 +105,7 @@ public class Tunneling implements Runnable {
     private void register(Tunnel tunnel) {
         // Add the new tunnel to the collection.
         tunnels.put(tunnel.ip(), tunnel);
-        Tunneling.getLogger().debug(tunnel.toString() + " created.");
+        Tunneling.getLogger().info(tunnel.toString() + " created.");
     }
 
     /**
@@ -122,7 +122,7 @@ public class Tunneling implements Runnable {
         if (t != null) {
             t.offer(p);
         } else {
-            Tunneling.getLogger().warning(p.toString() + " dropped, no tunnel found (IP: " + ip + ").");
+            Tunneling.getLogger().alert(p.toString() + " dropped, no tunnel found (IP: " + ip + ").");
             String tunnelsString = "";
             for (String tunnelIP : tunnels.keySet()) {
                 tunnelsString += " " + tunnelIP + ": " + tunnels.get(tunnelIP).ip() + ",";
@@ -145,7 +145,7 @@ public class Tunneling implements Runnable {
         try {
             socket = new ServerSocket(PORT);
         } catch (BindException e) {
-            Tunneling.getLogger().bbq(String.format("Port %d is already in use! Tunnels set up by other hosts will not be accepted.", Tunneling.PORT));
+            Tunneling.getLogger().critical(String.format("Port %d is already in use! Tunnels set up by other hosts will not be accepted.", Tunneling.PORT));
         } catch (IOException e) {
             Tunneling.getLogger().critical(String.format("Cannot listen on port %d, exiting...", PORT));
             run = false;
@@ -190,7 +190,7 @@ public class Tunneling implements Runnable {
         run = true;
         t.start();
         startTunnels();
-        Tunneling.getLogger().warning("Tunneling started.");
+        Tunneling.getLogger().info("Tunneling started.");
     }
 
     public void stop() {
@@ -201,7 +201,7 @@ public class Tunneling implements Runnable {
         } catch (InterruptedException e) {
             // Do nothing.
         }
-        Tunneling.getLogger().warning("Tunneling stopped.");
+        Tunneling.getLogger().info("Tunneling stopped.");
     }
 
     public static Logger getLogger() {
