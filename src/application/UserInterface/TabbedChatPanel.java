@@ -119,6 +119,7 @@ public class TabbedChatPanel extends JPanel{
 			System.out.println("GEEN PANEL ACTIEF");
 		}
 		if(cp != null){
+			System.out.println("HERPHEP");
 				cp.addMessage(nickName, adr, message);
 		}else {
 			//TODO throw error
