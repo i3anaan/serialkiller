@@ -45,6 +45,7 @@ public class Packet {
         header = new PacketHeader();
         header.setSeqnum(seqnum);
         header.setTTL(MAX_TTL);
+        payload = new byte[0];
     }
 
     /**
