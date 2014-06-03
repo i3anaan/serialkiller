@@ -262,6 +262,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         return hosts;
     }
 
+    /**
+     * Returns the address of this host.
+     * @return The address of this host.
+     */
+    public Byte host() {
+        return router.self();
+    }
+
     @Override
     public void run() {
         // Run handlers
