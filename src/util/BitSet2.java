@@ -36,6 +36,13 @@ public class BitSet2 extends BitSet {
 		//TODO unit test dit.
 	}
 	
+	public BitSet2(String string){
+		super();
+		for(int i=0;i<string.length();i++){
+			this.set(i,string.charAt(i)=='1');
+		}
+	}
+	
 	
 	
 	
@@ -137,6 +144,21 @@ public class BitSet2 extends BitSet {
 	}
 	
 	/**
+	 * Inserts a boolean value on the given index.
+	 * This means that the boolean previously on the index will now be on index+1
+	 * @param index
+	 * @param b
+	 */
+	public void insert(int startIndex, BitSet2 bits) {
+		for(int i=this.length()-1;i>=startIndex;i--){
+			this.set(i+bits.length(),this.get(i));
+		}
+		for(int i=0;i<bits.length();i++){
+			this.set(startIndex+i,bits.get(i));
+		}
+	}
+	
+	/**
 	 * Removes a boolean value, moving every subsequent boolean 1 index down.
 	 * @param index
 	 */
@@ -145,6 +167,20 @@ public class BitSet2 extends BitSet {
 			this.set(i,this.get(i+1));
 		}
 		this.length--;
+	}
+	
+	/**
+	 * Removes a couple of boolean values,
+	 * Every subsequent index is moved endIndex-startIndex down;
+	 * @param startIndex inclusive
+	 * @param endIndex exclusive
+	 */
+	public void remove(int startIndex, int endIndex) {
+		int diff = endIndex-startIndex;
+		for(int i=startIndex;i<this.length()-diff;i++){
+			this.set(i,this.get(i+diff));
+		}
+		this.length = this.length - diff;
 	}
 	
 	@Override
@@ -167,16 +203,21 @@ public class BitSet2 extends BitSet {
 		return isEqual;
 	}
 	
-	public boolean contains(BitSet2 bs){
+	/**
+	 * Whether or not this BitSet2 contains the other bs.
+	 * @param bs
+	 * @return	first index of occurence, else -1;
+	 */
+	public int contains(BitSet2 bs){
 		if(bs.length()>this.length()){
-			return false;
+			return -1;
 		}
 		for(int i=0;i<this.length()-bs.length()+1;i++){
 			if(this.get(i,i+bs.length()).equals(bs)){
-				return true;
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	}
 	
 	
@@ -230,6 +271,7 @@ public class BitSet2 extends BitSet {
      * @return A new BitSet2 being a concatenation of both.
      */
     public static BitSet2 concatenate(BitSet2 first, BitSet2 second) {
+    	//Use System.arrayCopy?
     	int newSize = first.length()+second.length();
     	BitSet2 result = new BitSet2(newSize);
     	int f = 0;
