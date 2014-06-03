@@ -97,8 +97,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 
 	@Override
 	public String toCoolString() {
-		// TODO Auto-generated method stub
-		return null;
+		return toString();
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class Graph {
 		//Make example graph.
 		Node node = new FrameCeptionNode<Node>(null, 2);
 		BitSet2 bs = new BitSet2();
-		for(int i=0;i<155;i++){
+		for(int i=0;i<29;i++){
 			bs.addAtEnd(Math.random()>0.5);
 		}
 		node.giveOriginal(bs);
