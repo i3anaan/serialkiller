@@ -21,14 +21,19 @@ import javax.swing.JTextField;
 
 public class FileOfferDialog extends Dialog implements EventListener{
 
-	// Constants
+	/** file offer reject value to indicate a file offer has been rejected */
 	public static final String FILEOFFER_REJECT = null;
 	
-	
-	// Private variables
+	/** Path to save the offered file to or null in case of rejection */
 	private		String 		result = null;
+	
+	/** Preferences element for this application */
 	private 	Preferences prefs;
+	
+	/** Panel containing all the elements of this dialog */
 	private		JPanel		panel1;
+	
+	/** TextField displaying the value of result */
 	private		JTextField  field = new JTextField();
 	
 	/**
