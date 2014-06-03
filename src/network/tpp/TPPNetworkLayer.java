@@ -168,7 +168,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), data.length - (Packet.MAX_PAYLOAD_LENGTH * i))));
 
                 // Send it.
-                sendPacket(p);
+                try {
+                    queue.put(p);
+                } catch (InterruptedException e) {
+                    // Do nothing.
+                }
             }
         } else {
             TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
@@ -186,13 +190,17 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
+            // Decrease TTL if needed.
+            if (!(p.header().getSender() == router.self())) {
+                p.header().decreaseTTL();
+            }
+
             if (!host.handler().offer(p)) {
                 TPPNetworkLayer.getLogger().error(p.toString() + " dropped, NetworkLayer queue full.");
             }
 
             // Mark packet as sent when we are the original sender.
             if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
-                p.header().decreaseTTL(); // Decrease the TTL for this hop.
                 markSent(p);
             }
         } else {
