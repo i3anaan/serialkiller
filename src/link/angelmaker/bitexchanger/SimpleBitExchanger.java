@@ -183,11 +183,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return	The byte representing this dataBit to be placed on the physical layer.
 	 */
 	public byte adaptBitToPrevious(boolean nextData) {
-		System.out.println("PreviousByteSent = "+Bytes.format(previousByteSent));
-		System.out.println("Sending: "+Bytes.format((byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0))));
-		System.out.println(Bytes.format((byte)(previousByteSent^2)));
-		System.out.println(Bytes.format((byte)((previousByteSent^2)&-2)));
-		System.out.println(Bytes.format((byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0))));
 		return (byte)(((previousByteSent^2)&-2)|(nextData ? 1 : 0));
 		//TODO test.
 	}
@@ -197,7 +192,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return	The data bit this byte represents.
 	 */
 	private boolean extractBitFromInput(byte input){
-		System.out.println("Reading: "+(((input&1)==1) ? "1" : "0"));
 		return (input&1)==1;
 		//TODO test;
 	}
