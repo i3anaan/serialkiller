@@ -52,6 +52,9 @@ class LogDisplayHandler extends ServiceHandler {
         }
         puts(r, "</table>");
 
+        // Add autorefresh
+        puts(r, "<script type='text/javascript'>setTimeout('document.location.reload(true);', %d);</script>", 5000);
+
         return r;
     }
     
