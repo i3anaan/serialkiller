@@ -48,6 +48,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** The retransmission handler. */
     private Handler retransmissionHandler;
 
+    /** The reoffering handler. */
+    private Handler reofferHandler;
+
     /** The tunneling handler. */
     private Handler tunnelingHandler;
 
@@ -311,8 +314,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     if (inRoute.get(p.header().getDestination()) < MAX_FOR_HOST) {
                         sendPacket(p);
                     } else {
-                        queue.put(p);
-                        TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" re-added to queue, limit of %d packets exceeded.", MAX_FOR_HOST));
+                        if (reofferHandler.offer(p)) {
+                            TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" re-added to queue, limit of %d packets exceeded.", MAX_FOR_HOST));
+                        } else {
+                            TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped, reoffer queue full."));
+                        }
                     }
                 }
             } catch (InterruptedException e) {
@@ -351,6 +357,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         handlers.remove(retransmissionHandler);
         retransmissionHandler = new RetransmissionHandler(this);
         handlers.add(retransmissionHandler);
+
+        // Add reoffering handler
+        handlers.remove(reofferHandler);
+        reofferHandler = new ReofferHandler(this);
+        handlers.add(reofferHandler);
 
         // Add tunneling handler
         handlers.remove(tunnelingHandler);
