@@ -30,10 +30,10 @@ public class UserListPanel extends JPanel{
 	private HashBiMap<Byte, String> hostMap;
 
 	/** DefaultListModel containing all of the hostNames in the JList */
-	DefaultListModel<Object> nicknames = new DefaultListModel<Object>();
+	DefaultListModel nicknames = new DefaultListModel();
 
 	/** Visual list containing a list of hostnames that have been mapped to their hosts */
-	private JList<Object> hostList;
+	private JList hostList;
 
 
 	public UserListPanel(GUI gu, Collection<Byte> hostCollection) {
@@ -50,7 +50,7 @@ public class UserListPanel extends JPanel{
 		this.setMinimumSize((new Dimension(100, 600)));
 		this.setPreferredSize((new Dimension(100, 600)));
 		// History Field
-		hostList = new JList<Object>(nicknames);
+		hostList = new JList(nicknames);
 
 		JScrollPane taScroll = new JScrollPane(hostList, 
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
