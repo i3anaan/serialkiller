@@ -30,7 +30,9 @@ public class ReceiveTest {
 			byte[] receivedBytes = am.readFrame();
 			
 			if (receivedBytes.length > 0) {
-				System.out.println(Bytes.format(receivedBytes[0]));
+				for(byte b : receivedBytes){
+					System.out.println(Bytes.format(b));
+				}
 				String received = new String(receivedBytes, Charsets.US_ASCII);
 				//System.out.println(received);
 			}

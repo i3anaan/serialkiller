@@ -35,9 +35,9 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final String MASTER = "master";
 	public static final String SLAVE = "slave";
 	public static final int STABILITY = 4;
-	public static final long SYNC_RANGE_WAIT = 100*1000000;
-	public static final long SYNC_TIMEOUT_DESYNC = 1000*1000000;
-	public static final long READ_TIMEOUT_NO_ACK = 100*1000000;
+	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
+	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
+	public static final long READ_TIMEOUT_NO_ACK = 1000000l*1000000l;
 	private byte previousByteSent;
 	private byte previousByteReceived;
 	
@@ -205,6 +205,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		waitForSync();
 		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
 		boolean firstRound = true;
+		int round = 0;
 		while(true){
 			//Send bit. (Slave skips this first time)
 			if(!firstRound || connectionRole.equals(MASTER)){
@@ -217,6 +218,9 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				byte byteToSendNext = adaptBitToPrevious(previousByteSent,sendNext);
 				down.sendByte(byteToSendNext);
 				previousByteSent = byteToSendNext;
+				if(round<20){
+				AngelMaker.logger.debug("Send Bit: "+sendNext);
+				}
 			}
 			
 			
@@ -226,7 +230,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				byte receivedByte = readByte();
 				bitReceived = extractBitFromInput(receivedByte);
 				previousByteReceived = receivedByte; //Currently unused.
-				
+				firstRound = false;					
 			} catch (TimeOutException e) {
 				//Time-out, ignore, moving, don't hang.
 				AngelMaker.logger.debug("Time out waiting on ack.");
@@ -236,11 +240,15 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			
 			if(bitReceived!=null){		
 				queueIn.offer(bitReceived);
+				if(round<20){
+				AngelMaker.logger.debug("Received Bit: "+bitReceived);
+				}
+				round++;
 				//TODO what to do when overflow.
 			}
 			
 			
-			firstRound = false;			
+					
 		}
 	}
 	
