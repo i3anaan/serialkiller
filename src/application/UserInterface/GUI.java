@@ -265,7 +265,6 @@ public class GUI extends JFrame implements Observer{
 		}
 		
 		// WHOIS response has been received
-		
 		else if(arg instanceof IdentificationMessage){
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
 		}

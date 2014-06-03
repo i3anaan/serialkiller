@@ -115,6 +115,9 @@ public class TabbedChatPanel extends JPanel{
 		//TODO same NPE as in GUI cp is still null
 		//TODO might be fixed now
 		ChatPanel cp = (ChatPanel) tabIndex.get(hostName);
+		if(cp == null){
+			System.out.println("GEEN PANEL ACTIEF");
+		}
 		if(cp != null){
 				cp.addMessage(nickName, adr, message);
 		}else {
