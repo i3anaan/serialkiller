@@ -296,6 +296,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     sendPacket(ack);
                     routerLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
+                    sendPacket(p);
                 } else {
                     if (!inRoute.containsKey(p.header().getDestination())) {
                         inRoute.put(p.header().getDestination(), 0);
