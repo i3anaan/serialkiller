@@ -321,7 +321,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     sendPacket(ack);
                     routerLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
-                    sendPacket(p);
+
+                    // Only send the packet when the payload is not empty.
+                    if (p.payload() != null && p.payload().length > 0) {
+                        sendPacket(p);
+                    }
                 } else {
                     if (!inRoute.containsKey(p.header().getDestination())) {
                         inRoute.put(p.header().getDestination(), 0);
