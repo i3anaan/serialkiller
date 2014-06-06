@@ -34,4 +34,10 @@ public abstract class NetworkLayer extends Layer implements Startable {
      * @return The collection of all known addresses.
      */
     public abstract Collection<Byte> hosts();
+    
+    /**
+     * Returns the address of this host.
+     * @return The address of this host.
+     */
+    public abstract Byte host();
 }

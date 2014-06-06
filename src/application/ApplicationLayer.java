@@ -365,6 +365,15 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		}
 		return hostCollection;
 	}
+	
+	/**
+	 * Method to retrieve the address of this host.
+	 * @return the address of this host.
+	 */
+	public Byte getHost(){
+		return networkLayer.host();
+	}
+	
 
 	/**
 	 * CURRENTLY DEPRECIATED

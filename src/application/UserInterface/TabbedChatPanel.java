@@ -63,18 +63,6 @@ public class TabbedChatPanel extends JPanel{
 	 */
 	public void addChatPanel(String hostName, byte address){
 
-		// Alternative 1
-
-		//		if(tabbedPane.indexOfComponent(tabIndex.get(hostName)) == -1){
-		//			if(tabIndex.get(hostName) != null){
-		//				tabIndex.remove(hostName);
-		//			}
-		//			JPanel newPanel = new ChatPanel(gui, address);
-		//			tabIndex.put(hostName, newPanel);
-		//			tabbedPane.addTab(hostName, newPanel);
-		//		}
-
-		// Alternative 2
 		if(tabIndex.get(hostName) == null) {
 
 			JPanel newPanel = new ChatPanel(gui, address);
