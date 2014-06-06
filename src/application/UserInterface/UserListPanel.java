@@ -98,7 +98,6 @@ public class UserListPanel extends JPanel{
 
 	/** Updates the local hostMap and hostList with a new hostName belonging to an address */
 	public void setHostName(byte address, byte[] hostName){
-
 		for (int i = 0; i < hostMap.size(); i++){
 			if(nicknames.get(i).equals(hostMap.get(address)))
 				nicknames.set(i, String.valueOf(address) + ": " +new String(hostName));

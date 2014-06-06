@@ -133,7 +133,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Someone accepted our file offer.
 				FileAcceptMessage accept = new FileAcceptMessage(p.address, p.data);
 				//Get key from FileMessage
-				byte [] nameByte = new byte[p.data.length -32];
+				byte [] nameByte = new byte[p.data.length -31];
+				//TODO index out of bounds
 				System.arraycopy(p.data, 32, nameByte, 1, p.data.length - 32);
 				String key = Arrays.toString(nameByte);
 
@@ -155,7 +156,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Someone is sending us a file. Write the file to our disk.
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
 				
-				//TODO 01 check if file was offered before
+				//check if file was offered before
 				String offerKey = ("" + fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName());
 				if(offeredFileCache.getIfPresent(offerKey) != null){
 					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
@@ -171,7 +172,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 			case WHOISrequestCommand:
 				// Someone is requesting our identification
-				//IdentificationMessage id = new IdentificationMessage(p.address, p.data);
 
 				byte[] data = new byte[1 + identification.length];
 				data[0] = WHOISresponseCommand;
@@ -187,7 +187,13 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 			case WHOISresponseCommand:
 				// Someone is responding to our identification request
-				IdentificationMessage idResponse = new IdentificationMessage(p.address, p.data);
+				
+				//Get WHOIS without command byte
+				byte[] identificationResponseData = new byte[p.data.length-1];
+				System.arraycopy(p.data, 1, identificationResponseData, 0, p.data.length-1);
+				
+				//Parse WHOIS to GUI
+				IdentificationMessage idResponse = new IdentificationMessage(p.address, identificationResponseData);
 				setChanged();
 				notifyObservers(idResponse);
 				break;
