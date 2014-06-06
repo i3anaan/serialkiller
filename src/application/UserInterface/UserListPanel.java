@@ -103,7 +103,7 @@ public class UserListPanel extends JPanel{
 			if(nicknames.get(i).equals(hostMap.get(address)))
 				nicknames.set(i, String.valueOf(address) + ": " +new String(hostName));
 		}
-		hostMap.put(address, new String(hostName));
+		hostMap.put(address, String.valueOf(address) + ": " + new String(hostName));
 
 
 	}
