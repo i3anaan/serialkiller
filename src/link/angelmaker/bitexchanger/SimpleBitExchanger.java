@@ -240,8 +240,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			
 			if(bitReceived!=null){		
 				queueIn.offer(bitReceived);
-				if(round<20){
-				AngelMaker.logger.debug("Received Bit: "+bitReceived);
+				if(round<60){
+				AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
 				}
 				round++;
 				//TODO what to do when overflow.

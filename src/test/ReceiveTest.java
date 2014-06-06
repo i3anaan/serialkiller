@@ -1,5 +1,7 @@
 package test;
 
+import java.util.ArrayList;
+
 import com.google.common.base.Charsets;
 import common.Graph;
 
@@ -14,6 +16,7 @@ import link.jack.JackTheRipper;
 import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
+import util.BitSet2;
 import util.Bytes;
 
 public class ReceiveTest {
@@ -26,21 +29,23 @@ public class ReceiveTest {
 		System.out.println(am);
 		System.out.println("BEGIN TEST");
 
-		byte[] totalReceived = new byte[65];
-		int currentIndex = 0;
 		
+		int currentIndex = 0;
+		BitSet2 totalReceived = new BitSet2();
 		while (true) {
 			byte[] receivedBytes = am.readFrame();
-			
-			if (receivedBytes.length > 0) {
-				System.arraycopy(receivedBytes, 0, totalReceived, currentIndex, receivedBytes.length);
+			if (receivedBytes.length > 0 && totalReceived.length()<500) {
+				totalReceived = BitSet2.concatenate(totalReceived,new BitSet2(receivedBytes));
 				currentIndex = currentIndex + receivedBytes.length;
 				for(byte b : receivedBytes){
 					System.out.println(Bytes.format(b));
 				}
-				String received = new String(totalReceived, Charsets.UTF_8);
+				String received = new String(totalReceived.toByteArray(), Charsets.UTF_8);
 				System.out.println(received);
 				//Se, 420 gigadoge! #swag
+				if(currentIndex == receivedBytes.length-1){
+					currentIndex= 0;
+				}
 
 			}
 		}
