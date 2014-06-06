@@ -76,7 +76,7 @@ public class GUI extends JFrame implements Observer{
 		validate();
 		setVisible(true);
 
-		GUI.getLogger().warning("GUI started.");
+		GUI.getLogger().info("GUI started.");
 
 	}
 
