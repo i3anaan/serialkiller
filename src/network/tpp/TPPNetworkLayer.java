@@ -317,10 +317,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
-                    routerLock.lock();
-                    sendPacket(ack);
-                    routerLock.unlock();
-                    TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
+
+                    if (!queue.offer(ack)) {
+                        TPPNetworkLayer.getLogger().warning(p.toString() + " dropped, network layer queue full.");
+                    } else {
+                        TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
+                    }
 
                     // Only send the packet when the payload is not empty.
                     if (p.payload() != null && p.payload().length > 0) {
