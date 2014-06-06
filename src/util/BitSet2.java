@@ -220,6 +220,19 @@ public class BitSet2 extends BitSet {
 		return -1;
 	}
 	
+	public int contains(BitSet2 bs,int startAt){
+		if(bs.length()>this.length()){
+			return -1;
+		}
+		for(int i=startAt;i<this.length()-bs.length()+1;i++){
+			if(this.get(i,i+bs.length()).equals(bs)){
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	
 	
 	//Utility methods from java 7
 	

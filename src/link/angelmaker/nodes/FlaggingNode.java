@@ -11,6 +11,7 @@ import util.BitSet2;
  * Only when it detects its full, it gives the data to its childNode.
  * When not full, getOriginal() returns an empty BitSet2.
  * 
+ * Best to use either giveConverted or giveOriginal, not both.
  * 
  * @author I3anaan
  *
@@ -23,9 +24,11 @@ public class FlaggingNode implements Node,Node.Internal,Node.Fillable{
 	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2("01100110"));//TODO
 	//Original, unstuffed, unflagged data.
 	private BitSet2 stored;
+	private BitSet2 storedConverted;
 	private int dataBitCount;
 	
-	private boolean receivingData = false;
+	private boolean receivedStartFlag = false;
+	private boolean isFull;
 	private BitSet2 lastJunk;
 	
 	
@@ -43,11 +46,16 @@ public class FlaggingNode implements Node,Node.Internal,Node.Fillable{
 			stored.addAtEnd(bits.get(i));
 		}
 		if(stored.length()>=dataBitCount){
+			isFull =true;
+		}
+		
+		if(isFull){
 			BitSet2 remaining = childNodes[0].giveOriginal(getConverted());
 			if(remaining.length()>0){
 				AngelMaker.logger.alert("FlaggningNode is spilling data");
 			}
 		}
+		
 		return bits.get(i, bits.length());
 	}
 
@@ -58,24 +66,26 @@ public class FlaggingNode implements Node,Node.Internal,Node.Fillable{
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		//TODO
-		//Maak opnieuw, moet converted data storen in aparte variabele.
-		//Als deze start en end flag heeft, dan flags verwijderen, unstuffen en in stored zetten.
-		//Rest van klasse ook nakijken'
-		
-		BitSet2.concatenate(stored, removeFlags(bits));
-		int contains = bits.contains(FLAG_END_OF_FRAME.getFlag());
-
-		if(stored.length()==dataBitCount ||){
-			childNodes[0].giveOriginal(stuff(stored));
+		if(!receivedStartFlag){
+			BitSet2 afterStart = getDataAfterStartFlag(bits);
+			if(afterStart.length()>0){
+				storedConverted = afterStart;
+			}
 		}else{
-			AngelMaker.logger.notice("Received more bits than this Node can handle");
+			storedConverted = BitSet2.concatenate(storedConverted, bits);
 		}
 		
-		if(contains>0){
-			return bits.get(contains,bits.length());
+		int contains = storedConverted.contains(FLAG_END_OF_FRAME.getFlag());
+		if(receivedStartFlag && contains>0){
+			//Received start and end flag.
+			isFull = true;
+			stored = new BitSet2();
+			giveOriginal(unStuff(removeFlags(bits)));
+			return storedConverted.get(contains+FLAG_END_OF_FRAME.getFlag().length(), storedConverted.length());
+		}else{
+			//Does not have end flag yet.
+			return new BitSet2();
 		}
-		return new BitSet2();
 	}
 	
 	private BitSet2 placeFlags(BitSet2 bits){
@@ -108,12 +118,19 @@ public class FlaggingNode implements Node,Node.Internal,Node.Fillable{
 	 * 			Data bits after the Start flag if it does contain the start flag.
 	 */
 	private BitSet2 getDataAfterStartFlag(BitSet2 bits){
-		BitSet2 junk = BitSet2.concatenate(lastJunk, bits);
-		int contains = junk.contains(FLAG_START_OF_FRAME.getFlag());
-		if(contains>0){
-			return bits.get(contains+FLAG_START_OF_FRAME.getFlag().length(), bits.length());
+		if(!receivedStartFlag){
+			BitSet2 junk = BitSet2.concatenate(lastJunk, bits);
+			int contains = junk.contains(FLAG_START_OF_FRAME.getFlag());
+			if(contains>0){
+				receivedStartFlag = true;
+				return bits.get(contains+FLAG_START_OF_FRAME.getFlag().length(), bits.length());
+			}
+			lastJunk = junk.get(junk.length()-FLAG_START_OF_FRAME.getFlag().length(), junk.length());
+			
+			return new BitSet2();
+		}else{
+			return new BitSet2(bits);
 		}
-		return new BitSet2();
 	}
 	/**
 	 * @param bits
@@ -150,12 +167,12 @@ public class FlaggingNode implements Node,Node.Internal,Node.Fillable{
 
 	@Override
 	public boolean isFull() {
-		return stored.length()==dataBitCount || childNodes[0].isFull();
+		return stored.length()==dataBitCount || childNodes[0].isFull() || isFull;
 	}
 
 	@Override
 	public boolean isReady() {
-		return stored.length()==dataBitCount || childNodes[0].isReady();
+		return childNodes[0].isReady();
 	}
 
 	@Override
