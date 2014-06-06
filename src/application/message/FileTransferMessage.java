@@ -5,20 +5,16 @@ import java.util.Arrays;
 public class FileTransferMessage extends FileMessage {
 
 	// Private variables
-	private final byte[] fileBytes;
-	
+	private byte[] fileBytes;
+
 	public FileTransferMessage(byte address, byte[] data) {
 		super(address, data);
-		int i = 0;
-		for(i = 0; i < data.length; i++){
-			if(data[i] == (byte)0){
-				break;
-			}
-		}
-		fileBytes = Arrays.copyOfRange(data, i, data.length);
-		
+
+		fileBytes = Arrays.copyOfRange(data, 1, data.length);
+
+
 	}
-	
+
 	/**
 	 * Returns the byte array containing all of the bytes
 	 * of the transfered file
