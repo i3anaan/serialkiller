@@ -21,9 +21,9 @@ public class Graph {
 	
 	public static void main(String[] args){
 		//Make example graph.
-		Node node = new FrameCeptionNode<Node>(null, 2);
+		Node node = new FrameCeptionNode<Node>(null, 3);
 		BitSet2 bs = new BitSet2();
-		for(int i=0;i<29;i++){
+		for(int i=0;i<150;i++){
 			bs.addAtEnd(Math.random()>0.5);
 		}
 		node.giveOriginal(bs);

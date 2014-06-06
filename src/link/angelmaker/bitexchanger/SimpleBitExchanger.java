@@ -34,7 +34,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	AMManager.Server manager;
 	public static final String MASTER = "master";
 	public static final String SLAVE = "slave";
-	public static final int STABILITY = 4;
+	public static final int STABILITY = 400;
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
 	public static final long READ_TIMEOUT_NO_ACK = 1000000l*1000000l;
@@ -218,8 +218,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				byte byteToSendNext = adaptBitToPrevious(previousByteSent,sendNext);
 				down.sendByte(byteToSendNext);
 				previousByteSent = byteToSendNext;
-				if(round<20){
-				AngelMaker.logger.debug("Send Bit: "+sendNext);
+				if(round<100){
+				AngelMaker.logger.debug("["+round+"]Send Bit: "+sendNext);
 				}
 			}
 			
@@ -240,13 +240,19 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			
 			if(bitReceived!=null){		
 				queueIn.offer(bitReceived);
-				if(round<60){
+				if(round<100){
 				AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
 				}
 				round++;
 				//TODO what to do when overflow.
 			}
 			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 					
 		}
