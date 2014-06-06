@@ -221,6 +221,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
                     // We handled this one.
                     sent.get(p.header().getSeqnum()).remove(p.header().getSegnum());
+                    inRoute.put(p.header().getDestination(), Math.max(inRoute.get(p.header().getDestination()) -1, 0));
                     if (sent.get(p.header().getSeqnum()).size() == 0) {
                         sent.remove(p.header().getSeqnum());
                     }
@@ -317,7 +318,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     inRoute.put(p.header().getSender(), Math.max(inRoute.get(p.header().getSender()) - 1, 0));
 
                     sentLock.unlock();
-                    TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
+                    TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + String.format(" (%d in route).", inRoute.get(p.header().getSender())));
                 } else if (p.header().getDestination() == router.self()) {
                     // Send acknowledgement if we are the final destination.
                     Packet ack = p.createAcknowledgement(nextSeqnum());
@@ -341,7 +342,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                         sendPacket(p);
                     } else {
                         if (reofferHandler.offer(p)) {
-                            TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" re-added to queue, limit of %d packets exceeded.", MAX_FOR_HOST));
+                            TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" re-added to queue, limit of %d packets exceeded (%d in route).", MAX_FOR_HOST, inRoute.get(p.header().getDestination())));
                         } else {
                             TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped, reoffer queue full."));
                         }
