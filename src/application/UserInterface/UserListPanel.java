@@ -40,6 +40,7 @@ public class UserListPanel extends JPanel{
 		super();
 		gui = gu;
 
+		// Create the hostMap based on the hostCollection
 		hostMap = HashBiMap.create();
 		for (Byte h : hostCollection) {
 			hostMap.put(h, String.format("%d", h));
@@ -49,9 +50,11 @@ public class UserListPanel extends JPanel{
 		this.setLayout(new BorderLayout());
 		this.setMinimumSize((new Dimension(100, 600)));
 		this.setPreferredSize((new Dimension(100, 600)));
-		// History Field
+		
+		// Create the list of hosts using our hostName list
 		hostList = new JList(nicknames);
 
+		// Make sure it's scrollable
 		JScrollPane taScroll = new JScrollPane(hostList, 
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -59,11 +62,15 @@ public class UserListPanel extends JPanel{
 		this.add(taScroll, BorderLayout.CENTER);	
 
 
+		// Listens to selection events in the hostList
 		ListSelectionListener listSelectionListener = new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-
+				
+				// When done changing to a new selection return the index of the selection
 				if (!e.getValueIsAdjusting()) {
 					int selection[] = hostList.getSelectedIndices();
+					
+					// Create new chat Tabs based on the selection and then clear it
 					for (int i = 0; i< selection.length; i++) {
 						String hostName =  String.valueOf(hostList.getSelectedValue());
 						gui.getChatPanel().addChatPanel(hostName, findValueAddress((String) hostList.getSelectedValue()));
@@ -73,6 +80,8 @@ public class UserListPanel extends JPanel{
 			}
 		};
 		hostList.addListSelectionListener(listSelectionListener);
+		
+		// Set component to ready
 		isReady = true;
 	}
 
