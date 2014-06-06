@@ -34,7 +34,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	AMManager.Server manager;
 	public static final String MASTER = "master";
 	public static final String SLAVE = "slave";
-	public static final int STABILITY = 400;
+	public static final int STABILITY = 400;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
 	public static final long READ_TIMEOUT_NO_ACK = 1000000l*1000000l;
@@ -86,6 +86,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return Whether or not the given input was stable for the given amount of times.
 	 */
 	public boolean checkStable(byte input, int amount) {
+		//TODO improve this method, take average or something, or just simply do not use invertions anymore.
 		for (int i = 0; i < amount; i++) {
 			if (input != down.readByte()) {
 				return false;
@@ -246,14 +247,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				round++;
 				//TODO what to do when overflow.
 			}
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
 					
 		}
 	}
