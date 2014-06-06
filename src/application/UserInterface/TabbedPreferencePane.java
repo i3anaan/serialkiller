@@ -75,6 +75,7 @@ extends 	Dialog
 		userPanel.add( label1 );
 
 		nameField = new JTextField();
+		nameField.setText(gui.getPreferences().get("USERNAME", ""));
 		nameField.setBounds( 10, 35, 150, 25 );
 		userPanel.add( nameField );
 

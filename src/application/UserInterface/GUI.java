@@ -229,14 +229,10 @@ public class GUI extends JFrame implements Observer{
 
 	// Starter of the GUI
 	private void Start(){
-		//TODO debug line
-		//		while(!cp.isReady() || !ulp.isReady()){
-		//			System.out.println("NOT READY!");
-		//		}
+		
 		// Setup Observer/Observable relation
 		apl.addObserver(this);
 		loadHostList();
-		System.out.println("READY!!!");
 	}
 	// Update Event Methods
 
@@ -259,9 +255,14 @@ public class GUI extends JFrame implements Observer{
 			//TODO test MORE
 			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
+				//TODO fix this, send file offer ack and await file transfer message
 				//TODO temporary, look for prettier solution
-				FileTransferMessage fm = new FileTransferMessage(((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getPayload());
-				apl.writeFile(fm, filePath);
+				//FileTransferMessage fm = new FileTransferMessage(((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getPayload());
+				//apl.writeFile(fm, filePath);
+				
+				apl.acceptFileOffer((FileOfferMessage) arg, filePath);
+				
+				
 			}
 		}
 
