@@ -30,6 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public static final long TIMEOUT = 10000; // in milliseconds
     public static final int MAX_RETRANSMISSIONS = 3; // 0 for no maximum
+    public static final int MAX_FOR_HOST = 1; // 0 for no maximum
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
 
     /** Size of the queue. */
@@ -46,6 +47,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
     /** The retransmission handler. */
     private Handler retransmissionHandler;
+
+    /** The reoffering handler. */
+    private Handler reofferHandler;
 
     /** The tunneling handler. */
     private Handler tunnelingHandler;
@@ -78,6 +82,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
     private Stack stack;
 
+    private Map<Byte, Integer> inRoute;
+
     /**
      * Constructs a new NetworkLayer instance.
      */
@@ -87,6 +93,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
         appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
         sent = new ConcurrentHashMap<Integer, HashMap<Integer, Packet>>();
+        inRoute = new ConcurrentHashMap<Byte, Integer>();
 
         router = new Router();
 
@@ -161,7 +168,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), data.length - (Packet.MAX_PAYLOAD_LENGTH * i))));
 
                 // Send it.
-                sendPacket(p);
+                try {
+                    queue.put(p);
+                } catch (InterruptedException e) {
+                    // Do nothing.
+                }
             }
         } else {
             TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
@@ -179,6 +190,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
+            // Decrease TTL if needed.
+            if (!(p.header().getSender() == router.self())) {
+                p.header().decreaseTTL();
+            }
+
             if (!host.handler().offer(p)) {
                 TPPNetworkLayer.getLogger().error(p.toString() + " dropped, NetworkLayer queue full.");
             }
@@ -244,6 +260,10 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
         }
         sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
+        if (!inRoute.containsKey(p.header().getDestination())) {
+            inRoute.put(p.header().getDestination(), 0);
+        }
+        inRoute.put(p.header().getDestination(), inRoute.get(p.header().getDestination()) + 1);
         TPPNetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
         sentLock.unlock();
     }
@@ -281,12 +301,17 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         while (run) {
             try {
                 Packet p = queue.take();
-                p.header().decreaseTTL(); // Decrease the TTL for this hop.
 
                 // Check if this is an acknowledgement or should be acknowledged.
                 if (p.header().getAck() && p.header().getDestination() == router.self()) {
                     sentLock.lock();
                     sent.get(p.header().getAcknum()).remove(p.header().getSegnum());
+
+                    if (!inRoute.containsKey(p.header().getSender())) {
+                        inRoute.put(p.header().getSender(), 0);
+                    }
+                    inRoute.put(p.header().getSender(), Math.max(inRoute.get(p.header().getSender()) - 1, 0));
+
                     sentLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
                 } else if (p.header().getDestination() == router.self()) {
@@ -296,8 +321,21 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     sendPacket(ack);
                     routerLock.unlock();
                     TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
-                } else {
                     sendPacket(p);
+                } else {
+                    if (!inRoute.containsKey(p.header().getDestination())) {
+                        inRoute.put(p.header().getDestination(), 0);
+                    }
+
+                    if (inRoute.get(p.header().getDestination()) < MAX_FOR_HOST) {
+                        sendPacket(p);
+                    } else {
+                        if (reofferHandler.offer(p)) {
+                            TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" re-added to queue, limit of %d packets exceeded.", MAX_FOR_HOST));
+                        } else {
+                            TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped, reoffer queue full."));
+                        }
+                    }
                 }
             } catch (InterruptedException e) {
                 // Exit gracefully.
@@ -335,6 +373,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         handlers.remove(retransmissionHandler);
         retransmissionHandler = new RetransmissionHandler(this);
         handlers.add(retransmissionHandler);
+
+        // Add reoffering handler
+        handlers.remove(reofferHandler);
+        reofferHandler = new ReofferHandler(this);
+        handlers.add(reofferHandler);
 
         // Add tunneling handler
         handlers.remove(tunnelingHandler);
