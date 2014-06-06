@@ -2,6 +2,7 @@ package test.unit;
 
 import static org.junit.Assert.*;
 import link.angelmaker.nodes.BasicLeafNode;
+import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.FrameCeptionNode;
 import link.angelmaker.nodes.FrameNode;
 import link.angelmaker.nodes.Node;
@@ -15,7 +16,7 @@ public class NodeTest {
 	@Test
 	public void testGeneral() {
 		Node root = new PureNode(null,1);
-		Node[] nodes = new Node[]{new PureNode(root,80),new FrameNode<Node>(root, 10),new FrameCeptionNode<Node>(root,2),new FrameCeptionNode<Node>(root, 0)};
+		Node[] nodes = new Node[]{new PureNode(root,80),new FrameNode<Node>(root, 10),new FrameCeptionNode<Node>(root,2),new FrameCeptionNode<Node>(root, 0),new FlaggingNode(root,8)};
 		BitSet2 data = new BitSet2(new byte[]{0,-7,127,-128,-1,10,4,-6,2,8,3,7});
 		for(Node base : nodes){
 			System.out.println("Testing: " +base);
@@ -34,10 +35,16 @@ public class NodeTest {
 					assertTrue(stored.length()>0);
 				}
 				assertTrue(data!=unused);
+				System.out.println("i="+i);
+				if(!(base instanceof FlaggingNode)){
 				assertEquals(stored,n.getOriginal());
 				assertEquals(data,BitSet2.concatenate(n.getOriginal(), unused));
+				}
+				System.out.println("Converted = "+n.getConverted());
 				clone.giveConverted(n.getConverted());
 				if(n.isFull()){
+					System.out.println("N-Original:\t"+n.getOriginal());
+					System.out.println("C-Original:\t"+clone.getOriginal());
 					assertEquals(n.getOriginal(),clone.getOriginal());
 					assertTrue(n.isCorrect());
 				}
@@ -54,12 +61,14 @@ public class NodeTest {
 				BitSet2 queueOriginal = new BitSet2();
 				BitSet2 queueOriginalTotal = new BitSet2(); //Contains all the data added.
 				
+				System.out.println("####################>Hand data to sender");
 				boolean tookBits = false;
 				while(!sender.isFull()){
 					//Add in parts, simulate network behaviour.
 					BitSet2 before = (BitSet2) queueOriginal.clone();
+					System.out.println("QueueOriginal: "+queueOriginal);
 					queueOriginal = sender.giveOriginal(queueOriginal);
-					
+					System.out.println("Sender has:"+sender.getOriginal());
 					BitSet2 taken = before.get(0, before.length()-queueOriginal.length());
 					if(!before.equals(queueOriginal)){
 						tookBits = true;
@@ -89,13 +98,13 @@ public class NodeTest {
 				
 				assertEquals(queueConvertedTotal.length(),from);
 				assertEquals(new BitSet2((byte)5),receiver.giveConverted(new BitSet2((byte)5)));
-				/*
+				
 				System.out.println("Sender Original:\t"+sender.getOriginal() +" \t["+sender.getOriginal().length()+"]");
 				System.out.println("Sender Converted:\t"+sender.getConverted() +" \t["+sender.getConverted().length()+"]");
 				System.out.println("Received Converted:\t" +receiver.getConverted() +" \t["+receiver.getConverted().length()+"]");
 				System.out.println("Received Original:\t" +receiver.getOriginal() +" \t["+receiver.getOriginal().length()+"]");
 				System.out.println("Test Original:\t\t"+queueOriginalTotal +" \t["+queueOriginalTotal.length()+"]");
-				*/
+				
 				assertEquals(receiver.getOriginal().length(),queueOriginalTotal.length());
 				assertEquals(receiver.getOriginal(),queueOriginalTotal);
 			}

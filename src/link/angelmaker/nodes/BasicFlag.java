@@ -58,11 +58,8 @@ public class BasicFlag implements Flag{
 		// If data contains escaped flag, place escape escaper after it.
 		int index = 0;
 		int containsEscapedFlag = bits.contains(escapedFlag);
-		while(containsEscapedFlag>0){
-			
-			if (containsEscapedFlag > 0) {
-				bits.insert(containsEscapedFlag + escapedFlag.length(), escapedEscapedFlag);
-			}
+		while(containsEscapedFlag>=0){
+			bits.insert(containsEscapedFlag + escapedFlag.length(), escapedEscapedFlag);
 			index = containsEscapedFlag + escapedFlag.length() + escapedEscapedFlag.length()+6;
 			//System.out.println("Index = "+index+"  length="+bits.length());
 			containsEscapedFlag = bits.contains(escapedFlag,index); //Ignore already flagged part.
@@ -71,7 +68,7 @@ public class BasicFlag implements Flag{
 
 		// If data contains flag, escape it.
 		int containsFlag = bits.contains(flag);
-		while(containsFlag>0){
+		while(containsFlag>=0){
 			//bits.insert(containsFlag, !flag.get(0));
 			bits.remove(containsFlag,containsFlag+flag.length());
 			bits.insert(containsFlag, BitSet2.concatenate(escapedFlag,realEscapedFlag));
@@ -85,7 +82,7 @@ public class BasicFlag implements Flag{
 		//System.out.println("To be unstuffed: "+bits);
 		int index = 0;
 		int contains = bits.contains(escapedFlag);
-		while(contains>0){
+		while(contains>=0){
 			int start = contains+escapedFlag.length();
 			int end = contains+escapedFlag.length()+realEscapedFlag.length();
 			if(end<=bits.length() && bits.get(start,end).equals(realEscapedFlag)){
@@ -100,7 +97,7 @@ public class BasicFlag implements Flag{
 		//System.out.println("Unstuffed real flags.");
 		index = 0;
 		contains = bits.contains(escapedFlag);
-		while(contains>0){
+		while(contains>=0){
 			int end = contains+escapedFlag.length()+realEscapedFlag.length();
 			//Was escaped flag.
 			bits.remove(contains+escapedFlag.length(),end);

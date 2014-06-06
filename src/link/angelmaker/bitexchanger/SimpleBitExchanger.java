@@ -86,7 +86,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return Whether or not the given input was stable for the given amount of times.
 	 */
 	public boolean checkStable(byte input, int amount) {
-		//TODO improve this method, take average or something, or just simply do not use invertions anymore.
+		//TODO improve this method, take average or something, or just simply do not use inversions anymore.
 		for (int i = 0; i < amount; i++) {
 			if (input != down.readByte()) {
 				return false;
