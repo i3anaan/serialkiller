@@ -305,6 +305,10 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Check if this is an acknowledgement or should be acknowledged.
                 if (p.header().getAck() && p.header().getDestination() == router.self()) {
                     sentLock.lock();
+
+                    if (!sent.containsKey(p.header().getAcknum())) {
+                        sent.put(p.header().getAcknum(), new HashMap<Integer, Packet>());
+                    }
                     sent.get(p.header().getAcknum()).remove(p.header().getSegnum());
 
                     if (!inRoute.containsKey(p.header().getSender())) {
