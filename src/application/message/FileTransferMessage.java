@@ -9,7 +9,13 @@ public class FileTransferMessage extends FileMessage {
 	
 	public FileTransferMessage(byte address, byte[] data) {
 		super(address, data);
-		fileBytes = Arrays.copyOfRange(data, 1, data.length);
+		int i = 0;
+		for(i = 0; i < data.length; i++){
+			if(data[i] == (byte)0){
+				break;
+			}
+		}
+		fileBytes = Arrays.copyOfRange(data, i, data.length);
 		
 	}
 	

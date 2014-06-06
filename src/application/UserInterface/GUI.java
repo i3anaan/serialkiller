@@ -29,20 +29,20 @@ import application.message.*;
 public class GUI extends JFrame implements Observer{
 
 	// private variables
-	
+
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
 	/** The preferences object used by this application */
 	private		Preferences 		prefs; 
 	/** The application layer this application communicates with */
 	private 	ApplicationLayer 	apl;
-	
+
 	private 	TabbedChatPanel 	cp; 					
 	private 	UserListPanel 		ulp;
 	private JMenuItem sendFileItem;
 
 	// Constructors
-	
+
 	public GUI(ApplicationLayer applicationLayer){
 		super("G.A.R.G.L.E.");
 		apl = applicationLayer;
@@ -75,7 +75,7 @@ public class GUI extends JFrame implements Observer{
 		pack();
 		validate();
 		setVisible(true);
-		
+
 		GUI.getLogger().warning("GUI started.");
 
 	}
@@ -112,8 +112,8 @@ public class GUI extends JFrame implements Observer{
 
 					}
 				}
-				
-				
+
+
 			}
 		});
 		// Exit item
@@ -158,8 +158,8 @@ public class GUI extends JFrame implements Observer{
 		this.add(ulp, BorderLayout.EAST);
 
 	}
-	
-	
+
+
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received, returns null when file offer is refused
@@ -178,7 +178,7 @@ public class GUI extends JFrame implements Observer{
 		return rval;
 	}
 
-	
+
 
 	//	Getter methods
 	/**
@@ -188,7 +188,7 @@ public class GUI extends JFrame implements Observer{
 	public UserListPanel getUserList(){
 		return ulp;
 	}
-	
+
 	/**
 	 * getter for the main chat panel in this application
 	 * @return TabbedChatPanel
@@ -204,7 +204,7 @@ public class GUI extends JFrame implements Observer{
 	public Preferences getPreferences(){
 		return prefs;
 	}
-	
+
 	/**
 	 * getter for the ApplicationLayer being used by this application
 	 * @return ApplicationLayer
@@ -212,7 +212,7 @@ public class GUI extends JFrame implements Observer{
 	public ApplicationLayer getApplicationLayer(){
 		return apl;
 	}
-	
+
 	/** Returns the Logger object for this GUI */
 	public static Logger getLogger() {
 		if (logger == null) {
@@ -220,22 +220,23 @@ public class GUI extends JFrame implements Observer{
 		}
 		return logger;
 	}
-	
+
 	/** Loads a collection holding a list of hosts into the gui */
 	public Collection<Byte> loadHostList(){
 		return apl.getHosts();
-		
+
 	}
-	
+
 	// Starter of the GUI
 	private void Start(){
-		while(!cp.isReady() || !ulp.isReady()){
-			System.out.println("NOT READY!");
-		}
-	// Setup Observer/Observable relation
-			apl.addObserver(this);
-			loadHostList();
-			System.out.println("READY!!!");
+		//TODO debug line
+		//		while(!cp.isReady() || !ulp.isReady()){
+		//			System.out.println("NOT READY!");
+		//		}
+		// Setup Observer/Observable relation
+		apl.addObserver(this);
+		loadHostList();
+		System.out.println("READY!!!");
 	}
 	// Update Event Methods
 
@@ -243,18 +244,18 @@ public class GUI extends JFrame implements Observer{
 	public void update(Observable o, Object arg) {
 
 		// Chat message has been received
-		
+
 		if(arg instanceof ChatMessage){
 			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
-			
+
 		}
-		
+
 		// File offer has been received
-		
+
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
-			
+
 			//TODO test MORE
 			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
@@ -263,9 +264,8 @@ public class GUI extends JFrame implements Observer{
 				apl.writeFile(fm, filePath);
 			}
 		}
-		
+
 		// WHOIS response has been received
-		
 		else if(arg instanceof IdentificationMessage){
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
 		}
