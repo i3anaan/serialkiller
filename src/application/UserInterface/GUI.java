@@ -229,14 +229,10 @@ public class GUI extends JFrame implements Observer{
 
 	// Starter of the GUI
 	private void Start(){
-		//TODO debug line
-		//		while(!cp.isReady() || !ulp.isReady()){
-		//			System.out.println("NOT READY!");
-		//		}
+		
 		// Setup Observer/Observable relation
 		apl.addObserver(this);
 		loadHostList();
-		System.out.println("READY!!!");
 	}
 	// Update Event Methods
 

@@ -379,8 +379,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Send a WHOIS for each host in the collection
 				for (Byte h : hostCollection) {
 					byte[] data = new byte[1];
-					System.out.println("DEBUG--------- Value of data = " + data);
-					System.out.println(h);
+//					System.out.println("DEBUG--------- Value of data = " + data);
+//					System.out.println(h);
 					data[0] = WHOISrequestCommand;
 					try {
 						networkLayer.send(new Payload(data, h));
@@ -394,7 +394,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		};
 
 		ScheduledFuture<?> scheduledWHOIS = scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
-		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
+//		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
 		//scheduledWHOIS.cancel(false);
 	}
 
