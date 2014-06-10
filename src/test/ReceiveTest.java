@@ -25,6 +25,20 @@ import util.Bytes;
 
 public class ReceiveTest {
 
+	/*
+	 * STATUS
+	 * werkt momenteel op foutloze link (stability 400)
+	 * Error LPT faalt opeens, onduidelijk hoe, hij krijgt steeds timeouts.
+	 * Buffer size tweaken.
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 */
+	
+	
+	
 	public static void main(String[] args) {
 		PhysicalLayer phys = new LptErrorHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
