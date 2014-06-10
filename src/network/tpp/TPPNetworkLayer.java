@@ -67,9 +67,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     private Collection<Handler> handlers;
 
     /** Pointers to individual handlers that are very specific. */
-    private Handler retransmissionHandler; // Handler for retransmissions
-    private Handler reofferHandler; // Handler for reoffering
-    private Handler tunnelingHandler; // Handler for tunneling
+    private RetransmissionHandler retransmissionHandler; // Handler for retransmissions
+    private ReofferHandler reofferHandler; // Handler for reoffering
+    private TunnelingHandler tunnelingHandler; // Handler for tunneling
 
     /** The network layer queue: contains packets that have to be handled by the network layer. */
     protected ArrayBlockingQueue<Packet> queue;
