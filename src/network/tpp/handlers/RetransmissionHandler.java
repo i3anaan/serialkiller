@@ -10,19 +10,19 @@ import java.util.concurrent.TimeUnit;
  * Makes sure that packets are retransmitted.
  */
 public class RetransmissionHandler extends Handler {
-    DelayQueue<Packet> out = new DelayQueue<Packet>();
+    DelayQueue<Packet> delayed;
     TPPNetworkLayer parent;
 
     public RetransmissionHandler(TPPNetworkLayer parent) {
         super(parent);
         this.parent = parent;
-        this.out = parent.retransmissionQueue();
+        this.delayed = parent.retransmissionQueue();
     }
 
     @Override
     public void handle() throws InterruptedException {
         // Take the next item out of the queue.
-        Packet p = out.take();
+        Packet p = delayed.take();
 
         // Check if it should be dropped.
         if (p.retransmissions() < TPPNetworkLayer.MAX_RETRANSMISSIONS) {
@@ -32,8 +32,13 @@ public class RetransmissionHandler extends Handler {
             TPPNetworkLayer.getLogger().debug(p.toString() + " will be retransmitted.");
         } else {
             TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped after %d retransmissions.", p.retransmissions()));
-            parent.markAsDropped(p);
         }
+        parent.markAsDropped(p);
+    }
+
+    @Override
+    public boolean offer(Packet p) {
+        return delayed.offer(p);
     }
 
     public String toString() {

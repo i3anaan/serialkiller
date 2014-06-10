@@ -277,7 +277,7 @@ public class Packet implements Delayed {
      */
     @Override
     public int compareTo(Delayed o) {
-        return (int) (getDelay(delayUnit) - o.getDelay(delayUnit));
+        return new Long(getDelay(delayUnit)).compareTo(o.getDelay(delayUnit));
     }
 
     /**
