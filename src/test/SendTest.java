@@ -11,6 +11,7 @@ import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
 import link.angelmaker.nodes.FlaggingNode;
+import link.angelmaker.nodes.FrameNode;
 import link.angelmaker.nodes.Node;
 import link.jack.DCFDXLLSSReadSendManager2000;
 import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
@@ -24,7 +25,7 @@ public class SendTest {
 	public static void main(String[] args) {
 		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
-		Node node = new FlaggingNode(null,8);
+		Node node = new FrameNode<Node>(null,3);
 		FrameLinkLayer am = new AngelMaker(phys, node, manager,
 				new SimpleBitExchanger(phys, manager));
 		System.out.println(am.toString());

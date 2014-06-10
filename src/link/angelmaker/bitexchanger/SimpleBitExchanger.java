@@ -34,7 +34,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	AMManager.Server manager;
 	public static final String MASTER = "master";
 	public static final String SLAVE = "slave";
-	public static final int STABILITY = 400;//TODO This is kind of a dirty fix.
+	public static final int STABILITY = 4000;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
 	public static final long READ_TIMEOUT_NO_ACK = 100l*1000000l;
@@ -43,8 +43,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	
 	public SimpleBitExchanger(PhysicalLayer down, AMManager manager){
 		this.down = down;
-		queueOut = new ArrayBlockingQueue<Boolean>(100*1024*1024*8);
-		queueIn = new ArrayBlockingQueue<Boolean>(100*1024*1024*8);
+		queueOut = new ArrayBlockingQueue<Boolean>(1024*1024*8);
+		queueIn = new ArrayBlockingQueue<Boolean>(1024*1024*8);
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
 		}else{
