@@ -173,6 +173,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
         retransmissionQueue = new DelayQueue<Packet>();
 
+        sentPackets = new ConcurrentHashMap<String, Packet>();
+
         congestion = new ConcurrentHashMap<Byte, Integer>();
 
         router = new Router();
