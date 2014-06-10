@@ -308,7 +308,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
-            if (host.address() == router.self() || getCongestion(p.header().getDestination()) < MAX_FOR_HOST) {
+            if (host.address() == router.self() || (p.header().getSender() == router.self() && p.header().getAck()) || getCongestion(p.header().getDestination()) < MAX_FOR_HOST) {
                 // Decrease TTL if needed.
                 if (p.header().getSender() != router.self()) {
                     p.header().decreaseTTL();
