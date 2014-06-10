@@ -124,6 +124,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		if(exchangerUsed==null){
 			exchangerUsed = new DummyBitExchanger();
 		}
+		TOP_NODE_IN_USE = topNodeUsed;
 		setup(physUsed,topNodeUsed,managerUsed,exchangerUsed);
 	}
 	

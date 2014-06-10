@@ -5,6 +5,7 @@ import common.Graph;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.nodes.BasicLeafNode;
 import link.angelmaker.nodes.Node;
 import util.BitSet2;
@@ -53,11 +54,15 @@ public class BlockingAMManager implements AMManager{
 
 	@Override
 	public Node readNode() {
+		//System.out.println("readingNode");
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
 		lastNodeReceived = node;
 		do{
+			System.out.println("QueueIn Size: "+((SimpleBitExchanger)exchanger).queueIn.size());
+			System.out.println("QueueOut Size: "+((SimpleBitExchanger)exchanger).queueOut.size());
 			BitSet2 received = exchanger.readBits();
 			if(received.length()>0){
+				System.out.println("Read Bits!!!! "+received);
 				node.giveConverted(received);
 			}
 		}while(!(node.isReady() || node.isFull()));
@@ -65,6 +70,8 @@ public class BlockingAMManager implements AMManager{
 			AngelMaker.logger.error("Node full, but not ready to be read.");
 			//TODO;
 		}
+		//System.out.println("Done Reading Node: "+node);
+		Graph.makeImage(Graph.getFullGraphForNode(node, true));
 		return node;
 	}
 	

@@ -1,6 +1,7 @@
 package test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.google.common.base.Charsets;
 
@@ -35,6 +36,7 @@ public class ReceiveTest {
 		BitSet2 totalReceived = new BitSet2();
 		while (true) {
 			byte[] receivedBytes = am.readFrame();
+			System.out.println("received:"+Arrays.toString(receivedBytes));
 			if (receivedBytes.length > 0 && totalReceived.length()<500) {
 				totalReceived = BitSet2.concatenate(totalReceived,new BitSet2(receivedBytes));
 				String received = new String(totalReceived.toByteArray(), Charsets.UTF_8);

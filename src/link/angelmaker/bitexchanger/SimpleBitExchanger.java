@@ -27,8 +27,8 @@ import util.Bytes;
  */
 public class SimpleBitExchanger extends Thread implements BitExchanger, BitExchanger.AlwaysSending {
 
-	private ArrayBlockingQueue<Boolean> queueOut;
-	private ArrayBlockingQueue<Boolean> queueIn;
+	public ArrayBlockingQueue<Boolean> queueOut;
+	public ArrayBlockingQueue<Boolean> queueIn;
 	private String connectionRole;
 	PhysicalLayer down;
 	AMManager.Server manager;
