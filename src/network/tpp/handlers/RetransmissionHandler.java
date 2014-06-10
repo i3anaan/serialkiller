@@ -31,7 +31,7 @@ public class RetransmissionHandler extends Handler {
             in.put(p);
         } else {
             TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped after %d retransmissions.", p.retransmissions()));
-            parent.markAsAcknowledged(p);
+            parent.markAsDropped(p);
         }
     }
 

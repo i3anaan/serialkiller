@@ -94,7 +94,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * queue with the default delay.
      * @param p The packet.
      */
-    public void markAsSent(Packet p) {
+    private void markAsSent(Packet p) {
         p.delay(TIMEOUT);
         retransmissionQueue.add(p);
         sentPackets.put(p.id(), p);
@@ -106,7 +106,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * retransmission queue and sets the delay to zero.
      * @param p The packet.
      */
-    public void markAsAcknowledged(Packet p) {
+    private void markAsAcknowledged(Packet p) {
         // Remove packet from retransmission queue.
         if (retransmissionQueue.remove(p)) {
             // If removed, set the delay to 0. If not removed, keep delay.
@@ -121,17 +121,31 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * packet from the retransmission queue and sets the delay to zero.
      * @param id The id of the packet.
      */
-    public void markAsAcknowledged(String id) {
+    private void markAsAcknowledged(String id) {
         if (sentPackets.containsKey(id)) {
             markAsAcknowledged(sentPackets.get(id));
         }
     }
 
     /**
+     * Marks a packet as dropped.
+     * @param p The packet.
+     */
+    public void markAsDropped(Packet p) {
+        // Remove packet from retransmission queue.
+        if (retransmissionQueue.remove(p)) {
+            // If removed, set the delay to 0. If not removed, keep delay.
+            p.delay(0);
+        }
+        sentPackets.remove(p.id());
+        decreaseCongestion(p.header().getDestination());
+    }
+
+    /**
      * Increases the network congestion for a host.
      * @param address The address of the host.
      */
-    public void increaseCongestion(Byte address) {
+    private void increaseCongestion(Byte address) {
         // Create entry if not exists.
         if (!congestion.containsKey(address)) {
             congestion.put(address, 1);
@@ -145,7 +159,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Decreases the network congestion for a host to a minimum of 0.
      * @param address The address of the host.
      */
-    public void decreaseCongestion(Byte address) {
+    private void decreaseCongestion(Byte address) {
         // Create entry if not exists.
         if (!congestion.containsKey(address)) {
             congestion.put(address, 0);
@@ -317,6 +331,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Offer packet to handler.
                 if (!host.handler().offer(p)) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " dropped, handler queue full.");
+                    return; // We are done.
                 } else {
                     TPPNetworkLayer.getLogger().debug(p.toString() + " offered to " + host.handler().toString() + ".");
                 }
