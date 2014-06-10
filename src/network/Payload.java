@@ -27,7 +27,7 @@ public class Payload {
 	 * @return The byte representing the command in this payload
 	 */
 	public byte getCommand() {
-		return data[0];
+        return data.length > 0 ? data[0] : 0;
 	}
 
     public String toString() {
