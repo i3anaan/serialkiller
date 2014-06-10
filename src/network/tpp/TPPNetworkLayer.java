@@ -138,6 +138,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         } else {
             congestion.put(address, congestion.get(address) + 1);
         }
+        TPPNetworkLayer.getLogger().debug(String.format("Congestion for %d increased to %d", address, congestion.get(address)));
     }
 
     /**
@@ -149,8 +150,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         if (!congestion.containsKey(address)) {
             congestion.put(address, 0);
         } else {
-            congestion.put(address, Math.max(congestion.get(address) + 1, 0));
+            congestion.put(address, Math.max(congestion.get(address) - 1, 0));
         }
+        TPPNetworkLayer.getLogger().debug(String.format("Congestion for %d decreased to %d", address, congestion.get(address)));
     }
 
     /**
@@ -315,6 +317,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Offer packet to handler.
                 if (!host.handler().offer(p)) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " dropped, handler queue full.");
+                } else {
+                    TPPNetworkLayer.getLogger().debug(p.toString() + " offered to " + host.handler().toString() + ".");
                 }
 
                 // Mark packet as sent when we are the original sender.
