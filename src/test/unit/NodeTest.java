@@ -18,14 +18,13 @@ public class NodeTest {
 		new FrameCeptionNode<Node>(root, 2),
 		new FrameCeptionNode<Node>(root, 0), new FlaggingNode(root, 8) };
 	
-	//@Test
+	@Test
 	public void testGeneral() {
 		
 		
 		BitSet2 data = new BitSet2(new byte[] { 0, -7, 127, -128, -1, 10, 4,
 				-6, 2, 8, 3, 7 });
 		for (Node base : nodes) {
-			System.out.println("Testing: " + base);
 			assertEquals(root, base.getParent());
 			for (int i = 0; i < 200; i++) {
 				data = new BitSet2();
@@ -41,17 +40,13 @@ public class NodeTest {
 					assertTrue(stored.length() > 0);
 				}
 				assertTrue(data != unused);
-				System.out.println("i=" + i);
 				if (!(base instanceof FlaggingNode)) {
 					assertEquals(stored, n.getOriginal());
 					assertEquals(data,
 							BitSet2.concatenate(n.getOriginal(), unused));
 				}
-				System.out.println("Converted = " + n.getConverted());
 				clone.giveConverted(n.getConverted());
 				if (n.isFull()) {
-					System.out.println("N-Original:\t" + n.getOriginal());
-					System.out.println("C-Original:\t" + clone.getOriginal());
 					assertEquals(n.getOriginal(), clone.getOriginal());
 					assertTrue(n.isCorrect());
 				}
@@ -72,15 +67,11 @@ public class NodeTest {
 				BitSet2 queueOriginal = new BitSet2();
 				BitSet2 queueOriginalTotal = new BitSet2(); // Contains all the
 															// data added.
-
-				System.out.println("####################>Hand data to sender");
 				boolean tookBits = false;
 				while (!sender.isFull()) {
 					// Add in parts, simulate network behaviour.
 					BitSet2 before = (BitSet2) queueOriginal.clone();
-					System.out.println("QueueOriginal: " + queueOriginal);
 					queueOriginal = sender.giveOriginal(queueOriginal);
-					System.out.println("Sender has:" + sender.getOriginal());
 					BitSet2 taken = before.get(0, before.length()
 							- queueOriginal.length());
 					if (!before.equals(queueOriginal)) {
@@ -97,7 +88,6 @@ public class NodeTest {
 				}
 				assertTrue(sender.isReady());
 				assertTrue(tookBits);
-				System.out.println("##> Done giving sender data");
 				// Is full, dont consume anymore
 				//TODO what is this assert?
 				//assertEquals(new BitSet2((byte) 5),
@@ -106,12 +96,10 @@ public class NodeTest {
 				BitSet2 queueConvertedReceived = new BitSet2();
 				BitSet2 receivedSoFar = new BitSet2();
 				int from = 0;
-				System.out.println("Giving Receiver: "+queueConvertedTotal);
 				while (!receiver.isFull()) {
 					// Add in parts, simulate network behaviour.
 					queueConvertedReceived = receiver
 							.giveConverted(queueConvertedReceived);
-					System.out.println("Received so far: "+receivedSoFar);
 					int to = Math.min((int) (Math.random() * 8),
 							queueConvertedTotal.length() - from);
 					queueConvertedReceived = BitSet2.concatenate(
@@ -121,12 +109,10 @@ public class NodeTest {
 					
 					from = from + to;
 				}
-				System.out.println("Before ready receiver has Converted:\t"+receiver.getConverted());
-				System.out.println("Before ready receiver has Original:\t"+receiver.getOriginal());
 				assertTrue(receiver.isReady());
 
 				assertEquals(queueConvertedTotal.length(), from);
-				System.out.println("Sender Original:\t" + sender.getOriginal()
+				/*System.out.println("Sender Original:\t" + sender.getOriginal()
 						+ " \t[" + sender.getOriginal().length() + "]");
 				System.out.println("Sender Converted:\t"
 						+ sender.getConverted() + " \t["
@@ -139,7 +125,7 @@ public class NodeTest {
 						+ receiver.getOriginal().length() + "]");
 				System.out.println("Test Original:\t\t" + queueOriginalTotal
 						+ " \t[" + queueOriginalTotal.length() + "]");
-
+				*/
 				assertEquals(queueOriginalTotal.length(),receiver.getOriginal().length());
 				assertEquals(receiver.getOriginal(), queueOriginalTotal);
 			}

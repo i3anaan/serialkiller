@@ -44,10 +44,12 @@ public class BasicFlag implements Flag{
 		escapedEscapedFlag.addAtEnd(endWith);
 		escapedEscapedFlag.addAtEnd(endWith);
 		
+		/*
 		System.out.println("Flag:\t\t\t"+flag);
 		System.out.println("EscapedFlag:\t\t"+escapedFlag);
 		System.out.println("EscapedEscapedFlag:\t"+escapedEscapedFlag);
 		System.out.println("RealEscapedFlag:\t"+realEscapedFlag);
+		*/
 		//assert(notEscapedEscapedFlag.length() == escapedEscapedFlag.length());
 		//Otherwise bitstuffing fails.
 	}
