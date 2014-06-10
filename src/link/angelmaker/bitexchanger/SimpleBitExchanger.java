@@ -37,7 +37,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final int STABILITY = 400;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 1000000l*1000000l;
+	public static final long READ_TIMEOUT_NO_ACK = 100l*1000000l;
 	private byte previousByteSent;
 	private byte previousByteReceived;
 	
@@ -48,7 +48,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
 		}else{
-			throw new IncompatibleModulesException();
+			throw new IncompatibleMomessagedulesException();
 		}
 		this.start();
 	}
