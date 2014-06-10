@@ -15,4 +15,6 @@ public class FrameCeptionNode<N extends Node> extends FrameNode<N> {
 			}
 		}
 	}
+	
+	//TODO cloning fixen.
 }

@@ -224,7 +224,7 @@ public class BitSet2 extends BitSet {
 		if(bs.length()>this.length()){
 			return -1;
 		}
-		for(int i=startAt;i<this.length()-bs.length()+1;i++){
+		for(int i=Math.max(startAt,0);i<this.length()-bs.length()+1;i++){
 			if(this.get(i,i+bs.length()).equals(bs)){
 				return i;
 			}

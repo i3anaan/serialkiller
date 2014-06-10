@@ -42,8 +42,11 @@ public class Graph {
 	}
 	
 	public static void makeImage(String graph){
+		makeImage(graph,"graphTest");
+	}
+	public static void makeImage(String graph,String name){
 		String type = "png";
-		File out = new File("graphTest." + type);
+		File out = new File(name+"." + type);
 		GraphViz gv = new GraphViz();
 		gv.writeGraphToFile( gv.getGraph( graph, type ), out );
 	}
