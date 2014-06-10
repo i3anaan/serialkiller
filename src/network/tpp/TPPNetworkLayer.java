@@ -373,17 +373,17 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Check if this is an acknowledgement or should be acknowledged.
                 if (p.header().getAck() && p.header().getDestination() == router.self()) {
                     // Acknowledgement for us.
-                    handleAcknowledgement(p);
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
+                    handleAcknowledgement(p);
                 } else if (p.header().getDestination() == router.self()) {
                     // We are the final destination.
-                    handleForApplication(p);
                     TPPNetworkLayer.getLogger().debug("Received packet for application: " + p.toString() + ".");
+                    handleForApplication(p);
                 } else {
                     // We are merely a simple workman, bossed around and without any initiative.
                     // In other words, send the packet to another host.
-                    handlePassthrough(p);
                     TPPNetworkLayer.getLogger().debug("Received packet for remote host: " + p.toString() + ".");
+                    handlePassthrough(p);
                 }
             } catch (InterruptedException e) {
                 // Exit gracefully.
