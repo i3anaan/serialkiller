@@ -220,7 +220,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				down.sendByte(byteToSendNext);
 				previousByteSent = byteToSendNext;
 				if(round<100){
-				AngelMaker.logger.debug("["+round+"]Send Bit: "+sendNext);
+				//AngelMaker.logger.debug("["+round+"]Send Bit: "+sendNext);
 				}
 			}
 			
@@ -242,7 +242,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			if(bitReceived!=null){		
 				queueIn.offer(bitReceived);
 				if(round<100){
-				AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
+				//AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
 				}
 				round++;
 				//TODO what to do when overflow.
