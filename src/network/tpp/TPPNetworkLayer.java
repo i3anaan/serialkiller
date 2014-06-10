@@ -316,15 +316,15 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 if (!host.handler().offer(p)) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " dropped, handler queue full.");
                 }
+
+                // Mark packet as sent when we are the original sender.
+                if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
+                    markAsSent(p);
+                }
             } else {
                 // Offer again.
                 reofferHandler.offer(p);
-//                TPPNetworkLayer.getLogger().debug(String.format("%d congested, ", host.address()) + p.toString() + " will be delayed.");
-            }
-
-            // Mark packet as sent when we are the original sender.
-            if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
-                markAsSent(p);
+                TPPNetworkLayer.getLogger().debug(String.format("%d congested, ", host.address()) + p.toString() + " will be delayed.");
             }
         } else {
             TPPNetworkLayer.getLogger().error(p.toString() + " dropped, packet is not routable.");
@@ -374,10 +374,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 } else if (p.header().getDestination() == router.self()) {
                     // We are the final destination.
                     handleForApplication(p);
+                    TPPNetworkLayer.getLogger().debug("Received packet for application: " + p.toString() + ".");
                 } else {
                     // We are merely a simple workman, bossed around and without any initiative.
                     // In other words, send the packet to another host.
                     handlePassthrough(p);
+                    TPPNetworkLayer.getLogger().debug("Received packet for remote host: " + p.toString() + ".");
                 }
             } catch (InterruptedException e) {
                 // Exit gracefully.
