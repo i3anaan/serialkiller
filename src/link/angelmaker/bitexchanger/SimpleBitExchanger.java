@@ -48,7 +48,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
 		}else{
-			throw new IncompatibleMomessagedulesException();
+			throw new IncompatibleModulesException();
 		}
 		this.start();
 	}
