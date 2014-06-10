@@ -146,6 +146,7 @@ public class Tunneling implements Runnable {
             socket = new ServerSocket(PORT);
         } catch (BindException e) {
             Tunneling.getLogger().critical(String.format("Port %d is already in use! Tunnels set up by other hosts will not be accepted.", Tunneling.PORT));
+            run = false;
         } catch (IOException e) {
             Tunneling.getLogger().critical(String.format("Cannot listen on port %d, exiting...", PORT));
             run = false;
