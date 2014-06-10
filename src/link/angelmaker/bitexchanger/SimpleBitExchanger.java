@@ -43,8 +43,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	
 	public SimpleBitExchanger(PhysicalLayer down, AMManager manager){
 		this.down = down;
-		queueOut = new ArrayBlockingQueue<Boolean>(1024);
-		queueIn = new ArrayBlockingQueue<Boolean>(1024);
+		queueOut = new ArrayBlockingQueue<Boolean>(100*1024*1024*8);
+		queueIn = new ArrayBlockingQueue<Boolean>(100*1024*1024*8);
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
 		}else{
