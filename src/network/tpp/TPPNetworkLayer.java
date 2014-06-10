@@ -94,7 +94,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * queue with the default delay.
      * @param p The packet.
      */
-    private void markAsSent(Packet p) {
+    public void markAsSent(Packet p) {
         p.delay(TIMEOUT);
         retransmissionQueue.add(p);
         sentPackets.put(p.id(), p);
@@ -106,7 +106,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * retransmission queue and sets the delay to zero.
      * @param p The packet.
      */
-    private void markAsAcknowledged(Packet p) {
+    public void markAsAcknowledged(Packet p) {
         // Remove packet from retransmission queue.
         if (retransmissionQueue.remove(p)) {
             // If removed, set the delay to 0. If not removed, keep delay.
@@ -121,7 +121,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * packet from the retransmission queue and sets the delay to zero.
      * @param id The id of the packet.
      */
-    private void markAsAcknowledged(String id) {
+    public void markAsAcknowledged(String id) {
         if (sentPackets.containsKey(id)) {
             markAsAcknowledged(sentPackets.get(id));
         }
@@ -131,7 +131,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Increases the network congestion for a host.
      * @param address The address of the host.
      */
-    private void increaseCongestion(Byte address) {
+    public void increaseCongestion(Byte address) {
         // Create entry if not exists.
         if (!congestion.containsKey(address)) {
             congestion.put(address, 1);
@@ -145,7 +145,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Decreases the network congestion for a host to a minimum of 0.
      * @param address The address of the host.
      */
-    private void decreaseCongestion(Byte address) {
+    public void decreaseCongestion(Byte address) {
         // Create entry if not exists.
         if (!congestion.containsKey(address)) {
             congestion.put(address, 0);
@@ -161,7 +161,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param address The address of the host.
      * @return The congestion for the specified host.
      */
-    private int getCongestion(Byte address) {
+    public int getCongestion(Byte address) {
         return congestion.get(address) != null ? congestion.get(address) : 0;
     }
 

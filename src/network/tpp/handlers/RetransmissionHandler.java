@@ -11,9 +11,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class RetransmissionHandler extends Handler {
     DelayQueue<Packet> out = new DelayQueue<Packet>();
+    TPPNetworkLayer parent;
 
     public RetransmissionHandler(TPPNetworkLayer parent) {
         super(parent);
+        this.parent = parent;
         this.out = parent.retransmissionQueue();
     }
 
@@ -27,6 +29,9 @@ public class RetransmissionHandler extends Handler {
             // Increase retransmissions
             p.retransmit();
             in.put(p);
+        } else {
+            TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped after %d retransmissions.", p.retransmissions()));
+            parent.markAsAcknowledged(p);
         }
     }
 
