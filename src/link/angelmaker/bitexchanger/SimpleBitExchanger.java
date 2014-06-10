@@ -203,7 +203,9 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * Needs a AMManager.Server to be able to send filler data.
 	 */
 	public void run(){
-		waitForSync();
+		//waitForSync();
+		AngelMaker.logger.omg("SYNC CURRENTLY DISABLED FOR TESTING PURPOSES");
+		//TODO REENABLE THIS
 		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
 		boolean firstRound = true;
 		int round = 0;
