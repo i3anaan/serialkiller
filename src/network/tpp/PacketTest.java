@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /** Unit tests for the Packet class. */
 public class PacketTest {
@@ -52,6 +53,23 @@ public class PacketTest {
 
         assertEquals("Payload length set incorrectly.", 879, p.header().getLength());
         assertTrue("Payload data not equal to input.", Arrays.equals(data, p.payload()));
+    }
+
+    @Test
+    public void testDelayed() {
+        Packet q = new Packet(1);
+        p.delay(10);
+        q.delay(11);
+
+        assertTrue("Comparison p<q incorrect.", p.compareTo(q) < 0);
+        q.delay(10);
+        assertTrue("Comparison p=q incorrect.", p.compareTo(q) == 0);
+        q.delay(9);
+        assertTrue("Comparison p>q incorrect.", p.compareTo(q) > 0);
+
+        p.delay(5000);
+        assertEquals("Delay conversion incorrect.", 5000, p.getDelay(TimeUnit.MILLISECONDS));
+        assertEquals("Delay conversion incorrect.", 5, p.getDelay(TimeUnit.SECONDS));
     }
 
 }

@@ -1,5 +1,8 @@
 package log;
 
+import com.google.common.escape.Escaper;
+import com.google.common.html.HtmlEscapers;
+
 import java.util.Date;
 
 /**
@@ -48,6 +51,11 @@ public class LogMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getEscapedMessage() {
+        Escaper escaper = HtmlEscapers.htmlEscaper();
+        return escaper.escape(getMessage());
     }
 
     public String toString() {

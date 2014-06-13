@@ -11,11 +11,22 @@ import javax.swing.*;
 public class TabbedPreferencePane
 extends 	Dialog
 {
+	/** The tabbedPane containing all of the individual preference panels */
 	private		JTabbedPane tabbedPane;
-	private		JPanel		panel1;
-	private		JPanel		panel2;
-	private		JPanel		panel3;
+	
+	/** Preference panel containing options for user customization */
+	private		JPanel		userPanel;
+	
+	/** Preference panel containing options for network transfers */
+	private		JPanel		transferPanel;
+	
+	/** Preference panel containing options for audio settings */
+	private		JPanel		audioPanel;
+	
+	/** The field containing the chosen username */
 	private		JTextField 	nameField;
+	
+	/** The Application GUI parent of this Component */
 	private		GUI			gui;
 
 
@@ -46,25 +57,27 @@ extends 	Dialog
 
 		// Create a tabbed pane
 		tabbedPane = new JTabbedPane();
-		tabbedPane.addTab( "User", panel1 );
-		tabbedPane.addTab( "File Transfer", panel2 );
-		tabbedPane.addTab( "Sound", panel3 );
+		tabbedPane.addTab( "User", userPanel );
+		tabbedPane.addTab( "File Transfer", transferPanel );
+		tabbedPane.addTab( "Sound", audioPanel );
 		topPanel.add( tabbedPane, BorderLayout.CENTER );
 	}
 
+	/** Method to create the userPanel part of the preference pane */
 	public void createUserPage()
 	{
-		panel1 = new JPanel();
-		panel1.setLayout( null );
+		userPanel = new JPanel();
+		userPanel.setLayout( null );
 
 		// Set a username that is displayed with all chat messages
 		JLabel label1 = new JLabel( "Username:" );
 		label1.setBounds( 10, 15, 150, 20 );
-		panel1.add( label1 );
+		userPanel.add( label1 );
 
 		nameField = new JTextField();
+		nameField.setText(gui.getPreferences().get("USERNAME", ""));
 		nameField.setBounds( 10, 35, 150, 25 );
-		panel1.add( nameField );
+		userPanel.add( nameField );
 
 		// Save preferences
 		JButton save = new JButton("Save");
@@ -76,49 +89,52 @@ extends 	Dialog
 				dispose();
 			}
 		});
-		panel1.add( save );
+		userPanel.add( save );
 	}
 
+	
+	/** Method to create the transferPanel part of the preference pane */
 	public void createFileTransferPage()
 	{
-		panel2 = new JPanel();
-		panel2.setLayout(null );
+		transferPanel = new JPanel();
+		transferPanel.setLayout(null );
 
 		// Default location to download files to
 		JLabel pathLabel = new JLabel( "Default file path:" );
 		pathLabel.setBounds( 10, 15, 150, 20 );
-		panel2.add(pathLabel);
+		transferPanel.add(pathLabel);
 		JTextField defPathField = new JTextField();
 		defPathField.setBounds( 10, 35, 300, 20 );
-		panel2.add( defPathField );
+		transferPanel.add( defPathField );
 
 		// Setting for ignoring all file offers
 		JLabel blockLabel = new JLabel( "Ignore all file offers:" );
 		blockLabel.setBounds( 10, 60, 150, 20 );
-		panel2.add(blockLabel);
+		transferPanel.add(blockLabel);
 		JCheckBox block = new JCheckBox();
 		block.setBounds( 160, 60, 150, 20 );
-		panel2.add(block);
+		transferPanel.add(block);
 
 		// Save preferences
 		JButton save = new JButton("Save");
 		save.setBounds( 10, 105, 150, 20 );
-		panel2.add( save );
+		transferPanel.add( save );
 
 	}
 
+	/** Method to create the audioPanel part of the preference pane */
 	public void createSoundPage()
 	{
-		panel3 = new JPanel();
-		panel3.setLayout(null );
+		audioPanel = new JPanel();
+		audioPanel.setLayout(null );
 
 		// Setting for ignoring all sounds
 		JLabel muteLabel = new JLabel( "Mute all sounds:" );
 		muteLabel.setBounds( 10, 60, 150, 20 );
-		panel3.add(muteLabel);
+		audioPanel.add(muteLabel);
 		JCheckBox mute = new JCheckBox();
 		mute.setBounds( 160, 60, 150, 20 );
-		panel3.add(mute);
+		audioPanel.add(mute);
 	}
 
 }

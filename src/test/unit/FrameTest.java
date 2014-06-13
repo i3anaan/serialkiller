@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import link.jack.Frame;
+import link.jack.SimpleFrame;
 import link.jack.HammingUnit;
 import link.jack.JackTheRipper;
 import link.jack.Unit;
@@ -21,20 +21,20 @@ public class FrameTest {
 	public void testConstructors(){
 		ArrayBlockingQueue<Unit> arr = new ArrayBlockingQueue<Unit>(1024);
 		arr.add(JackTheRipper.UNIT_IN_USE.getRandomUnit());
-		Frame f = new Frame(arr);
-		for(int i=0;i<Frame.FRAME_UNIT_COUNT;i++){
+		SimpleFrame f = new SimpleFrame(arr);
+		for(int i=0;i<SimpleFrame.FRAME_UNIT_COUNT;i++){
 			assertTrue(f.getUnits()[i]!=null);
 		}
 		
 		arr = new ArrayBlockingQueue<Unit>(1024);
 		ArrayList<Unit> arr2 = new ArrayList<Unit>();
-		for(int i=0;i<Frame.FRAME_UNIT_COUNT;i++){
+		for(int i=0;i<SimpleFrame.FRAME_UNIT_COUNT;i++){
 			Unit u = JackTheRipper.UNIT_IN_USE.getRandomUnit();
 			arr2.add(u);
 			arr.add(u);
 		}
-		f = new Frame(arr);
-		for(int i=0;i<Frame.FRAME_UNIT_COUNT;i++){
+		f = new SimpleFrame(arr);
+		for(int i=0;i<SimpleFrame.FRAME_UNIT_COUNT;i++){
 			assertTrue(f.getUnits()[i]==arr2.get(i));
 			assertTrue(f.getUnits()[i]!=null);
 		}
@@ -44,8 +44,8 @@ public class FrameTest {
 		for(Unit u : arr2){
 			bs = BitSet2.concatenate(bs, u.serializeToBitSet());
 		}
-		Frame f2 = new Frame(bs);
-		for(int i = 0;i<Frame.FRAME_UNIT_COUNT;i++){
+		SimpleFrame f2 = new SimpleFrame(bs);
+		for(int i = 0;i<SimpleFrame.FRAME_UNIT_COUNT;i++){
 			assertTrue(f2.getUnits()[i]!=null);
 			assertEquals(arr2.get(i),f2.getUnits()[i]);
 		}
@@ -53,8 +53,8 @@ public class FrameTest {
 		
 		bs = new BitSet2();
 		bs= BitSet2.concatenate(bs, HammingUnit.getDummy().serializeToBitSet());
-		f2 = new Frame(bs);
-		for(int i = 0;i<Frame.FRAME_UNIT_COUNT;i++){
+		f2 = new SimpleFrame(bs);
+		for(int i = 0;i<SimpleFrame.FRAME_UNIT_COUNT;i++){
 			assertTrue(f2.getUnits()[i]!=null);
 		}
 	}

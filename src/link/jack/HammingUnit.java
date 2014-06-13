@@ -105,4 +105,9 @@ public class HammingUnit extends Unit{
 		return getFlag(FLAG_END_OF_FRAME);
 	}
 	
+	@Override
+	public boolean isCorrect(){
+		return hc.hasError(getEncodedPayloadAsBitSet());
+	}
+	
 }

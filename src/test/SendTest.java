@@ -1,35 +1,20 @@
 package test;
-
-import com.google.common.base.Charsets;
-
-import phys.LptErrorHardwareLayer;
+import phys.LptHardwareLayer;
+import link.FrameLinkLayer;
 import link.jack.DCFDXLLSSReadSendManager2000;
 import link.jack.DelayCorrectedFDXLinkLayerSectionSegment;
+import link.jack.JackTheRipper;
 public class SendTest {
 
 	
 	/**
 	 * @param args
-	 *//*
+	 */
 	public static void main(String[] args) {
-		DCFDXLLSSReadSendManager2000 ll = new DCFDXLLSSReadSendManager2000(
-				new DelayCorrectedFDXLinkLayerSectionSegment(
-						new LptErrorHardwareLayer()));
-		System.out.println("Start Sending");
-		ll.setRun(true);
-		int count = 0;
-		while (count<3) {
-			// for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; b++) {
-			// ll.sendByte((byte) b);
-			// }
-			for (byte b : "Dit is een test message. 112233\n"
-					.getBytes(Charsets.UTF_8)) {
-				ll.sendByte((byte) b);
-			}
-			count++;
-			
+		FrameLinkLayer jkr = new JackTheRipper(new DCFDXLLSSReadSendManager2000(new DelayCorrectedFDXLinkLayerSectionSegment(new LptHardwareLayer())));
+		System.out.println("START SENDING");
+		while(true){
+			jkr.sendFrame("Such test, such amazing, wow, up to 420 gigadoge! #swag\n".getBytes());
 		}
-		System.out.println("Stopping exchanger thread");
-		//ll.setRun(false);
-	}*/
+	}
 }

@@ -35,7 +35,7 @@ public class LinkLayerInHandler extends LinkLayerHandler {
                 TPPNetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
             }
         } else {
-            TPPNetworkLayer.getLogger().warning("Link layer delivered malformed packet, packet dropped.");
+            TPPNetworkLayer.getLogger().warning("Link layer delivered malformed packet (" + p.reason() + "), packet dropped.");
         }
     }
 

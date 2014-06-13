@@ -12,7 +12,11 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.*;
 
-
+/**
+ * CloseableTabbedPane implementation based
+ * on code project: 
+ * http://www.codeproject.com/KB/tabs/JTabbedPane.aspx?display=Print
+ */
 public class ClosableTabbedPane extends JTabbedPane{
 	
 	/** The UI for drawing the close button */
@@ -109,6 +113,7 @@ public class ClosableTabbedPane extends JTabbedPane{
 			if(mouseOverTab(meX, meY)){
 				controlCursor();
 				tabbedPane.repaint();
+				
 			}
 		}
 

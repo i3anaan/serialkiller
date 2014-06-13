@@ -1,28 +1,17 @@
 package link.jack;
 
-import util.BitSet2;
-
 import java.util.concurrent.ArrayBlockingQueue;
 
-/**
- * Sets starting from the left (MSB), reads starting from the right (LSB).
- * 
- * @author I3anaan
- * 
- */
-public class Frame {
+import util.BitSet2;
 
-	private Unit[] units = new Unit[FRAME_UNIT_COUNT];
-
-	public static final int FRAME_UNIT_COUNT = 10;
+public abstract class Frame {
 	
-	/**
-	 * Constructs a frame, taking as much Units from the queue as possible.
-	 * @param outbox
-	 */
-	public Frame(ArrayBlockingQueue<Unit> outbox){
+	protected Unit[] units;
+	
+	public void instertUnits(ArrayBlockingQueue<Unit> outbox){
+		units = new Unit[getUnitCount()];
 		int added= 0;
-		while(added<FRAME_UNIT_COUNT){
+		while(added<getUnitCount()){
 			Unit u = outbox.poll();
 			if(u!=null){
 				units[added] = u;				
@@ -33,31 +22,13 @@ public class Frame {
 		}
 	}
 	
-	/**
-	 * Constructs a Units from the received data, and saves those in this frame.
-	 * @param received
-	 */
-	public Frame(BitSet2 received){
-		int index=0;
-		int bitCount = JackTheRipper.UNIT_IN_USE.getSerializedBitCount();
-		while((index*bitCount<received.length()-bitCount+1) && index<FRAME_UNIT_COUNT*bitCount){
-			units[index] = JackTheRipper.UNIT_IN_USE.constructFromBitSet(received.get(index*bitCount,(index+1)*bitCount));
-			index++;
-		}
-		for(int i=0;i<FRAME_UNIT_COUNT;i++){
-			if(units[i]==null){
-				units[i] = JackTheRipper.UNIT_IN_USE.getFiller();
-			}
-		}
-	}
-	
 	public Unit[] getUnits(){
 		return units;
 	}
 	
 	public BitSet2 asBitSet(){
 		BitSet2 result = new BitSet2();
-		for(int i=0;i<FRAME_UNIT_COUNT;i++){
+		for(int i=0;i<getUnitCount();i++){
 			result = BitSet2.concatenate(result, units[i].serializeToBitSet());
 		}
 		return result;
@@ -71,4 +42,10 @@ public class Frame {
 		}
 		return s;
 	}
+	public abstract int getUnitCount();
+	
+	public int minimumBits() {
+		return getUnitCount()*JackTheRipper.UNIT_IN_USE.getSerializedBitCount()-5;
+	}
+
 }
