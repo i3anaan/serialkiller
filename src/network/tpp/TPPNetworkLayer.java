@@ -516,7 +516,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             tunnels.create(routes.getTunnels().get(addr), addr < r.self());
         }
 
-        TPPNetworkLayer.getLogger().warning("Routes updated.");
+        TPPNetworkLayer.getLogger().alert("Routes updated.");
     }
 
     /**
@@ -524,7 +524,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * router will be lost.
      */
     public void loadDefaultRoutes() {
-        TPPNetworkLayer.getLogger().info("Reloading routes from file (" + ROUTING_PATH + ").");
+        TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
 
         // Create new routes
         constructRoutes(new Router(), ROUTING_PATH);

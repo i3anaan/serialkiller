@@ -28,8 +28,6 @@ class TemplateResponse extends Response {
                 .append("  <body>")
                 .append("    <div id='nav'>")
                 .append("    <a href='/'>Home</a>&nbsp; ")
-                .append("    <a href='/chat/'>Chat</a>&nbsp; ")
-                .append("    <a href='/files/'>Files</a>&nbsp; ")
                 .append("    <a href='/logs/'>Logs</a>&nbsp; ")
                 .append("    <a href='/threads/'>Threads</a>&nbsp; ")
                 .append("    <a href='/routes/'>Routes</a>&nbsp; ")
