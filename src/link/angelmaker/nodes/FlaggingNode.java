@@ -187,10 +187,6 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		}
 	}
 
-	public Node getExtraStorageNode(int bitCount) {
-		return new PureNode(this, bitCount);
-	}
-
 	@Override
 	public Node getParent() {
 		return parent;

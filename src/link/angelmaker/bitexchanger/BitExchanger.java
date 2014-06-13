@@ -1,5 +1,7 @@
 package link.angelmaker.bitexchanger;
 
+import java.util.BitSet;
+
 import util.BitSet2;
 
 /**
@@ -79,4 +81,6 @@ public interface BitExchanger {
 	public interface AlwaysSending extends BitExchanger {
 
 	}
+
+	public BitSet getQueueOut();
 }

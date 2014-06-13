@@ -1,5 +1,6 @@
 package link.angelmaker.bitexchanger;
 
+import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import link.angelmaker.AngelMaker;
@@ -261,5 +262,10 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	
 	public String toString(){
 		return "SimpleBitExchanger, using: "+down.toString();
+	}
+
+	@Override
+	public BitSet getQueueOut() {
+		return queueOut;
 	}
 }
