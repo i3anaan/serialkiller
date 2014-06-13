@@ -343,7 +343,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             } else {
                 // Offer again.
                 reofferHandler.offer(p);
-                TPPNetworkLayer.getLogger().debug(String.format("%d congested, ", host.address()) + p.toString() + " will be delayed.");
+                TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d), ", host.address(), getCongestion(host.address())) + p.toString() + " will be delayed.");
             }
         } else {
             TPPNetworkLayer.getLogger().error(p.toString() + " dropped, packet is not routable.");
@@ -352,7 +352,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
     private void handleAcknowledgement(Packet p) {
         // Mark packet as acknowledged.
-        markAsAcknowledged(Packet.id(p.header().getDestination(), p.header().getSeqnum(), p.header().getSegnum()));
+        markAsAcknowledged(Packet.id(p.header().getSender(), p.header().getSeqnum(), p.header().getSegnum()));
     }
 
     private void handlePassthrough(Packet p) {
