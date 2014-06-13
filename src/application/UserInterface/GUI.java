@@ -239,7 +239,7 @@ public class GUI extends JFrame implements Observer{
 
 		// Setup Observer/Observable relation
 		apl.addObserver(this);
-		loadHostList();
+		apl.getHosts(true);
 	}
 	// Update Event Methods
 

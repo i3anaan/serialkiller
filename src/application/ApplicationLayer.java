@@ -142,20 +142,21 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				String ftp = fileOfferCache.getIfPresent(key);
 
 				//DEBUG LINE
-				System.out.println("Present? : " + ftp);
-
-				for (String loopkey : fileOfferCache.asMap().keySet()) {
-					System.out.println("A key: " +loopkey);
-					System.out.println(loopkey.equals(key));
-					
-				}
+				//				System.out.println("Present? : " + ftp);
+				//
+				//				for (String loopkey : fileOfferCache.asMap().keySet()) {
+				//					System.out.println("Base key: " + key + "Test1");
+				//					System.out.println("A key: " +loopkey + "Test2");
+				//					System.out.println(loopkey.equals(key));
+				//					
+				//				}
 
 
 				if(ftp != null){
-					System.out.println("DEBUG REACHED");
+					//System.out.println("DEBUG REACHED");
 					//TODO FIX STRING KEY IN CACHE, REPLEACE IT WITH A MAP?
 					//TODO TEST NEW METHOD, WHEN WORKING REMOVE readFile METHOD
-					
+
 					//Load the file from directory into byte array
 					byte[] fileData = Files.toByteArray(new File(ftp));
 
@@ -166,7 +167,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 					System.arraycopy(fileData, 0, fileTransferData, p.data.length, fileData.length);
 
 					Payload transfer = new Payload(fileTransferData, p.address);
-					
+
 					try {
 						networkLayer.send(transfer);
 					} catch (SizeLimitExceededException e) {
@@ -191,8 +192,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				//check if file was offered before
 				String offerKey = ("" + fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName());
 				if(offeredFileCache.getIfPresent(offerKey) != null){
+					System.out.println("FILE OFFERED DETECTED!!!");
 					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
 				}else{
+					System.out.println("FILE OFFERED NOT DETECTED");
 					logger.debug("Host: " + fm.getAddress() + " Had no such file offer!");
 				}
 
@@ -269,7 +272,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		data[0] = fileOfferCommand;
 		System.arraycopy(byteFileSize, 0, data, 1, 4);
 		System.arraycopy(byteName, 0, data, 5, byteName.length);
-		
+
 		String key = destination + fileName;
 		fileOfferCache.put(key, strFilePath);
 		System.out.println("OFFERED KEY: " + key);
@@ -374,22 +377,32 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * automatically sends a WHOIS request to all hosts listed.
 	 * @return collection of hosts
 	 */
-	public Collection<Byte> getHosts() {
+	public Collection<Byte> getHosts(boolean whois) {
 		Collection<Byte> hostCollection = networkLayer.hosts();
 
-		// Send a WHOIS for each host in the collection
-		for (Byte h : hostCollection) {
-			byte[] data = new byte[1];
-			data[0] = WHOISrequestCommand;
-			try {
-				networkLayer.send(new Payload(data, h));
-				logger.debug("WHOIS Request Sent to: " + h + ".");
-			} catch (SizeLimitExceededException e) {
-				logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
-				e.printStackTrace();
+		if(whois){
+			// Send a WHOIS for each host in the collection
+			for (Byte h : hostCollection) {
+				byte[] data = new byte[1];
+				data[0] = WHOISrequestCommand;
+				try {
+					networkLayer.send(new Payload(data, h));
+					logger.debug("WHOIS Request Sent to: " + h + ".");
+				} catch (SizeLimitExceededException e) {
+					logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
+					e.printStackTrace();
+				}
 			}
 		}
 		return hostCollection;
+	}
+	
+	/**
+	 * getHosts with whois defaulted to false
+	 * @return collection of hosts
+	 */
+	public Collection<Byte> getHosts(){
+		return getHosts(false);
 	}
 
 	/**

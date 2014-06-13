@@ -15,9 +15,11 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 		byte [] name = Arrays.copyOfRange(data, 5, data.length);
 		int derp = ByteBuffer.allocate(4).wrap(size).getInt();
 	
-		System.out.println("DE FILESIZE: " +derp);
+		//TODO DEBUG LINE
+		//System.out.println("DE FILESIZE: " +derp);
 		fileSize = 	derp;
-		fileName = new String(name);
+		fileName = new String(name).trim();
+		//System.out.println("THE NAME : " +fileName);
 	}
 	
 	/**
