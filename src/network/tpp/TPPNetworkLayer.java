@@ -522,9 +522,6 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public void loadDefaultRoutes() {
         TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
 
-        // Lock router
-        routerLock.lock();
-
         // Create new routes
         constructRoutes(new Router(), ROUTING_PATH);
         constructHandlers();
