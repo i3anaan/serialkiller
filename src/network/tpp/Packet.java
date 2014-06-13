@@ -293,7 +293,7 @@ public class Packet implements Delayed {
      * @return The string representation.
      */
     public String toString() {
-        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d; Ack: %d>", header.getSender(), header.getDestination(), header.getSeqnum(), header.getSegnum(), header.getAcknum());
+        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d; Ack: %d; More: %b>", header.getSender(), header.getDestination(), header.getSeqnum(), header.getSegnum(), header.getAcknum(), header.getMore());
     }
 
     /**
