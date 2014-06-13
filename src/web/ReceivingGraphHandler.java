@@ -29,6 +29,8 @@ public class ReceivingGraphHandler extends ServiceHandler {
 			try {
 				img = Files.toString(new File("receiving_node_graph.svg"), Charsets.UTF_8);
 				r.out.append(img);
+				//r.out.append("<style>svg{max-width:100%;}</style>");
+
 			} catch (IOException e) {
 				e.printStackTrace();
 				r.out.append("<p>No graph available, input error.</p>");

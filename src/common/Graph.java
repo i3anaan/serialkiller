@@ -38,7 +38,10 @@ public class Graph {
 	
 	
 	public static String getNodeStyle(){
-		return "node[shape=\""+shape+"\",fillcolor=\""+baseColor+"\",style=\""+style+"\",fontname=\""+fontName+"\"];";
+		return "node[shape=\""+shape+"\",fillcolor=\""+baseColor+"\",style=\""+style+"\",fontname=\""+fontName+"\""+",fontsize=\"9\"];";
+	}
+	public static String getGraphStyle(){
+		return "graph[];";
 	}
 	
 	public static void makeImage(String graph){
@@ -54,6 +57,7 @@ public class Graph {
 	public static String getFullGraphForNode(Node node,boolean sendingNode){
 		StringBuilder sb = new StringBuilder();
 		sb.append("digraph status{"+"\n");
+		sb.append(getGraphStyle()+"\n");
 		sb.append(getNodeStyle()+"\n");
 		sb.append(getLegend(sendingNode)+"\n");
 		sb.append(getNodeSubGraph(node, sendingNode)+"\n");

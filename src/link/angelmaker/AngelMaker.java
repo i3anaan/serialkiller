@@ -71,7 +71,14 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	
 	public static AngelMaker instance;
 	
-	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
+	/**
+	 * Standard classes to use when nothing else specified.	
+	 */
+	private static PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
+	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 4);
+	private static AMManager STANDARD_MANAGER = new BlockingAMManagerServer();
+	private static BitExchanger STANDARD_EXCHANGER = new DummyBitExchanger();
+	
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
 	public BitExchanger bitExchanger;
@@ -126,16 +133,16 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		BitExchanger exchangerUsed = exchanger;
 		PhysicalLayer physUsed = phys;
 		if(physUsed==null){
-			physUsed = new NullPhysicalLayer();
+			physUsed = STANDARD_PHYS;
 		}
 		if(topNodeUsed==null){
-			topNodeUsed = new FrameCeptionNode<Node>(null, 0);
+			topNodeUsed = TOP_NODE_IN_USE;
 		}
 		if(managerUsed==null){
-			managerUsed = new BlockingAMManagerServer();
+			managerUsed = STANDARD_MANAGER;
 		}
 		if(exchangerUsed==null){
-			exchangerUsed = new DummyBitExchanger();
+			exchangerUsed =STANDARD_EXCHANGER;
 		}
 		TOP_NODE_IN_USE = topNodeUsed;
 		setup(physUsed,topNodeUsed,managerUsed,exchangerUsed);
