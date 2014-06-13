@@ -124,7 +124,9 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Received a file transfer offer.
 				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
 
+				String keyOffer = ("" + offer.getAddress() + "-" + offer.getFileSize() + "-" + offer.getFileName());
 				//TODO 01 BUILD CACHE HERE?
+				offeredFileCache.put(keyOffer, keyOffer);
 
 				setChanged();
 				notifyObservers(offer);
@@ -140,6 +142,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 				// Check if fileOffer exists and if so send it
 				String ftp = fileOfferCache.getIfPresent(key);
+				
 
 				//DEBUG LINE
 				//				System.out.println("Present? : " + ftp);
