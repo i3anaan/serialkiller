@@ -2,6 +2,7 @@ package tunnel;
 
 import log.LogMessage;
 import log.Logger;
+import network.NetworkLayer;
 import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 
@@ -19,6 +20,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class Tunneling implements Runnable {
     public static final int PORT = 1337;
+
+    private TPPNetworkLayer parent;
 
     /** The tunnels. */
     private Map<String, Tunnel> tunnels;
@@ -39,6 +42,7 @@ public class Tunneling implements Runnable {
     private static Logger logger;
 
     public Tunneling(TPPNetworkLayer parent) {
+        this.parent = parent;
         queue = parent.queue();
         tunnels = new TreeMap<String, Tunnel>();
 
@@ -58,7 +62,7 @@ public class Tunneling implements Runnable {
 
         if (tunnel == null) {
             // Create the new tunnel.
-            tunnel = new Tunnel(ip, queue, autoconnect);
+            tunnel = new Tunnel(ip, queue, autoconnect, parent);
 
             // Perform tunnel create actions.
             register(tunnel);
@@ -83,7 +87,7 @@ public class Tunneling implements Runnable {
 
         if (tunnel == null) {
             // Create the new tunnel.
-            tunnel = new Tunnel(socket, queue, autoconnect);
+            tunnel = new Tunnel(socket, queue, autoconnect, parent);
 
             // Perform tunnel create actions.
             register(tunnel);
@@ -123,6 +127,9 @@ public class Tunneling implements Runnable {
             t.offer(p);
         } else {
             Tunneling.getLogger().alert(p.toString() + " dropped, no tunnel found (IP: " + ip + ").");
+            if (parent != null) {
+                parent.markAsDropped(p);
+            }
             String tunnelsString = "";
             for (String tunnelIP : tunnels.keySet()) {
                 tunnelsString += " " + tunnelIP + ": " + tunnels.get(tunnelIP).ip() + ",";
@@ -146,6 +153,7 @@ public class Tunneling implements Runnable {
             socket = new ServerSocket(PORT);
         } catch (BindException e) {
             Tunneling.getLogger().critical(String.format("Port %d is already in use! Tunnels set up by other hosts will not be accepted.", Tunneling.PORT));
+            run = false;
         } catch (IOException e) {
             Tunneling.getLogger().critical(String.format("Cannot listen on port %d, exiting...", PORT));
             run = false;

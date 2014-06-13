@@ -109,7 +109,7 @@ public class UserListPanel extends JPanel{
 	public void setHostName(byte address, byte[] hostName){
 		for (int i = 0; i < hostMap.size(); i++){
 			if(nicknames.get(i).equals(hostMap.get(address)))
-				nicknames.set(i, String.valueOf(address) + ": " +new String(hostName));
+				nicknames.set(i, new String(hostName));
 		}
 		hostMap.put(address, String.valueOf(address) + ": " + new String(hostName));
 

@@ -2,6 +2,7 @@ package tunnel;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Bytes;
+import network.NetworkLayer;
 import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 import network.tpp.PacketHeader;
@@ -20,6 +21,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Tunnel implements Runnable {
     public static final int CONNECT_TIMEOUT = 2000;
     public static final int RECONNECT_TIMEOUT = 2000;
+
+    /** The NetworkLayer this tunnel works for. */
+    private TPPNetworkLayer network;
 
     /** The IP address of the host this tunnel connects to. */
     protected String ip;
@@ -48,11 +52,14 @@ public class Tunnel implements Runnable {
      * Constructs a new Tunnel instance. Sets up some basic parameters.
      * @param in The queue for packets traveling into the network layer.
      * @param autoconnect Whether the tunnel should automatically (re)connect.
+     * @param network The NetworkLayer instance this tunnel works for. May be
+     *                null if this tunnel works without a network layer.
      */
-    private Tunnel(ArrayBlockingQueue<Packet> in, boolean autoconnect) {
+    private Tunnel(ArrayBlockingQueue<Packet> in, boolean autoconnect, TPPNetworkLayer network) {
         this.autoconnect = autoconnect;
         this.in = in;
-        out = new ArrayBlockingQueue<Packet>(TPPNetworkLayer.QUEUE_SIZE);
+        this.out = new ArrayBlockingQueue<Packet>(TPPNetworkLayer.QUEUE_SIZE);
+        this.network = network;
     }
 
     /**
@@ -61,9 +68,11 @@ public class Tunnel implements Runnable {
      * @param socket The socket.
      * @param in The queue for packets traveling into the network layer.
      * @param autoconnect Whether the tunnel should automatically (re)connect.
+     * @param network The NetworkLayer instance this tunnel works for. May be
+     *                null if this tunnel works without a network layer.
      */
-    public Tunnel(Socket socket, ArrayBlockingQueue<Packet> in, boolean autoconnect) {
-        this(in, autoconnect);
+    public Tunnel(Socket socket, ArrayBlockingQueue<Packet> in, boolean autoconnect, TPPNetworkLayer network) {
+        this(in, autoconnect, network);
         this.socket = socket;
         this.ip = socket.getInetAddress().getHostAddress();
 
@@ -77,9 +86,11 @@ public class Tunnel implements Runnable {
      * @param ip The IP address of the remote host.
      * @param in The queue for packets traveling into the network layer.
      * @param autoconnect Whether the tunnel should automatically (re)connect.
+     * @param network The NetworkLayer instance this tunnel works for. May be
+     *                null if this tunnel works without a network layer.
      */
-    public Tunnel(String ip, ArrayBlockingQueue<Packet> in, boolean autoconnect) {
-        this(in, autoconnect);
+    public Tunnel(String ip, ArrayBlockingQueue<Packet> in, boolean autoconnect, TPPNetworkLayer network) {
+        this(in, autoconnect, network);
         this.ip = ip;
 
         t = new Thread(this);
@@ -118,6 +129,9 @@ public class Tunnel implements Runnable {
     public void offer(Packet p) {
         if (!out.offer(p)) {
             Tunneling.getLogger().alert(p.toString() + " dropped, " + toString() + " queue full.");
+            if (network != null) {
+                network.markAsDropped(p);
+            }
         }
     }
 
@@ -268,6 +282,9 @@ public class Tunnel implements Runnable {
                         // Add packet to queue.
                         if (!tunnel.in.offer(p)) {
                             Tunneling.getLogger().error(p.toString() + " dropped, queue full.");
+                            if (network != null) {
+                                network.markAsDropped(p);
+                            }
                         }
                     } else if (p.reason() != null) {
                         // We are out of sync, stop.
