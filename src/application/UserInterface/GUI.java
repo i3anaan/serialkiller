@@ -38,7 +38,7 @@ public class GUI extends JFrame implements Observer{
 	private 	TabbedChatPanel 	cp; 			
 	/** The list of hostNames we can communicate with */
 	private 	UserListPanel 		ulp;
-	
+
 	private JMenuItem sendFileItem;
 
 	// Constructors
@@ -102,18 +102,12 @@ public class GUI extends JFrame implements Observer{
 				if(cp.getActiveHost() != null){
 					int rVal = c.showOpenDialog(GUI.this);
 					if (rVal == JFileChooser.APPROVE_OPTION) {
-						try {
-							apl.readFile(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
-						} catch (IOException ex) {
-							JOptionPane.showMessageDialog(cp, ex.toString());
-						}
+						apl.writeFileOffer(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
 					}
 					if (rVal == JFileChooser.CANCEL_OPTION) {
-
+						//DO NOTHING
 					}
 				}
-
-
 			}
 		});
 		// Exit item
@@ -239,10 +233,10 @@ public class GUI extends JFrame implements Observer{
 	public Byte getHost(){
 		return apl.getHost();
 	}
-	
+
 	// Starter of the GUI
 	private void Start(){
-		
+
 		// Setup Observer/Observable relation
 		apl.addObserver(this);
 		loadHostList();
@@ -269,8 +263,8 @@ public class GUI extends JFrame implements Observer{
 			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
 				apl.acceptFileOffer((FileOfferMessage) arg, filePath);
-				
-				
+
+
 			}
 		}
 

@@ -165,7 +165,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.header().setMore(i + 1 != segments);
                 p.header().setSender(router.self());
                 p.header().setDestination(destination);
-                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), data.length - (Packet.MAX_PAYLOAD_LENGTH * i))));
+                int end = Packet.MAX_PAYLOAD_LENGTH * (i+1) < data.length ? data.length : Packet.MAX_PAYLOAD_LENGTH * (i+1);
+                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, end));
 
                 // Send it.
                 try {
