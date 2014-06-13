@@ -140,7 +140,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 				// Check if fileOffer exists and if so send it
 				String ftp = fileOfferCache.getIfPresent(key);
-				
+
 
 				//DEBUG LINE
 				//				System.out.println("Present? : " + ftp);
@@ -191,12 +191,21 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
 
 				//check if file was offered before
-				String offerKey = ("" + fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName());
+				String offerKey = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
 				if(offeredFileCache.getIfPresent(offerKey) != null){
 					System.out.println("FILE OFFERED DETECTED!!!");
 					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
 				}else{
 					System.out.println("FILE OFFERED NOT DETECTED");
+					System.out.println(offeredFileCache.size());
+					
+					for (String loopkey : offeredFileCache.asMap().keySet()) {
+						System.out.println("A key: " +loopkey.hashCode());
+						System.out.println(offerKey.hashCode());
+						System.out.println(offerKey.equals(loopkey));
+						
+					}
+			
 					logger.debug("Host: " + fm.getAddress() + " Had no such file offer!");
 				}
 
@@ -276,7 +285,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 		String key = destination + fileName;
 		fileOfferCache.put(key, strFilePath);
-		System.out.println("OFFERED KEY: " + key);
+		//System.out.println("OFFERED KEY: " + key);
 
 		// Put the offer in a new payload and send it
 		Payload offer = new Payload(data, destination);
@@ -341,8 +350,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	/** accepts a file offer and sends a fileAcceptMessage */
 	public void acceptFileOffer(FileOfferMessage fm, String filePath){
 
-		String key = ("" + fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName());
+		String key = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
 		offeredFileCache.put(key, filePath);
+		//DEBUG
+		System.out.println("PUT KEY: " + key.hashCode());
 
 		byte[] data = fm.getPayload();
 		data[0] = fileAcceptCommand;
@@ -397,7 +408,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		}
 		return hostCollection;
 	}
-	
+
 	/**
 	 * getHosts with whois defaulted to false
 	 * @return collection of hosts
