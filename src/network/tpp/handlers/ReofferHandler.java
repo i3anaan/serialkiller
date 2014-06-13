@@ -10,8 +10,11 @@ import java.util.concurrent.TimeUnit;
  * packets in the main queue.
  */
 public class ReofferHandler extends Handler {
+    TPPNetworkLayer parent;
+
     public ReofferHandler(TPPNetworkLayer parent) {
         super(parent);
+        this.parent = parent;
     }
 
     @Override
@@ -19,11 +22,7 @@ public class ReofferHandler extends Handler {
         Thread.sleep(TPPNetworkLayer.TIMEOUT / 2);
 
         Packet p = out.take();
-
-        while (p != null) {
-            in.put(p);
-            p = out.poll();
-        }
+        parent.sendPacket(p);
     }
 
     public String toString() {

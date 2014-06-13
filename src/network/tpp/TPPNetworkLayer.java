@@ -318,11 +318,13 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Sends the given packet.
      * @param p The packet.
      */
-    private void sendPacket(Packet p) {
+    public void sendPacket(Packet p) {
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
-            if (host.address() == router.self() || (p.header().getSender() == router.self() && p.header().getAck()) || getCongestion(p.header().getDestination()) < MAX_FOR_HOST) {
+            if (p.header().getDestination() == router.self() // Packets to ourselves do not get congestion control.
+                    || (p.header().getSender() == router.self() && p.header().getAck()) // Packets that are acknowledgements do not get congestion control.
+                    || (p.header().getSender() == router.self() && getCongestion(p.header().getDestination()) < MAX_FOR_HOST)) { // Packets for hosts that are congested by us can be sent.
                 // Decrease TTL if needed.
                 if (p.header().getSender() != router.self()) {
                     p.header().decreaseTTL();
@@ -336,14 +338,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                     TPPNetworkLayer.getLogger().debug(p.toString() + " offered to " + host.handler().toString() + ".");
                 }
 
-                // Mark packet as sent when we are the original sender.
+                // Mark packet as sent when we are the original sender and the packet is not an acknowledgement.
                 if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
                     markAsSent(p);
                 }
             } else {
                 // Offer again.
                 reofferHandler.offer(p);
-                TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d), ", host.address(), getCongestion(host.address())) + p.toString() + " will be delayed.");
+                TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
             }
         } else {
             TPPNetworkLayer.getLogger().error(p.toString() + " dropped, packet is not routable.");
@@ -352,7 +354,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
     private void handleAcknowledgement(Packet p) {
         // Mark packet as acknowledged.
-        markAsAcknowledged(Packet.id(p.header().getSender(), p.header().getSeqnum(), p.header().getSegnum()));
+        markAsAcknowledged(Packet.id(p.header().getSender(), p.header().getAcknum(), p.header().getSegnum()));
     }
 
     private void handlePassthrough(Packet p) {
