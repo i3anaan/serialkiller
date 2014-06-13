@@ -1,5 +1,6 @@
 package network.tpp;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Bytes;
 
 import java.util.Arrays;
@@ -38,6 +39,7 @@ public class Packet implements Delayed {
 
     private long delay;
     private TimeUnit delayUnit = TimeUnit.MILLISECONDS;
+    private Stopwatch stopwatch;
 
     /** Number of retransmissions. */
     private int retransmissions;
@@ -54,6 +56,7 @@ public class Packet implements Delayed {
         header.setTTL(MAX_TTL);
         payload = new byte[0];
         delay = 0;
+        stopwatch = Stopwatch.createUnstarted();
     }
 
     /**
@@ -268,7 +271,14 @@ public class Packet implements Delayed {
      */
     @Override
     public long getDelay(TimeUnit unit) {
-        return unit.convert(delay, delayUnit);
+        if (!stopwatch.isRunning()) {
+            stopwatch.start();
+        }
+        long calculated = delay > stopwatch.elapsed(delayUnit) ? delay - stopwatch.elapsed(delayUnit) : 0;
+        if (calculated == 0) {
+            stopwatch.stop();
+        }
+        return unit.convert(calculated, delayUnit);
     }
 
     /**
