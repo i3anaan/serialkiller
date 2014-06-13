@@ -77,7 +77,7 @@ public class ApplicationLayerHandler extends Handler {
 
             // If this packet is the last segment, set total.
             if (!more) {
-                sequenceSizes.get(sender).put(seqnum, segnum);
+                sequenceSizes.get(sender).put(seqnum, segnum + 1);
             }
 
             // Check if we have all segments and concatenate data.
@@ -91,6 +91,8 @@ public class ApplicationLayerHandler extends Handler {
                 // Cleanup.
                 segments.get(sender).remove(seqnum);
                 sequenceSizes.get(sender).remove(seqnum);
+            } else if (sequenceSizes.get(sender).get(seqnum) < segments.get(sender).get(seqnum).size()) {
+                TPPNetworkLayer.getLogger().warning(String.format("Sequence %d from %d has more (%d) segments than the given number (%d) allows.", seqnum, sender, segments.get(sender).get(seqnum).size(), sequenceSizes.get(sender).get(seqnum)));
             }
         } else {
             // Simple payload.
