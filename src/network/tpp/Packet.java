@@ -272,6 +272,7 @@ public class Packet implements Delayed {
     @Override
     public long getDelay(TimeUnit unit) {
         if (!stopwatch.isRunning()) {
+            stopwatch.reset();
             stopwatch.start();
         }
         long calculated = delay > stopwatch.elapsed(delayUnit) ? delay - stopwatch.elapsed(delayUnit) : 0;
