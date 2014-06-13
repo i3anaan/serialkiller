@@ -50,6 +50,7 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 		taMessages.setEditable(false);
 		taMessages.setLineWrap(true);
 
+		// Make it scrollable
 		JScrollPane taScroll = new JScrollPane(taMessages, 
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -75,8 +76,7 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 		if (event.getKeyCode() == KeyEvent.VK_ENTER) {
 			if(!myMessage.getText().equals("")){
 				String username = gui.getPreferences().get("USERNAME", "");
-				//TODO find a proper hostID for ourselves
-				addMessage(username, 6666,myMessage.getText());
+				addMessage(username, gui.getHost(),myMessage.getText());
 				gui.getApplicationLayer().writeChatMessage(username, myMessage.getText(), address);
 				myMessage.setText("");
 			}

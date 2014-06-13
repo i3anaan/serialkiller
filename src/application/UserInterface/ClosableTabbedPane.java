@@ -62,6 +62,7 @@ public class ClosableTabbedPane extends JTabbedPane{
 		
 		/** the height of the close UI */
 		private final int  height = 5;
+		
 		/** selection rectangle for the close UI */
 		private Rectangle rectangle = new Rectangle(0,0,width, height);
 		
@@ -74,25 +75,15 @@ public class ClosableTabbedPane extends JTabbedPane{
 		
 		/** mouse events */
 		@Override 
-		public void mouseEntered(MouseEvent me) {
-			// Nothing
-		}
+		public void mouseEntered(MouseEvent me) {}
 		@Override
-		public void mouseExited(MouseEvent me) {
-			// Nothing
-		}
+		public void mouseExited(MouseEvent me) {}
 		@Override
-		public void mousePressed(MouseEvent me) {
-			// Nothing
-		}
+		public void mousePressed(MouseEvent me) {}
 		@Override
-		public void mouseClicked(MouseEvent me) {
-			// Nothing
-		}
+		public void mouseClicked(MouseEvent me) {}
 		@Override
-		public void mouseDragged(MouseEvent me) {
-			// Nothing
-		}
+		public void mouseDragged(MouseEvent me) {}
 		
 		
 		/** event when close button has been clicked and mouse has been released */
@@ -101,7 +92,6 @@ public class ClosableTabbedPane extends JTabbedPane{
 				boolean isToCloseTab = tabAboutToClose(selectedTab);
 				if (isToCloseTab && selectedTab > -1){			
 					tabbedPane.removeTabAt(selectedTab);
-					// HIER IETS DOEN
 				}
 				selectedTab = tabbedPane.getSelectedIndex();
 			}

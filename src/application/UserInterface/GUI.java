@@ -28,17 +28,17 @@ import application.message.*;
 
 public class GUI extends JFrame implements Observer{
 
-	// private variables
-
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
 	/** The preferences object used by this application */
 	private		Preferences 		prefs; 
 	/** The application layer this application communicates with */
 	private 	ApplicationLayer 	apl;
-
-	private 	TabbedChatPanel 	cp; 					
+	/** The container for all the ChatPanel Tabs*/
+	private 	TabbedChatPanel 	cp; 			
+	/** The list of hostNames we can communicate with */
 	private 	UserListPanel 		ulp;
+
 	private JMenuItem sendFileItem;
 
 	// Constructors
@@ -102,18 +102,12 @@ public class GUI extends JFrame implements Observer{
 				if(cp.getActiveHost() != null){
 					int rVal = c.showOpenDialog(GUI.this);
 					if (rVal == JFileChooser.APPROVE_OPTION) {
-						try {
-							apl.readFile(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
-						} catch (IOException ex) {
-							JOptionPane.showMessageDialog(cp, ex.toString());
-						}
+						apl.writeFileOffer(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
 					}
 					if (rVal == JFileChooser.CANCEL_OPTION) {
-
+						//DO NOTHING
 					}
 				}
-
-
 			}
 		});
 		// Exit item
@@ -213,7 +207,10 @@ public class GUI extends JFrame implements Observer{
 		return apl;
 	}
 
-	/** Returns the Logger object for this GUI */
+	/**
+	 * Returns the Logger object for this GUI
+	 * @return Logger object
+	 */
 	public static Logger getLogger() {
 		if (logger == null) {
 			logger = new Logger(LogMessage.Subsystem.APPLICATION);
@@ -221,18 +218,28 @@ public class GUI extends JFrame implements Observer{
 		return logger;
 	}
 
-	/** Loads a collection holding a list of hosts into the gui */
+	/**
+	 * Loads a collection holding a list of hosts into the GUI.
+	 * @return the collection of hosts
+	 */
 	public Collection<Byte> loadHostList(){
 		return apl.getHosts();
+	}
 
+	/**
+	 * Method to retrieve the address of this host.
+	 * @return the address of this host.
+	 */
+	public Byte getHost(){
+		return apl.getHost();
 	}
 
 	// Starter of the GUI
 	private void Start(){
-		
+
 		// Setup Observer/Observable relation
 		apl.addObserver(this);
-		loadHostList();
+		apl.getHosts(true);
 	}
 	// Update Event Methods
 
@@ -255,14 +262,9 @@ public class GUI extends JFrame implements Observer{
 			//TODO test MORE
 			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
-				//TODO fix this, send file offer ack and await file transfer message
-				//TODO temporary, look for prettier solution
-				//FileTransferMessage fm = new FileTransferMessage(((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getPayload());
-				//apl.writeFile(fm, filePath);
-				
 				apl.acceptFileOffer((FileOfferMessage) arg, filePath);
-				
-				
+
+
 			}
 		}
 

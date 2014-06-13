@@ -59,21 +59,10 @@ public class TabbedChatPanel extends JPanel{
 	/**
 	 * adds a tab for a host with the specified hostName
 	 * @param name of the host
+	 * @param address of the host
 	 */
 	public void addChatPanel(String hostName, byte address){
 
-		// Alternative 1
-
-		//		if(tabbedPane.indexOfComponent(tabIndex.get(hostName)) == -1){
-		//			if(tabIndex.get(hostName) != null){
-		//				tabIndex.remove(hostName);
-		//			}
-		//			JPanel newPanel = new ChatPanel(gui, address);
-		//			tabIndex.put(hostName, newPanel);
-		//			tabbedPane.addTab(hostName, newPanel);
-		//		}
-
-		// Alternative 2
 		if(tabIndex.get(hostName) == null) {
 
 			JPanel newPanel = new ChatPanel(gui, address);
@@ -108,22 +97,23 @@ public class TabbedChatPanel extends JPanel{
 	 * @param address of the user
 	 * @param chat message to be parsed
 	 */
+	//TODO clean up if, if , else structure
 	public void parseMessage(String nickName, Byte address, String message){
 		String hostName = gui.getUserList().findHostName(address);
 		int adr = address;
 		
-		//TODO same NPE as in GUI cp is still null
-		//TODO might be fixed now
 		ChatPanel cp = (ChatPanel) tabIndex.get(hostName);
+		// If no tab is active create a new tab and parse
 		if(cp == null){
-			System.out.println("GEEN PANEL ACTIEF");
+			addChatPanel(hostName, address);
+			((ChatPanel) tabIndex.get(hostName)).addMessage(nickName, adr, message);
 		}
+		// Else just parse
 		if(cp != null){
-			System.out.println("HERPHEP");
 				cp.addMessage(nickName, adr, message);
 		}else {
 			//TODO throw error
-			System.out.println("ChatPanel has failed to initialize");
+			System.out.println("ChatPanel faillure");
 		}
 	}
 	
