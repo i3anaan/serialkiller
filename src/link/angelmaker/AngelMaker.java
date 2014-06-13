@@ -69,17 +69,30 @@ import log.LogMessage.Subsystem;
 //TODO implement this class more serious.
 public class AngelMaker extends FrameLinkLayer implements Startable{
 	
+	public static AngelMaker instance;
+	
 	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
 	public BitExchanger bitExchanger;
 	private Stack stack;
 	
+	public static AngelMaker getInstanceOrNull(){
+		return instance;
+	}
+	
+	
 	public AngelMaker(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
 		standardSetup(phys,topNode,manager,exchanger);
+		instance = this;
 	}
 	public AngelMaker(PhysicalLayer phys){
 		standardSetup(phys,null,null,null);
+		instance = this;
+	}
+	public AngelMaker(){
+		standardSetup(null,null,null,null);
+		instance = this;
 	}
 	
 	

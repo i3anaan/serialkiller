@@ -29,7 +29,7 @@ public class Graph {
 		node.giveOriginal(bs);
 		System.out.println(getFullGraphForNode(node, true));
 		
-		String type = "png";
+		String type = "svg";
 		File out = new File("graphTest." + type);
 		GraphViz gv = new GraphViz();
 		gv.writeGraphToFile( gv.getGraph( getFullGraphForNode(node, true), type ), out );
@@ -45,7 +45,7 @@ public class Graph {
 		makeImage(graph,"graphTest");
 	}
 	public static void makeImage(String graph,String name){
-		String type = "png";
+		String type = "svg";
 		File out = new File(name+"." + type);
 		GraphViz gv = new GraphViz();
 		gv.writeGraphToFile( gv.getGraph( graph, type ), out );

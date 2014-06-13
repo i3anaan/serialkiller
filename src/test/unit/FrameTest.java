@@ -85,15 +85,15 @@ public class FrameTest {
 	@Test
 	public void testFixingFrame(){
 		BitSet2 data = BitSet2.concatenate(FixingFrame.FLAG_END_OF_FRAME,BitSet2.concatenate(new BitSet2(new boolean[]{true,false,true,false,false,true,true}),FixingFrame.FLAG_END_OF_FRAME));
-		assertTrue(data.contains(FixingFrame.FLAG_END_OF_FRAME));
+		assertTrue(data.contains(FixingFrame.FLAG_END_OF_FRAME)>=0);
 		BitSet2 stuffedData = (BitSet2) data.clone();
 		assertTrue(data.equals(stuffedData));
 		stuffedData = FixingFrame.addBitStuffing(stuffedData);
-		assertFalse(stuffedData.contains(FixingFrame.FLAG_END_OF_FRAME));
+		assertFalse(stuffedData.contains(FixingFrame.FLAG_END_OF_FRAME)>=0);
 		stuffedData = FixingFrame.removeBitStuffing(stuffedData);
 		assertTrue(stuffedData.equals(data));
 		stuffedData = FixingFrame.addBitStuffing(stuffedData);
 		stuffedData = FixingFrame.addEndFlag(stuffedData);
-		assertTrue(stuffedData.contains(FixingFrame.FLAG_END_OF_FRAME));
+		assertTrue(stuffedData.contains(FixingFrame.FLAG_END_OF_FRAME)>=0);
 	}
 }
