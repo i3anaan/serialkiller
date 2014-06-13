@@ -31,6 +31,7 @@ import network.tpp.TPPNetworkLayer;
 import link.BittasticLinkLayer;
 import link.LinkLayer;
 import link.BufferStufferLinkLayer;
+import link.diag.MockFrameLinkLayer;
 import link.jack.JackTheRipper;
 import log.LogMessage;
 import log.Logger;
@@ -47,7 +48,7 @@ public class Starter extends JFrame implements ActionListener {
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
-	private Class<?> linkLayers[] = {BittasticLinkLayer.class, BufferStufferLinkLayer.class,JackTheRipper.class};
+	private Class<?> linkLayers[] = {MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class,JackTheRipper.class};
 	private Class<?> physLayers[] = {NullPhysicalLayer.class, LptHardwareLayer.class, LptErrorHardwareLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
@@ -210,6 +211,7 @@ public class Starter extends JFrame implements ActionListener {
 	}
 	
 	/** Make a new JComboBox and add ourselves as the ActionListener. */
+	@SuppressWarnings("unchecked")
 	private JComboBox combo(Object[] items) {
 		return new JComboBox(items);
 	}
@@ -241,10 +243,10 @@ public class Starter extends JFrame implements ActionListener {
 		startStack();
 	}
 	
-	public void startGUI(final Stack stack){
+	public static void startGUI(final Stack stack){
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		    	GUI gui = new GUI(stack.applicationLayer);
+		    	new GUI(stack.applicationLayer);
 		    }
 		});
 	}
