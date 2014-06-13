@@ -3,6 +3,7 @@ package application;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Observable;
@@ -43,13 +44,14 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	/** The main thread of this class instance. */
 	private Thread thread;
 
+	//TODO update documentation
 	/** Cash containing all the hosts we are offering files, mapped to the FileOfferPayload we made them */
-	private Cache<String, Payload> fileOfferCache;
+	private Cache<String, String> fileOfferCache;
 
 	/** Cash containing all the hosts that are offering files, mapped to the FileOfferPayload they made us */
 	//TODO fix description
 	private Cache<String, String> offeredFileCache;
-	
+
 	/** byte value of a chat flag */
 	private static final byte chatCommand = 'C';
 
@@ -89,12 +91,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// All file offers expire after 30 minutes.
 				.expireAfterWrite(30, TimeUnit.MINUTES)
 				.build();
-		
+
 		// Construct our offeredFileCache
-				offeredFileCache = CacheBuilder.newBuilder()
-						.maximumSize(42)
-						.expireAfterWrite(30, TimeUnit.MINUTES)
-						.build();
+		offeredFileCache = CacheBuilder.newBuilder()
+				.maximumSize(42)
+				.expireAfterWrite(30, TimeUnit.MINUTES)
+				.build();
 
 
 
@@ -121,9 +123,11 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			case fileOfferCommand: 
 				// Received a file transfer offer.
 				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
-				
+
+				String keyOffer = ("" + offer.getAddress() + "-" + offer.getFileSize() + "-" + offer.getFileName());
 				//TODO 01 BUILD CACHE HERE?
-				
+				offeredFileCache.put(keyOffer, keyOffer);
+
 				setChanged();
 				notifyObservers(offer);
 				logger.debug("Received FileOffer: " + p + "From host: " + p.address);
@@ -132,46 +136,80 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			case fileAcceptCommand:
 				// Someone accepted our file offer.
 				FileAcceptMessage accept = new FileAcceptMessage(p.address, p.data);
+
 				//Get key from FileMessage
-				byte [] nameByte = new byte[p.data.length -32];
-				System.arraycopy(p.data, 32, nameByte, 1, p.data.length - 32);
-				String key = Arrays.toString(nameByte);
+				String key = (accept.getAddress() + accept.getFileName());
 
 				// Check if fileOffer exists and if so send it
-				Payload ftp = fileOfferCache.getIfPresent(key);
+				String ftp = fileOfferCache.getIfPresent(key);
+				
+
+				//DEBUG LINE
+				//				System.out.println("Present? : " + ftp);
+				//
+				//				for (String loopkey : fileOfferCache.asMap().keySet()) {
+				//					System.out.println("Base key: " + key + "Test1");
+				//					System.out.println("A key: " +loopkey + "Test2");
+				//					System.out.println(loopkey.equals(key));
+				//					
+				//				}
+
+
 				if(ftp != null){
+					//System.out.println("DEBUG REACHED");
+					//TODO FIX STRING KEY IN CACHE, REPLEACE IT WITH A MAP?
+					//TODO TEST NEW METHOD, WHEN WORKING REMOVE readFile METHOD
+
+					//Load the file from directory into byte array
+					byte[] fileData = Files.toByteArray(new File(ftp));
+
+					// Use the data from the offer to form the filetransfer data
+					byte[] fileTransferData = new byte[p.data.length + 1 + fileData.length];
+					fileTransferData[0] = fileTransferCommand;
+					System.arraycopy(p.data, 0, fileTransferData, 1, (p.data.length -1) );
+					System.arraycopy(fileData, 0, fileTransferData, p.data.length, fileData.length);
+
+					Payload transfer = new Payload(fileTransferData, p.address);
+
 					try {
-						networkLayer.send(ftp);
+						networkLayer.send(transfer);
 					} catch (SizeLimitExceededException e) {
 						logger.warning("Size Limit Exceeded:" + p + ".");
 						e.printStackTrace();
 					}
+
+					logger.debug("Started File Transfer for: " + accept.getFileName() + ": " + p);
+				}
+				else if(ftp == null){
+					//THIS MEANS THERE WAS NO SUCH OFFER PRESENT
+					System.out.println("FRP NULL, NO SUCH OFFER PRESENT" );
 				}
 
-				logger.debug("Accepted File Transfer for file " + accept.getFileName() + ": " + p);
+
 				break;
 
 			case fileTransferCommand:
 				// Someone is sending us a file. Write the file to our disk.
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
-				
-				//TODO 01 check if file was offered before
+
+				//check if file was offered before
 				String offerKey = ("" + fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName());
 				if(offeredFileCache.getIfPresent(offerKey) != null){
+					System.out.println("FILE OFFERED DETECTED!!!");
 					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
 				}else{
+					System.out.println("FILE OFFERED NOT DETECTED");
 					logger.debug("Host: " + fm.getAddress() + " Had no such file offer!");
 				}
-				
+
 				//TODO 02 investigate if current handling by GUI is desired
-				logger.debug("Started File Transfer: " + p);
+				logger.debug("Receiving File Transfer: " + p);
 				setChanged();
 				notifyObservers(fm);
 				break;
 
 			case WHOISrequestCommand:
 				// Someone is requesting our identification
-				//IdentificationMessage id = new IdentificationMessage(p.address, p.data);
 
 				byte[] data = new byte[1 + identification.length];
 				data[0] = WHOISresponseCommand;
@@ -187,7 +225,13 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 			case WHOISresponseCommand:
 				// Someone is responding to our identification request
-				IdentificationMessage idResponse = new IdentificationMessage(p.address, p.data);
+
+				//Get WHOIS without command byte
+				byte[] identificationResponseData = new byte[p.data.length-1];
+				System.arraycopy(p.data, 1, identificationResponseData, 0, p.data.length-1);
+
+				//Parse WHOIS to GUI
+				IdentificationMessage idResponse = new IdentificationMessage(p.address, identificationResponseData);
 				setChanged();
 				notifyObservers(idResponse);
 				break;
@@ -200,51 +244,44 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		}  catch (CommandNotFoundException e) {
 			logger.debug("CommandNotFoundException on: " + p);
 			e.printStackTrace();
+		} catch (IOException e1) {
+			logger.debug("Requested file not found on local directory: " + p);
+			e1.printStackTrace();
 		}
 
 	}
 
 	/**
-	 * Reads a file from local directory and places it in our file offer queue.
+	 * Reads a filepath from local directory and places it in our file offer queue.
 	 * A file offer is then sent to the destination host.
 	 * 
 	 * @requires file size < 2GB
-	 * @param Path of the file to be read
-	 * @param Destination host to offer the file to
-	 * 
+	 * @param strFilePath
+	 * @param destination
 	 */
-	public void readFile(String strFilePath, byte destination) throws IOException {
-		byte[] fileData = Files.toByteArray(new File(strFilePath));
+	public void writeFileOffer(String strFilePath, byte destination){
 
 		// Split the string and retrieve only the filename in bytes
 		String[] nameParts = strFilePath.split("/");
 		String fileName = nameParts[nameParts.length -1];
 		byte[] byteName = fileName.getBytes(Charsets.UTF_8);
 
-		// FileSize
-		String fileSize = Integer.toBinaryString(fileData.length);
-		byte[] byteFileSize = fileSize.getBytes(Charsets.UTF_8);
+		// Experimental line : FileSize
+		long fileSize = (new File(strFilePath).length());
+		byte[] byteFileSize = ByteBuffer.allocate(4).putInt((int) fileSize).array();
 
 		// Form the data byte array for the offer payload
-		byte[] data2 = new byte[5 + byteName.length];
-		data2[0] = fileOfferCommand;
-		System.arraycopy(byteFileSize, 0, data2, 1, 4);
-		System.arraycopy(byteName, 0, data2, 5, byteName.length);
+		byte[] data = new byte[5 + byteName.length];
+		data[0] = fileOfferCommand;
+		System.arraycopy(byteFileSize, 0, data, 1, 4);
+		System.arraycopy(byteName, 0, data, 5, byteName.length);
 
-		// Use the data from the offer to form the filetransfer data
-		byte[] fileTransferData = new byte[data2.length + fileData.length];
-		fileTransferData[0] = fileTransferCommand;
-		System.arraycopy(data2, 0, fileTransferData, 1, (data2.length -1) );
-		System.arraycopy(fileData, 0, fileTransferData, data2.length, fileData.length);
-
-		// Put the original Payload in the fileOfferCache for later sending
-		Payload p = new Payload(fileTransferData, destination);
-		String key = Byte.toString(destination) + fileName;
-		fileOfferCache.put(key, p);
+		String key = destination + fileName;
+		fileOfferCache.put(key, strFilePath);
+		System.out.println("OFFERED KEY: " + key);
 
 		// Put the offer in a new payload and send it
-		Payload offer = new Payload(data2, destination);
-
+		Payload offer = new Payload(data, destination);
 
 		try {
 			networkLayer.send(offer);
@@ -252,6 +289,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			logger.debug("Size Limit Exceeded! " + offer.toString() + ".");
 			e.printStackTrace();
 		}
+
 	}
 
 	/**
@@ -301,23 +339,23 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		}
 		//logger.debug("Started File Transfer: " + fm);
 	}
-	
+
 	/** accepts a file offer and sends a fileAcceptMessage */
 	public void acceptFileOffer(FileOfferMessage fm, String filePath){
-		
+
 		String key = ("" + fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName());
 		offeredFileCache.put(key, filePath);
-		
+
 		byte[] data = fm.getPayload();
 		data[0] = fileAcceptCommand;
-			
+
 		try {
 			networkLayer.send(new Payload(data, fm.getAddress()));
 		} catch (SizeLimitExceededException e) {
 			e.printStackTrace();
 		}
-		
-		
+
+
 	}
 
 	@Override
@@ -342,23 +380,42 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * automatically sends a WHOIS request to all hosts listed.
 	 * @return collection of hosts
 	 */
-	public Collection<Byte> getHosts() {
+	public Collection<Byte> getHosts(boolean whois) {
 		Collection<Byte> hostCollection = networkLayer.hosts();
 
-		// Send a WHOIS for each host in the collection
-		for (Byte h : hostCollection) {
-			byte[] data = new byte[1];
-			data[0] = WHOISrequestCommand;
-			try {
-				networkLayer.send(new Payload(data, h));
-				logger.debug("WHOIS Request Sent to: " + h + ".");
-			} catch (SizeLimitExceededException e) {
-				logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
-				e.printStackTrace();
+		if(whois){
+			// Send a WHOIS for each host in the collection
+			for (Byte h : hostCollection) {
+				byte[] data = new byte[1];
+				data[0] = WHOISrequestCommand;
+				try {
+					networkLayer.send(new Payload(data, h));
+					logger.debug("WHOIS Request Sent to: " + h + ".");
+				} catch (SizeLimitExceededException e) {
+					logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
+					e.printStackTrace();
+				}
 			}
 		}
 		return hostCollection;
 	}
+	
+	/**
+	 * getHosts with whois defaulted to false
+	 * @return collection of hosts
+	 */
+	public Collection<Byte> getHosts(){
+		return getHosts(false);
+	}
+
+	/**
+	 * Method to retrieve the address of this host.
+	 * @return the address of this host.
+	 */
+	public Byte getHost(){
+		return networkLayer.host();
+	}
+
 
 	/**
 	 * CURRENTLY DEPRECIATED
@@ -379,8 +436,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Send a WHOIS for each host in the collection
 				for (Byte h : hostCollection) {
 					byte[] data = new byte[1];
-//					System.out.println("DEBUG--------- Value of data = " + data);
-//					System.out.println(h);
+					//					System.out.println("DEBUG--------- Value of data = " + data);
+					//					System.out.println(h);
 					data[0] = WHOISrequestCommand;
 					try {
 						networkLayer.send(new Payload(data, h));
@@ -394,7 +451,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		};
 
 		ScheduledFuture<?> scheduledWHOIS = scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
-//		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
+		//		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
 		//scheduledWHOIS.cancel(false);
 	}
 

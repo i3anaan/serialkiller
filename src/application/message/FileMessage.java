@@ -1,5 +1,6 @@
 package application.message;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public abstract class FileMessage extends ApplicationLayerMessage {
@@ -12,8 +13,13 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 		super(address, data);
 		byte [] size = Arrays.copyOfRange(data, 1, 5);
 		byte [] name = Arrays.copyOfRange(data, 5, data.length);
-		fileSize = Integer.parseInt(new String(size));
-		fileName = new String(name);
+		int derp = ByteBuffer.allocate(4).wrap(size).getInt();
+	
+		//TODO DEBUG LINE
+		//System.out.println("DE FILESIZE: " +derp);
+		fileSize = 	derp;
+		fileName = new String(name).trim();
+		//System.out.println("THE NAME : " +fileName);
 	}
 	
 	/**
