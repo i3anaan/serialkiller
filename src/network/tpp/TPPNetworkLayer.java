@@ -114,6 +114,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         }
         sentPackets.remove(p.id());
         decreaseCongestion(p.header().getDestination());
+        // Immediately send the next packet.
+        reofferHandler.notify(p.header().getDestination());
     }
 
     /**
