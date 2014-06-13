@@ -40,7 +40,7 @@ public class ReceiveTest {
 	
 	
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptErrorHardwareLayer();
+		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
 		Node node = new FrameNode<Node>(null,3);
 		node = new FlaggingNode(null,8);

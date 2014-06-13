@@ -332,7 +332,7 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 				}
 				// Wait on 1 (ack from first to see)
 			}
-			// assume ok.
+			// assume ok.// TODO Auto-generated method stub
 			previousByteSent = 0;
 			previousByteReceived = 1;
 		}
@@ -352,6 +352,11 @@ public class ConsistentDuplexBitExchanger extends Thread implements
 
 	public class InvalidByteTransitionException extends Exception {
 
+	}
+
+	@Override
+	public ArrayBlockingQueue<Boolean> getQueueOut() {
+		throw new UnsupportedOperationException();
 	}
 
 }

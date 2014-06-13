@@ -21,14 +21,14 @@ public class RoutingTableTest {
 	public void testToGraph() throws IOException {
 		RoutingTable rt = new RoutingTable("src/test/routes.txt");
 		assertNotNull(rt.toGraph());
-		assertNotEquals("", rt.toGraph());
+		assertTrue(!"".equals(rt.toGraph()));
 	}
 	
 	@Test
 	public void testToGraphUri() throws IOException {
 		RoutingTable rt = new RoutingTable("src/test/routes.txt");
 		assertNotNull(rt.toGraphUri());
-		assertNotEquals("", rt.toGraphUri());
+		assertTrue(!"".equals(rt.toGraphUri()));
 		assertEquals(0x89, new URL(rt.toGraphUri()).openConnection().getInputStream().read());
 	}
 }

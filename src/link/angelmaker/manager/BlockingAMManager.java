@@ -59,13 +59,17 @@ public class BlockingAMManager implements AMManager{
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
 		lastNodeReceived = node;
 		do{
-			//System.out.println("QueueIn Size: "+((SimpleBitExchanger)exchanger).queueIn.size());
-			//System.out.println("QueueOut Size: "+((SimpleBitExchanger)exchanger).queueOut.size());
+			
 			BitSet2 received = exchanger.readBits();
 			if(received.length()>0){
+				//System.out.println("Handing over bits:"+received);
 				node.giveConverted(received);
+			}else{
+				//System.out.println("QueueIn Size: "+((SimpleBitExchanger)exchanger).queueIn.size());
+				//System.out.println("QueueOut Size: "+((SimpleBitExchanger)exchanger).queueOut.size());
 			}
 		}while(!(node.isFull()));
+		//System.out.println("Done filling");
 		if(node.isFull() && !node.isReady()){
 			AngelMaker.logger.error("Node full, but not ready to be read.");
 			//TODO;

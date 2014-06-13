@@ -2,6 +2,7 @@ package link.angelmaker.bitexchanger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.BitSet2;
 
 /**
@@ -42,6 +43,10 @@ public class DummyBitExchanger implements BitExchanger {
 			//System.out.println("Read:\t"+bs);
 		}
 		return bs;
+	}
+	@Override
+	public ArrayBlockingQueue<Boolean> getQueueOut() {
+		throw new UnsupportedOperationException();
 	}
 
 }

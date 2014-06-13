@@ -92,38 +92,40 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	 */
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
+		//System.out.println("Give Converted");
 		if (!receivedStartFlag) {
 			BitSet2 tempConcat = BitSet2.concatenate(lastReceivedConvertedJunk,
 					bits); // Add just received to already received.
 			// Keep only just received + max flag length (so it cannot
 			// infinetely grow.
+			//System.out.println("TempConcat = "+tempConcat +"    Start flag = "+FLAG_START_OF_FRAME.getFlag());
 			lastReceivedConvertedJunk = tempConcat.get(
 					Math.max(0,
 							tempConcat.length()
 									- FLAG_START_OF_FRAME.getFlag().length()
 									- bits.length()), tempConcat.length());
 			BitSet2 afterStart = getDataAfterStartFlag(lastReceivedConvertedJunk);
+			//System.out.println("Data after start:"+afterStart);
 			if (afterStart.length() >= 0) {
 				storedConverted = afterStart;
 			}
 		} else {
+			//System.out.println("receivedFlag");
 			storedConverted = BitSet2.concatenate(storedConverted, bits);
 		}
 		int contains = getRealEndFlagIndex(storedConverted);
-		if (receivedStartFlag
-				&& contains >= 0
-				&& contains + 2 * FLAG_END_OF_FRAME.getFlag().length() - 2 >= storedConverted
-						.length()) {
+		if (receivedStartFlag && contains >= 0) {
 			// Received start and end flag.
 			isFull = true;
 			stored = new BitSet2();
 			giveOriginal(unStuff(getDataBeforeEndFlag(storedConverted)));
-
+			//System.out.println("GiveConverted done");
 			return storedConverted.get(contains
 					+ FLAG_END_OF_FRAME.getFlag().length(),
 					storedConverted.length());
 		} else {
 			// Does not have end flag yet.
+			//System.out.println("GiveConverted done");
 			return new BitSet2();
 		}
 	}
@@ -171,6 +173,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		int contains = bits.contains(FLAG_START_OF_FRAME.getFlag());
 		if (contains >= 0) {
 			receivedStartFlag = true;
+			//System.out.println("Seen start flag");
 			return bits.get(contains + FLAG_START_OF_FRAME.getFlag().length(),
 					bits.length());
 		} else {

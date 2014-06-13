@@ -35,10 +35,10 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	AMManager.Server manager;
 	public static final String MASTER = "master";
 	public static final String SLAVE = "slave";
-	public static final int STABILITY = 100;//TODO This is kind of a dirty fix.
+	public static final int STABILITY = 4;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 100l*1000000l;
+	public static final long READ_TIMEOUT_NO_ACK = 100000l*1000000l;
 	private byte previousByteSent;
 	private byte previousByteReceived;
 	
@@ -101,10 +101,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return A stable input from the physical layer.
 	 */
 	public byte getStableInput() {
+		System.out.println("Stable in");
 		byte in = down.readByte();
 		while (!checkStable(in, STABILITY)) {
 			in = down.readByte();
 		}
+		System.out.println("Stable out");
 		return in;
 	}
 	
@@ -219,6 +221,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 					Node requested = manager.getNextNode();
 					this.sendBits(requested.getConverted());
 					sendNext = queueOut.poll();
+					//System.out.println("sendNext null");
 				}
 				byte byteToSendNext = adaptBitToPrevious(previousByteSent,sendNext);
 				down.sendByte(byteToSendNext);
@@ -234,7 +237,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			try {
 				byte receivedByte = readByte();
 				bitReceived = extractBitFromInput(receivedByte);
-				previousByteReceived = receivedByte; //Currently unused.
+				//System.out.println(bitReceived);
+				previousByteReceived = receivedByte; //Currently unused. //TODO really unused?
 				firstRound = false;					
 			} catch (TimeOutException e) {
 				//Time-out, ignore, moving, don't hang.
@@ -265,7 +269,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	}
 
 	@Override
-	public BitSet getQueueOut() {
+	public ArrayBlockingQueue<Boolean> getQueueOut() {
 		return queueOut;
 	}
 }

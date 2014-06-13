@@ -1,6 +1,7 @@
 package link.angelmaker.bitexchanger;
 
 import java.util.BitSet;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import util.BitSet2;
 
@@ -82,5 +83,5 @@ public interface BitExchanger {
 
 	}
 
-	public BitSet getQueueOut();
+	public ArrayBlockingQueue<Boolean> getQueueOut();
 }

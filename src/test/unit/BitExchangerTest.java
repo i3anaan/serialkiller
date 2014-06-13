@@ -12,6 +12,7 @@ import org.junit.Test;
 import phys.diag.NullPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 import util.BitSet2;
+import util.Bytes;
 
 public class BitExchangerTest {
 	
@@ -20,6 +21,7 @@ public class BitExchangerTest {
 		SimpleBitExchanger e = new SimpleBitExchanger(new NullPhysicalLayer(), new BlockingAMManagerServer());
 		for(int i=0;i<4;i++){
 			for(int b=0;b<2;b++){
+				System.out.println("CurrentState:"+Bytes.format((byte)i)+"\tEncoding:"+(b==1?"1":"0")+"\tResult:"+Bytes.format(e.adaptBitToPrevious(((byte)i),b==1)));
 				assertTrue((b==1)==e.extractBitFromInput(e.adaptBitToPrevious(((byte)i),b==1)));
 			}
 		}

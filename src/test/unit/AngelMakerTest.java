@@ -13,7 +13,7 @@ import phys.diag.VirtualPhysicalLayer;
 
 public class AngelMakerTest {
 
-	@Test
+	//@Test
 	public void testWithDummyBitExchanger() {
 		//TODO cycle through all possible combinations?
 		AngelMaker am = new AngelMaker(new VirtualPhysicalLayer(),null,null,new DummyBitExchanger());
