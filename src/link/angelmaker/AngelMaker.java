@@ -17,6 +17,7 @@ import common.Startable;
 import link.FrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.DummyBitExchanger;
+import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
@@ -72,10 +73,10 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	/**
 	 * Standard classes to use when nothing else specified.	
 	 */
-	private static PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
+	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
 	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
-	private static AMManager STANDARD_MANAGER = new BlockingAMManagerServer();
-	private static BitExchanger STANDARD_EXCHANGER = new DummyBitExchanger();
+	private AMManager STANDARD_MANAGER = new BlockingAMManagerServer();
+	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
 	
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
@@ -108,9 +109,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 
 	@Override
 	public byte[] readFrame() {
-		
-		byte[] result = manager.readNode().getOriginal().toByteArray();
-		return result;
+		return manager.readBytes();
 	}
 
 	@Override
@@ -143,6 +142,8 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 			exchangerUsed =STANDARD_EXCHANGER;
 		}
 		TOP_NODE_IN_USE = topNodeUsed;
+		exchangerUsed.givePhysicalLayer(physUsed);
+		exchangerUsed.giveAMManager(managerUsed);
 		setup(physUsed,topNodeUsed,managerUsed,exchangerUsed);
 	}
 	
@@ -158,6 +159,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		this.bitExchanger = exchanger;
 		this.manager.setExchanger(bitExchanger);
 		logger.debug("Connected Modules.");
+		exchanger.enable();
 		manager.enable();
 		logger.debug("Enabled Modules.");
 		logger.info("ANGEL_MAKER setup done.");

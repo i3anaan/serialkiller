@@ -25,13 +25,10 @@ public class SimpleTestbench {
 		public void run() {
 			while (true) {
 				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-					//System.out.println("Sending Byte: "+Bytes.format((byte)(i)));
 					down.sendFrame(new byte[]{(byte)(i)});
 					byte[] bytes = down.readFrame();
 					if(bytes.length>0){
 					byte in = bytes[0];
-					
-					//System.out.println("ReceivedByte: "+Bytes.format(in));
 					if(down instanceof AngelMaker){
 						//Graph.makeImage(Graph.getFullGraphForNode(((AngelMaker) down).getCurrentSendingNode(), true));
 					}

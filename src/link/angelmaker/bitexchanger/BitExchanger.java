@@ -3,6 +3,10 @@ package link.angelmaker.bitexchanger;
 import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import link.angelmaker.AngelMaker;
+import link.angelmaker.IncompatibleModulesException;
+import link.angelmaker.manager.AMManager;
+import phys.PhysicalLayer;
 import util.BitSet2;
 
 /**
@@ -25,13 +29,16 @@ import util.BitSet2;
  */
 public interface BitExchanger {
 
+	
+	
+	public void givePhysicalLayer(PhysicalLayer down);
+	public void giveAMManager(AMManager manager);
 	/**
 	 * Enables the BitExchanger.
 	 * Before enabling, calling the different methods have absolutely no guarantees.
 	 * They might crash, they might work, they might do nothing.
 	 */
-	//public void enable();
-	//TODO
+	public void enable();
 	
 	/**
 	 * Adds the given bits to the send queue. This means there is no requirement

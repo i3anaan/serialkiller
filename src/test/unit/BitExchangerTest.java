@@ -20,7 +20,10 @@ public class BitExchangerTest {
 	
 	@Test
 	public void testSimpleBitExchanger(){
-		SimpleBitExchanger e = new SimpleBitExchanger(new NullPhysicalLayer(), new BlockingAMManagerServer());
+		SimpleBitExchanger e = new SimpleBitExchanger();
+		e.givePhysicalLayer(new NullPhysicalLayer());
+		e.giveAMManager(new BlockingAMManagerServer());
+		e.enable();
 		for(int i=0;i<4;i++){
 			for(int b=0;b<2;b++){
 				assertTrue((b==1)==e.extractBitFromInput(e.adaptBitToPrevious(((byte)i),b==1)));
@@ -30,17 +33,21 @@ public class BitExchangerTest {
 	
 	@Test
 	public void testBitExchanger() {
-		VirtualPhysicalLayer vpla, vplb;
+		VirtualPhysicalLayer vplA, vplB;
 		int bitAmount = 1000;
-		vpla = new VirtualPhysicalLayer();
-		vplb = new VirtualPhysicalLayer();
+		vplA = new VirtualPhysicalLayer();
+		vplB = new VirtualPhysicalLayer();
 		
-		vpla.connect(vplb);
-		vplb.connect(vpla);
+		vplA.connect(vplB);
+		vplB.connect(vplA);
 		AMManager managerA = new BlockingAMManagerServer();
 		AMManager managerB = new BlockingAMManagerServer();
-		BitExchanger beA = new SimpleBitExchanger(vpla, managerA);
-		BitExchanger beB = new SimpleBitExchanger(vplb,managerB);
+		BitExchanger beA = new SimpleBitExchanger();
+		beA.givePhysicalLayer(vplA);
+		beA.giveAMManager(managerA);
+		BitExchanger beB = new SimpleBitExchanger();
+		beB.givePhysicalLayer(vplB);
+		beB.giveAMManager(managerB);
 		managerA.setExchanger(beA);
 		managerB.setExchanger(beB);
 		

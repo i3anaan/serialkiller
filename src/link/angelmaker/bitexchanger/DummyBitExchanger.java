@@ -2,6 +2,8 @@ package link.angelmaker.bitexchanger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+import link.angelmaker.manager.AMManager;
+import phys.PhysicalLayer;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.BitSet2;
 
@@ -47,6 +49,17 @@ public class DummyBitExchanger implements BitExchanger {
 	@Override
 	public ArrayBlockingQueue<Boolean> getQueueOut() {
 		throw new UnsupportedOperationException();
+	}
+	
+	
+	@Override
+	public void givePhysicalLayer(PhysicalLayer down) {
+	}
+	@Override
+	public void giveAMManager(AMManager manager) {
+	}
+	@Override
+	public void enable() {
 	}
 
 }

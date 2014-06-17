@@ -129,6 +129,11 @@ public class BitSet2 extends BitSet {
 	public void addAtEnd(boolean bit){
 		this.set(length,bit);
 	}
+	public void addAtEnd(BitSet2 bits){
+		for(int i=0;i<bits.length;i++){
+			this.set(length,bits.get(i));
+		}		
+	}
 	
 	/**
 	 * Inserts a boolean value on the given index.
@@ -240,6 +245,7 @@ public class BitSet2 extends BitSet {
      * Convert a BitSet2 object to a byte array.
      * This method becomes obsolete once Java 7 is available, then
      * BitSet2.toByteArray() is preferred.
+     * Fills half bytes with zeros
      * @param data The BitSet2 object to convert.
      * @return The byte array.
      */

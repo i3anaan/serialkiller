@@ -56,8 +56,8 @@ public class SelfBuilderAMManager implements AMManager {
 	 * 
 	 */
 	@Override
-	public Node readNode() {
-		return sbExchanger.queueIn.poll();
+	public byte[] readBytes() {
+		return sbExchanger.queueIn.poll().getOriginal().toByteArray();
 	}
 	@Override
 	public Node getCurrentSendingNode() {

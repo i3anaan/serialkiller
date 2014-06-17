@@ -45,7 +45,7 @@ public class BlockingAMManager implements AMManager{
 			remaining = node.giveOriginal(remaining);
 			if(node.isReady()){
 				lastNodeSend = node;
-				System.out.println("Node to be send:\t"+node);
+				//System.out.println("Node to be send:\t"+node);
 				exchanger.sendBits(node.getConverted());
 			}else{
 				AngelMaker.logger.error("Node trying to send is not ready to be send");
@@ -55,30 +55,25 @@ public class BlockingAMManager implements AMManager{
 	}
 
 	@Override
-	public Node readNode() {
-		//System.out.println("Reading node...");
-		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
-		lastNodeReceived = node;
-		do{
-			
-			received = BitSet2.concatenate(received,exchanger.readBits());
-			if(received.length()>0){
-				//System.out.println("Handing over bits:"+"    ["+received.length()+"]"+received );
-				received = node.giveConverted(received);
-				//System.out.println("Got back:"+received);
-			}else{
-				//System.out.println("QueueIn Size: "+((SimpleBitExchanger)exchanger).queueIn.size());
-				//System.out.println("QueueOut Size: "+((SimpleBitExchanger)exchanger).queueOut.size());
+	public byte[] readBytes() {
+		BitSet2 result = new BitSet2();
+		
+		received = BitSet2.concatenate(received,exchanger.readBits());
+		while(received.length()>0){
+			Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+			lastNodeReceived = node;
+			do{
+				if(received.length()>0){
+					received = node.giveConverted(received);
+				}
+			}while(!(node.isFull()));
+			if(node.isFull() && !node.isReady()){
+				AngelMaker.logger.error("Node full, but not ready to be read.");
+				//TODO;
 			}
-		}while(!(node.isFull()));
-		//System.out.println("Done filling");
-		if(node.isFull() && !node.isReady()){
-			AngelMaker.logger.error("Node full, but not ready to be read.");
-			//TODO;
+			result.addAtEnd(node.getOriginal());
 		}
-		//System.out.println("Done Reading Node: "+node);
-		//Graph.makeImage(Graph.getFullGraphForNode(node, true));
-		return node;
+		return result.toByteArray();
 	}
 	
 	@Override

@@ -26,7 +26,7 @@ public class SendTest {
 		Node node = new FrameNode<Node>(null,3);
 		node = new FillablePureNode(null,8);
 		FrameLinkLayer am = new AngelMaker(phys, node, manager,
-				new SimpleBitExchanger(phys, manager));
+				new SimpleBitExchanger());
 		System.out.println(am.toString());
 		String stringToSend = "Such test, such amazing, wow, up to 420 gigadoge! #swag\n";
 		byte[] bytesToSend = stringToSend.getBytes(Charsets.US_ASCII);

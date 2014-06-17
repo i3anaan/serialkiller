@@ -22,7 +22,7 @@ public class ReceiveTest {
 		Node node = new FrameNode<Node>(null,3);
 		node = new FillablePureNode(null,8);
 		FrameLinkLayer am = new AngelMaker(phys, node, manager,
-				new SimpleBitExchanger(phys, manager));
+				new SimpleBitExchanger());
 		System.out.println(am);
 		System.out.println("BEGIN TEST");
 

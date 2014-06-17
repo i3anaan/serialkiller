@@ -43,18 +43,33 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	private byte previousByteSent;
 	private byte previousByteReceived;
 	
-	public SimpleBitExchanger(PhysicalLayer down, AMManager manager){
-		this.down = down;
+	public SimpleBitExchanger(){
 		queueOut = new ArrayBlockingQueue<Boolean>(1024*8);
 		queueIn = new ArrayBlockingQueue<Boolean>(1024*8);
+		this.connectionRole = ROLE_UKNOWN;
+	}
+	
+	public void givePhysicalLayer(PhysicalLayer down){
+		this.down = down;
+	}
+	
+	public void giveAMManager(AMManager manager){
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
 		}else{
 			throw new IncompatibleModulesException();
 		}
-		//this.connectionRole = ROLE_UKNOWN;
-		this.start();
 	}
+	
+	public void enable(){
+		if(this.down!=null && this.manager !=null){
+			this.start();
+			AngelMaker.logger.info("Enabled: "+this.toString());
+		}else{
+			AngelMaker.logger.warning("Trying to start BitExchanger without setting the PhysicalLayer or the AMManager");
+		}
+	}
+	
 	
 	@Override
 	public void sendBits(BitSet2 bits) {

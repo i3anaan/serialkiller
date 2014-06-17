@@ -49,7 +49,7 @@ public interface AMManager {
 	 * @return A completed Node.
 	 * Can be null, usually depends on whether its blocking or not
 	 */
-	public Node readNode();
+	public byte[] readBytes();
 	
 	
 	/**
