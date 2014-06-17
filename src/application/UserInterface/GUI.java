@@ -239,36 +239,29 @@ public class GUI extends JFrame implements Observer{
 		apl.addObserver(this);
 		apl.getHosts(true);
 	}
+	
 	// Update Event Methods
-
 	@Override
 	public void update(Observable o, Object arg) {
-
-		// Chat message has been received
-
-		if(arg instanceof ChatMessage){
-			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
-
+		// Chat message received
+		if(arg instanceof ChatMessage) {
+			ChatMessage cm = (ChatMessage) arg;
+			cp.parseMessage(cm.getNickname(), cm.getAddress(), cm.getMessage());
 		}
 
-		// File offer has been received
-
-		else if(arg instanceof FileOfferMessage){
-			// TODO 1: play sound
-			// TODO 2: parse system message
-
-			//TODO test MORE
-			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+		// File offer received
+		else if(arg instanceof FileOfferMessage) {
+			FileOfferMessage fom = (FileOfferMessage) arg;
+			String filePath = saveFile(ulp.findHostName(fom.getAddress()), fom.getFileName(), fom.getFileSize());
 			if(filePath != null){
 				apl.acceptFileOffer((FileOfferMessage) arg, filePath);
-
-
 			}
 		}
 
-		// WHOIS response has been received
-		else if(arg instanceof IdentificationMessage){
-			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getIdentifier());
+		// WHOIS response received
+		else if(arg instanceof IdentificationMessage) {
+			IdentificationMessage im = (IdentificationMessage) arg;
+			ulp.setHostName(im.getAddress(), im.getIdentifier());
 		}
 
 	}
