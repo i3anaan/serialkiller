@@ -87,7 +87,7 @@ public class ThreadedAMManagerServer extends Thread implements AMManager,
 
 	@Override
 	public void run() {
-		AngelMaker.logger.info("Started ThreadedAMManagerServer Thread");
+		AngelMaker.logger.info("Started ThreadedAMManagerServer Receiving Thread");
 		BitSet2 received = new BitSet2();
 		while (true) {
 			currentReceivingNode = AngelMaker.TOP_NODE_IN_USE.getClone();

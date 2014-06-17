@@ -1,9 +1,9 @@
 package bench;
 
 import common.Graph;
-
 import link.*;
 import link.angelmaker.AngelMaker;
+import link.angelmaker.manager.ThreadedAMManagerServer;
 import link.diag.BytewiseLinkLayer;
 import phys.diag.DelayPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
@@ -28,21 +28,21 @@ public class SimpleTestbench {
 					down.sendFrame(new byte[]{(byte)(i)});
 					byte[] bytes = down.readFrame();
 					if(bytes.length>0){
-					byte in = bytes[0];
-					if(down instanceof AngelMaker){
-						//Graph.makeImage(Graph.getFullGraphForNode(((AngelMaker) down).getCurrentSendingNode(), true));
-					}
-					if (in == i) {
-						System.out.print(".");
-						good++;
-					} else {
-						System.out.print("X");
-						bad++;
-					}
-					
-					if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
-					
-					System.out.flush();
+						byte in = bytes[0];
+						if(down instanceof AngelMaker){
+							//Graph.makeImage(Graph.getFullGraphForNode(((AngelMaker) down).getCurrentSendingNode(), true));
+						}
+						if (in == i) {
+							System.out.print(".");
+							good++;
+						} else {
+							System.out.print("X");
+							bad++;
+						}
+						
+						if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
+						
+						System.out.flush();
 					}
 				}
 			}
@@ -85,8 +85,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		FrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(vpla));
-		FrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(vplb));
+		FrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(vpla),null,new ThreadedAMManagerServer(),null);
+		FrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(vplb),null,new ThreadedAMManagerServer(),null);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
