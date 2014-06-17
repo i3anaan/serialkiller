@@ -1,37 +1,33 @@
 package application.message;
 
-public class ApplicationLayerMessage implements Message {
-
-	// Private variables
+/**
+ * Abstract superclass for all application-layer messages (which are network-
+ * layer payloads). 
+ */
+public abstract class ApplicationLayerMessage {
+	/**
+	 * TPP address.
+	 * 
+	 * For incoming messages, this is the sender's address; for outgoing
+	 * messages, this is the destination address.
+	 */
 	private final byte address;
+	
+	/** Payload. The exact meaning depends on the message type. Immutable. */
 	private final byte[] payload;
 	
-	/**
-	 * Main ApplicationLayerMessage class, it is the base type for
-	 * any message that is sent to the ApplicationLayer
-	 * The payload of the message is defined at construction and cannot be changed
-	 * @param data The payload for this message
-	 */
+	/** Construct an ApplicationLayerMessage. */
 	public ApplicationLayerMessage(byte address, byte[] data){
 		this.address = address;
 		this.payload = data;
-		
-		//DEBUG CODE
-		int i = 0;
-		for(byte derp: data){
-			if(derp == '\0'){
-				System.out.println("nullbyte found! on index: "+i + this.getClass());
-			}
-			i++;
-		}
 	}
 	
-	@Override
+	/** Returns the message payload. */
 	public byte[] getPayload() {
 		return payload;
 	}
 	
-	@Override
+	/** Returns the message address. */
 	public byte getAddress() {
 		return address;
 	}
