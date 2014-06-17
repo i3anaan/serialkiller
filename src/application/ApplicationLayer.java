@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Observable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.SizeLimitExceededException;
@@ -461,9 +460,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			}
 		};
 
-		ScheduledFuture<?> scheduledWHOIS = scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
-		//		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
-		//scheduledWHOIS.cancel(false);
+		scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
 	}
 
 	@Override

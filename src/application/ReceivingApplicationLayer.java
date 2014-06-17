@@ -39,39 +39,9 @@ public class ReceivingApplicationLayer {
 
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		
-
-		boolean loop_continue = true;
-		
-		
-		ApplicationLayer al = new ApplicationLayer();
-		GUI gui = new GUI(al);
-		al.addObserver(gui);
-		boolean doOnce = true;
-//		while(loop_continue){
-//
-//			
-//			//byte[] data = getChatMsg();
-//			if(doOnce){
-//			byte[] data = null;
-//			try {
-//				data = getFileMsg();
-//			} catch (UnsupportedEncodingException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//			try {
-//				al.readPayload(data);
-//				doOnce = false;
-//			} catch (CommandNotFoundException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			}
-//
-//		}
-		
-        
+				ApplicationLayer al = new ApplicationLayer();
+				GUI gui = new GUI(al);
+				al.addObserver(gui);
 		    }
 		});
 	}
