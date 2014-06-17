@@ -33,24 +33,26 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	private String connectionRole;
 	PhysicalLayer down;
 	AMManager.Server manager;
-	public static final String MASTER = "master";
-	public static final String SLAVE = "slave";
+	public static final String ROLE_MASTER = "master";
+	public static final String ROLE_SLAVE = "slave";
+	public static final String ROLE_UKNOWN = "unkown";
 	public static final int STABILITY = 4;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 100000l*1000000l;
+	public static final long READ_TIMEOUT_NO_ACK = 1000l*1000000l;
 	private byte previousByteSent;
 	private byte previousByteReceived;
 	
 	public SimpleBitExchanger(PhysicalLayer down, AMManager manager){
 		this.down = down;
-		queueOut = new ArrayBlockingQueue<Boolean>(1024*1024*8);
-		queueIn = new ArrayBlockingQueue<Boolean>(1024*1024*8);
+		queueOut = new ArrayBlockingQueue<Boolean>(1024*8);
+		queueIn = new ArrayBlockingQueue<Boolean>(1024*8);
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
 		}else{
 			throw new IncompatibleModulesException();
 		}
+		//this.connectionRole = ROLE_UKNOWN;
 		this.start();
 	}
 	
@@ -101,12 +103,10 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @return A stable input from the physical layer.
 	 */
 	public byte getStableInput() {
-		System.out.println("Stable in");
 		byte in = down.readByte();
 		while (!checkStable(in, STABILITY)) {
 			in = down.readByte();
 		}
-		System.out.println("Stable out");
 		return in;
 	}
 	
@@ -129,7 +129,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			byte inputTwo = getStableInput();
 			if (inputTwo==0) {
 				// First to see, last to send.
-				connectionRole = MASTER;
+				connectionRole = ROLE_MASTER;
 				lastToSend = true;
 				down.sendByte((byte) 1);
 				// send ack.
@@ -139,7 +139,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			}
 		}
 		if (!lastToSend) {
-			connectionRole = SLAVE;
+			connectionRole = ROLE_SLAVE;
 			down.sendByte((byte) 0);
 			long waitTill = System.nanoTime()
 					+ SYNC_TIMEOUT_DESYNC;
@@ -207,15 +207,15 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public void run(){
 		waitForSync();
-		AngelMaker.logger.omg("SYNC CURRENTLY DISABLED FOR TESTING PURPOSES");
+		//AngelMaker.logger.omg("SYNC CURRENTLY DISABLED FOR TESTING PURPOSES");
 		//TODO REENABLE THIS
 		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
-		connectionRole = MASTER;
+		connectionRole = ROLE_MASTER;
 		boolean firstRound = true;
 		int round = 0;
 		while(true){
 			//Send bit. (Slave skips this first time)
-			if(!firstRound || connectionRole.equals(MASTER)){
+			if(!firstRound || connectionRole.equals(ROLE_MASTER)){
 				Boolean sendNext = queueOut.poll();
 				while(sendNext==null){
 					Node requested = manager.getNextNode();
