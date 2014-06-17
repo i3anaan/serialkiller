@@ -1,10 +1,8 @@
 package application;
 
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Observable;
 import java.util.concurrent.Executors;
@@ -13,7 +11,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.SizeLimitExceededException;
-import javax.swing.Timer;
 
 import com.google.common.base.Charsets;
 import com.google.common.cache.Cache;

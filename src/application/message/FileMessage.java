@@ -3,7 +3,6 @@ package application.message;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import com.google.common.base.Splitter;
 import com.google.common.primitives.Bytes;
 
 public abstract class FileMessage extends ApplicationLayerMessage {
