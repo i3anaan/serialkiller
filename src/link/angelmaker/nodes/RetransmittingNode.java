@@ -167,16 +167,16 @@ public class RetransmittingNode implements Node, Node.Fillable, Node.SelfBuildin
 	
 	private void sendChild(BitExchanger exchanger, int sequenceNumber, BitSet2 childConverted, int messageForOther) {
 		BitSet2 rawToBeSend = new BitSet2();
-		rawToBeSend = BitSet2.concatenate(rawToBeSend, getBitSetFromSequenceNumber(sequenceNumber));
+		rawToBeSend = BitSet2.concatenate(rawToBeSend, getMessageBitSetFromNumber(sequenceNumber));
 		rawToBeSend = BitSet2.concatenate(rawToBeSend, childConverted);
-		rawToBeSend = BitSet2.concatenate(rawToBeSend, getBitSetFromSequenceNumber(messageForOther));
+		rawToBeSend = BitSet2.concatenate(rawToBeSend, getMessageBitSetFromNumber(messageForOther));
 		stuff(rawToBeSend);
 		rawToBeSend = BitSet2.concatenate(FLAG_START_OF_FRAME.getFlag(),rawToBeSend);
 		rawToBeSend = BitSet2.concatenate(rawToBeSend, FLAG_END_OF_FRAME.getFlag());
 		exchanger.sendBits(rawToBeSend);		
 	}
 	
-	public BitSet2 getBitSetFromSequenceNumber(int sequenceNumber){
+	public BitSet2 getMessageBitSetFromNumber(int sequenceNumber){
 		BitSet2 result = new BitSet2();
 		int remaining = sequenceNumber;
 		for(int i=0;i<SEQUENCE_BIT_COUNT;i++){

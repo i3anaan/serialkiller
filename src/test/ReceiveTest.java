@@ -12,13 +12,14 @@ import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.FrameNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.PureNode;
+import phys.LptErrorHardwareLayer;
 import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
 import util.BitSet2;
 
 public class ReceiveTest {	
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptHardwareLayer();
+		PhysicalLayer phys = new LptErrorHardwareLayer();
 		AMManager manager = new ThreadedAMManagerServer();
 		Node node = new FrameNode<Node>(null,3);
 		node = new FlaggingNode(null,8);
