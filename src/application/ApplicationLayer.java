@@ -2,11 +2,8 @@ package application;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Observable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.SizeLimitExceededException;
@@ -15,6 +12,7 @@ import com.google.common.base.Charsets;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
+import com.google.common.primitives.Ints;
 
 import common.Stack;
 import common.Startable;
@@ -40,36 +38,24 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	/** The main thread of this class instance. */
 	private Thread thread;
 
-	//TODO update documentation
-	/** Cash containing all the hosts we are offering files, mapped to the FileOfferPayload we made them */
+	/** Cache containing all the hosts we are offering files to, mapped to the FileOfferPayload we made them. */
 	private Cache<String, String> fileOfferCache;
 
-	/** Cash containing all the hosts that are offering files, mapped to the FileOfferPayload they made us */
-	//TODO fix description
+	/** Cache containing all the hosts that are offering files to us, mapped to the FileOfferPayload they made us. */
 	private Cache<String, String> offeredFileCache;
 
-	/** byte value of a chat flag */
-	private static final byte chatCommand = 'C';
+	/** Initial bytes for all commands. */
+	private static final byte CHAT_CMD = 'C';
+	private static final byte FILE_OFFER_CMD = 'F';
+	private static final byte FILE_ACCEPT_CMD = 'A';
+	private static final byte FILE_TRANSFER_CMD = 'S';
+	private static final byte WHOIS_REQUEST_CMD = 'W';
+	private static final byte WHOIS_RESPONSE_CMD = 'I';
 
-	/** byte value of a fileOffer flag */
-	private static final byte fileOfferCommand = 'F';
-
-	/** byte value of a  fileAccept flag */
-	private static final byte fileAcceptCommand = 'A';
-
-	/** byte value of a fileTransfer flag */
-	private static final byte fileTransferCommand = 'S';
-
-	/** byte value of a WHOIS request flag */
-	private static final byte WHOISrequestCommand = 'W';
-
-	/** byte value of a WHOIS response flag */
-	private static final byte WHOISresponseCommand = 'I';
-
-	// Identification label for WHOIS requests.
+	/** Our identification string. */
 	private final static String label ="<html>4evr \u00B4\u00AF`\u00B7.\u00B8\u00B8.\u00B7\u00B4\u00AF`\u00B7. Connexx0rred with tha bestest proto implementation \u2605\u2605\u2605 SerialKiller \u2605\u2605\u2605 <font color=#ff0000>Brought to you by Squeamish, i3anaan, TheMSB, jjkester</font> \u00AF\\_(\u30C4)_/\u00AF - Regards to all our friends: Jason, Jack, Patrick, Ghostface, Jigsaw, Hannibal, John and Sweeney \u0F3C \u1564\uFEFF\u25D5\u25E1\u25D5\uFEFF \u0F3D\uFEFF\u1564\uFEFF <font color=#009900>Smoke weed every day #420 \u0299\u029F\u1D00\u1D22\u1D07 \u026A\u1D1B</font> --- Send warez 2 <a href='https://sk.twnc.org/'>sk.twnc.org</a>, complaints to /dev/null --- The more the merrier: serial killer = best killer --- Word of the day: hacksaw \u00B4\u00AF`\u00B7.\u00B8\u00B8.\u00B7\u00B4\u00AF`\u00B7. Thanks for taking the time to receive this message, 4evr out.";
 
-	/** byte value of our WHOIS Identification String */
+	/** Our ID as an array of bytes. */
 	private final static byte[] identification = label.getBytes(Charsets.UTF_8);
 
 	public ApplicationLayer() {
@@ -91,8 +77,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				.expireAfterWrite(30, TimeUnit.MINUTES)
 				.build();
 
-
-
 		logger = new Logger(LogMessage.Subsystem.APPLICATION);
 	}
 
@@ -105,7 +89,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			byte command = p.getCommand();
 
 			switch(command) {
-			case chatCommand:
+			case CHAT_CMD:
 				// Received a chat message.
 				// Create a new chat message object and notifies the GUI
 				ChatMessage cm = new ChatMessage(p.address, p.data);
@@ -113,7 +97,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				notifyObservers(cm);
 				break;
 
-			case fileOfferCommand: 
+			case FILE_OFFER_CMD: 
 				// Received a file transfer offer.
 				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
 
@@ -124,20 +108,17 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				logger.debug("Received FileOffer: " + p + "From host: " + p.address);
 				break;
 
-			case fileAcceptCommand:
+			case FILE_ACCEPT_CMD:
 				// Someone accepted our file offer.
 				FileAcceptMessage accept = new FileAcceptMessage(p.address, p.data);
 
-				//Get key from FileMessage
+				// Get key from FileMessage
 				String key = (accept.getAddress() + accept.getFileName());
 
 				// Check if fileOffer exists and if so send it
 				String ftp = fileOfferCache.getIfPresent(key);
 
-
-				if(ftp != null){
-					//System.out.println("DEBUG REACHED");
-					//TODO FIX STRING KEY IN CACHE, REPLEACE IT WITH A MAP?
+				if (ftp != null){
 					byte[] fileTransferData = writeTransferMessage(p.data, ftp);
 
 					Payload transfer = new Payload(fileTransferData, p.address);
@@ -150,49 +131,35 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 					}
 
 					logger.debug("Started File Transfer for: " + accept.getFileName() + ": " + p);
+				} else {
+					logger.warning("Accept for unoffered file received - someone asked us for a file we don't have");
 				}
-				else if(ftp == null){
-					//THIS MEANS THERE WAS NO SUCH OFFER PRESENT
-					System.out.println("FRP NULL, NO SUCH OFFER PRESENT" );
-				}
-
 
 				break;
 
-			case fileTransferCommand:
+			case FILE_TRANSFER_CMD:
 				// Someone is sending us a file. Write the file to our disk.
 				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
 
-				//check if file was offered before
+				// Check if file was offered before
 				String offerKey = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
-				if(offeredFileCache.getIfPresent(offerKey) != null){
-					System.out.println("FILE OFFERED DETECTED!!!");
-					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
-				}else{
-					//TODO cleanup debug code when working
-					System.out.println("FILE OFFERED NOT DETECTED");
-					System.out.println(offeredFileCache.size());
-					
-					for (String loopkey : offeredFileCache.asMap().keySet()) {
-						System.out.println("A key: " +loopkey.hashCode());
-						System.out.println(offerKey.hashCode());
-						System.out.println(offerKey.equals(loopkey));
-						
-					}
-			
-					logger.debug("Host: " + fm.getAddress() + " Had no such file offer!");
+				String offerPath = offeredFileCache.getIfPresent(offerKey);
+				if (offerPath != null) {
+					writeFile(fm, offerPath);
+				} else{
+					logger.warning("Host " + fm.getAddress() + " sent us " + offerKey + " which we didn't accept!");
 				}
 
-				//TODO 02 investigate if current handling by GUI is desired
+				// TODO Investigate if current handling by GUI is desired
 				logger.debug("Receiving File Transfer: " + p);
 				setChanged();
 				notifyObservers(fm);
 				break;
 
-			case WHOISrequestCommand:
+			case WHOIS_REQUEST_CMD:
 				// Someone is requesting our identification
 				byte[] data = new byte[1 + identification.length];
-				data[0] = WHOISresponseCommand;
+				data[0] = WHOIS_RESPONSE_CMD;
 				System.arraycopy(identification, 0, data, 1, identification.length);
 
 				try {
@@ -203,7 +170,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				}
 				break;
 
-			case WHOISresponseCommand:
+			case WHOIS_RESPONSE_CMD:
 				// Someone is responding to our identification request
 
 				//Get WHOIS without command byte
@@ -222,11 +189,11 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				throw new CommandNotFoundException(String.format("command: %c", command));
 			}
 		}  catch (CommandNotFoundException e) {
-			logger.debug("CommandNotFoundException on: " + p);
+			logger.error("CommandNotFoundException on: " + p);
 			e.printStackTrace();
-		} catch (IOException e1) {
-			logger.debug("Requested file not found on local directory: " + p);
-			e1.printStackTrace();
+		} catch (IOException e) {
+			logger.error("IOException in ApplicationLayer: " + e);
+			e.printStackTrace();
 		}
 
 	}
@@ -239,30 +206,27 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * @param strFilePath
 	 * @param destination
 	 */
-	public void writeFileOffer(String strFilePath, byte destination){
-
+	public void writeFileOffer(String strFilePath, byte destination) {
 		// Split the string and retrieve only the filename in bytes
 		String[] nameParts = strFilePath.split("/");
 		String fileName = nameParts[nameParts.length -1];
 		byte[] byteName = fileName.getBytes(Charsets.UTF_8);
 
 		// Experimental line : FileSize
-		long fileSize = (new File(strFilePath).length());
-		byte[] byteFileSize = ByteBuffer.allocate(4).putInt((int) fileSize).array();
+		int fileSize = (int) new File(strFilePath).length();
+		byte[] byteFileSize = Ints.toByteArray(fileSize);
 
 		// Form the data byte array for the offer payload
 		byte[] data = new byte[5 + byteName.length];
-		data[0] = fileOfferCommand;
+		data[0] = FILE_OFFER_CMD;
 		System.arraycopy(byteFileSize, 0, data, 1, 4);
 		System.arraycopy(byteName, 0, data, 5, byteName.length);
 
-		//TODO HIER ZIT HET PROBLEEM VAN FILETRANSFER
 		System.out.println("byteFileSize : " + byteFileSize[0] + "-" + byteFileSize[1] + "-" + byteFileSize[2] + "-" + byteFileSize[3]);
 		System.out.println("index 1 = " + data[1]);
 		System.out.println("index 2 = " + data[2]);
 		String key = destination + fileName;
 		fileOfferCache.put(key, strFilePath);
-		//System.out.println("OFFERED KEY: " + key);
 
 		// Put the offer in a new payload and send it
 		Payload offer = new Payload(data, destination);
@@ -273,7 +237,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			logger.debug("Size Limit Exceeded! " + offer.toString() + ".");
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -285,7 +248,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * @param byte   the destination of the chat message as an address
 	 */
 	public void writeChatMessage(String nickname, String message, byte destination) {
-
 		byte[] nick = nickname.getBytes(Charsets.UTF_8);
 		byte[] msg = message.getBytes(Charsets.UTF_8);
 
@@ -293,7 +255,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		byte[] data = new byte[nick.length + 2 + msg.length];
 
 		// concatenate byte arrays into a new byte array
-		data[0] = chatCommand;
+		data[0] = CHAT_CMD;
 		System.arraycopy(nick, 0, data, 1, nick.length);
 		data[nick.length+1] = 0;
 		System.arraycopy(msg, 0, data, (nick.length+2), msg.length);
@@ -314,13 +276,13 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * @return payload of fileTransferMessage
 	 * @throws IOException 
 	 */
-	public byte[] writeTransferMessage(byte[] data, String ftp) throws IOException{
+	public byte[] writeTransferMessage(byte[] data, String ftp) throws IOException {
 		byte[] fileData = Files.toByteArray(new File(ftp));
 
 		// Use the data from the offer to form the filetransfer data
 		byte[] fileTransferData = new byte[data.length + 1 + fileData.length];
 		
-		fileTransferData[0] = fileTransferCommand;
+		fileTransferData[0] = FILE_TRANSFER_CMD;
 		System.arraycopy(data, 1, fileTransferData, 1, (data.length - 1) );
 		fileTransferData[data.length] = 0;
 		System.arraycopy(fileData, 0, fileTransferData, data.length + 1, fileData.length);
@@ -334,35 +296,31 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * @param FileTransferMessage
 	 * @param Path to write to
 	 */
-	public void writeFile(FileTransferMessage fm, String path){
-
+	public void writeFile(FileTransferMessage fm, String path) {
 		try {
 			Files.write(fm.getFileBytes(), new File(path));
 		}catch (IOException e) {
 			logger.warning("Caught IOException " + e + " while handling fileMessage " + fm);
-			/* Do nothing else (i.e. drop the payload). */
+			// Do nothing else (i.e. drop the payload).
 		}
-		//logger.debug("Started File Transfer: " + fm);
+		
+		logger.debug("Started File Transfer: " + fm);
 	}
 
 	/** accepts a file offer and sends a fileAcceptMessage */
-	public void acceptFileOffer(FileOfferMessage fm, String filePath){
-
+	public void acceptFileOffer(FileOfferMessage fm, String filePath) {
 		String key = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
 		offeredFileCache.put(key, filePath);
-		//DEBUG
 		System.out.println("PUT KEY: " + key.hashCode());
 
 		byte[] data = fm.getPayload();
-		data[0] = fileAcceptCommand;
+		data[0] = FILE_ACCEPT_CMD;
 
 		try {
 			networkLayer.send(new Payload(data, fm.getAddress()));
 		} catch (SizeLimitExceededException e) {
 			e.printStackTrace();
 		}
-
-
 	}
 
 	@Override
@@ -373,7 +331,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		while (run) {
 			Payload p = networkLayer.read();
 
-			// incoming payload
+			// Incoming payload
 			readPayload(p);
 			logger.debug("Received Payload: " + p.toString() + ".");
 		}
@@ -394,7 +352,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			// Send a WHOIS for each host in the collection
 			for (Byte h : hostCollection) {
 				byte[] data = new byte[1];
-				data[0] = WHOISrequestCommand;
+				data[0] = WHOIS_REQUEST_CMD;
 				try {
 					networkLayer.send(new Payload(data, h));
 					logger.debug("WHOIS Request Sent to: " + h + ".");
@@ -411,7 +369,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * getHosts with whois defaulted to false
 	 * @return collection of hosts
 	 */
-	public Collection<Byte> getHosts(){
+	public Collection<Byte> getHosts() {
 		return getHosts(false);
 	}
 
@@ -419,45 +377,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 * Method to retrieve the address of this host.
 	 * @return the address of this host.
 	 */
-	public Byte getHost(){
+	public Byte getHost() {
 		return networkLayer.host();
-	}
-
-
-	/**
-	 * CURRENTLY DEPRECATED
-	 * Sends out a WHOIS message to all hosts in our hostCollection after
-	 * a given delay in seconds.
-	 * @param delay
-	 */
-	public void sendWHOIS(int delay){
-
-		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-		// Create a runnable that we can execute
-		final Runnable WHOIS = new Runnable() {
-			public void run() {
-				// Get the collection of all the hosts so we can WHOIS them
-				Collection<Byte> hostCollection = getHosts();
-
-				// Send a WHOIS for each host in the collection
-				for (Byte h : hostCollection) {
-					byte[] data = new byte[1];
-					//					System.out.println("DEBUG--------- Value of data = " + data);
-					//					System.out.println(h);
-					data[0] = WHOISrequestCommand;
-					try {
-						networkLayer.send(new Payload(data, h));
-						logger.debug("WHOIS Request Sent to: " + h + ".");
-					} catch (SizeLimitExceededException e) {
-						logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-
-		scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
 	}
 
 	@Override
