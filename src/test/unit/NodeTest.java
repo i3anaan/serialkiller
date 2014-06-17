@@ -1,7 +1,6 @@
 package test.unit;
 
 import static org.junit.Assert.*;
-import link.angelmaker.nodes.BasicLeafNode;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.FrameCeptionNode;
 import link.angelmaker.nodes.FrameNode;

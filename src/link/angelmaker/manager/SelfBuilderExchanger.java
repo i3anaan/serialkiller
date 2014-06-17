@@ -5,7 +5,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.bitexchanger.BitExchanger;
-import link.angelmaker.nodes.BasicLeafNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
 

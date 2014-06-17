@@ -1,8 +1,4 @@
 package link.angelmaker.nodes;
-
-import link.jack.HammingUnit;
-import link.jack.JackTheRipper;
-import link.jack.Unit;
 import util.BitSet2;
 import util.encoding.HammingCode;
 
@@ -60,11 +56,6 @@ public class HammingNode implements Node.Fillable, Node.Leaf{
 			return (obj instanceof HammingNode) && ((HammingNode) obj).stored==this.stored;
 		}
 	}
-
-	private HammingUnit getRandomUnit() {
-		return new HammingUnit(new BitSet2(new boolean[]{JackTheRipper.R.nextBoolean(),JackTheRipper.R.nextBoolean(),JackTheRipper.R.nextBoolean(),JackTheRipper.R.nextBoolean()}),JackTheRipper.R.nextBoolean(),hc);
-	}
-	
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {
 		BitSet2 encoded = hc.encode(bits.get(0, 4));

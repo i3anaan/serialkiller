@@ -210,7 +210,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		//AngelMaker.logger.omg("SYNC CURRENTLY DISABLED FOR TESTING PURPOSES");
 		//TODO REENABLE THIS
 		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
-		connectionRole = ROLE_MASTER;
+		//connectionRole = ROLE_MASTER;
 		boolean firstRound = true;
 		int round = 0;
 		while(true){
