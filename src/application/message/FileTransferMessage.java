@@ -5,10 +5,7 @@ import java.util.Arrays;
 import com.google.common.primitives.Bytes;
 
 public class FileTransferMessage extends FileMessage {
-
-	// Private variables
 	private byte[] fileBytes;
-	private String fileName;
 
 	public FileTransferMessage(byte address, byte[] data) {
 		super(address, data);

@@ -1,9 +1,9 @@
 package application.message;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Ints;
 
 public abstract class FileMessage extends ApplicationLayerMessage {
 
@@ -39,9 +39,7 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 	 * @param data
 	 */
 	private void setFileSize(byte[] data){
-		byte [] size = Arrays.copyOfRange(data, 1, 5);
-		int derp = ByteBuffer.allocate(4).wrap(size).getInt();
-		fileSize = 	derp;
+		fileSize = Ints.fromByteArray(Arrays.copyOfRange(data, 1, 5));
 	}
 	
 	/**
