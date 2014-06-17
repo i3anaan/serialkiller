@@ -1,6 +1,7 @@
 package test.unit;
 
 import static org.junit.Assert.*;
+import link.angelmaker.nodes.FillablePureNode;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.FrameCeptionNode;
 import link.angelmaker.nodes.FrameNode;
@@ -15,7 +16,8 @@ public class NodeTest {
 	public Node[] nodes = new Node[] { new PureNode(root, 80),
 		new FrameNode<Node>(root, 10),
 		new FrameCeptionNode<Node>(root, 2),
-		new FrameCeptionNode<Node>(root, 0), new FlaggingNode(root, 8) };
+		new FrameCeptionNode<Node>(root, 0), new FlaggingNode(root, 8),
+		new FillablePureNode(root,8)};
 	
 	@Test
 	public void testGeneral() {

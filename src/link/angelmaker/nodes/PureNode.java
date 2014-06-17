@@ -8,11 +8,11 @@ import util.BitSet2;
  * 
  * @author I3anaan
  */
-public class PureNode implements Node.Leaf {
+public class PureNode implements Node.Leaf{
 
-	private BitSet2 stored;
-	private int dataBitCount;
-	private Node parent;
+	protected BitSet2 stored;
+	protected int dataBitCount;
+	protected Node parent;
 
 	public PureNode(Node parent, int dataBitCount) {
 		stored = new BitSet2();

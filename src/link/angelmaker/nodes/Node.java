@@ -189,6 +189,7 @@ public interface Node {
 	 */
 	public interface Fillable extends Node {
 		public boolean isFiller();
+		public Node getFiller();
 	}
 
 	/**

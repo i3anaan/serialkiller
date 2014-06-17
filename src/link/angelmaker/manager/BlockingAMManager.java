@@ -54,14 +54,14 @@ public class BlockingAMManager implements AMManager{
 
 	@Override
 	public Node readNode() {
-		//System.out.println("Reading node...");
+		System.out.println("Reading node...");
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
 		lastNodeReceived = node;
 		do{
 			
 			BitSet2 received = exchanger.readBits();
 			if(received.length()>0){
-				//System.out.println("Handing over bits:"+received);
+				System.out.println("Handing over bits:"+received);
 				node.giveConverted(received);
 			}else{
 				//System.out.println("QueueIn Size: "+((SimpleBitExchanger)exchanger).queueIn.size());
@@ -73,7 +73,7 @@ public class BlockingAMManager implements AMManager{
 			AngelMaker.logger.error("Node full, but not ready to be read.");
 			//TODO;
 		}
-		//System.out.println("Done Reading Node: "+node);
+		System.out.println("Done Reading Node: "+node);
 		Graph.makeImage(Graph.getFullGraphForNode(node, true));
 		return node;
 	}

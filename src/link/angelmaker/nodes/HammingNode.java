@@ -1,4 +1,5 @@
 package link.angelmaker.nodes;
+import link.angelmaker.AngelMaker;
 import util.BitSet2;
 import util.encoding.HammingCode;
 
@@ -110,6 +111,12 @@ public class HammingNode implements Node.Fillable, Node.Leaf{
 	public boolean isFiller() {
 		return stored==FLAG_FILLER_DATA;
 	}
+	@Override
+	public Node getFiller(){
+		//TODO test, rethink;
+		return AngelMaker.TOP_NODE_IN_USE.getClone();
+	}
+	
 	@Override
 	public boolean isReady() {
 		// TODO Auto-generated method stub

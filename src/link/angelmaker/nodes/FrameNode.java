@@ -2,6 +2,8 @@ package link.angelmaker.nodes;
 
 import java.util.Arrays;
 
+import link.angelmaker.AngelMaker;
+
 import util.BitSet2;
 
 /**
@@ -165,6 +167,11 @@ public class FrameNode<N extends Node> implements Node.Fillable, Node.Internal {
 			}
 		}
 		return ready;
+	}
+	@Override
+	public Node getFiller(){
+		//TODO test, rethink;
+		return AngelMaker.TOP_NODE_IN_USE.getClone();
 	}
 
 	@Override

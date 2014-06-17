@@ -34,7 +34,12 @@ public class BlockingAMManagerServer extends BlockingAMManager implements AMMana
 
 	@Override
 	public Node getNextNode() {
-		return AngelMaker.TOP_NODE_IN_USE.getClone();
+		if(AngelMaker.TOP_NODE_IN_USE instanceof Node.Fillable){
+			return ((Node.Fillable)AngelMaker.TOP_NODE_IN_USE).getFiller();
+		}else{
+			throw new IncompatibleModulesException();
+		}
+		
 	}
 	
 	@Override

@@ -227,6 +227,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	public Node getClone() {
 		return new FlaggingNode(parent, childNodes[0].getClone(), dataBitCount);
 	}
+	
+	@Override
+	public Node getFiller(){
+		//TODO test, rethink;
+		return AngelMaker.TOP_NODE_IN_USE.getClone();
+	}
 
 	@Override
 	public String getStateString() {

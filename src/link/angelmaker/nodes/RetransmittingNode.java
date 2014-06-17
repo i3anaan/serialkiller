@@ -1,5 +1,6 @@
 package link.angelmaker.nodes;
 
+import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -386,6 +387,13 @@ public class RetransmittingNode implements Node, Node.Fillable, Node.SelfBuildin
 		}
 		return isReady();
 	}
+	
+	@Override
+	public Node getFiller(){
+		//TODO test, rethink;
+		return AngelMaker.TOP_NODE_IN_USE.getClone();
+	}
+	
 
 	@Override
 	public Node getClone() {

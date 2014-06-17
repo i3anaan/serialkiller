@@ -23,7 +23,7 @@ public class SendTest {
 		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
 		Node node = new FrameNode<Node>(null,3);
-		node = new FlaggingNode(null,8);
+		node = new FillablePureNode(null,8);
 		FrameLinkLayer am = new AngelMaker(phys, node, manager,
 				new SimpleBitExchanger(phys, manager));
 		System.out.println(am.toString());
