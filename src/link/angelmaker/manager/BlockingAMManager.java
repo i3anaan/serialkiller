@@ -57,12 +57,14 @@ public class BlockingAMManager implements AMManager{
 	@Override
 	public byte[] readBytes() {
 		BitSet2 result = new BitSet2();
-		
+		//System.out.println("AMManager readBytes START");
 		received = BitSet2.concatenate(received,exchanger.readBits());
+		//System.out.println("Received: "+received);
 		while(received.length()>0){
 			Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
 			lastNodeReceived = node;
 			do{
+				received = BitSet2.concatenate(received,exchanger.readBits());
 				if(received.length()>0){
 					received = node.giveConverted(received);
 				}
@@ -71,8 +73,11 @@ public class BlockingAMManager implements AMManager{
 				AngelMaker.logger.error("Node full, but not ready to be read.");
 				//TODO;
 			}
+			//System.out.println(node);
 			result.addAtEnd(node.getOriginal());
+			
 		}
+		//System.out.println("AMManager readBytes END");
 		return result.toByteArray();
 	}
 	

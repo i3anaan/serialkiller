@@ -20,7 +20,7 @@ public class ReceiveTest {
 		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
 		Node node = new FrameNode<Node>(null,3);
-		node = new FillablePureNode(null,8);
+		node = new FlaggingNode(null,8);
 		FrameLinkLayer am = new AngelMaker(phys, node, manager,
 				new SimpleBitExchanger());
 		System.out.println(am);
@@ -32,8 +32,7 @@ public class ReceiveTest {
 			if (receivedBytes.length > 0) {
 				totalReceived = BitSet2.concatenate(totalReceived,new BitSet2(receivedBytes));
 				String received = new String(totalReceived.toByteArray(), Charsets.US_ASCII);
-				System.out.println(received);
-
+				System.out.println("#######################################################\n"+received);
 			}
 		}
 		
