@@ -37,7 +37,9 @@ public class SendTest {
 		System.out.println("START SENDING");
 		
 		while(true){
-			am.sendFrame(bytesToSend);
+			for(int i=0;i<bytesToSend.length;i++){
+				am.sendFrame(new byte[]{bytesToSend[i]});
+			}			
 		}
 	}
 }

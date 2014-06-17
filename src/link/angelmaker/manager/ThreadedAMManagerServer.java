@@ -2,6 +2,8 @@ package link.angelmaker.manager;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+import com.google.common.base.Charsets;
+
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
@@ -62,8 +64,10 @@ public class ThreadedAMManagerServer extends Thread implements AMManager,
 
 	@Override
 	public byte[] readBytes() {
+		
 		int size = queueIn.size();
 		byte[] arr = new byte[size];
+		
 		for (int i = 0; i < size; i++) {
 			try {
 				arr[i] = queueIn.take();
