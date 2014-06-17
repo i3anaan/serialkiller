@@ -259,7 +259,6 @@ public class GUI extends JFrame implements Observer{
 			// TODO 1: play sound
 			// TODO 2: parse system message
 
-			//TODO test MORE
 			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 			if(filePath != null){
 				apl.acceptFileOffer((FileOfferMessage) arg, filePath);

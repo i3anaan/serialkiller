@@ -53,9 +53,8 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 		if (this instanceof FileTransferMessage){
 			System.out.println("FileTransferMessage!");
 			byte [] namedata = Arrays.copyOfRange(data, 5, data.length);
-			byte [] name = Arrays.copyOfRange(namedata, 5, Bytes.indexOf(namedata, (byte)0));
+			byte [] name = Arrays.copyOfRange(namedata, 0, Bytes.indexOf(namedata, (byte)'\0'));
 			fileName = new String(name).trim();
-			System.out.println(fileName);
 		}else{
 			System.out.println("FileMessage !");
 			byte [] name = Arrays.copyOfRange(data, 5, data.length);

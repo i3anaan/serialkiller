@@ -44,12 +44,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	/** The main thread of this class instance. */
 	private Thread thread;
 
-	//TODO update documentation
-	/** Cash containing all the hosts we are offering files, mapped to the FileOfferPayload we made them */
+	/** Cash containing all the hosts we are offering files, mapped to the path of the FileOffer we made them */
 	private Cache<String, String> fileOfferCache;
 
-	/** Cash containing all the hosts that are offering files, mapped to the FileOfferPayload they made us */
-	//TODO fix description
+	/** Cash containing all the hosts that are offering files, mapped to the FileOffer they made us */
 	private Cache<String, String> offeredFileCache;
 
 	/** byte value of a chat flag */
@@ -124,8 +122,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Received a file transfer offer.
 				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
 
-				//TODO 01 BUILD CACHE HERE?
-
 				setChanged();
 				notifyObservers(offer);
 				logger.debug("Received FileOffer: " + p + "From host: " + p.address);
@@ -141,14 +137,13 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Check if fileOffer exists and if so send it
 				String ftp = fileOfferCache.getIfPresent(key);
 
-
+				// There was a file offer present for this transfer
 				if(ftp != null){
-					//System.out.println("DEBUG REACHED");
-					//TODO FIX STRING KEY IN CACHE, REPLEACE IT WITH A MAP?
+					// Build fileTransferMessage
 					byte[] fileTransferData = writeTransferMessage(p.data, ftp);
-
 					Payload transfer = new Payload(fileTransferData, p.address);
 
+					// Transfer the file
 					try {
 						networkLayer.send(transfer);
 					} catch (SizeLimitExceededException e) {
@@ -160,7 +155,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				}
 				else if(ftp == null){
 					//THIS MEANS THERE WAS NO SUCH OFFER PRESENT
-					System.out.println("FRP NULL, NO SUCH OFFER PRESENT" );
+					logger.warning("Host: "+ p.address +" tried to transfer a file from us we never offered!");
 				}
 
 
@@ -172,28 +167,17 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 				//check if file was offered before
 				String offerKey = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
+				
 				if(offeredFileCache.getIfPresent(offerKey) != null){
-					System.out.println("FILE OFFERED DETECTED!!!");
 					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
+					logger.info("Host: " + fm.getAddress() + "Is transfering us " + fm.getFileName());
+					setChanged();
+					notifyObservers(fm);
 				}else{
-					//TODO cleanup debug code when working
-					System.out.println("FILE OFFERED NOT DETECTED");
-					System.out.println(offeredFileCache.size());
 					
-					for (String loopkey : offeredFileCache.asMap().keySet()) {
-						System.out.println("A key: " +loopkey.hashCode());
-						System.out.println(offerKey.hashCode());
-						System.out.println(offerKey.equals(loopkey));
-						
-					}
-			
 					logger.debug("Host: " + fm.getAddress() + " Had no such file offer!");
 				}
 
-				//TODO 02 investigate if current handling by GUI is desired
-				logger.debug("Receiving File Transfer: " + p);
-				setChanged();
-				notifyObservers(fm);
 				break;
 
 			case WHOISrequestCommand:
@@ -263,13 +247,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		System.arraycopy(byteFileSize, 0, data, 1, 4);
 		System.arraycopy(byteName, 0, data, 5, byteName.length);
 
-		//TODO HIER ZIT HET PROBLEEM VAN FILETRANSFER
-		System.out.println("byteFileSize : " + byteFileSize[0] + "-" + byteFileSize[1] + "-" + byteFileSize[2] + "-" + byteFileSize[3]);
-		System.out.println("index 1 = " + data[1]);
-		System.out.println("index 2 = " + data[2]);
 		String key = destination + fileName;
 		fileOfferCache.put(key, strFilePath);
-		//System.out.println("OFFERED KEY: " + key);
 
 		// Put the offer in a new payload and send it
 		Payload offer = new Payload(data, destination);
@@ -313,7 +292,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			/* Drop the message. */
 		}
 	}
-	
+
 	/**
 	 * Builds the payload for a fileTransferMessage
 	 * @param payload of the acceptMessage
@@ -326,12 +305,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 		// Use the data from the offer to form the filetransfer data
 		byte[] fileTransferData = new byte[data.length + 1 + fileData.length];
-		
+
 		fileTransferData[0] = fileTransferCommand;
 		System.arraycopy(data, 1, fileTransferData, 1, (data.length - 1) );
 		fileTransferData[data.length] = nullbyte;
 		System.arraycopy(fileData, 0, fileTransferData, data.length + 1, fileData.length);
-	
+
 		return fileTransferData;
 	}
 
@@ -357,8 +336,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 		String key = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
 		offeredFileCache.put(key, filePath);
-		//DEBUG
-		System.out.println("PUT KEY: " + key.hashCode());
 
 		byte[] data = fm.getPayload();
 		data[0] = fileAcceptCommand;
@@ -428,45 +405,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 */
 	public Byte getHost(){
 		return networkLayer.host();
-	}
-
-
-	/**
-	 * CURRENTLY DEPRECATED
-	 * Sends out a WHOIS message to all hosts in our hostCollection after
-	 * a given delay in seconds.
-	 * @param delay
-	 */
-	public void sendWHOIS(int delay){
-
-		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-		// Create a runnable that we can execute
-		final Runnable WHOIS = new Runnable() {
-			public void run() {
-				// Get the collection of all the hosts so we can WHOIS them
-				Collection<Byte> hostCollection = getHosts();
-
-				// Send a WHOIS for each host in the collection
-				for (Byte h : hostCollection) {
-					byte[] data = new byte[1];
-					//					System.out.println("DEBUG--------- Value of data = " + data);
-					//					System.out.println(h);
-					data[0] = WHOISrequestCommand;
-					try {
-						networkLayer.send(new Payload(data, h));
-						logger.debug("WHOIS Request Sent to: " + h + ".");
-					} catch (SizeLimitExceededException e) {
-						logger.warning("WHOIS Request Size Limit Exceeded:" + h + ".");
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-
-		ScheduledFuture<?> scheduledWHOIS = scheduler.schedule(WHOIS, delay, TimeUnit.SECONDS);
-		//		System.out.println("DONEDONEDONEDONE ------ 101010100101 ");
-		//scheduledWHOIS.cancel(false);
 	}
 
 	@Override
