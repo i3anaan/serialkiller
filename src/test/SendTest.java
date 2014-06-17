@@ -20,7 +20,7 @@ public class SendTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptErrorHardwareLayer();
+		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new BlockingAMManagerServer();
 		Node node = new FrameNode<Node>(null,3);
 		node = new FlaggingNode(null,8);
@@ -40,15 +40,3 @@ public class SendTest {
 		}
 	}
 }
-/*
-01010011
-01110101
-01100011
-01101000
-00100000
-01110100
-01100101
-01110011
-01110100
-00101100
-*/
