@@ -8,6 +8,7 @@ import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.nodes.Node;
 
 public class ThreadedAMManagerServer extends Thread implements AMManager,
@@ -64,7 +65,7 @@ public class ThreadedAMManagerServer extends Thread implements AMManager,
 
 	@Override
 	public byte[] readBytes() {
-		
+		//System.out.println("ThreadedAMManagerServer queueIn.size(): "+queueIn.size()+"  exchanger.queueIn.size(): "+((SimpleBitExchanger)exchanger).queueIn.size()+"  exchanger.queueOut.size(): "+((SimpleBitExchanger)exchanger).queueOut.size());
 		int size = queueIn.size();
 		byte[] arr = new byte[size];
 		

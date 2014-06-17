@@ -74,7 +74,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	@Override
 	public void sendBits(BitSet2 bits) {
 		for(int i=0;i<bits.length();i++){
-			queueOut.offer(bits.get(i));
+			try {
+				queueOut.put(bits.get(i));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -221,7 +226,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * Needs a AMManager.Server to be able to send filler data.
 	 */
 	public void run(){
-		waitForSync();
+		//waitForSync();
 		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
 		boolean firstRound = true;
 		int round = 0;
