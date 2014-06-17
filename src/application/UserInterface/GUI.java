@@ -258,12 +258,13 @@ public class GUI extends JFrame implements Observer{
 		else if(arg instanceof FileOfferMessage){
 			// TODO 1: play sound
 			// TODO 2: parse system message
-
-			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
-			if(filePath != null){
-				apl.acceptFileOffer((FileOfferMessage) arg, filePath);
-
-
+			
+			// If IgnoreFileTransfer option has been set the offer will be ignored
+			if(!(this.getPreferences().get("TRANSFERIGNORE", "").equals("true"))){
+				String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+				if(filePath != null){
+					apl.acceptFileOffer((FileOfferMessage) arg, filePath);
+				}
 			}
 		}
 
