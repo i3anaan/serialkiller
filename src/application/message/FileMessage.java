@@ -3,23 +3,20 @@ package application.message;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import com.google.common.base.Splitter;
+import com.google.common.primitives.Bytes;
+
 public abstract class FileMessage extends ApplicationLayerMessage {
 
 	// Private variables
-	private final int fileSize;
-	private final String fileName;
+	private int fileSize;
+	private String fileName;
 	
 	public FileMessage(byte address, byte[] data) {
 		super(address, data);
-		byte [] size = Arrays.copyOfRange(data, 1, 5);
-		byte [] name = Arrays.copyOfRange(data, 5, data.length);
-		int derp = ByteBuffer.allocate(4).wrap(size).getInt();
-	
-		//TODO DEBUG LINE
-		//System.out.println("DE FILESIZE: " +derp);
-		fileSize = 	derp;
-		fileName = new String(name).trim();
-		//System.out.println("THE NAME : " +fileName);
+		
+		setFileSize(data);
+		setFileName(data);
 	}
 	
 	/**
@@ -38,6 +35,33 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 		return fileName;
 	}
 	
+	/**
+	 * sets the fileSize, should only be used once
+	 * @param data
+	 */
+	private void setFileSize(byte[] data){
+		byte [] size = Arrays.copyOfRange(data, 1, 5);
+		int derp = ByteBuffer.allocate(4).wrap(size).getInt();
+		fileSize = 	derp;
+	}
 	
+	/**
+	 * sets the fileName, should only be used once
+	 * @param data
+	 */
+	private void setFileName(byte[] data){
+		if (this instanceof FileTransferMessage){
+			System.out.println("FileTransferMessage!");
+			byte [] namedata = Arrays.copyOfRange(data, 5, data.length);
+			byte [] name = Arrays.copyOfRange(namedata, 5, Bytes.indexOf(namedata, (byte)0));
+			fileName = new String(name).trim();
+			System.out.println(fileName);
+		}else{
+			System.out.println("FileMessage !");
+			byte [] name = Arrays.copyOfRange(data, 5, data.length);
+			fileName = new String(name).trim();
+			System.out.println(fileName);
+		}
+	}
 
 }

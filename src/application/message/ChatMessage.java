@@ -27,11 +27,11 @@ public class ChatMessage extends ApplicationLayerMessage {
 		// that nul bytes terminate strings
 		int i;
 		for(i = 0; i<data.length; i++){
-			if(data[i] == 0)
+			if(data[i] == '\0')
 				break;
 		}
-		nickname = new String(data, 1, i);
-		int l = nickname.length();
+		nickname = new String(data, 1, i-1);
+		int l = nickname.length() + 2;
 
 		// Message part of the payload
 		byte [] payload = Arrays.copyOfRange(data, l, data.length);

@@ -77,7 +77,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	private final static byte[] identification = label.getBytes(Charsets.UTF_8);
 
 	/** byte value of nullbyte */
-	private final int nullbyte = 0;
+	private final char nullbyte = '\0';
 
 	public ApplicationLayer() {
 		// Construct our own thread
@@ -142,30 +142,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				String ftp = fileOfferCache.getIfPresent(key);
 
 
-				//DEBUG LINE
-				//				System.out.println("Present? : " + ftp);
-				//
-				//				for (String loopkey : fileOfferCache.asMap().keySet()) {
-				//					System.out.println("Base key: " + key + "Test1");
-				//					System.out.println("A key: " +loopkey + "Test2");
-				//					System.out.println(loopkey.equals(key));
-				//					
-				//				}
-
-
 				if(ftp != null){
 					//System.out.println("DEBUG REACHED");
 					//TODO FIX STRING KEY IN CACHE, REPLEACE IT WITH A MAP?
-					//TODO TEST NEW METHOD, WHEN WORKING REMOVE readFile METHOD
-
-					//Load the file from directory into byte array
-					byte[] fileData = Files.toByteArray(new File(ftp));
-
-					// Use the data from the offer to form the filetransfer data
-					byte[] fileTransferData = new byte[p.data.length + 1 + fileData.length];
-					fileTransferData[0] = fileTransferCommand;
-					System.arraycopy(p.data, 0, fileTransferData, 1, (p.data.length -1) );
-					System.arraycopy(fileData, 0, fileTransferData, p.data.length, fileData.length);
+					byte[] fileTransferData = writeTransferMessage(p.data, ftp);
 
 					Payload transfer = new Payload(fileTransferData, p.address);
 
@@ -196,6 +176,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 					System.out.println("FILE OFFERED DETECTED!!!");
 					writeFile(fm, offeredFileCache.getIfPresent(offerKey));
 				}else{
+					//TODO cleanup debug code when working
 					System.out.println("FILE OFFERED NOT DETECTED");
 					System.out.println(offeredFileCache.size());
 					
@@ -217,7 +198,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 			case WHOISrequestCommand:
 				// Someone is requesting our identification
-
 				byte[] data = new byte[1 + identification.length];
 				data[0] = WHOISresponseCommand;
 				System.arraycopy(identification, 0, data, 1, identification.length);
@@ -283,6 +263,10 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		System.arraycopy(byteFileSize, 0, data, 1, 4);
 		System.arraycopy(byteName, 0, data, 5, byteName.length);
 
+		//TODO HIER ZIT HET PROBLEEM VAN FILETRANSFER
+		System.out.println("byteFileSize : " + byteFileSize[0] + "-" + byteFileSize[1] + "-" + byteFileSize[2] + "-" + byteFileSize[3]);
+		System.out.println("index 1 = " + data[1]);
+		System.out.println("index 2 = " + data[2]);
 		String key = destination + fileName;
 		fileOfferCache.put(key, strFilePath);
 		//System.out.println("OFFERED KEY: " + key);
@@ -328,6 +312,27 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			e.printStackTrace();
 			/* Drop the message. */
 		}
+	}
+	
+	/**
+	 * Builds the payload for a fileTransferMessage
+	 * @param payload of the acceptMessage
+	 * @param path of the file to transfer
+	 * @return payload of fileTransferMessage
+	 * @throws IOException 
+	 */
+	public byte[] writeTransferMessage(byte[] data, String ftp) throws IOException{
+		byte[] fileData = Files.toByteArray(new File(ftp));
+
+		// Use the data from the offer to form the filetransfer data
+		byte[] fileTransferData = new byte[data.length + 1 + fileData.length];
+		
+		fileTransferData[0] = fileTransferCommand;
+		System.arraycopy(data, 1, fileTransferData, 1, (data.length - 1) );
+		fileTransferData[data.length] = nullbyte;
+		System.arraycopy(fileData, 0, fileTransferData, data.length + 1, fileData.length);
+	
+		return fileTransferData;
 	}
 
 	/**
@@ -427,7 +432,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 
 	/**
-	 * CURRENTLY DEPRECIATED
+	 * CURRENTLY DEPRECATED
 	 * Sends out a WHOIS message to all hosts in our hostCollection after
 	 * a given delay in seconds.
 	 * @param delay

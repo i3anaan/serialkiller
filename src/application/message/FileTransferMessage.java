@@ -2,15 +2,21 @@ package application.message;
 
 import java.util.Arrays;
 
+import com.google.common.primitives.Bytes;
+
 public class FileTransferMessage extends FileMessage {
 
 	// Private variables
 	private byte[] fileBytes;
+	private String fileName;
 
 	public FileTransferMessage(byte address, byte[] data) {
 		super(address, data);
 
-		fileBytes = Arrays.copyOfRange(data, 1, data.length);
+		//TODO start from nullbyte!!!!
+		setFileBytes(data);
+
+		System.out.println(new String(data));
 
 
 	}
@@ -24,4 +30,17 @@ public class FileTransferMessage extends FileMessage {
 		return fileBytes;
 	}
 
+	/**
+	 * Sets the bytes containing the file data in
+	 * the private variable;
+	 * @param payload data to read from
+	 */
+	private void setFileBytes(byte[] data){
+		byte[] datapart = Arrays.copyOfRange(data, 5, data.length-1);
+		fileBytes = Arrays.copyOfRange(datapart, Bytes.indexOf(data, (byte)'\0'), (data.length - Bytes.indexOf(data, (byte)0)));
+
+	}
+
 }
+
+

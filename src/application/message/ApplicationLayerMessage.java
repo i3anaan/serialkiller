@@ -15,6 +15,15 @@ public class ApplicationLayerMessage implements Message {
 	public ApplicationLayerMessage(byte address, byte[] data){
 		this.address = address;
 		this.payload = data;
+		
+		//DEBUG CODE
+		int i = 0;
+		for(byte derp: data){
+			if(derp == '\0'){
+				System.out.println("nullbyte found! on index: "+i + this.getClass());
+			}
+			i++;
+		}
 	}
 	
 	@Override
