@@ -52,12 +52,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	private static final byte WHOIS_REQUEST_CMD = 'W';
 	private static final byte WHOIS_RESPONSE_CMD = 'I';
 
-	/** Our identification string. */
-	private final static String label ="<html>4evr \u00B4\u00AF`\u00B7.\u00B8\u00B8.\u00B7\u00B4\u00AF`\u00B7. Connexx0rred with tha bestest proto implementation \u2605\u2605\u2605 SerialKiller \u2605\u2605\u2605 <font color=#ff0000>Brought to you by Squeamish, i3anaan, TheMSB, jjkester</font> \u00AF\\_(\u30C4)_/\u00AF - Regards to all our friends: Jason, Jack, Patrick, Ghostface, Jigsaw, Hannibal, John and Sweeney \u0F3C \u1564\uFEFF\u25D5\u25E1\u25D5\uFEFF \u0F3D\uFEFF\u1564\uFEFF <font color=#009900>Smoke weed every day #420 \u0299\u029F\u1D00\u1D22\u1D07 \u026A\u1D1B</font> --- Send warez 2 <a href='https://sk.twnc.org/'>sk.twnc.org</a>, complaints to /dev/null --- The more the merrier: serial killer = best killer --- Word of the day: hacksaw \u00B4\u00AF`\u00B7.\u00B8\u00B8.\u00B7\u00B4\u00AF`\u00B7. Thanks for taking the time to receive this message, 4evr out.";
-
-	/** Our ID as an array of bytes. */
-	private final static byte[] identification = label.getBytes(Charsets.UTF_8);
-
 	public ApplicationLayer() {
 		// Construct our own thread
 		thread = new Thread(this);
@@ -92,14 +86,14 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			case CHAT_CMD:
 				// Received a chat message.
 				// Create a new chat message object and notifies the GUI
-				ChatMessage cm = new ChatMessage(p.address, p.data);
+				ChatMessage cm = new ChatMessage(p);
 				setChanged();
 				notifyObservers(cm);
 				break;
 
 			case FILE_OFFER_CMD: 
 				// Received a file transfer offer.
-				FileOfferMessage offer = new FileOfferMessage(p.address, p.data);
+				FileOfferMessage offer = new FileOfferMessage(p);
 
 				//TODO 01 BUILD CACHE HERE?
 
@@ -110,7 +104,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 			case FILE_ACCEPT_CMD:
 				// Someone accepted our file offer.
-				FileAcceptMessage accept = new FileAcceptMessage(p.address, p.data);
+				FileAcceptMessage accept = new FileAcceptMessage(p);
 
 				// Get key from FileMessage
 				String key = (accept.getAddress() + accept.getFileName());
@@ -139,7 +133,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 
 			case FILE_TRANSFER_CMD:
 				// Someone is sending us a file. Write the file to our disk.
-				FileTransferMessage fm = new FileTransferMessage(p.address, p.data);
+				FileTransferMessage fm = new FileTransferMessage(p);
 
 				// Check if file was offered before
 				String offerKey = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
@@ -157,35 +151,22 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				break;
 
 			case WHOIS_REQUEST_CMD:
-				// Someone is requesting our identification
-				byte[] data = new byte[1 + identification.length];
-				data[0] = WHOIS_RESPONSE_CMD;
-				System.arraycopy(identification, 0, data, 1, identification.length);
-
+				// Someone requested our WHOIS identification
 				try {
-					networkLayer.send(new Payload(data, p.address));
+					networkLayer.send(new IdentificationMessage(p.address).getPayload());
 				} catch (SizeLimitExceededException e) {
-					logger.warning("Size Limit Exceeded:" + p + ".");
-					e.printStackTrace();
+					logger.error("Could not respond to WHOIS request: size limit");
 				}
 				break;
 
 			case WHOIS_RESPONSE_CMD:
 				// Someone is responding to our identification request
-
-				//Get WHOIS without command byte
-				byte[] identificationResponseData = new byte[p.data.length-1];
-				System.arraycopy(p.data, 1, identificationResponseData, 0, p.data.length-1);
-
-				//Parse WHOIS to GUI
-				IdentificationMessage idResponse = new IdentificationMessage(p.address, identificationResponseData);
+				IdentificationMessage idResponse = new IdentificationMessage(p);
 				setChanged();
 				notifyObservers(idResponse);
 				break;
 
-
 			default:
-				// TODO 03 find ways to catch invalid commands in a more refined manner
 				throw new CommandNotFoundException(String.format("command: %c", command));
 			}
 		}  catch (CommandNotFoundException e) {
@@ -298,8 +279,8 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	 */
 	public void writeFile(FileTransferMessage fm, String path) {
 		try {
-			Files.write(fm.getFileBytes(), new File(path));
-		}catch (IOException e) {
+			Files.write(fm.getData(), new File(path));
+		} catch (IOException e) {
 			logger.warning("Caught IOException " + e + " while handling fileMessage " + fm);
 			// Do nothing else (i.e. drop the payload).
 		}
@@ -308,16 +289,12 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	}
 
 	/** accepts a file offer and sends a fileAcceptMessage */
-	public void acceptFileOffer(FileOfferMessage fm, String filePath) {
-		String key = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
+	public void acceptFileOffer(FileOfferMessage offer, String filePath) {
+		String key = offer.getKey();
 		offeredFileCache.put(key, filePath);
-		System.out.println("PUT KEY: " + key.hashCode());
-
-		byte[] data = fm.getPayload();
-		data[0] = FILE_ACCEPT_CMD;
 
 		try {
-			networkLayer.send(new Payload(data, fm.getAddress()));
+			networkLayer.send(new FileAcceptMessage(offer).getPayload());
 		} catch (SizeLimitExceededException e) {
 			e.printStackTrace();
 		}
@@ -331,7 +308,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		while (run) {
 			Payload p = networkLayer.read();
 
-			// Incoming payload
 			readPayload(p);
 			logger.debug("Received Payload: " + p.toString() + ".");
 		}

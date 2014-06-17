@@ -1,38 +1,37 @@
 package application.message;
 
-import java.util.Arrays;
+import java.nio.charset.Charset;
+
+import com.google.common.base.Charsets;
+import com.google.common.primitives.Bytes;
+
+import network.Payload;
 
 /**
  * Representation for all chat messages in the Application layer,
  * it contains the nickname of the sender, the message and the original payload
- * @author msbruning
- *
  */
 public class ChatMessage extends ApplicationLayerMessage {
-
 	//Private variables
 	private final String nickname;
 	private final String message;
+	
+	private static final Charset UTF = Charsets.UTF_8;
 
-
-	/**
-	 * @param message payload
-	 */
-	public ChatMessage(byte address, byte[] data) {
-		super(address, data);
-		// Nickname used by the message sender, this is found by using the fact
-		// that nul bytes terminate strings
-		int i;
-		for(i = 0; i<data.length; i++){
-			if(data[i] == '\0')
-				break;
-		}
-		nickname = new String(data, 1, i-1);
-		int l = nickname.length() + 2;
-
-		// Message part of the payload
-		byte [] payload = Arrays.copyOfRange(data, l, data.length);
-		message = new String(payload);
+	public ChatMessage(Payload payload) {
+		super(payload);
+		byte[] data = payload.data;
+		int nick_end = Bytes.indexOf(data, (byte)'\0');
+		
+		nickname = new String(data, 1, nick_end - 1, UTF);
+		message  = new String(data, nick_end + 1, data.length - nick_end - 1, UTF);
+	}
+	
+	public ChatMessage(byte destination, String nickname, String message) {
+		super(destination);
+		this.nickname = nickname;
+		this.message = message;
+		setData(String.format("C%s\0%s", nickname, message).getBytes(UTF));
 	}
 
 	/**

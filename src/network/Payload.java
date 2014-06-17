@@ -1,5 +1,9 @@
 package network;
 
+import java.util.Arrays;
+
+import com.google.common.base.Objects;
+
 /**
  * Simple class designed to enable returning two specific types at once, from
  * the network layer to the application layer.
@@ -20,6 +24,14 @@ public class Payload {
      */
     public Payload clone() {
         return new Payload(data, address);
+    }
+    
+    /** Compares two Payloads. */
+    public boolean equals(Object obj) {
+    	return obj != null 
+    		   && obj instanceof Payload 
+    		   && Arrays.equals(this.data, ((Payload)obj).data) 
+    		   && this.address == ((Payload)obj).address;
     }
     
 	/**

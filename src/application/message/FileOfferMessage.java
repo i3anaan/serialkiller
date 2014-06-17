@@ -1,10 +1,22 @@
 package application.message;
 
-public class FileOfferMessage extends FileMessage {
+import network.Payload;
 
-	public FileOfferMessage(byte address, byte[] data) {
-		super(address, data);
-		// TODO Auto-generated constructor stub
+public class FileOfferMessage extends FileMessage {
+	public FileOfferMessage(byte destination, int size, String name) {
+		super(destination, (byte) 'F', size, name);
 	}
 
+	public FileOfferMessage(Payload p) {
+		super(p);
+	}
+	
+	public String getKey() {
+		return String.format("%s-%s-%s", getAddress(), getFileSize(), getFileName());
+	}
+	
+	@Override
+	public int hashCode() {
+		return getKey().hashCode();
+	}
 }
