@@ -13,12 +13,13 @@ import phys.diag.VirtualPhysicalLayer;
 
 public class AngelMakerTest {
 
-	//@Test
+	@Test
 	public void testWithDummyBitExchanger() {
 		//TODO cycle through all possible combinations?
 		AngelMaker am = new AngelMaker(new VirtualPhysicalLayer(),null,null,new DummyBitExchanger());
 		
 		for(int i : new int[]{1,2,3,5,10,50}){
+			System.out.println("AngelMakerTest, testing "+i+" bytes");
 			for(byte b = Byte.MIN_VALUE;b<Byte.MAX_VALUE;b++){
 				byte byteUsed = b;
 				byte[] arr = new byte[i];

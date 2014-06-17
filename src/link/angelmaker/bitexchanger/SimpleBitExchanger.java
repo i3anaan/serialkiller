@@ -39,7 +39,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final int STABILITY = 4;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 1000l*1000000l;
+	public static final long READ_TIMEOUT_NO_ACK = 100l*1000000l;
 	private byte previousByteSent;
 	private byte previousByteReceived;
 	

@@ -75,7 +75,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	 * Standard classes to use when nothing else specified.	
 	 */
 	private static PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
-	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 4);
+	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
 	private static AMManager STANDARD_MANAGER = new BlockingAMManagerServer();
 	private static BitExchanger STANDARD_EXCHANGER = new DummyBitExchanger();
 	
