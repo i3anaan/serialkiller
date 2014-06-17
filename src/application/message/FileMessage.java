@@ -3,7 +3,6 @@ package application.message;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import com.google.common.base.Splitter;
 import com.google.common.primitives.Bytes;
 
 public abstract class FileMessage extends ApplicationLayerMessage {
@@ -51,15 +50,14 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 	 */
 	private void setFileName(byte[] data){
 		if (this instanceof FileTransferMessage){
-			System.out.println("FileTransferMessage!");
+			
 			byte [] namedata = Arrays.copyOfRange(data, 5, data.length);
 			byte [] name = Arrays.copyOfRange(namedata, 0, Bytes.indexOf(namedata, (byte)'\0'));
 			fileName = new String(name).trim();
 		}else{
-			System.out.println("FileMessage !");
+			
 			byte [] name = Arrays.copyOfRange(data, 5, data.length);
 			fileName = new String(name).trim();
-			System.out.println(fileName);
 		}
 	}
 

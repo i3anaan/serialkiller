@@ -147,21 +147,6 @@ public class FileOfferDialog extends Dialog implements EventListener{
 	}
 	
 	/**
-	 * Creates a FileOfferDialog where the result is determined by
-	 * detecting that the user has selected an output path to save to
-	 * or not
-	 * @param sender of the file offer
-	 * @param name of the file being offered
-	 * @param size of the file being offered
-	 * @return path to save file to OR null if the offer is rejected
-	 */
-	public String openFileOfferDialog(String sender, String name, int size){
-		//TODO fix redundancy
-		return null;
-		
-	}
-	
-	/**
 	 * This method shows the current value of the current
 	 * return value
 	 * @return null or path value
