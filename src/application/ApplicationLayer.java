@@ -72,9 +72,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 	/** byte value of our WHOIS Identification String */
 	private final static byte[] identification = label.getBytes(Charsets.UTF_8);
 
-	/** byte value of nullbyte */
-	private final char nullbyte = '\0';
-
 	public ApplicationLayer() {
 		// Construct our own thread
 		thread = new Thread(this);
@@ -298,7 +295,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		// concatenate byte arrays into a new byte array
 		data[0] = chatCommand;
 		System.arraycopy(nick, 0, data, 1, nick.length);
-		data[nick.length+1] = nullbyte;
+		data[nick.length+1] = 0;
 		System.arraycopy(msg, 0, data, (nick.length+2), msg.length);
 
 		try {
@@ -325,7 +322,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		
 		fileTransferData[0] = fileTransferCommand;
 		System.arraycopy(data, 1, fileTransferData, 1, (data.length - 1) );
-		fileTransferData[data.length] = nullbyte;
+		fileTransferData[data.length] = 0;
 		System.arraycopy(fileData, 0, fileTransferData, data.length + 1, fileData.length);
 	
 		return fileTransferData;
