@@ -13,11 +13,10 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 	
 	public FileMessage(byte address, byte[] data) {
 		super(address, data);
-		
 		setFileSize(data);
 		setFileName(data);
 	}
-	
+
 	/**
 	 * Returns the size of the file
 	 * @return size of file
