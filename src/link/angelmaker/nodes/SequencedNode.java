@@ -2,80 +2,101 @@ package link.angelmaker.nodes;
 
 import util.BitSet2;
 
+/**
+ * Accepts one-time injection of data.
+ * Sequence numbers / flags can be set afterwards.
+ * @author I3anaan
+ *
+ */
 public class SequencedNode implements Node, Node.Internal {
 
+	private Node parent;
+	private int maxDataSize;
+	private int messageBitCount;
+	private boolean full;
+	private BitSet2 storedData;
+	private BitSet2 sequenceNumber;
+	private BitSet2 message;
+	
+	public SequencedNode(Node parent, int maxDataSize, int messageBitCount){
+		this.parent = parent;
+		this.maxDataSize = maxDataSize;
+		this.messageBitCount = messageBitCount;
+	}
+	
+	
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {
-		// TODO Auto-generated method stub
-		return null;
+		this.storedData = bits.get(0,Math.min(bits.length(), maxDataSize));
+		full = true;
+		return bits.get(Math.min(bits.length(), maxDataSize),bits.length());
 	}
 
 	@Override
 	public BitSet2 getOriginal() {
-		// TODO Auto-generated method stub
-		return null;
+		return storedData;
 	}
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		// TODO Auto-generated method stub
-		return null;
+		BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxDataSize+2*messageBitCount));
+		sequenceNumber = bitsToUse.get(0,messageBitCount);
+		message = bitsToUse.get(bits.length()-messageBitCount,bits.length());
+		storedData = bitsToUse.get(messageBitCount, bits.length()-messageBitCount);
+		full = true;
+		return bits.get(Math.min(bits.length(),maxDataSize+2*messageBitCount),bits.length());
 	}
 
 	@Override
 	public BitSet2 getConverted() {
-		// TODO Auto-generated method stub
-		return null;
+		return BitSet2.concatenate(sequenceNumber, BitSet2.concatenate(storedData, message));
 	}
 
 	@Override
 	public Node getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return parent;
 	}
 
 	@Override
 	public boolean isFull() {
-		// TODO Auto-generated method stub
-		return false;
+		return full;
 	}
 
 	@Override
 	public boolean isReady() {
-		// TODO Auto-generated method stub
-		return false;
+		return isFull();
 	}
 
 	@Override
 	public boolean isCorrect() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public Node getClone() {
-		// TODO Auto-generated method stub
-		return null;
+		Node clone = new SequencedNode(parent, maxDataSize, messageBitCount);
+		if(isFull()){
+			clone.giveConverted(getConverted());
+		}
+		return clone;
 	}
 
 	@Override
 	public Node[] getChildNodes() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getStateString() {
-		// TODO Auto-generated method stub
-		return null;
+		return isFull() ? "Full" : "Empty";
 	}
 	
 	public int getSeq(){
-		return 0; //TODO
+		return sequenceNumber.getUnsignedValue();
 	}
 	
 	public int getMessage(){
-		return 0; //TODO
+		return message.getUnsignedValue(); //TODO
 	}
 
 }

@@ -4,8 +4,8 @@ import java.io.File;
 
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
-import link.angelmaker.nodes.FrameCeptionNode;
 import link.angelmaker.nodes.Node;
+import link.angelmaker.nodes.PureNode;
 
 public class Graph {
 	private static int graphID;
@@ -21,7 +21,7 @@ public class Graph {
 	
 	public static void main(String[] args){
 		//Make example graph.
-		Node node = new FrameCeptionNode<Node>(null, 3);
+		Node node = new PureNode(null,8);
 		BitSet2 bs = new BitSet2();
 		for(int i=0;i<150;i++){
 			bs.addAtEnd(Math.random()>0.5);

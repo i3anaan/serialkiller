@@ -238,6 +238,17 @@ public class BitSet2 extends BitSet {
 	}
 	
 	
+	public int getUnsignedValue(){
+		int value = 0;
+		for(int i=0;i<this.length();i++){
+			if(this.get(this.length()-1-i)){
+				value = value + (int)Math.pow(2, i);
+			}
+		}
+		return value;
+	}
+	
+	
 	
 	//Utility methods from java 7
 	

@@ -1,5 +1,8 @@
 package link.angelmaker.nodes;
 
+import com.google.common.base.Optional;
+
+import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
 public class ErrorDetectionNode implements Node,Node.Internal {
@@ -13,7 +16,7 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	public ErrorDetectionNode(Node parent, int maxDataSize){
 		this.parent = parent;
 		this.maxDataSize = maxDataSize;
-		child = new SequencedNode();
+		child = new SequencedNode(this,64,3);
 	}
 	
 	
@@ -38,8 +41,8 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
 		try{
-			BitSet2 decoded = codec.ParityBitsCodec.decode(bits);
-			correct = decoded!=null;
+			Optional<BitSet2> decoded = ParityBitsCodec.decode(bits);
+			correct = decoded.isPresent();
 			if(correct){
 				child.giveOriginal(decoded);
 			}
@@ -50,7 +53,7 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 
 	@Override
 	public BitSet2 getConverted() {
-		return codec.ParityBitsCodec.encode(child.getOriginal());
+		return ParityBitsCodec.encode(child.getOriginal());
 	}
 
 	@Override
