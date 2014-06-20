@@ -35,6 +35,8 @@ public class ParityBitsTest  {
 		assertEquals(Optional.of(new BitSet2("11110000")), ParityBitsCodec.decode(new BitSet2("1111000000")));
 		
 		assertEquals(Optional.of(new BitSet2("0101010101010101")), ParityBitsCodec.decode(new BitSet2("01010101000101010100")));
+		
+		assertEquals(Optional.absent(), ParityBitsCodec.decode(new BitSet2("0000000011")));
 	}
 
 }

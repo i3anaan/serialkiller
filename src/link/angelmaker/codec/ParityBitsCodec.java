@@ -28,7 +28,6 @@ public class ParityBitsCodec {
 			byte par = (byte) (oneByte.cardinality() % 4);
 			
 			BitSet2 bitsSet = new BitSet2(par);
-
 			
 			out.addAtEnd(oneByte);
 			out.addAtEnd(bitsSet.get(6, 8));
@@ -52,9 +51,14 @@ public class ParityBitsCodec {
 		
 		for (int i = 0; i < input.length(); i += 10) {
 			BitSet2 oneByte = input.get(i, i+8);
-			BitSet2 parBits = oneByte.get(8, 10);
+			BitSet2 parBits = input.get(i+8, i+10);
 			
-			System.out.println(parBits.toByteArray()[0]);
+			byte par = (byte) (oneByte.cardinality() % 4);
+			BitSet2 dataParity = new BitSet2(par).get(6, 8);
+			
+			if (!dataParity.equals(parBits)) {
+				return Optional.absent();
+			}
 			
 			out.addAtEnd(oneByte);
 		}
