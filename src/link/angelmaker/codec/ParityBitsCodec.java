@@ -48,7 +48,18 @@ public class ParityBitsCodec {
 			throw new IllegalArgumentException(msg);
 		}
 		
-		return Optional.absent();
+		BitSet2 out = new BitSet2();
+		
+		for (int i = 0; i < input.length(); i += 10) {
+			BitSet2 oneByte = input.get(i, i+8);
+			BitSet2 parBits = oneByte.get(8, 10);
+			
+			System.out.println(parBits.toByteArray()[0]);
+			
+			out.addAtEnd(oneByte);
+		}
+		
+		return Optional.of(out);
 	}
 
 }
