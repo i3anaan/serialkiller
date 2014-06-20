@@ -96,14 +96,6 @@ extends 	Dialog
 		transferPanel = new JPanel();
 		transferPanel.setLayout(null );
 
-		// Setting for ignoring all sounds
-		JLabel muteLabel = new JLabel( "Mute all sounds:" );
-		muteLabel.setBounds( 10, 15, 150, 20 );
-		transferPanel.add(muteLabel);
-		JCheckBox mute = new JCheckBox();
-		mute.setBounds( 160, 15, 150, 20 );
-		transferPanel.add(mute);
-
 		// Setting for ignoring all file offers
 		JLabel blockLabel = new JLabel( "Ignore all file offers:" );
 		blockLabel.setBounds( 10, 60, 150, 20 );

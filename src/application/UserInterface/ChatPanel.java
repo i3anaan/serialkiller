@@ -74,7 +74,7 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 			if(!myMessage.getText().equals("")){
 				String username = gui.getPreferences().get("USERNAME", "");
 				addMessage(username, gui.getHost(),myMessage.getText());
-				gui.getApplicationLayer().writeChatMessage(username, myMessage.getText(), address);
+				gui.getApplicationLayer().sendChatMessage(username, myMessage.getText(), address);
 				myMessage.setText("");
 			}
 		}
