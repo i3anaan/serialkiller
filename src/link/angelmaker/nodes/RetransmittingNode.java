@@ -409,5 +409,10 @@ public class RetransmittingNode implements Node, Node.Fillable, Node.SelfBuildin
 		return "NOT IMPLEMENTED";
 	}
 
+	@Override
+	public Node[] getChildNodes() {
+		return childNodes;
+	}
+
 	
 }
