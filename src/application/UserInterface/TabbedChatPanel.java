@@ -90,6 +90,18 @@ public class TabbedChatPanel extends JPanel{
 	public String getActiveHost(){
 		return tabIndex.inverse().get(tabbedPane.getSelectedComponent());
 	}
+	
+	/**
+	 * Method to change the HostName of an already active tab.
+	 * @param address of the host
+	 * @Param new name for the host
+	 */
+	public void setHostName(byte address, String oldName, byte[] newName){
+		if(tabIndex.get(oldName) != null) {
+			//TODO check if this method works
+			tabbedPane.setTitleAt(address, (String.valueOf(address) + ": " +new String(newName)));
+		}
+	}
 
 	/**
 	 * Parses a chat message to the tab belonging to the specified host
@@ -97,7 +109,6 @@ public class TabbedChatPanel extends JPanel{
 	 * @param address of the user
 	 * @param chat message to be parsed
 	 */
-	//TODO clean up if, if , else structure
 	public void parseMessage(String nickName, Byte address, String message){
 		String hostName = gui.getUserList().findHostName(address);
 		int adr = address;
@@ -108,12 +119,9 @@ public class TabbedChatPanel extends JPanel{
 			addChatPanel(hostName, address);
 			((ChatPanel) tabIndex.get(hostName)).addMessage(nickName, adr, message);
 		}
-		// Else just parse
-		if(cp != null){
+		// Else just parse and (cp != null)
+		else{
 				cp.addMessage(nickName, adr, message);
-		}else {
-			//TODO throw error
-			System.out.println("ChatPanel faillure");
 		}
 	}
 	
