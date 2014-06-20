@@ -43,7 +43,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private BitSet2 lastReceivedConvertedJunk;
 
 	public FlaggingNode(Node parent, int dataBitCount) {
-		childNodes = new Node[] { new FrameCeptionNode<Node>(parent, 0) };
+		childNodes = new Node[] { new ErrorDetectionNode(this, 80) };
 		this.dataBitCount = dataBitCount;
 		this.parent = parent;
 		stored = new BitSet2();
