@@ -7,9 +7,7 @@ import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
 import link.angelmaker.manager.ThreadedAMManagerServer;
-import link.angelmaker.nodes.FillablePureNode;
 import link.angelmaker.nodes.FlaggingNode;
-import link.angelmaker.nodes.FrameNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.PureNode;
 import phys.LptHardwareLayer;
@@ -20,7 +18,7 @@ public class ReceiveTest {
 	public static void main(String[] args) {
 		PhysicalLayer phys = new LptHardwareLayer();
 		AMManager manager = new ThreadedAMManagerServer();
-		Node node = new FrameNode<Node>(null,3);
+		Node node = new PureNode(null,8);
 		node = new FlaggingNode(null,8);
 		FrameLinkLayer am = new AngelMaker(phys, node, manager,
 				new SimpleBitExchanger());

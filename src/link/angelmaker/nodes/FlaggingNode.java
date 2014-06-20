@@ -3,6 +3,7 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
 /**
@@ -25,6 +26,9 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 			"10011001"));
 	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
 			"00111001101"));
+	
+	
+	
 	/*
 	 * Requirements for flags: FLAG_END_OF_FRAME Does NOT contain part of itself
 	 * starting at the right. In other words: It should not be possible to
@@ -41,10 +45,24 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
+	
+	public static int maxBitsExpected = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)*ParityBitsCodec.ENCODED_BYTE/8;
+	//90
 
 	public FlaggingNode(Node parent, int dataBitCount) {
-		childNodes = new Node[] { new FrameCeptionNode<Node>(parent, 0) };
+		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
+		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
 		this.dataBitCount = dataBitCount;
+		this.parent = parent;
+		stored = new BitSet2();
+		storedConverted = new BitSet2();
+		lastReceivedConvertedJunk = new BitSet2();
+	}
+	
+	public FlaggingNode(Node parent) {
+		this.dataBitCount = maxBitsExpected;
+		childNodes = new Node[] { new ErrorDetectionNode(this, dataBitCount) };
+		
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
@@ -197,8 +215,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public boolean isFull() {
-		return stored.length() == dataBitCount || childNodes[0].isFull()
-				|| isFull;
+		return isFull;
 	}
 
 	@Override
