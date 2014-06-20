@@ -16,7 +16,7 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	public ErrorDetectionNode(Node parent, int maxDataSize){
 		this.parent = parent;
 		this.maxDataSize = maxDataSize;
-		child = new SequencedNode(this,64,3);
+		child = new SequencedNode(this,SequencedNode.PACKET_BIT_COUNT,SequencedNode.MESSAGE_BIT_COUNT);
 	}
 	
 	

@@ -25,6 +25,9 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 			"10011001"));
 	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
 			"00111001101"));
+	
+	
+	
 	/*
 	 * Requirements for flags: FLAG_END_OF_FRAME Does NOT contain part of itself
 	 * starting at the right. In other words: It should not be possible to

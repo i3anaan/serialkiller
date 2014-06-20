@@ -18,6 +18,9 @@ public class SequencedNode implements Node, Node.Internal {
 	private BitSet2 sequenceNumber;
 	private BitSet2 message;
 	
+	public static final int PACKET_BIT_COUNT = 64;
+	public static final int MESSAGE_BIT_COUNT = 4;
+	
 	public SequencedNode(Node parent, int maxDataSize, int messageBitCount){
 		this.parent = parent;
 		this.maxDataSize = maxDataSize;
