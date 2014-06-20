@@ -25,14 +25,19 @@ public class ParityBitsCodec implements Codec {
 		BitSet2 out = new BitSet2();
 		
 		for (int i = 0; i < input.length(); i += 8) {
-			BitSet2 oneByte = out.get(i, i+8);
+			BitSet2 oneByte = input.get(i, i+8);
 			byte par = (byte) (oneByte.cardinality() % 4);
-			BitSet2 bitsSet = BitSet2.valueOf(new byte[]{par});
+			
+			BitSet2 bitsSet = new BitSet2(par);
+
+			
+			out.addAtEnd(oneByte);
+			out.addAtEnd(bitsSet.get(6, 8));
 		}
 		
 		return out;
 	}
-
+	
 	/**
 	 * Decodes a BitSet that was encoded by encode.
 	 * 
