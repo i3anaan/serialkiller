@@ -75,8 +75,17 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	 */
 	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
 	public static Node TOP_NODE_IN_USE = new FrameCeptionNode<Node>(null, 0);
+	//TODO set changed zodat zeker dat leeg is.
 	private AMManager STANDARD_MANAGER = new BlockingAMManagerServer();
 	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
+	
+	/*
+	 * NEW PLAN NODE
+	 * new FlaggingNode(null,new SequencedNode(),80)
+	 * 
+	 */
+	
+	
 	
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
@@ -97,6 +106,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		instance = this;
 	}
 	public AngelMaker(){
+		//TODO deze moet niet standard setup aanropen.
 		standardSetup(null,null,null,null);
 		instance = this;
 	}
