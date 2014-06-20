@@ -7,9 +7,13 @@ import phys.PhysicalLayer;
  * threads on the same machine.
  */
 public class VirtualPhysicalLayer extends PhysicalLayer {
+	private static VirtualPhysicalLayer FIRST_INSTANCE;
 	private VirtualPhysicalLayer that;
 	private byte state;
 
+	public VirtualPhysicalLayer(){
+	}
+	
 	/** Connect this instance to another instance of VirtualPhysicalLayer. */
 	public void connect(VirtualPhysicalLayer that) {
 		this.that = that;
