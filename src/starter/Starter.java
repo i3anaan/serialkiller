@@ -31,8 +31,8 @@ import network.tpp.TPPNetworkLayer;
 import link.BittasticLinkLayer;
 import link.LinkLayer;
 import link.BufferStufferLinkLayer;
+import link.angelmaker.AngelMaker;
 import link.diag.MockFrameLinkLayer;
-import link.jack.JackTheRipper;
 import log.LogMessage;
 import log.Logger;
 
@@ -48,7 +48,7 @@ public class Starter extends JFrame implements ActionListener {
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
-	private Class<?> linkLayers[] = {MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class,JackTheRipper.class};
+	private Class<?> linkLayers[] = {MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class, AngelMaker.class};
 	private Class<?> physLayers[] = {NullPhysicalLayer.class, LptHardwareLayer.class, LptErrorHardwareLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
