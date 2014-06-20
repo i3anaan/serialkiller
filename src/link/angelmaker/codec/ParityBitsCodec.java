@@ -22,6 +22,14 @@ import util.BitSet2;
  * No error correction is attempted.
  */
 public class ParityBitsCodec {
+	/** The amount of bits in a byte. */
+	public static final int BYTE = 8;
+	
+	/** The amount of overhead per byte as bits. */
+	public static final int OVERHEAD = 2;
+	
+	/** The space required to store one encoded byte, in bits. */
+	public static final int ENCODED_BYTE = BYTE + OVERHEAD;
 
 	/**
 	 * Encodes a BitSet of input data by adding two parity bits for every
