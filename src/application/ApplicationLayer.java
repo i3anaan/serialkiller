@@ -72,7 +72,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		// Construct our own thread
 		thread = new Thread(this);
 		thread.setName("APL " + this.hashCode());
-
+		
 		// Construct our fileOfferCache
 		fileOfferCache = CacheBuilder.newBuilder()
 				// No more than 42 file offers outstanding.
@@ -134,15 +134,11 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 						logger.warning("Size Limit Exceeded:" + ftm.getFileName() + ".");
 						e.printStackTrace();
 					}
-
 					logger.debug("Started File Transfer for: " + ftm.getFileName() + ": " + p);
 				}
 				else{
-					//THIS MEANS THERE WAS NO SUCH OFFER PRESENT
 					logger.warning("Host: "+ p.address +" tried to transfer a file from us we never offered!");
 				}
-
-
 				break;
 
 			case fileTransferCommand:
@@ -161,7 +157,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 					
 					logger.debug("Host: " + fm.getAddress() + " had no such file offer!");
 				}
-
 				break;
 
 			case WHOISrequestCommand:
@@ -180,8 +175,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 				// Someone is responding to our identification request
 				IdentificationResponseMessage idResponse = new IdentificationResponseMessage(p.address, p.data);
 				setChanged();
-				notifyObservers(idResponse);
-				
+				notifyObservers(idResponse);			
 				break;
 
 			default:
@@ -195,46 +189,7 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			e1.printStackTrace();
 		}
 	}
-
-	/**
-	 * Creates a new fileOfferMessage, adds it to out fileOfferCache 
-	 * and then sends it.
-	 * @requires file size < 2GB
-	 * @param file path of the offered file
-	 * @param destination to send to
-	 */
-	public void writeFileOffer(String strFilePath, byte destination){
-		FileOfferMessage fom = new FileOfferMessage(destination, strFilePath);
-
-		String key = destination + fom.getFileName();
-		fileOfferCache.put(key, strFilePath);
-		
-		try {
-			networkLayer.send(new Payload(fom.getPayload(), destination));
-		} catch (SizeLimitExceededException e) {
-			logger.debug("Size Limit Exceeded! " + fom.getFileName() + ".");
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Creates a new ChatMessage using the provided parameters and sends it
-	 * @param String containing nickname
-	 * @param String containing chat message
-	 * @param byte   the destination of the chat message as an address
-	 */
-	public void writeChatMessage(String nickname, String message, byte destination) {
-		ChatMessage cm = new ChatMessage(destination, nickname, message);
-		
-		try {
-			networkLayer.send(new Payload(cm.getPayload(), destination));
-		} catch (SizeLimitExceededException e) {
-			logger.warning("Size Limit Exceeded:" + ".");
-			e.printStackTrace();
-			/* Drop the message. */
-		}
-	}
-
+	
 	/**
 	 * Method to write files from fileTransfers to our
 	 * disk.
@@ -248,11 +203,32 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			logger.warning("Caught IOException " + e + " while handling fileMessage " + fm);
 			/* Do nothing else (i.e. drop the payload). */
 		}
-		//logger.debug("Started File Transfer: " + fm);
+		logger.debug("Writing file to disk: " + fm);
 	}
 
+	/**
+	 * Creates a new fileOfferMessage, adds it to out fileOfferCache 
+	 * and then sends it.
+	 * @requires file size < 2GB
+	 * @param file path of the offered file
+	 * @param destination to send to
+	 */
+	public void sendFileOffer(String strFilePath, byte destination){
+		FileOfferMessage fom = new FileOfferMessage(destination, strFilePath);
+
+		String key = destination + fom.getFileName();
+		fileOfferCache.put(key, strFilePath);
+		
+		try {
+			networkLayer.send(new Payload(fom.getPayload(), destination));
+		} catch (SizeLimitExceededException e) {
+			logger.debug("Size Limit Exceeded! " + fom.getFileName() + ".");
+			e.printStackTrace();
+		}
+	}
+	
 	/** accepts a file offer and sends a fileAcceptMessage */
-	public void acceptFileOffer(FileOfferMessage fm, String filePath){
+	public void sendFileAccept(FileOfferMessage fm, String filePath){
 		FileAcceptMessage fam = new FileAcceptMessage(fm.getAddress(), fm.getPayload());
 		
 		String key = (fm.getAddress() + "-" + fm.getFileSize() + "-" + fm.getFileName()).trim();
@@ -265,6 +241,24 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 		}
 	}
 
+	/**
+	 * Creates a new ChatMessage using the provided parameters and sends it
+	 * @param String containing nickname
+	 * @param String containing chat message
+	 * @param byte   the destination of the chat message as an address
+	 */
+	public void sendChatMessage(String nickname, String message, byte destination) {
+		ChatMessage cm = new ChatMessage(destination, nickname, message);
+		
+		try {
+			networkLayer.send(new Payload(cm.getPayload(), destination));
+		} catch (SizeLimitExceededException e) {
+			logger.warning("Size Limit Exceeded:" + ".");
+			e.printStackTrace();
+			/* Drop the message. */
+		}
+	}
+	
 	@Override
 	public void run() {
 		boolean run = true;
@@ -277,7 +271,6 @@ public class ApplicationLayer extends Observable implements Runnable, Startable 
 			readPayload(p);
 			logger.debug("Received Payload: " + p.toString() + ".");
 		}
-
 		logger.warning("ApplicationLayer stopped.");
 	}
 
