@@ -3,6 +3,7 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
 /**
@@ -44,6 +45,9 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
+	
+	public static int maxBitsExpected = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)*ParityBitsCodec.ENCODED_BYTE/8;
+	//90
 
 	public FlaggingNode(Node parent, int dataBitCount) {
 		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
@@ -56,8 +60,9 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 	
 	public FlaggingNode(Node parent) {
-		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
-		this.dataBitCount = SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT;
+		this.dataBitCount = maxBitsExpected;
+		childNodes = new Node[] { new ErrorDetectionNode(this, dataBitCount) };
+		
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
@@ -210,8 +215,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public boolean isFull() {
-		return stored.length() == dataBitCount || childNodes[0].isFull()
-				|| isFull;
+		return isFull;
 	}
 
 	@Override

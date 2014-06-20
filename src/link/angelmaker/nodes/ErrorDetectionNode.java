@@ -42,7 +42,7 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
 		try{
-			int maxExpectedBits = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)/8*ParityBitsCodec.;
+			int maxExpectedBits = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)*ParityBitsCodec.ENCODED_BYTE/8;
 			BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxExpectedBits));
 			Optional<BitSet2> decoded = ParityBitsCodec.decode(bitsToUse);
 			correct = decoded.isPresent();

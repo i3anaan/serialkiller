@@ -67,6 +67,7 @@ public class NodeTest {
 				while (!sender.isFull()) {
 					// Add in parts, simulate network behaviour.
 					BitSet2 before = (BitSet2) queueOriginal.clone();
+					System.out.println(sender.isFull());
 					queueOriginal = sender.giveOriginal(queueOriginal);
 					BitSet2 taken = before.get(0, before.length()
 							- queueOriginal.length());
@@ -75,6 +76,8 @@ public class NodeTest {
 					}
 					queueOriginal = BitSet2.concatenate(queueOriginal,
 							new BitSet2(b));
+					
+					System.out.println("Taken:\t"+taken);
 					queueOriginalTotal = BitSet2.concatenate(
 							queueOriginalTotal, taken);
 					if (tookBits) {
