@@ -3,3 +3,6 @@ jdk:
   - openjdk6
   - openjdk7
   - oraclejdk7
+before_install:
+  - mkdir -p ~/serialkiller
+  - cp src/test/routes.txt ~/serialkiller/routes.txt

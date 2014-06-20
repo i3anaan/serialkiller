@@ -127,8 +127,15 @@ public class Tunnel implements Runnable {
      * @param p The packet.
      */
     public void offer(Packet p) {
-        if (!out.offer(p)) {
-            Tunneling.getLogger().alert(p.toString() + " dropped, " + toString() + " queue full.");
+        if (socket != null && socket.isConnected()) {
+            if (!out.offer(p)) {
+                Tunneling.getLogger().alert(p.toString() + " dropped, " + toString() + " queue full.");
+                if (network != null) {
+                    network.markAsDropped(p);
+                }
+            }
+        } else {
+            Tunneling.getLogger().alert(p.toString() + " dropped, " + toString() + " is not connected.");
             if (network != null) {
                 network.markAsDropped(p);
             }

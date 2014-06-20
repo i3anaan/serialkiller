@@ -23,15 +23,15 @@ public class RetransmissionHandler extends Handler {
     public void handle() throws InterruptedException {
         // Take the next item out of the queue.
         Packet p = delayed.take();
+        parent.markAsDropped(p);
 
         // Check if it should be dropped.
         if (p.retransmissions() < TPPNetworkLayer.MAX_RETRANSMISSIONS) {
             // Increase retransmissions
             p.retransmit();
-            in.put(p);
-            TPPNetworkLayer.getLogger().debug(p.toString() + " will be retransmitted.");
+            TPPNetworkLayer.getLogger().debug("Retransmitting " + p.toString() + ".");
+            parent.sendPacket(p);
         } else {
-            parent.markAsDropped(p);
             TPPNetworkLayer.getLogger().warning(p.toString() + String.format(" dropped after %d retransmissions.", p.retransmissions()));
         }
     }

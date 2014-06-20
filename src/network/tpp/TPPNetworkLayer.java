@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     /** Retransmission timeout in milliseconds. */
-    public static final long TIMEOUT = 5000; // Protocol: no spec
+    public static final long TIMEOUT = 10000; // Protocol: no spec
 
     /** Maximum number of retransmissions until a packet is dropped. */
     public static final int MAX_RETRANSMISSIONS = 3; // Protocol: 3
@@ -43,7 +43,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt";
 
     /** Size of the queue. */
-    public static final int QUEUE_SIZE = 64;
+    public static final int QUEUE_SIZE = 2048;
 
     /** The logger for the network layer. */
     private static Logger logger;
@@ -114,8 +114,6 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         }
         sentPackets.remove(p.id());
         decreaseCongestion(p.header().getDestination());
-        // Immediately send the next packet.
-        reofferHandler.notify(p.header().getDestination());
     }
 
     /**
@@ -168,6 +166,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         } else {
             congestion.put(address, Math.max(congestion.get(address) - 1, 0));
         }
+        // Immediately send the next packet.
+        reofferHandler.notify(address);
         TPPNetworkLayer.getLogger().debug(String.format("Congestion for %d decreased to %d", address, congestion.get(address)));
     }
 
@@ -346,7 +346,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
                     markAsSent(p);
                 }
-            } else {
+            } else if(getCongestion(p.header().getDestination()) >= MAX_FOR_HOST) {
                 // Offer again.
                 reofferHandler.offer(p);
                 TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
@@ -516,7 +516,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             tunnels.create(routes.getTunnels().get(addr), addr < r.self());
         }
 
-        TPPNetworkLayer.getLogger().warning("Routes updated.");
+        TPPNetworkLayer.getLogger().alert("Routes updated.");
     }
 
     /**
@@ -524,7 +524,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * router will be lost.
      */
     public void loadDefaultRoutes() {
-        TPPNetworkLayer.getLogger().info("Reloading routes from file (" + ROUTING_PATH + ").");
+        TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
 
         // Create new routes
         constructRoutes(new Router(), ROUTING_PATH);
