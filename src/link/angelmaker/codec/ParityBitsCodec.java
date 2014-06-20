@@ -5,7 +5,21 @@ import com.google.common.base.Optional;
 import util.BitSet2;
 
 /**
- * A Codec that implements a two-bits-per-byte parity check.
+ * A Codec that implements a two-bits-per-byte parity check. In other words,
+ * the encoding adds a two-bit population count to every data byte, like so:
+ * 
+ * 0000 0000 -> 0000 0000 00
+ * 0001 0001 -> 0001 0001 10
+ * 1111 1111 -> 1111 1111 00
+ * 
+ * Both decode and encode throw IllegalArgumentExceptions when they get an
+ * input with a wrong amount of bits (i.e. they will never encode or decode
+ * parts of bytes).
+ * 
+ * The decode function will return an empty Optional when the data is long
+ * enough but invalid.
+ * 
+ * No error correction is attempted.
  */
 public class ParityBitsCodec {
 
@@ -25,12 +39,10 @@ public class ParityBitsCodec {
 		
 		for (int i = 0; i < input.length(); i += 8) {
 			BitSet2 oneByte = input.get(i, i+8);
-			byte par = (byte) (oneByte.cardinality() % 4);
-			
-			BitSet2 bitsSet = new BitSet2(par);
+			BitSet2 parBits = parity(oneByte);
 			
 			out.addAtEnd(oneByte);
-			out.addAtEnd(bitsSet.get(6, 8));
+			out.addAtEnd(parBits);
 		}
 		
 		return out;
@@ -50,13 +62,11 @@ public class ParityBitsCodec {
 		BitSet2 out = new BitSet2();
 		
 		for (int i = 0; i < input.length(); i += 10) {
-			BitSet2 oneByte = input.get(i, i+8);
-			BitSet2 parBits = input.get(i+8, i+10);
+			BitSet2 oneByte = input.get(i, i + 8);
+			BitSet2 parBits = input.get(i + 8, i + 10);
+			BitSet2 dataPar = parity(oneByte);
 			
-			byte par = (byte) (oneByte.cardinality() % 4);
-			BitSet2 dataParity = new BitSet2(par).get(6, 8);
-			
-			if (!dataParity.equals(parBits)) {
+			if (!dataPar.equals(parBits)) {
 				return Optional.absent();
 			}
 			
@@ -66,4 +76,8 @@ public class ParityBitsCodec {
 		return Optional.of(out);
 	}
 
+	private static BitSet2 parity(BitSet2 input) {
+		byte par = (byte) (input.cardinality() % 4);
+		return new BitSet2(par).get(6, 8);
+	}
 }
