@@ -10,7 +10,7 @@ import util.BitSet2;
 
 public class NodeTest {
 	public  Node root = new PureNode(null, 1);
-	public Node[] nodes = new Node[] { new PureNode(root, 80)};
+	public Node[] nodes = new Node[] { new PureNode(root, 80), new FlaggingNode(root)};
 	
 	@Test
 	public void testGeneral() {
@@ -19,6 +19,7 @@ public class NodeTest {
 		BitSet2 data = new BitSet2(new byte[] { 0, -7, 127, -128, -1, 10, 4,
 				-6, 2, 8, 3, 7 });
 		for (Node base : nodes) {
+			//System.out.println("Testing: "+base.getClass().getSimpleName());
 			assertEquals(root, base.getParent());
 			for (int i = 0; i < 200; i++) {
 				data = new BitSet2();
@@ -42,6 +43,7 @@ public class NodeTest {
 				clone.giveConverted(n.getConverted());
 				if (n.isFull()) {
 					assertEquals(n.getOriginal(), clone.getOriginal());
+					//System.out.println("["+n.getOriginal().length()+"]  "+n.getOriginal());
 					assertTrue(n.isCorrect());
 				}
 			}
@@ -106,7 +108,7 @@ public class NodeTest {
 				assertTrue(receiver.isReady());
 
 				assertEquals(queueConvertedTotal.length(), from);
-				/*System.out.println("Sender Original:\t" + sender.getOriginal()
+				System.out.println("Sender Original:\t" + sender.getOriginal()
 						+ " \t[" + sender.getOriginal().length() + "]");
 				System.out.println("Sender Converted:\t"
 						+ sender.getConverted() + " \t["
@@ -119,7 +121,7 @@ public class NodeTest {
 						+ receiver.getOriginal().length() + "]");
 				System.out.println("Test Original:\t\t" + queueOriginalTotal
 						+ " \t[" + queueOriginalTotal.length() + "]");
-				*/
+				
 				assertEquals(queueOriginalTotal.length(),receiver.getOriginal().length());
 				assertEquals(receiver.getOriginal(), queueOriginalTotal);
 			}

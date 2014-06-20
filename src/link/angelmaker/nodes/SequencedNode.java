@@ -1,5 +1,6 @@
 package link.angelmaker.nodes;
 
+import link.angelmaker.AngelMaker;
 import util.BitSet2;
 
 /**
@@ -25,6 +26,7 @@ public class SequencedNode implements Node, Node.Internal {
 		this.parent = parent;
 		this.maxDataSize = maxDataSize;
 		this.messageBitCount = messageBitCount;
+		this.storedData = new BitSet2();
 	}
 	
 	
@@ -99,7 +101,23 @@ public class SequencedNode implements Node, Node.Internal {
 	}
 	
 	public int getMessage(){
-		return message.getUnsignedValue(); //TODO
+		return message.getUnsignedValue();
+	}
+	
+	public void setSeq(BitSet2 seq){
+		if(seq.length()==MESSAGE_BIT_COUNT){
+			this.sequenceNumber = seq;
+		}else{
+			AngelMaker.logger.error("Trying to set packet seq number with too many bits");
+		}
+	}
+	
+	public void setMessage(BitSet2 msg){
+		if(msg.length()==MESSAGE_BIT_COUNT){
+			this.message = msg;
+		}else{
+			AngelMaker.logger.error("Trying to set packet msg with too many bits");
+		}
 	}
 
 }

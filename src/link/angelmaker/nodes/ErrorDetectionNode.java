@@ -25,9 +25,10 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 		if(!full){
 			child.giveOriginal(bits.get(0, Math.min(maxDataSize,bits.length())));
 			full = true;
+			correct = true;
 			return bits.get(Math.min(maxDataSize,bits.length()), bits.length());
 		}
-		return new BitSet2();
+		return bits;
 	}
 
 	@Override
@@ -41,14 +42,18 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
 		try{
-			Optional<BitSet2> decoded = ParityBitsCodec.decode(bits);
+			int maxExpectedBits = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)/8*ParityBitsCodec.;
+			BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxExpectedBits));
+			Optional<BitSet2> decoded = ParityBitsCodec.decode(bitsToUse);
 			correct = decoded.isPresent();
 			if(correct){
-				child.giveOriginal(decoded);
+				child.giveOriginal(decoded.get());
 			}
+			return bits.get(Math.min(bits.length(),maxExpectedBits),bits.length());
 		}catch(IllegalArgumentException e){
 			correct = false;
 		}
+		return new BitSet2();
 	}
 
 	@Override

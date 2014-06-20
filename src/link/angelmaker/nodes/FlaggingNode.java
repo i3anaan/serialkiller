@@ -46,8 +46,18 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private BitSet2 lastReceivedConvertedJunk;
 
 	public FlaggingNode(Node parent, int dataBitCount) {
-		childNodes = new Node[] { new ErrorDetectionNode(this, 80) };
+		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
+		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
 		this.dataBitCount = dataBitCount;
+		this.parent = parent;
+		stored = new BitSet2();
+		storedConverted = new BitSet2();
+		lastReceivedConvertedJunk = new BitSet2();
+	}
+	
+	public FlaggingNode(Node parent) {
+		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
+		this.dataBitCount = SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT;
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
