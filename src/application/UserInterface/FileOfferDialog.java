@@ -127,9 +127,6 @@ public class FileOfferDialog extends Dialog implements EventListener{
 					File lastOutputDir = jFileChooser.getSelectedFile();
 					prefs.put("LAST_OUTPUT_DIR", lastOutputDir.getAbsolutePath());
 					field.setText(String.format("%s/%s",prefs.get("LAST_OUTPUT_DIR", ""), fileName));
-				    
-				    result = lastOutputDir.getAbsolutePath();
-
 				}
 			}
 		});
