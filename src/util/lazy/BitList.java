@@ -2,6 +2,10 @@ package util.lazy;
 
 import java.util.Iterator;
 
+/**
+ * An abstract superclass for an immutable, fixed-size, possibly lazy, 
+ * collection of bits.
+ */
 public abstract class BitList implements Iterable<Boolean> {
 	protected class BitListIterator implements Iterator<Boolean> {
 		private BitList bl;
@@ -35,4 +39,33 @@ public abstract class BitList implements Iterable<Boolean> {
 	
 	public abstract int size();
 	public abstract boolean get(int i);
+	
+	@Override
+	public String toString() {
+		byte[] barr = new byte[size()+2];
+		barr[0] = '[';
+		barr[size()+1] = ']';
+		
+		for (int i = 0; i < size(); i++) {
+			barr[i+1] = (byte)(get(i) ? '1' : '0');
+		}
+		
+		return new String(barr);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+        if (obj instanceof BitList) {
+            BitList that = (BitList)obj;
+            if (this.size() == that.size()) {
+	            for (int i = 0; i < that.size(); i++) {
+	            	if (this.get(i) != that.get(i)) {
+	            		return false;
+	            	}
+	            }
+	            
+	            return true;
+            } else return false;
+        } else return false;
+	}
 }
