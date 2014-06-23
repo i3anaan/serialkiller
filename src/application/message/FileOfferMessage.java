@@ -32,14 +32,14 @@ public class FileOfferMessage extends FileMessage {
 	/**
 	 * Method that writes the data for a fileOffer
 	 * message to a byte array
-	 * @param file path of the offered file
+	 * @param strFilePath path of the offered file
 	 * @return byte array containing the file offer
 	 */
 	private static byte[] writeData(String strFilePath){
 
 		// Split the string and retrieve only the filename in bytes
-		String[] nameParts = strFilePath.split("/");
-		String fileName = nameParts[nameParts.length -1];
+		File f = new File(strFilePath);
+        String fileName = f.getName();
 		byte[] byteName = fileName.getBytes(Charsets.UTF_8);
 
 		// FileSize
