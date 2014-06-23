@@ -230,9 +230,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public boolean isFiller() {
-		return stored.length() == 0
-				|| (childNodes[0] instanceof Node.Fillable && ((Node.Fillable) childNodes[0])
-						.isFiller());
+		return getOriginal().length()==0;
 	}
 
 	@Override

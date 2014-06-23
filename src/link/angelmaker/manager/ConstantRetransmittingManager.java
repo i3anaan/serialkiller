@@ -132,7 +132,6 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		node.giveOriginal(bs);
 		
 		if(node.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
-			
 			SequencedNode seqNode = ((SequencedNode)node.getChildNodes()[0].getChildNodes()[0]);			
 			seqNode.setMessage(intMessageToBitSet(messageToSend));
 			seqNode.setSeq(intMessageToBitSet(index));
@@ -167,13 +166,10 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 						Node packetNode = errorDetection.getChildNodes()[0];
 						if(packetNode instanceof SequencedNode){
 							SequencedNode seqNode = ((SequencedNode) packetNode);
-							AngelMaker.logger.debug("Received non-filler SeqNode: "+seqNode.getOriginal());
-							AngelMaker.logger.debug("Seq "+seqNode.getSeq());
-							AngelMaker.logger.debug("Seq "+seqNode.getMessage());
 							if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
 								//Fully correct.
 								Node data = received.getChildNodes()[0];
-								AngelMaker.logger.debug("Received Data: "+data.getOriginal());
+								AngelMaker.logger.debug("Received data: "+data.getOriginal());
 								byte[] dataBytes = data.getOriginal().toByteArray();
 								for(byte b : dataBytes){
 								try {
@@ -199,7 +195,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 						messageToSend = lastReceivedCorrect;
 					}
 				}else{
-					AngelMaker.logger.debug("Received filler");
+					//AngelMaker.logger.debug("Received filler");
 				}
 			}
 		}

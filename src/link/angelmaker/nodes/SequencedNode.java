@@ -47,7 +47,6 @@ public class SequencedNode implements Node, Node.Internal {
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		AngelMaker.logger.debug("Received converted: "+bits);
 		BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxDataSize+2*messageBitCount));
 		sequenceNumber = bitsToUse.get(0,messageBitCount);
 		message = bitsToUse.get(bits.length()-messageBitCount,bits.length());
