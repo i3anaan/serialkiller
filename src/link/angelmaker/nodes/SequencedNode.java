@@ -1,6 +1,7 @@
 package link.angelmaker.nodes;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.manager.ConstantRetransmittingManager;
 import util.BitSet2;
 
 /**
@@ -118,6 +119,12 @@ public class SequencedNode implements Node, Node.Internal {
 		}else{
 			AngelMaker.logger.error("Trying to set packet msg with too many bits");
 		}
+	}
+	
+	
+	@Override
+	public String toString(){
+		return "SequencedNode";
 	}
 
 }

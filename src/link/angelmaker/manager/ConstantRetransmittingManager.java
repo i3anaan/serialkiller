@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Ints;
 
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
@@ -18,7 +19,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	//TODO more like a manager, or combination of manager / node
 	
 	private BitExchanger exchanger;
-	public final int bitsUsed = 3;
+	public final int messageBitsUsed = SequencedNode.MESSAGE_BIT_COUNT;
 	private ArrayBlockingQueue<Byte> queueIn;
 	private ArrayBlockingQueue<Byte> queueOut;
 	
@@ -27,6 +28,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	private int messageToSend;
 	
 	private Node[] memory;
+	private BitSet2 spilledBitsIn;
 	
 	private Sender sender;
 	private Receiver receiver;
@@ -34,7 +36,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	public ConstantRetransmittingManager(){
 		this.queueIn = new ArrayBlockingQueue<Byte>(1024);
 		this.queueOut = new ArrayBlockingQueue<Byte>(1024);
-		this.memory = new Node[(int)Math.pow(2,bitsUsed)-1]; //bitsUsed - amount of special messages.
+		this.memory = new Node[(int)Math.pow(2,messageBitsUsed)-1]; //bitsUsed - amount of special messages.
+		spilledBitsIn = new BitSet2();
 	}
 	
 	
@@ -106,7 +109,34 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	}
 	
 	public void loadNewNodeInMemory(int index,int messageToSend){
+		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+		BitSet2 bs = new BitSet2();
+		int byteCount = 0;
+		Byte b = queueOut.poll();
+		while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
+			bs.addAtEnd(new BitSet2(b));
+			byteCount++;
+			b = queueOut.poll();
+		}
+		node.giveOriginal(bs);
 		
+		if(node.getChildNodes()[0] instanceof SequencedNode){
+			((SequencedNode)node.getChildNodes()[0]).setMessage(intMessageToBitSet(messageToSend));
+			((SequencedNode)node.getChildNodes()[0]).setSeq(intMessageToBitSet(index));
+		}
+		
+		memory[index] = node;
+		
+	}
+	
+	public BitSet2 intMessageToBitSet(int message){
+		BitSet2 bs = new BitSet2(Ints.toByteArray(message));
+		return bs.get(bs.length()-messageBitsUsed, bs.length());
+	}
+	
+	@Override
+	public String toString(){
+		return "ConstantRetransmittingManager";
 	}
 	
 	private class Sender extends Thread{
@@ -178,8 +208,12 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		}
 		
 		private Node fillNewNode(){
-			//TODO Read bit stream, give to node, make it full, return.
-			return null;
+			Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+			while(!node.isFull()){
+				spilledBitsIn = node.giveConverted(BitSet2.concatenate(spilledBitsIn,exchanger.readBits()));
+			}
+			
+			return node;
 		}
 		
 		

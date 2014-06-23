@@ -21,6 +21,7 @@ import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
+import link.angelmaker.manager.ConstantRetransmittingManager;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
@@ -74,9 +75,9 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	 * Standard classes to use when nothing else specified.	
 	 */
 	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
-	public static Node TOP_NODE_IN_USE = new PureNode(null,8);
+	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
-	private AMManager STANDARD_MANAGER = new BlockingAMManagerServer();
+	private AMManager STANDARD_MANAGER = new ConstantRetransmittingManager();
 	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
 	
 	/*

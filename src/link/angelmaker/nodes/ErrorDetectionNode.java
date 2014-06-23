@@ -99,5 +99,10 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	public String getStateString() {
 		return (isFull() ? (isCorrect() ? "Correct" : "Incorrect") : "Empty");
 	}
+	
+	@Override
+	public String toString(){
+		return "ErrorDetectionNode(Parity)["+child+"]";
+	}
 
 }
