@@ -226,8 +226,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * Needs a AMManager.Server to be able to send filler data.
 	 */
 	public void run(){
-		//waitForSync();
-		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
+		waitForSync();
+		if(connectionRole.equals(ROLE_MASTER) || connectionRole.equals(ROLE_SLAVE)){
+			AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
+		}else{
+			AngelMaker.logger.warning("Assumed "+connectionRole+" in this connection.");
+		}
 		boolean firstRound = true;
 		int round = 0;
 		while(true){

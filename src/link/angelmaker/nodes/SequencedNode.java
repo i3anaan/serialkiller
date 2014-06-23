@@ -98,6 +98,7 @@ public class SequencedNode implements Node, Node.Internal {
 	}
 	
 	public int getSeq(){
+		System.out.println("SequenceNumber = "+sequenceNumber);
 		return sequenceNumber.getUnsignedValue();
 	}
 	

@@ -10,6 +10,7 @@ import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.Node.Fillable;
 import link.angelmaker.nodes.SequencedNode;
@@ -48,7 +49,10 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 
 	@Override
 	public void enable() {
-		
+		sender = new Sender();
+		sender.start();
+		receiver = new Receiver();
+		receiver.start();
 	}
 
 	/**
@@ -93,8 +97,12 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	
 	@Override
 	public Node getNextNode() {
+		System.out.println("Sender = "+sender);
 		Node node = sender.nodeToSendNext;
+		System.out.println("Node = "+node);
 		sender.nodeToSendNext = null;
+		System.out.println("Node = "+node);
+		
 		//TODO make this a method, remove Sender Thread.
 		if(node!=null){
 			return node;
@@ -172,37 +180,41 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		public void run(){
 			while(true){
 				Node received = fillNewNode();
-				Node errorDetection = received.getChildNodes()[0];
-				if(errorDetection.isCorrect()){
-					Node packetNode = received.getChildNodes()[0];
-					if(packetNode instanceof SequencedNode){
-						SequencedNode seqNode = ((SequencedNode) packetNode);
-						if(seqNode.getSeq()==(lastReceivedCorrect+1)%memory.length){
-							//Fully correct.
-							Node data = received.getChildNodes()[0];
-							byte[] dataBytes = data.getOriginal().toByteArray();
-							for(byte b : dataBytes){
-							try {
-								queueIn.put(b);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+				FlaggingNode flaggingNode = (FlaggingNode) received;
+				if(!flaggingNode.isFiller()){
+					Node errorDetection = received.getChildNodes()[0];
+					if(errorDetection.isCorrect()){
+						Node packetNode = errorDetection.getChildNodes()[0];
+						System.out.println(packetNode);
+						if(packetNode instanceof SequencedNode){
+							SequencedNode seqNode = ((SequencedNode) packetNode);
+							if(seqNode.getSeq()==(lastReceivedCorrect+1)%memory.length){
+								//Fully correct.
+								Node data = received.getChildNodes()[0];
+								byte[] dataBytes = data.getOriginal().toByteArray();
+								for(byte b : dataBytes){
+								try {
+									queueIn.put(b);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								}
+								lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
+								messageReceived = seqNode.getMessage();
+								messageToSend = MESSAGE_FINE;
+							}else{
+								//Only sequence number is wrong, packet is correct.
+								messageReceived = seqNode.getMessage();
+								messageToSend = lastReceivedCorrect;
 							}
-							}
-							lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
-							messageReceived = seqNode.getMessage();
-							messageToSend = MESSAGE_FINE;
 						}else{
-							//Only sequence number is wrong, packet is correct.
-							messageReceived = seqNode.getMessage();
-							messageToSend = lastReceivedCorrect;
+							throw new IncompatibleModulesException();
 						}
 					}else{
-						throw new IncompatibleModulesException();
+						//Packet has errors.
+						messageToSend = lastReceivedCorrect;
 					}
-				}else{
-					//Packet has errors.
-					messageToSend = lastReceivedCorrect;
 				}
 			}
 		}
