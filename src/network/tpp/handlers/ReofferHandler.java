@@ -26,10 +26,14 @@ public class ReofferHandler extends Handler {
         Packet p = out.peek();
 
         if (p != null && nextPackets.get(p.header().getDestination()) == null) {
-            // Set packet as the next packet for a host.
-            nextPackets.put(p.header().getDestination(), p);
-            // Remove element from queue
-            out.take();
+            if (parent.getCongestion(p.header().getDestination()) < TPPNetworkLayer.MAX_FOR_HOST) {
+                parent.sendPacket(p);
+            } else {
+                // Set packet as the next packet for a host.
+                nextPackets.put(p.header().getDestination(), p);
+                // Remove element from queue
+                out.take();
+            }
         } else {
             Thread.sleep(TPPNetworkLayer.TIMEOUT / 4);
         }

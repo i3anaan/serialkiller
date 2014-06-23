@@ -136,9 +136,7 @@ public class Tunnel implements Runnable {
             }
         } else {
             Tunneling.getLogger().alert(p.toString() + " dropped, " + toString() + " is not connected.");
-            if (network != null) {
-                network.markAsDropped(p);
-            }
+            // Do not mark as dropped, retransmission should occur.
         }
     }
 
