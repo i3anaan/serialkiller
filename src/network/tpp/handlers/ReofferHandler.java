@@ -3,8 +3,8 @@ package network.tpp.handlers;
 import network.tpp.Packet;
 import network.tpp.TPPNetworkLayer;
 
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Moves packets between queues to ensure a timeout for trying to re-offer
@@ -12,37 +12,44 @@ import java.util.concurrent.TimeUnit;
  */
 public class ReofferHandler extends Handler {
     TPPNetworkLayer parent;
-    ConcurrentHashMap<Byte, Packet> nextPackets;
+    ConcurrentHashMap<Byte, LinkedList<Packet>> nextPackets;
 
     public ReofferHandler(TPPNetworkLayer parent) {
         super(parent);
         this.parent = parent;
-        nextPackets = new ConcurrentHashMap<Byte, Packet>();
+        nextPackets = new ConcurrentHashMap<Byte, LinkedList<Packet>>();
     }
 
     @Override
-    // TODO Make this another way so no busy waiting occurs
     public void handle() throws InterruptedException {
-        Packet p = out.peek();
-
-        if (p != null && nextPackets.get(p.header().getDestination()) == null) {
-            if (parent.getCongestion(p.header().getDestination()) < TPPNetworkLayer.MAX_FOR_HOST) {
-                parent.sendPacket(p);
-            } else {
-                // Set packet as the next packet for a host.
-                nextPackets.put(p.header().getDestination(), p);
-                // Remove element from queue
-                out.take();
-            }
-        } else {
-            Thread.sleep(TPPNetworkLayer.TIMEOUT / 4);
-        }
+        // Not used.
     }
 
+    @Override
+    public void run() {
+        // Do nothing.
+    }
+
+    @Override
+    public boolean offer(Packet p) {
+        byte address = p.header().getDestination();
+
+        // Create key if necessary.
+        if (nextPackets.get(address) == null) {
+            nextPackets.put(address, new LinkedList<Packet>());
+        }
+
+        // Add packet to the end of the list for this host.
+        nextPackets.get(address).addLast(p);
+
+        return true;
+    }
+
+
     public void notify(Byte address) {
-        if (nextPackets.get(address) != null) {
-            parent.sendPacket(nextPackets.get(address));
-            nextPackets.remove(address);
+        if (nextPackets.containsKey(address) && !nextPackets.get(address).isEmpty()) {
+            Packet p = nextPackets.get(address).removeFirst();
+            parent.sendPacket(p);
         }
     }
 
