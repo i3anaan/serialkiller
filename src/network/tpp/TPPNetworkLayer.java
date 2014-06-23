@@ -90,6 +90,68 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     private int seqnum;
 
     /**
+     * Constructs a new NetworkLayer instance.
+     */
+    public TPPNetworkLayer() {
+        handlers = new ArrayList<Handler>();
+
+        queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
+        appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
+        retransmissionQueue = new DelayQueue<Packet>();
+
+        sentPackets = new ConcurrentHashMap<String, Packet>();
+
+        congestion = new ConcurrentHashMap<Byte, Integer>();
+
+        router = new Router();
+        tunnels = new Tunneling(this);
+
+        // Construct and run thread
+        t = new Thread(this);
+        t.setName("TPP " + this.hashCode());
+    }
+
+    /**
+     * Returns a collection of all addresses known to the router.
+     * @return The collection of all known addresses.
+     */
+    public Collection<Byte> hosts() {
+        Collection<Byte> hosts = new ArrayList<Byte>();
+
+        for (Host h : router.hosts()) {
+            hosts.add(h.address());
+        }
+
+        return hosts;
+    }
+
+    /**
+     * Returns the address of this host.
+     * @return The address of this host.
+     */
+    public Byte host() {
+        return router.self();
+    }
+
+    /**
+     * Returns the queue of the network layer. Elements in this queue will be
+     * handled by the network layer.
+     * @return The network layer queue.
+     */
+    public ArrayBlockingQueue<Packet> queue() {
+        return queue;
+    }
+
+    /**
+     * Returns the queue for retransmissions. Only the retransmission handler
+     * should be removing elements from this queue.
+     * @return The retransmission queue.
+     */
+    public DelayQueue<Packet> retransmissionQueue() {
+        return retransmissionQueue;
+    }
+
+    /**
      * Marks the specified packet as sent. Adds the packet to the retransmission
      * queue with the default delay.
      * @param p The packet.
@@ -182,46 +244,6 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     }
 
     /**
-     * Constructs a new NetworkLayer instance.
-     */
-    public TPPNetworkLayer() {
-        handlers = new ArrayList<Handler>();
-
-        queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
-        appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
-        retransmissionQueue = new DelayQueue<Packet>();
-
-        sentPackets = new ConcurrentHashMap<String, Packet>();
-
-        congestion = new ConcurrentHashMap<Byte, Integer>();
-
-        router = new Router();
-        tunnels = new Tunneling(this);
-
-        // Construct and run thread
-        t = new Thread(this);
-        t.setName("TPP " + this.hashCode());
-    }
-
-    /**
-     * Returns the queue of the network layer. Elements in this queue will be
-     * handled by the network layer.
-     * @return The network layer queue.
-     */
-    public ArrayBlockingQueue<Packet> queue() {
-        return queue;
-    }
-
-    /**
-     * Returns the queue for retransmissions. Only the retransmission handler
-     * should be removing elements from this queue.
-     * @return The retransmission queue.
-     */
-    public DelayQueue<Packet> retransmissionQueue() {
-        return retransmissionQueue;
-    }
-
-    /**
      * Sets the active sequence number to the next value and returns this new
      * value.
      * @return The new sequence number.
@@ -294,28 +316,6 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
             throw new SizeLimitExceededException("The data is too long for the packets.");
         }
-    }
-
-    /**
-     * Returns a collection of all addresses known to the router.
-     * @return The collection of all known addresses.
-     */
-    public Collection<Byte> hosts() {
-        Collection<Byte> hosts = new ArrayList<Byte>();
-
-        for (Host h : router.hosts()) {
-            hosts.add(h.address());
-        }
-
-        return hosts;
-    }
-
-    /**
-     * Returns the address of this host.
-     * @return The address of this host.
-     */
-    public Byte host() {
-        return router.self();
     }
 
     /**

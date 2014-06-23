@@ -196,7 +196,9 @@ public class Tunneling implements Runnable {
 
     public void start() {
         run = true;
-        t.start();
+        if (!t.isAlive()) {
+            t.start();
+        }
         startTunnels();
         Tunneling.getLogger().info("Tunneling started.");
     }
@@ -204,6 +206,9 @@ public class Tunneling implements Runnable {
     public void stop() {
         stopTunnels();
         run = false;
+        if (t.isAlive()) {
+            t.interrupt();
+        }
         try {
             t.join();
         } catch (InterruptedException e) {
