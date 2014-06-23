@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.EventListener;
 import java.util.prefs.Preferences;
 
@@ -18,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class FileOfferDialog extends Dialog implements EventListener{
 
@@ -26,6 +28,8 @@ public class FileOfferDialog extends Dialog implements EventListener{
 	
 	/** Path to save the offered file to or null in case of rejection */
 	private		String 		result = null;
+	
+	private		String		fileName;
 	
 	/** Preferences element for this application */
 	private 	Preferences prefs;
@@ -46,7 +50,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 	public FileOfferDialog(GUI gui,String sender, String name, int size) {
 		super(gui, "File Offer", true);
 		prefs = Preferences.userNodeForPackage(this.getClass());
-		
+		fileName = name;
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(final WindowEvent e) {
 				e.getWindow().dispose();
@@ -104,6 +108,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 		cancel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				result = null;
 				FileOfferDialog.this.dispose();
 			}
 		});
@@ -120,8 +125,9 @@ public class FileOfferDialog extends Dialog implements EventListener{
 				int rVal = jFileChooser.showDialog(FileOfferDialog.this, "Select");
 				if (rVal == JFileChooser.APPROVE_OPTION) {
 					File lastOutputDir = jFileChooser.getSelectedFile();
-				    field.setText(lastOutputDir.getAbsolutePath());
-				    prefs.put("LAST_OUTPUT_DIR", lastOutputDir.getAbsolutePath());
+					prefs.put("LAST_OUTPUT_DIR", lastOutputDir.getAbsolutePath());
+					field.setText(String.format("%s/%s",prefs.get("LAST_OUTPUT_DIR", ""), fileName));
+				    
 				    result = lastOutputDir.getAbsolutePath();
 
 				}
