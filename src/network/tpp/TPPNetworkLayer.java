@@ -43,7 +43,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt";
 
     /** Size of the queue. */
-    public static final int QUEUE_SIZE = 2048;
+    public static final int QUEUE_SIZE = 102400;
 
     /** The logger for the network layer. */
     private static Logger logger;
