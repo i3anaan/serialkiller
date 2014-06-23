@@ -13,19 +13,18 @@ extends 	Dialog
 {
 	/** The tabbedPane containing all of the individual preference panels */
 	private		JTabbedPane tabbedPane;
-	
+
 	/** Preference panel containing options for user customization */
 	private		JPanel		userPanel;
-	
+
 	/** Preference panel containing options for network transfers */
 	private		JPanel		transferPanel;
-	
-	/** Preference panel containing options for audio settings */
-	private		JPanel		audioPanel;
-	
+
 	/** The field containing the chosen username */
 	private		JTextField 	nameField;
 	
+	JCheckBox block = new JCheckBox();
+
 	/** The Application GUI parent of this Component */
 	private		GUI			gui;
 
@@ -53,13 +52,11 @@ extends 	Dialog
 		// Create the tab pages
 		createUserPage();
 		createFileTransferPage();
-		createSoundPage();
 
 		// Create a tabbed pane
 		tabbedPane = new JTabbedPane();
 		tabbedPane.addTab( "User", userPanel );
 		tabbedPane.addTab( "File Transfer", transferPanel );
-		tabbedPane.addTab( "Sound", audioPanel );
 		topPanel.add( tabbedPane, BorderLayout.CENTER );
 	}
 
@@ -92,49 +89,38 @@ extends 	Dialog
 		userPanel.add( save );
 	}
 
-	
+
 	/** Method to create the transferPanel part of the preference pane */
 	public void createFileTransferPage()
 	{
 		transferPanel = new JPanel();
 		transferPanel.setLayout(null );
 
-		// Default location to download files to
-		JLabel pathLabel = new JLabel( "Default file path:" );
-		pathLabel.setBounds( 10, 15, 150, 20 );
-		transferPanel.add(pathLabel);
-		JTextField defPathField = new JTextField();
-		defPathField.setBounds( 10, 35, 300, 20 );
-		transferPanel.add( defPathField );
-
 		// Setting for ignoring all file offers
 		JLabel blockLabel = new JLabel( "Ignore all file offers:" );
 		blockLabel.setBounds( 10, 60, 150, 20 );
 		transferPanel.add(blockLabel);
-		JCheckBox block = new JCheckBox();
+		//JCheckBox block = new JCheckBox();
+		
+		//Check the box if the setting has been enabled already
+		if(gui.getPreferences().get("TRANSFERIGNORE", "").equals("true")){
+			block.setSelected(true);
+		}
 		block.setBounds( 160, 60, 150, 20 );
 		transferPanel.add(block);
 
 		// Save preferences
 		JButton save = new JButton("Save");
 		save.setBounds( 10, 105, 150, 20 );
+		save.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gui.getPreferences().put("TRANSFERIGNORE", (""+block.isSelected()));
+				dispose();
+			}
+		});
 		transferPanel.add( save );
 
-	}
-
-	/** Method to create the audioPanel part of the preference pane */
-	public void createSoundPage()
-	{
-		audioPanel = new JPanel();
-		audioPanel.setLayout(null );
-
-		// Setting for ignoring all sounds
-		JLabel muteLabel = new JLabel( "Mute all sounds:" );
-		muteLabel.setBounds( 10, 60, 150, 20 );
-		audioPanel.add(muteLabel);
-		JCheckBox mute = new JCheckBox();
-		mute.setBounds( 160, 60, 150, 20 );
-		audioPanel.add(mute);
 	}
 
 }

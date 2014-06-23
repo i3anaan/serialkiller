@@ -6,8 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
@@ -17,7 +17,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
 import log.LogMessage;
@@ -38,10 +37,7 @@ public class GUI extends JFrame implements Observer{
 	private 	TabbedChatPanel 	cp; 			
 	/** The list of hostNames we can communicate with */
 	private 	UserListPanel 		ulp;
-
 	private JMenuItem sendFileItem;
-
-	// Constructors
 
 	public GUI(ApplicationLayer applicationLayer){
 		super("G.A.R.G.L.E.");
@@ -67,8 +63,7 @@ public class GUI extends JFrame implements Observer{
 			public void windowClosed(final WindowEvent e) {
 				System.exit(0);
 			}
-		}
-				);
+		});
 
 		// Start observable relation and make GUI ready for interaction
 		Start();
@@ -77,7 +72,6 @@ public class GUI extends JFrame implements Observer{
 		setVisible(true);
 
 		GUI.getLogger().info("GUI started.");
-
 	}
 
 	private void buildBarMenu(){
@@ -89,7 +83,6 @@ public class GUI extends JFrame implements Observer{
 
 		menu.setHorizontalTextPosition(SwingConstants.CENTER);
 		menu.setVerticalTextPosition(SwingConstants.BOTTOM);
-
 		menuBar.add(menu);
 
 		// SendFile Item
@@ -102,21 +95,9 @@ public class GUI extends JFrame implements Observer{
 				if(cp.getActiveHost() != null){
 					int rVal = c.showOpenDialog(GUI.this);
 					if (rVal == JFileChooser.APPROVE_OPTION) {
-						apl.writeFileOffer(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
-					}
-					if (rVal == JFileChooser.CANCEL_OPTION) {
-						//DO NOTHING
+						apl.sendFileOffer(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
 					}
 				}
-			}
-		});
-		// Exit item
-		JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				System.exit(0);
 			}
 		});
 		// Options item
@@ -128,13 +109,20 @@ public class GUI extends JFrame implements Observer{
 				buildOptionMenu();
 			}
 		});
+		// Exit item
+		JMenuItem exitItem = new JMenuItem("Exit");
+		exitItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 
 		menu.add(sendFileItem);
 		menu.add(optionItem);
 		menu.add(exitItem);
 
 		this.setJMenuBar(menuBar);
-
 	}
 
 	/**
@@ -147,12 +135,9 @@ public class GUI extends JFrame implements Observer{
 	}
 
 	private void buildChatMenu() {
-
 		this.add(cp, BorderLayout.CENTER);
 		this.add(ulp, BorderLayout.EAST);
-
 	}
-
 
 	/**
 	 * Method to be called for saving files when a file transfer
@@ -163,7 +148,6 @@ public class GUI extends JFrame implements Observer{
 	 * @return path to save file to
 	 */
 	private String saveFile(String senderName, String fileName, int fileSize){
-
 		FileOfferDialog fod = new FileOfferDialog(GUI.this, senderName, fileName, fileSize);
 		fod.setVisible(true);
 
@@ -172,9 +156,6 @@ public class GUI extends JFrame implements Observer{
 		return rval;
 	}
 
-
-
-	//	Getter methods
 	/**
 	 * getter for the UserListPanel containing a list of all the hosts
 	 * @return UserLisPanel
@@ -236,7 +217,6 @@ public class GUI extends JFrame implements Observer{
 
 	// Starter of the GUI
 	private void Start(){
-
 		// Setup Observer/Observable relation
 		apl.addObserver(this);
 		apl.getHosts(true);
@@ -245,34 +225,29 @@ public class GUI extends JFrame implements Observer{
 
 	@Override
 	public void update(Observable o, Object arg) {
-
 		// Chat message has been received
-
 		if(arg instanceof ChatMessage){
 			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
-
 		}
-
 		// File offer has been received
-
 		else if(arg instanceof FileOfferMessage){
-			// TODO 1: play sound
-			// TODO 2: parse system message
-
-			//TODO test MORE
-			String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
-			if(filePath != null){
-				apl.acceptFileOffer((FileOfferMessage) arg, filePath);
-
-
+			// If IgnoreFileTransfer option has been set the offer will be ignored
+			if(!(this.getPreferences().get("TRANSFERIGNORE", "").equals("true"))){
+				String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+				if(filePath != null){
+					apl.sendFileAccept((FileOfferMessage) arg, filePath);
+					cp.parseMessage(new Date().toString(), ((FileOfferMessage) arg).getAddress(), String.format("Accepted file offer for: %s (%d bytes)", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize()));
+				}
 			}
 		}
-
 		// WHOIS response has been received
 		else if(arg instanceof IdentificationMessage){
+			//TODO test if this method works
+			//cp.setHostName(((IdentificationMessage) arg).getAddress(), ulp.findHostName(((IdentificationMessage) arg).getAddress()), ((IdentificationMessage) arg).getPayload());
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
 		}
-
+		else if(arg instanceof FileTransferMessage){
+			cp.parseMessage(new Date().toString(), ((FileTransferMessage) arg).getAddress(), String.format("Completed file transfer for: %s (%d bytes)", ((FileTransferMessage) arg).getFileName(), ((FileTransferMessage) arg).getFileSize()));
+		}
 	}
-
 }

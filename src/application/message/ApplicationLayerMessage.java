@@ -15,6 +15,7 @@ public class ApplicationLayerMessage implements Message {
 	public ApplicationLayerMessage(byte address, byte[] data){
 		this.address = address;
 		this.payload = data;
+		
 	}
 	
 	@Override

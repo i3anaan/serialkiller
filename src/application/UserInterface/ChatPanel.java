@@ -1,12 +1,9 @@
 package application.UserInterface;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -77,7 +74,7 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 			if(!myMessage.getText().equals("")){
 				String username = gui.getPreferences().get("USERNAME", "");
 				addMessage(username, gui.getHost(),myMessage.getText());
-				gui.getApplicationLayer().writeChatMessage(username, myMessage.getText(), address);
+				gui.getApplicationLayer().sendChatMessage(username, myMessage.getText(), address);
 				myMessage.setText("");
 			}
 		}
