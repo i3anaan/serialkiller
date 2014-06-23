@@ -21,6 +21,7 @@ import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.BlockingAMManager;
 import link.angelmaker.manager.BlockingAMManagerServer;
+import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
 import link.angelmaker.nodes.PureNode;

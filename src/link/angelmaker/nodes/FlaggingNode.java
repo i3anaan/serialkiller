@@ -46,8 +46,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
-	public static int maxBitsExpected = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)*ParityBitsCodec.ENCODED_BYTE/8;
-	//90
+	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
 
 	public FlaggingNode(Node parent, int dataBitCount) {
 		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
