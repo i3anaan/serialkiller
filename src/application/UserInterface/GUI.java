@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
@@ -235,14 +236,18 @@ public class GUI extends JFrame implements Observer{
 				String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
 				if(filePath != null){
 					apl.sendFileAccept((FileOfferMessage) arg, filePath);
+					cp.parseMessage(new Date().toString(), ((FileOfferMessage) arg).getAddress(), String.format("Accepted file offer for: %s (%d bytes)", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize()));
 				}
 			}
 		}
 		// WHOIS response has been received
 		else if(arg instanceof IdentificationMessage){
 			//TODO test if this method works
-			cp.setHostName(((IdentificationMessage) arg).getAddress(), ulp.findHostName(((IdentificationMessage) arg).getAddress()), ((IdentificationMessage) arg).getPayload());
+			//cp.setHostName(((IdentificationMessage) arg).getAddress(), ulp.findHostName(((IdentificationMessage) arg).getAddress()), ((IdentificationMessage) arg).getPayload());
 			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
+		}
+		else if(arg instanceof FileTransferMessage){
+			cp.parseMessage(new Date().toString(), ((FileTransferMessage) arg).getAddress(), String.format("Completed file transfer for: %s (%d bytes)", ((FileTransferMessage) arg).getFileName(), ((FileTransferMessage) arg).getFileSize()));
 		}
 	}
 }
