@@ -346,7 +346,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
                     markAsSent(p);
                 }
-            } else if(getCongestion(p.header().getDestination()) >= MAX_FOR_HOST) {
+            } else if(p.header().getSender() == router.self() && getCongestion(p.header().getDestination()) >= MAX_FOR_HOST) {
                 // Offer again.
                 reofferHandler.offer(p);
                 TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");

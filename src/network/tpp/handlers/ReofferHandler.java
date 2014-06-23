@@ -21,23 +21,24 @@ public class ReofferHandler extends Handler {
     }
 
     @Override
+    // TODO Make this another way so no busy waiting occurs
     public void handle() throws InterruptedException {
-        Thread.sleep(TPPNetworkLayer.TIMEOUT);
+        Packet p = out.peek();
 
-        Packet p = out.take();
-
-        if (nextPackets.get(p.header().getDestination()) == null) {
+        if (p != null && nextPackets.get(p.header().getDestination()) == null) {
             // Set packet as the next packet for a host.
             nextPackets.put(p.header().getDestination(), p);
+            // Remove element from queue
+            out.take();
         } else {
-            // Delay processing.
-            out.put(p);
+            Thread.sleep(TPPNetworkLayer.TIMEOUT / 4);
         }
     }
 
     public void notify(Byte address) {
         if (nextPackets.get(address) != null) {
             parent.sendPacket(nextPackets.get(address));
+            nextPackets.remove(address);
         }
     }
 

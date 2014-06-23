@@ -92,7 +92,7 @@ public class ApplicationLayerHandler extends Handler {
                 segments.get(sender).remove(seqnum);
                 sequenceSizes.get(sender).remove(seqnum);
             } else if (sequenceSizes.get(sender).get(seqnum) < segments.get(sender).get(seqnum).size()) {
-                TPPNetworkLayer.getLogger().warning(String.format("Sequence %d from %d has more (%d) segments than the given number (%d) allows.", seqnum, sender, segments.get(sender).get(seqnum).size(), sequenceSizes.get(sender).get(seqnum)));
+                TPPNetworkLayer.getLogger().warning(String.format("Sequence %d from host %d has more (%d) segments than the given number (%d) allows.", seqnum, sender, segments.get(sender).get(seqnum).size(), sequenceSizes.get(sender).get(seqnum)));
             }
         } else {
             // Simple payload.
