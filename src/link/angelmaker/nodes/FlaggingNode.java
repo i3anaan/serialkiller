@@ -135,7 +135,8 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 			// Received start and end flag.
 			isFull = true;
 			stored = new BitSet2();
-			giveOriginal(unStuff(getDataBeforeEndFlag(storedConverted)));
+			stored = unStuff(getDataBeforeEndFlag(storedConverted));
+			childNodes[0].giveConverted(stored);
 			//System.out.println("GiveConverted done");
 			return storedConverted.get(contains
 					+ FLAG_END_OF_FRAME.getFlag().length(),
@@ -149,7 +150,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public BitSet2 getConverted() {
-		return placeFlags(stuff(getOriginal()));
+		return placeFlags(stuff(childNodes[0].getConverted()));
 	}
 
 	private int getRealEndFlagIndex(BitSet2 bits) {

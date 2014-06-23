@@ -2,6 +2,7 @@ package link.angelmaker.nodes;
 
 import com.google.common.base.Optional;
 
+import link.angelmaker.AngelMaker;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
@@ -42,12 +43,13 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
 		try{
+			
 			int maxExpectedBits = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)*ParityBitsCodec.ENCODED_BYTE/8;
 			BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxExpectedBits));
 			Optional<BitSet2> decoded = ParityBitsCodec.decode(bitsToUse);
 			correct = decoded.isPresent();
 			if(correct){
-				child.giveOriginal(decoded.get());
+				child.giveConverted(decoded.get());
 			}
 			return bits.get(Math.min(bits.length(),maxExpectedBits),bits.length());
 		}catch(IllegalArgumentException e){
@@ -58,7 +60,7 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 
 	@Override
 	public BitSet2 getConverted() {
-		return ParityBitsCodec.encode(child.getOriginal());
+		return ParityBitsCodec.encode(child.getConverted());
 	}
 
 	@Override
@@ -85,7 +87,7 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	public Node getClone() {
 		Node clone = new ErrorDetectionNode(parent, maxDataSize);
 		if(isFull()){
-			clone.giveOriginal(child.getOriginal());
+			clone.giveConverted(getConverted());
 		}
 		return clone;
 	}

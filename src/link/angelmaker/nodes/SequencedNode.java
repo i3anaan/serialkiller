@@ -1,5 +1,7 @@
 package link.angelmaker.nodes;
 
+import com.sun.corba.se.impl.encoding.CodeSetConversion.BTCConverter;
+
 import link.angelmaker.AngelMaker;
 import link.angelmaker.manager.ConstantRetransmittingManager;
 import util.BitSet2;
@@ -45,6 +47,7 @@ public class SequencedNode implements Node, Node.Internal {
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
+		AngelMaker.logger.debug("Received converted: "+bits);
 		BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxDataSize+2*messageBitCount));
 		sequenceNumber = bitsToUse.get(0,messageBitCount);
 		message = bitsToUse.get(bits.length()-messageBitCount,bits.length());
@@ -97,13 +100,12 @@ public class SequencedNode implements Node, Node.Internal {
 		return isFull() ? "Full" : "Empty";
 	}
 	
-	public int getSeq(){
-		System.out.println("SequenceNumber = "+sequenceNumber);
-		return sequenceNumber.getUnsignedValue();
+	public BitSet2 getSeq(){
+		return sequenceNumber;
 	}
 	
-	public int getMessage(){
-		return message.getUnsignedValue();
+	public BitSet2 getMessage(){
+		return message;
 	}
 	
 	public void setSeq(BitSet2 seq){
