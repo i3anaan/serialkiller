@@ -19,7 +19,8 @@ public class NodeTest {
 	public  Node root = new PureNode(null, 1);
 	public Node[] nodes = new Node[] { new PureNode(root, 80), new FlaggingNode(root)};
 	
-	@Test
+	
+	//@Test
 	public void testGeneral() {
 		
 		
@@ -56,8 +57,8 @@ public class NodeTest {
 			}
 		}
 	}
-
-	@Test
+	
+	//@Test
 	public void testNetworkSimulation() {
 		// Network exchange simulation
 		
