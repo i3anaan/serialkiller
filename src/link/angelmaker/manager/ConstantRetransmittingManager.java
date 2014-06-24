@@ -125,9 +125,12 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		int byteCount = 0;
 		Byte b = queueOut.poll();
 		while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
+			System.out.println(b);
 			bs.addAtEnd(new BitSet2(b));
 			byteCount++;
-			b = queueOut.poll();
+			if (byteCount<SequencedNode.PACKET_BIT_COUNT/8) {
+				b = queueOut.poll();
+			}
 		}
 		node.giveOriginal(bs);
 		
