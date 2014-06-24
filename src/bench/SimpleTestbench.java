@@ -23,44 +23,34 @@ public class SimpleTestbench {
 		}
 
 		public void run() {
-			while (true) {
-				for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-					down.sendFrame(new byte[]{(byte)(i)});
-					byte[] bytes = down.readFrame();
-					if(bytes.length>0){
-						byte in = bytes[0];
-						if(down instanceof AngelMaker){
-							//Graph.makeImage(Graph.getFullGraphForNode(((AngelMaker) down).getCurrentSendingNode(), true));
-						}
-						if (in == i) {
-							System.out.print(".");
-							good++;
-						} else {
-							System.out.print("X");
-							bad++;
-						}
-						
-						if ((good+bad) % 64 == 0) System.out.printf(" %d/%d bytes good\n", good, good+bad);
-						
-						System.out.flush();
-					}
-				}
+			for (byte i = 0; i < Byte.MAX_VALUE; i++) {
+				down.sendFrame(new byte[]{(byte)(i)});
 			}
 		}
 	}
-	private class EchoThread extends Thread {
+	private class CheckThread extends Thread {
 		private FrameLinkLayer down;
 
-		public EchoThread(FrameLinkLayer down) {
+		public CheckThread(FrameLinkLayer down) {
 			this.down = down;
 		}
 
 		public void run() {
-			while (true) {
+			for (byte i = 0; i < Byte.MAX_VALUE; i += 0) {
 				byte[] bytes = down.readFrame();
+			
 				if(bytes.length>0){
-				byte i = bytes[0];
-				down.sendFrame(new byte[]{i});
+					int j;
+					
+					for (j = 0; j < bytes.length; j++) {
+						if (bytes[j] == i) {
+							System.out.printf("[OK] expected %d got %d\n", i, bytes[j]);
+						} else {
+							System.out.printf("[!!] expected %d got %d\n", i, bytes[j]);
+						}
+						
+						i++;
+					}
 				}
 			}
 		}
@@ -95,10 +85,8 @@ public class SimpleTestbench {
 		//System.out.println(a.hashCode()+"\tReadFirstByte:\t"+Bytes.format(a.readByte()));
 		//System.out.println(b.hashCode()+"\tReadFirstByte:\t"+Bytes.format(b.readByte()));
 		
-		Thread et = new EchoThread(a);
+		Thread et = new CheckThread(a);
 		Thread st = new SeqThread(b);
-		
-		
 		
 		et.start();
 		st.start();
