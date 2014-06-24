@@ -83,9 +83,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		for (i = 0; i < bits.length() && stored.length() < dataBitCount; i++) {
 			stored.addAtEnd(bits.get(i));
 		}
-		if (stored.length() >= dataBitCount) {
-			isFull = true;
-		}
+		isFull = true;
 		if (isFull) {
 			BitSet2 remaining = childNodes[0].giveOriginal(stored);
 			if (remaining.length() > 0) {

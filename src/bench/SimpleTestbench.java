@@ -13,6 +13,7 @@ import util.Bytes;
  * A simple test bench application for testing layers of the SerialKiller stack.
  */
 public class SimpleTestbench {
+	public static final int BYTES_PER_CHAR = 8;
 	private class SeqThread extends Thread {
 		private FrameLinkLayer down;
 		int good = 0;
@@ -23,8 +24,11 @@ public class SimpleTestbench {
 		}
 
 		public void run() {
-			for (byte i = 0; i < Byte.MAX_VALUE; i++) {
-				down.sendFrame(new byte[]{(byte)(i)});
+			while(true){
+				for (byte i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
+					//TODO why did this need to be '<=' instead of just '<' ?
+					down.sendFrame(new byte[]{(byte)(i)});
+				}
 			}
 		}
 	}
@@ -36,20 +40,35 @@ public class SimpleTestbench {
 		}
 
 		public void run() {
-			for (byte i = 0; i < Byte.MAX_VALUE; i += 0) {
-				byte[] bytes = down.readFrame();
-			
-				if(bytes.length>0){
-					int j;
-					
-					for (j = 0; j < bytes.length; j++) {
-						if (bytes[j] == i) {
-							System.out.printf("[OK] expected %d got %d\n", i, bytes[j]);
-						} else {
-							System.out.printf("[!!] expected %d got %d\n", i, bytes[j]);
-						}
+			while(true){
+				int correct = 0;
+				byte i = Byte.MIN_VALUE;
+				while(true) {
+					byte[] bytes = down.readFrame();					
+					if(bytes.length>0){
+						int j;
 						
-						i++;
+						for (j = 0; j < bytes.length; j++) {
+							if(i==Byte.MIN_VALUE){
+								System.out.print("\n");
+							}
+							if (bytes[j] == i) {
+								//System.out.printf("[OK] expected %d got %d\n", i, bytes[j]);
+								correct++;
+							} else {
+								//System.out.printf("[!!] expected %d got %d\n", i, bytes[j]);
+							}
+							if((i+256)%BYTES_PER_CHAR==BYTES_PER_CHAR-1){
+								if(correct==BYTES_PER_CHAR){
+									System.out.print('.');
+								}else{
+									System.out.print('X');
+									System.out.println("Correct = "+correct);
+								}
+								correct = 0;
+							}
+							i++;
+						}
 					}
 				}
 			}

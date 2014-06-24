@@ -125,7 +125,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		int byteCount = 0;
 		Byte b = queueOut.poll();
 		while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
-			System.out.println(b);
+			//System.out.println(b);
 			bs.addAtEnd(new BitSet2(b));
 			byteCount++;
 			if (byteCount<SequencedNode.PACKET_BIT_COUNT/8) {
@@ -143,6 +143,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		}
 		
 		memory[index] = node;
+		
 		
 	}
 	
@@ -172,7 +173,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 							if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
 								//Fully correct.
 								Node data = received.getChildNodes()[0];
-								AngelMaker.logger.debug("Received data: "+data.getOriginal());
+								//AngelMaker.logger.debug("Received data: "+data.getOriginal());
 								byte[] dataBytes = data.getOriginal().toByteArray();
 								for(byte b : dataBytes){
 								try {
