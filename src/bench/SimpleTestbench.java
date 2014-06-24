@@ -1,13 +1,10 @@
 package bench;
 
-import common.Graph;
 import link.*;
 import link.angelmaker.AngelMaker;
-import link.angelmaker.manager.ThreadedAMManagerServer;
-import link.diag.BytewiseLinkLayer;
+import phys.diag.BitErrorPhysicalLayer;
 import phys.diag.DelayPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
-import util.Bytes;
 
 /**
  * A simple test bench application for testing layers of the SerialKiller stack.
@@ -16,8 +13,6 @@ public class SimpleTestbench {
 	public static final int BYTES_PER_CHAR = 8;
 	private class SeqThread extends Thread {
 		private FrameLinkLayer down;
-		int good = 0;
-		int bad = 0;
 
 		public SeqThread(FrameLinkLayer down) {
 			this.down = down;
@@ -63,7 +58,7 @@ public class SimpleTestbench {
 									System.out.print('.');
 								}else{
 									System.out.print('X');
-									System.out.println("Correct = "+correct);
+									//System.out.println("Correct = "+correct);
 								}
 								correct = 0;
 							}
@@ -88,22 +83,17 @@ public class SimpleTestbench {
 		
 		vpla = new VirtualPhysicalLayer();
 		vplb = new VirtualPhysicalLayer();
-		//vpla.connect(vplb);
-		//vplb.connect(vpla);
 		
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		FrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(vpla),null,null,null);
-		FrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(vplb),null,null,null);
+		FrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(new BitErrorPhysicalLayer(vpla)),null,null,null);
+		FrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(new BitErrorPhysicalLayer(vplb)),null,null,null);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
 		System.out.println();
-		
-		//System.out.println(a.hashCode()+"\tReadFirstByte:\t"+Bytes.format(a.readByte()));
-		//System.out.println(b.hashCode()+"\tReadFirstByte:\t"+Bytes.format(b.readByte()));
-		
+				
 		Thread et = new CheckThread(a);
 		Thread st = new SeqThread(b);
 		

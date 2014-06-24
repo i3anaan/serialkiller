@@ -263,7 +263,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				firstRound = false;					
 			} catch (TimeOutException e) {
 				//Time-out, ignore, moving, don't hang.
-				AngelMaker.logger.debug("Time out waiting on ack.");
+				//AngelMaker.logger.debug("Time out waiting on ack.");
 				//TODO instead of not adding a bit here, it might be usefull to still add a (guessed) bit.
 				//This might reduce out of sync problems.
 			}

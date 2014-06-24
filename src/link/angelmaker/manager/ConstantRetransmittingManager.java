@@ -99,7 +99,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	public Node getNextNode() {
 		Node nodeToSendNext;
 		if(messageReceived!=MESSAGE_FINE){
-		lastSent = messageReceived; //Other side requested retransmitting after this index
+			lastSent = messageReceived; //Other side requested retransmitting after this index
+			messageReceived = MESSAGE_FINE; //Moved sending index down, now continue assuming fine.
 		}
 		
 		int indexToSend = (lastSent+1)%(memory.length);
@@ -114,6 +115,9 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		if(lastSent == (loadNew+1)%memory.length){
 			loadNew = lastSent;
 		}
+		
+		//AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
+		
 		return nodeToSendNext;
 	}
 	
@@ -136,7 +140,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		
 		if(node.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
 			SequencedNode seqNode = ((SequencedNode)node.getChildNodes()[0].getChildNodes()[0]);			
-			seqNode.setMessage(intMessageToBitSet(messageToSend));
+			seqNode.setMessage(intMessageToBitSet(messageToSend));			
 			seqNode.setSeq(intMessageToBitSet(index));
 		}else{
 			throw new IncompatibleModulesException();
@@ -164,42 +168,39 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 			while(true){
 				Node received = fillNewNode();
 				FlaggingNode flaggingNode = (FlaggingNode) received;
-				if(!flaggingNode.isFiller()){
-					Node errorDetection = received.getChildNodes()[0];
-					if(errorDetection.isCorrect()){
-						Node packetNode = errorDetection.getChildNodes()[0];
-						if(packetNode instanceof SequencedNode){
-							SequencedNode seqNode = ((SequencedNode) packetNode);
-							if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
-								//Fully correct.
-								Node data = received.getChildNodes()[0];
-								//AngelMaker.logger.debug("Received data: "+data.getOriginal());
-								byte[] dataBytes = data.getOriginal().toByteArray();
-								for(byte b : dataBytes){
-								try {
-									queueIn.put(b);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								}
-								lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
-								messageReceived = seqNode.getMessage().getUnsignedValue();
-								messageToSend = MESSAGE_FINE;
-							}else{
-								//Only sequence number is wrong, packet is correct.
-								messageReceived = seqNode.getMessage().getUnsignedValue();
-								messageToSend = lastReceivedCorrect;
+				Node errorDetection = received.getChildNodes()[0];
+				if(errorDetection.isCorrect()){
+					Node packetNode = errorDetection.getChildNodes()[0];
+					if(packetNode instanceof SequencedNode){
+						SequencedNode seqNode = ((SequencedNode) packetNode);
+						//AngelMaker.logger.debug("Received packet\tseq="+seqNode.getSeq().getUnsignedValue()+" ("+((lastReceivedCorrect+1)%memory.length)+")"+"\tmsg="+seqNode.getMessage().getUnsignedValue()+"\tdata="+seqNode.getOriginal());
+						if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
+							//Fully correct.
+							//AngelMaker.logger.debug("Received correct packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tOK");
+							Node data = received.getChildNodes()[0];
+							byte[] dataBytes = data.getOriginal().toByteArray();
+							for(byte b : dataBytes){
+							try {
+								queueIn.put(b);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
+							}
+							lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
+							messageReceived = seqNode.getMessage().getUnsignedValue();
+							messageToSend = MESSAGE_FINE;
 						}else{
-							throw new IncompatibleModulesException();
+							//Only sequence number is wrong, packet is correct.
+							messageReceived = seqNode.getMessage().getUnsignedValue();
+							messageToSend = lastReceivedCorrect;
 						}
 					}else{
-						//Packet has errors.
-						messageToSend = lastReceivedCorrect;
+						throw new IncompatibleModulesException();
 					}
 				}else{
-					//AngelMaker.logger.debug("Received filler");
+					//Packet has errors.
+					messageToSend = lastReceivedCorrect;
 				}
 			}
 		}
