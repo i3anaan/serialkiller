@@ -105,11 +105,12 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		
 		int indexToSend = (lastSent+1)%(memory.length);
 		if(lastSent==loadNew){
-			loadNewNodeInMemory(indexToSend,messageToSend);
+			loadNewNodeInMemory(indexToSend);
 		}
 		nodeToSendNext = memory[indexToSend];
 		
 		lastSent = indexToSend;
+		((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).setMessage(intMessageToBitSet(messageToSend));
 		messageToSend = MESSAGE_FINE; //Do not send same message multiple times.
 		
 		if(lastSent == (loadNew+1)%memory.length){
@@ -123,7 +124,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	
 	
 	
-	public void loadNewNodeInMemory(int index,int messageToSend){
+	public void loadNewNodeInMemory(int index){
 		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
 		BitSet2 bs = new BitSet2();
 		int byteCount = 0;
@@ -140,7 +141,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		
 		if(node.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
 			SequencedNode seqNode = ((SequencedNode)node.getChildNodes()[0].getChildNodes()[0]);			
-			seqNode.setMessage(intMessageToBitSet(messageToSend));			
+			seqNode.setMessage(intMessageToBitSet(MESSAGE_FINE));			
 			seqNode.setSeq(intMessageToBitSet(index));
 		}else{
 			throw new IncompatibleModulesException();
