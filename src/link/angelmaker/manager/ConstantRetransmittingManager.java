@@ -188,11 +188,17 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 							}
 							}
 							lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
-							messageReceived = seqNode.getMessage().getUnsignedValue();
+							int currentMessageReceived = seqNode.getMessage().getUnsignedValue();
+							if(currentMessageReceived!=MESSAGE_FINE){
+								messageReceived = currentMessageReceived;
+							}
 							messageToSend = MESSAGE_FINE;
 						}else{
 							//Only sequence number is wrong, packet is correct.
-							messageReceived = seqNode.getMessage().getUnsignedValue();
+							int currentMessageReceived = seqNode.getMessage().getUnsignedValue();
+							if(currentMessageReceived!=MESSAGE_FINE){
+								messageReceived = currentMessageReceived;
+							}
 							messageToSend = lastReceivedCorrect;
 						}
 					}else{

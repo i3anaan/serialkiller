@@ -87,8 +87,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		FrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(new BitErrorPhysicalLayer(vpla)),null,null,null);
-		FrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(new BitErrorPhysicalLayer(vplb)),null,null,null);
+		FrameLinkLayer a = new AngelMaker(new BitErrorPhysicalLayer(vpla),null,null,null);
+		FrameLinkLayer b = new AngelMaker(new BitErrorPhysicalLayer(vplb),null,null,null);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
