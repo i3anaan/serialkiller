@@ -1,0 +1,72 @@
+ANGEL_MAKER TODOs
+
+General:
+>Check if improvements can be made somewhere in process.
+>Check existing TODOs
+>Buffer overflow management (drop/block?)		#>High Priority<#
+>Thread safety, some specifics:
+	>Diagram drawing (getCurrentReceivingNode(),getCurrentSendingNode())
+	>Check thread safety in classes with 2 threads
+		>ConstantRetransmittingManager probably has problems with this		#>High Priority<#
+>Cleanup
+	>Check logging (some unnecessary right now, some useful logs could be added)
+	>Clean up tests (and possibly make new tests)
+	>Better program structure
+		>Clean up and improve interfaces
+		>Make abstract base classes
+>Documentation
+
+
+AngelMaker:
+>Constructor (Compatible with Starter?)
+>Link with NetworkLayer			#>High Priority<#
+>Some better testing of the entire system.
+	>Error handling
+	>Filler handling
+	>Duplex sending
+>Bit rate test (for cable)		#>High Priority<#
+
+
+BitExchanger:
+Mostly some experiments to improve overall speed.
+>Try different techniques:
+	>High Speed bit transfer		#>High Priority<#
+	>No-inverse bit transfer
+	>Half duplex (might reduce error rates)
+>Try adding bit on timeout, might get bits received closer to bits send (ie, less missing bits).
+>Experiment with timeouts (in specific READ_TIMEOUT_NO_ACK)
+>Experiment with checkStable()
+	>Maybe take average instead of X in a row.
+	>Determine optimal amount in a row needed.
+
+
+Nodes:
+Mostly optimization, the Nodes already work.
+>Less instances of everything, in specific:
+	>Less cloning of BitSet2
+	>Let a single Node do everything (less oversight, but more efficient).
+	>Make Nodes reusable (Remove need to make new ones)
+
+Flags:
+Reduce overhead.
+>Improve general algorithm
+>Make specific flags (can probably be more efficient than general)
+>Calculate optimal flag length.
+>Add EndFlag test (No bit configuration in front of flag should ever form the end flag earlier)
+
+Codec:
+Stronger error detection.
+>Explore possibilities for more efficient error detection
+	>Should still allow 1-8 bytes.
+>Explore effectiveness of using error correction.
+	>Should also allow 1-8 bytes.
+	>Should probably be able to deal with missing bits.
+	
+AMManager:
+Retransmitting needs to be fixed, small improvements probably possible.
+>Fix retransmits		#>High Priority<#		#>High Priority<#		#>High Priority<#		#>High Priority<#
+	>Find out what goes wrong
+		>Fix it
+>Unit tests methods.
+>Make it a Node (and AMManager), so that diagram drawing draws entire memory.
+

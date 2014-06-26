@@ -208,7 +208,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public byte adaptBitToPrevious(byte previousByte,boolean nextData) {
 		return (byte)(((previousByte^2)&-2)|(nextData ? 1 : 0));
-		//TODO test.
 	}
 	
 	/**
@@ -217,7 +216,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public boolean extractBitFromInput(byte input){
 		return (input&1)==1;
-		//TODO test;
 	}
 	
 	/**
