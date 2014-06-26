@@ -130,7 +130,6 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		int byteCount = 0;
 		Byte b = queueOut.poll();
 		while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
-			//System.out.println(b);
 			bs.addAtEnd(new BitSet2(b));
 			byteCount++;
 			if (byteCount<SequencedNode.PACKET_BIT_COUNT/8) {
@@ -214,37 +213,5 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 			
 			return node;
 		}
-		
-		
-		/*RECEIVING:
-			 * Vanuitgaand normale situatie, lastReceivedCorrect = x.
-			 * while(true){
-				 * Vraag nieuwe node aan (vul een node met de stream).
-				 * unflag de node, splits
-				 * Check of verwachte lengte.
-				 * Check of correct.
-				 * Check of seq== (lastReceivedCorrect+1)%X.
-				 * if(fullyCorrect){
-					 * decode data, stop data in queueOut.
-					 * lastReceivedCorrect = (lastReceivedCorrect+1)%X;
-					 * messageReceived = haalMessageUitNode(node);
-					 * messageToSent = prima;
-				 * }else if(alleenSeqIsFout){
-					 *  messageReceived = haalMessageUitNode(node);
-					 *  messageToSent = lastReceivedCorrect;
-				 *  }else{
-					 *  messageToSent = lastReceivedCorrect;
-					 *  //Ignore, dont even update messageReceived, assume sending went ok.
-					 *  
-					 *  
-					 *  //TODO is dit een fatsoenlijke assumption? Je zou ook kunnen zeggen,
-					 *  //	fout ontvangen hier is waarschijnlijk fout ontvangen daar.
-					 *  //	Dit zou betekenen messageReceived = lastSent--; Punt is dat frame/node lengtes kunnen verschillen.
-					 *  //	Dit zou optimalisatie zijn.	 *  
-				 *  }
-			 *  }
-			 *  */
-		
-		
 	}
 }

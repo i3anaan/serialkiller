@@ -97,14 +97,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	public BitSet2 getOriginal() {
 		return childNodes[0].getOriginal();
 	}
-
-	/**
-	 * Receive 7 bits extra after spotting the first end of frame flag. Check if
-	 * there is no en of frame flag in these 7 bits. Take last possible end of
-	 * frame start. Return unused stuff (even from previous calls) afterwards.
-	 * This for situation: 1111011001100110 DDDDDDDDFFFFFFFF Correct
-	 * DDDDFFFFFFFF---- (possibly) Read
-	 */
+	
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
 		//System.out.println("Give Converted");

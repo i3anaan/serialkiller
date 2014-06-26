@@ -18,13 +18,14 @@ General:
 
 
 AngelMaker:
->Constructor (Compatible with Starter?)
+>Constructor (Compatible with Starter and tests?)
 >Link with NetworkLayer			#>High Priority<#
 >Some better testing of the entire system.
 	>Error handling
 	>Filler handling
 	>Duplex sending
 >Bit rate test (for cable)		#>High Priority<#
+>TOP_NODE_IN_USE set changed, for safety.
 
 
 BitExchanger:
@@ -46,6 +47,9 @@ Mostly optimization, the Nodes already work.
 	>Less cloning of BitSet2
 	>Let a single Node do everything (less oversight, but more efficient).
 	>Make Nodes reusable (Remove need to make new ones)
+>Resolve interface mess.
+	>Make interfaces more simple, consistent and clear.
+		>Check Filler usage.
 
 Flags:
 Reduce overhead.

@@ -80,12 +80,6 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	private AMManager STANDARD_MANAGER = new ConstantRetransmittingManager();
 	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
 	
-	/*
-	 * NEW PLAN NODE
-	 * new FlaggingNode(null,errorDetectionNode(),80)
-	 * 
-	 */
-	
 	
 	
 	public static final Logger logger =  new Logger(Subsystem.LINK);
@@ -161,7 +155,6 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	
 	public void setup(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
 		logger.info("Building ANGEL_MAKER with: "+phys+" | "+topNode+" | "+manager+" | "+exchanger);
-		//TODO severities set correct?
 		//TODO thread name on AMManger is TPPHandler, why is this?
 		logger.info("Setting up ANGEL_MAKER");
 		try{
