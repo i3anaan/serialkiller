@@ -5,7 +5,7 @@ import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
-import link.angelmaker.manager.BlockingAMManagerServer;
+import link.angelmaker.manager.ConstantRetransmittingManager;
 
 import org.junit.Test;
 
@@ -23,7 +23,7 @@ public class BitExchangerTest {
 	public void testSimpleBitExchanger(){
 		SimpleBitExchanger e = new SimpleBitExchanger();
 		e.givePhysicalLayer(new NullPhysicalLayer());
-		e.giveAMManager(new BlockingAMManagerServer());
+		e.giveAMManager(new ConstantRetransmittingManager());
 		e.enable();
 		for(int i=0;i<4;i++){
 			for(int b=0;b<2;b++){
@@ -43,8 +43,8 @@ public class BitExchangerTest {
 		
 		vplA.connect(vplB);
 		vplB.connect(vplA);
-		AMManager managerA = new BlockingAMManagerServer();
-		AMManager managerB = new BlockingAMManagerServer();
+		AMManager managerA = new ConstantRetransmittingManager();
+		AMManager managerB = new ConstantRetransmittingManager();
 		BitExchanger beA = new SimpleBitExchanger();
 		beA.givePhysicalLayer(vplA);
 		beA.giveAMManager(managerA);

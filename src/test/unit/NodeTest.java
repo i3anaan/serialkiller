@@ -8,7 +8,6 @@ import link.angelmaker.codec.ParityBitsCodec;
 import link.angelmaker.nodes.ErrorDetectionNode;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
-import link.angelmaker.nodes.PureNode;
 import link.angelmaker.nodes.SequencedNode;
 
 import org.junit.Test;
@@ -16,10 +15,8 @@ import org.junit.Test;
 import util.BitSet2;
 
 public class NodeTest {
-	public  Node root = new PureNode(null, 1);
-	public Node[] nodes = new Node[] { new PureNode(root, 80), new FlaggingNode(root)};
 	
-	
+	/*
 	//@Test
 	public void testGeneral() {
 		
@@ -150,6 +147,7 @@ public class NodeTest {
 	@Test
 	public void testPureNode() {
 	}
+	*/
 	
 	@Test
 	public void testSequencedNode(){
