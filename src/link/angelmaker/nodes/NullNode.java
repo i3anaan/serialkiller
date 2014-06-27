@@ -60,4 +60,8 @@ public class NullNode implements Node{
 		return "NULL NODE";
 	}
 
+	@Override
+	public void reset() {
+	}
+
 }

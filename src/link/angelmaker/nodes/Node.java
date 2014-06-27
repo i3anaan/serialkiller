@@ -139,6 +139,8 @@ public interface Node {
 	 * @return array of the childs, can be or contain null.
 	 */
 	public Node[] getChildNodes();
+	
+	public void reset();
 
 	/**
 	 * This method is somewhat optional, AngelMaker should not depend on this

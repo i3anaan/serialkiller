@@ -129,4 +129,11 @@ public class SequencedNode implements Node, Node.Internal {
 		return "SequencedNode";
 	}
 
+
+	@Override
+	public void reset() {
+		this.storedData.clear();
+		full = false;
+	}
+
 }

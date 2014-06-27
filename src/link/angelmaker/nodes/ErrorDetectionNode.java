@@ -107,4 +107,12 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 		return "ErrorDetectionNode(Parity)["+child+"]";
 	}
 
+
+	@Override
+	public void reset() {
+		child.reset();
+		full = false;
+		correct = true;		
+	}
+
 }

@@ -123,6 +123,12 @@ public class BitSet2 extends BitSet {
 		return (Object) new BitSet2(this);
 	}
 	
+	@Override
+	public void clear(){
+		this.length = 0;
+		super.clear();
+	}
+	
 	/**
 	 * Adds a bit at the end of this bitset2, same as set(length(), boolean)
 	 */

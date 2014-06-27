@@ -262,4 +262,16 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		return "FlaggingNode[" + Arrays.toString(childNodes) + "]";
 	}
 
+	@Override
+	public void reset() {
+		for(Node n : childNodes){
+			n.reset();
+		}
+		stored.clear();
+		storedConverted.clear();
+		receivedStartFlag = false;
+		isFull = false;
+		lastReceivedConvertedJunk.clear();
+	}
+
 }
