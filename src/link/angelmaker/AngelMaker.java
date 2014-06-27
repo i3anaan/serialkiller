@@ -16,6 +16,7 @@ import common.Stack;
 import common.Startable;
 import link.FrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.ConstantRetransmittingManager;
@@ -74,7 +75,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
 	private AMManager STANDARD_MANAGER = new ConstantRetransmittingManager();
-	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
+	private BitExchanger STANDARD_EXCHANGER = new HighSpeedBitExchanger();
 	
 	
 	
