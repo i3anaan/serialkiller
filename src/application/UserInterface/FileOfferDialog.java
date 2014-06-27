@@ -98,7 +98,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 		JLabel label1 = new JLabel( "File Path:" );
 		label1.setBounds( 10, 65, 150, 20 );
 		panel1.add( label1 );
-		field.setText(prefs.get("LAST_OUTPUT_DIR", ""));
+		field.setText(prefs.get("LAST_OUTPUT_DIR", "")+File.separator +name);
 		field.setBounds( 10, 85, 250, 25 );
 		panel1.add( field );
 
