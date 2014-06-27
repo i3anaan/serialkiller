@@ -50,7 +50,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 			memory[i] = NODE_FILLER.getClone();
 			possibleMessages[i] = intMessageToBitSet(i);
 		}
-		possibleMessages[MESSAGE_FINE+1] = intMessageToBitSet(MESSAGE_FINE+1);
+		possibleMessages[MESSAGE_FINE] = intMessageToBitSet(MESSAGE_FINE);
 		spilledBitsIn = new BitSet2();
 		messageReceived = MESSAGE_FINE;
 		messageToSend = MESSAGE_FINE;
