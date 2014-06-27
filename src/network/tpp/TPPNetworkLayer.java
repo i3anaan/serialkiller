@@ -350,6 +350,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 // Offer again.
                 reofferHandler.offer(p);
                 TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
+            } else {
+            	// This packet was not for us but for someone else.
+                if (!host.handler().offer(p)) {
+                    TPPNetworkLayer.getLogger().error(p.toString() + " forward dropped, handler queue full.");
+                    return; // We are done.
+                } else {
+                    TPPNetworkLayer.getLogger().debug(p.toString() + " forward offered to " + host.handler().toString() + ".");
+                }
             }
         } else {
             TPPNetworkLayer.getLogger().error(p.toString() + " dropped, packet is not routable.");
