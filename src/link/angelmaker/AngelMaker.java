@@ -113,11 +113,6 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	}
 
 	@Override
-	public String toCoolString() {
-		return toString();
-	}
-
-	@Override
 	public Thread start(Stack stack) {
 		this.stack = stack;
 		standardSetup(stack.physLayer,null,null,null);
