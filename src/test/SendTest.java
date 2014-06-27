@@ -2,15 +2,10 @@ package test;
 import com.google.common.base.Charsets;
 
 import phys.LptErrorHardwareLayer;
-import phys.LptHardwareLayer;
 import phys.PhysicalLayer;
 import util.Bytes;
 import link.FrameLinkLayer;
 import link.angelmaker.AngelMaker;
-import link.angelmaker.bitexchanger.SimpleBitExchanger;
-import link.angelmaker.manager.AMManager;
-import link.angelmaker.nodes.FlaggingNode;
-import link.angelmaker.nodes.Node;
 public class SendTest {
 
 	public static final String STRING_TO_SEND = "Such test, such amazing, wow, up to 420 gigadoge! #swag\n";

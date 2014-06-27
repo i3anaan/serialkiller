@@ -100,13 +100,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		//System.out.println("Give Converted");
+		//TODO optimize
 		if (!receivedStartFlag) {
 			BitSet2 tempConcat = BitSet2.concatenate(lastReceivedConvertedJunk,
 					bits); // Add just received to already received.
 			// Keep only just received + max flag length (so it cannot
-			// infinetely grow.
-			//System.out.println("TempConcat = "+tempConcat +"    Start flag = "+FLAG_START_OF_FRAME.getFlag());
+			// Infinitely grow.
 			lastReceivedConvertedJunk = tempConcat.get(
 					Math.max(0,
 							tempConcat.length()
@@ -118,14 +117,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 				storedConverted = afterStart;
 			}
 		} else {
-			//System.out.println("receivedFlag");
 			storedConverted = BitSet2.concatenate(storedConverted, bits);
 		}
 		int contains = getRealEndFlagIndex(storedConverted);
 		if (receivedStartFlag && contains >= 0) {
 			// Received start and end flag.
 			isFull = true;
-			stored = new BitSet2();
 			stored = unStuff(getDataBeforeEndFlag(storedConverted));
 			childNodes[0].giveConverted(stored);
 			//System.out.println("GiveConverted done");

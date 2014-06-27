@@ -227,6 +227,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		private void refillReceivingNode(){
 			receivingNode.reset();
 			while(!receivingNode.isFull()){
+				//TODO optimize
 				spilledBitsIn = receivingNode.giveConverted(BitSet2.concatenate(spilledBitsIn,exchanger.readBits()));
 			}
 		}

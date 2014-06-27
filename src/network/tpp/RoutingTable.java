@@ -12,6 +12,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import common.Graph;
+
 /**
  * This class represents a simple routing table that manages a collection of
  * machine addresses. For every address, it stores the next host address and
@@ -149,7 +151,9 @@ public class RoutingTable {
 	 */
 	public String toGraph() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("graph{node[shape=box];");
+		sb.append("graph{");
+		sb.append(Graph.getGraphStyle());
+		sb.append(Graph.getNodeStyle());
 
         Map<Byte, Byte> allRoutes = new TreeMap<Byte, Byte>();
         allRoutes.putAll(routes);

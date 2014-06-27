@@ -1,9 +1,6 @@
 package link.angelmaker.nodes;
 
-import com.sun.corba.se.impl.encoding.CodeSetConversion.BTCConverter;
-
 import link.angelmaker.AngelMaker;
-import link.angelmaker.manager.ConstantRetransmittingManager;
 import util.BitSet2;
 
 /**
@@ -12,7 +9,7 @@ import util.BitSet2;
  * @author I3anaan
  *
  */
-public class SequencedNode implements Node, Node.Internal {
+public class SequencedNode implements Node{
 
 	private Node parent;
 	private int maxDataSize;

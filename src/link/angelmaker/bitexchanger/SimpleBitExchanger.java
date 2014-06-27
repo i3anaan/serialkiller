@@ -91,7 +91,13 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	@Override
 	public BitSet2 readBits() {
 		BitSet2 bits = new BitSet2();
-		Boolean bit = queueIn.poll();
+		Boolean bit = null;
+		try {
+			bit = queueIn.take();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		while(bit!=null){
 			bits.addAtEnd(bit);
 			bit = queueIn.poll();
