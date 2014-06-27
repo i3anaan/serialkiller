@@ -16,7 +16,7 @@ public class MockFrameLinkLayer extends FrameLinkLayer implements Startable {
 	public byte[] readFrame() {
 		while (true) {
 			try {
-				this.wait();
+				Thread.sleep(Long.MAX_VALUE);
 			} catch (InterruptedException e) {
 			}
 		}
