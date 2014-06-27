@@ -18,6 +18,8 @@ import link.angelmaker.nodes.SequencedNode;
 public class ConstantRetransmittingManager extends Thread implements AMManager, AMManager.Server {
 	//TODO better name
 	//TODO more like a manager, or combination of manager / node
+	public static final FlaggingNode NODE_FILLER = (FlaggingNode) new FlaggingNode(null);
+	
 	
 	private BitExchanger exchanger;
 	private ArrayBlockingQueue<Byte> queueIn;
@@ -35,8 +37,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	private int loadNew=0;
 	
 	public ConstantRetransmittingManager(){
-		this.queueIn = new ArrayBlockingQueue<Byte>(1024);
-		this.queueOut = new ArrayBlockingQueue<Byte>(1024);
+		this.queueIn = new ArrayBlockingQueue<Byte>(2048);
+		this.queueOut = new ArrayBlockingQueue<Byte>(2048);
 		this.memory = new Node[MESSAGE_FINE]; //bitsUsed - amount of special messages.
 		spilledBitsIn = new BitSet2();
 		messageReceived = MESSAGE_FINE;
@@ -110,7 +112,13 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		nodeToSendNext = memory[indexToSend];
 		
 		lastSent = indexToSend;
-		((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).setMessage(intMessageToBitSet(messageToSend));
+		if(nodeToSendNext.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
+			SequencedNode seqNode = ((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]);			
+			seqNode.setMessage(intMessageToBitSet(messageToSend));		
+			seqNode.setSeq(intMessageToBitSet(indexToSend));
+		}else{
+			throw new IncompatibleModulesException();
+		}
 		messageToSend = MESSAGE_FINE; //Do not send same message multiple times.
 		
 		if(lastSent == (loadNew+1)%memory.length){
@@ -129,22 +137,28 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		BitSet2 bs = new BitSet2();
 		int byteCount = 0;
 		Byte b = queueOut.poll();
-		while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
-			bs.addAtEnd(new BitSet2(b));
-			byteCount++;
-			if (byteCount<SequencedNode.PACKET_BIT_COUNT/8) {
-				b = queueOut.poll();
+		if(b==null){
+			//Filler
+			node = NODE_FILLER;
+		}else{
+			while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
+				bs.addAtEnd(new BitSet2(b));
+				byteCount++;
+				if (byteCount<SequencedNode.PACKET_BIT_COUNT/8) {
+					b = queueOut.poll();
+				}
 			}
+			node.giveOriginal(bs);
 		}
-		node.giveOriginal(bs);
 		
+		/*
 		if(node.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
 			SequencedNode seqNode = ((SequencedNode)node.getChildNodes()[0].getChildNodes()[0]);			
-			seqNode.setMessage(intMessageToBitSet(MESSAGE_FINE));			
-			seqNode.setSeq(intMessageToBitSet(index));
+			//seqNode.setMessage(intMessageToBitSet(MESSAGE_FINE));			
+			//seqNode.setSeq(intMessageToBitSet(index));
 		}else{
 			throw new IncompatibleModulesException();
-		}
+		}*/
 		
 		memory[index] = node;
 		
