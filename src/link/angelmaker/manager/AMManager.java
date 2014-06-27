@@ -2,7 +2,6 @@ package link.angelmaker.manager;
 
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.Node;
-import link.angelmaker.nodes.NotSupportedNodeException;
 
 /**
  * Interface for a BitExchangerManager.
