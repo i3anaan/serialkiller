@@ -192,6 +192,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		while (!(input != previousByteReceived)) {
 			//TODO can theoretically hang here when trying to get a stable input.
 			input = getStableInput();
+			down.sendByte(previousByteSent);
 			if (System.nanoTime() > waitTime) {
 				throw new TimeOutException();
 			}
