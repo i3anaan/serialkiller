@@ -48,8 +48,8 @@ public class Starter extends JFrame implements ActionListener {
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
-	private Class<?> linkLayers[] = {MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class, AngelMaker.class};
-	private Class<?> physLayers[] = {NullPhysicalLayer.class, LptHardwareLayer.class, LptErrorHardwareLayer.class};
+	private Class<?> linkLayers[] = {AngelMaker.class,MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class};
+	private Class<?> physLayers[] = {LptErrorHardwareLayer.class,NullPhysicalLayer.class, LptHardwareLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
 	// Combo boxes for all the options.
