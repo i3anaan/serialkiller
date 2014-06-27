@@ -1,6 +1,7 @@
 package link.angelmaker.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import com.google.common.primitives.Bytes;
@@ -35,6 +36,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	private Receiver receiver;
 	private int lastSent=0;
 	private int loadNew=0;
+	
+	private static final byte[] emptyArray = new byte[]{};
 	
 	public ConstantRetransmittingManager(){
 		this.queueIn = new ArrayBlockingQueue<Byte>(2048);
@@ -75,13 +78,13 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	
 	@Override
 	public byte[] readBytes() {
-		ArrayList<Byte> arr = new ArrayList<Byte>();
-		Byte b = queueIn.poll();
-		while(b!=null){
-			arr.add(b);
-			b = queueIn.poll();
+		if (queueIn.isEmpty()) {
+			return emptyArray;
+		} else {
+			ArrayList<Byte> arr = new ArrayList<Byte>();
+			queueIn.drainTo(arr);
+			return Bytes.toArray(arr);
 		}
-		return Bytes.toArray(arr);
 	}
 
 	@Override

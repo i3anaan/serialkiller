@@ -214,26 +214,30 @@ public class BitSet2 extends BitSet {
 	 * @return	first index of occurence, else -1;
 	 */
 	public int contains(BitSet2 bs){
-		if(bs.length()>this.length()){
-			return -1;
-		}
-		for(int i=0;i<this.length()-bs.length()+1;i++){
-			if(this.get(i,i+bs.length()).equals(bs)){
-				return i;
-			}
-		}
-		return -1;
+		return contains(bs, 0);
 	}
 	
-	public int contains(BitSet2 bs,int startAt){
-		if(bs.length()>this.length()){
-			return -1;
-		}
-		for(int i=Math.max(startAt,0);i<this.length()-bs.length()+1;i++){
-			if(this.get(i,i+bs.length()).equals(bs)){
-				return i;
+	public int contains(BitSet2 needle, int startAt){
+		BitSet2 haystack = this;
+		
+		if (needle.length() > haystack.length()) return -1;
+		
+		// For every viable starting bit in the haystack...
+		for (int a = startAt; a < haystack.size() - needle.length() + 1; a++) {
+			int i = 0;
+			
+			while (i < needle.length()) {
+				if (haystack.get(a + i) != needle.get(i)) break;
+				i++;
+			}
+			
+			if (i == needle.length()) {
+				// Found the entire needle! Return the start index.
+				return a;
 			}
 		}
+		
+		// Matched nowhere, return -1
 		return -1;
 	}
 	
