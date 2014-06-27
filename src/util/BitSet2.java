@@ -302,8 +302,8 @@ public class BitSet2 extends BitSet {
      */
     public static BitSet2 concatenate(BitSet2 first, BitSet2 second) {
     	BitSet2 result = new BitSet2(first.length()+second.length());
-    	first.insert(0, first);
-    	first.addAtEnd(second);    	
+    	result.insert(0, first);
+    	result.addAtEnd(second);    	
     	return result;
     }
 	
