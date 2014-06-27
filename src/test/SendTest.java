@@ -20,7 +20,7 @@ public class SendTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptHardwareLayer();
+		PhysicalLayer phys = new LptErrorHardwareLayer();
 		FrameLinkLayer am = new AngelMaker(phys);
 		
 		System.out.println(am.toString());

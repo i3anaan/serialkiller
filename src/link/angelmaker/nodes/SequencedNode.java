@@ -49,8 +49,8 @@ public class SequencedNode implements Node, Node.Internal {
 	public BitSet2 giveConverted(BitSet2 bits) {
 		BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxDataSize+2*messageBitCount));
 		sequenceNumber = bitsToUse.get(0,messageBitCount);
-		message = bitsToUse.get(bits.length()-messageBitCount,bits.length());
-		storedData = bitsToUse.get(messageBitCount, bits.length()-messageBitCount);
+		message = bitsToUse.get(Math.max(0,bits.length()-messageBitCount),bits.length());
+		storedData = bitsToUse.get(messageBitCount, Math.max(0,bits.length()-messageBitCount));
 		full = true;
 		return bits.get(Math.min(bits.length(),maxDataSize+2*messageBitCount),bits.length());
 	}

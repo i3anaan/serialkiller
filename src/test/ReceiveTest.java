@@ -20,7 +20,7 @@ import util.BitSet2;
 
 public class ReceiveTest {	
 	public static void main(String[] args) {
-		PhysicalLayer phys = new LptHardwareLayer();
+		PhysicalLayer phys = new LptErrorHardwareLayer();
 		FrameLinkLayer am = new AngelMaker(phys);
 		System.out.println(am);
 		System.out.println("BEGIN TEST");
