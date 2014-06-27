@@ -71,7 +71,6 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
 	public BitExchanger bitExchanger;
-	private Stack stack;
 	
 	public static AngelMaker getInstanceOrNull(){
 		return instance;
@@ -105,7 +104,6 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 
 	@Override
 	public Thread start(Stack stack) {
-		this.stack = stack;
 		standardSetup(stack.physLayer,null,null,null);
 		return null;
 	}
@@ -115,6 +113,9 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 		AMManager managerUsed = manager;
 		BitExchanger exchangerUsed = exchanger;
 		PhysicalLayer physUsed = phys;
+		if(physUsed==null){
+			physUsed = STANDARD_PHYS;
+		}
 		if(topNodeUsed==null){
 			topNodeUsed = TOP_NODE_IN_USE;
 		}
