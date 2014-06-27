@@ -37,9 +37,7 @@ public class WebService implements Runnable {
         try {
             log.info("WebService starting");
 
-            router.register(ChatHandler.class);
             router.register(IndexHandler.class);
-            router.register(FilesHandler.class);
             router.register(LogDisplayHandler.class);
             router.register(StatusHandler.class);
             router.register(ThreadListHandler.class);

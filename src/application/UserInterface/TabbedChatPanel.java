@@ -3,12 +3,11 @@ package application.UserInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+
+import com.google.common.collect.HashBiMap;
 
 
 /**
@@ -21,20 +20,23 @@ public class TabbedChatPanel extends JPanel{
 
 	// Class variables
 	private		ClosableTabbedPane	 	tabbedPane;
-	private		Map<String, JPanel> 	tabIndex;
+	private		HashBiMap<String, JPanel> 	tabIndex;
 
 	// private variables
 	private GUI gui;
+	
+	/** Indicates if this components has finished initializing */
+	private boolean isReady;
 
 
 	public TabbedChatPanel(GUI gu) {
 		super();
 		gui = gu;
-		tabIndex = new HashMap<String,JPanel>();
+		tabIndex = HashBiMap.create();
 
 		setLayout( new BorderLayout() );
 		setBackground( Color.gray );
-		
+
 		Image image = new ImageIcon("logo.png").getImage();
 		BackgroundPanel topPanel = new BackgroundPanel(image);
 		topPanel.setLayout( new BorderLayout() );
@@ -48,29 +50,19 @@ public class TabbedChatPanel extends JPanel{
 				return true;
 			}
 		};
-		topPanel.add( tabbedPane, BorderLayout.CENTER );
-		
+		topPanel.add(tabbedPane, BorderLayout.CENTER);
 
+		// Set component to ready
+		isReady = true;
 	}
 
 	/**
 	 * adds a tab for a host with the specified hostName
 	 * @param name of the host
+	 * @param address of the host
 	 */
 	public void addChatPanel(String hostName, byte address){
 
-		// Alternative 1
-		
-		//		if(tabbedPane.indexOfComponent(tabIndex.get(hostName)) == -1){
-		//			if(tabIndex.get(hostName) != null){
-		//				tabIndex.remove(hostName);
-		//			}
-		//			JPanel newPanel = new ChatPanel(gui, address);
-		//			tabIndex.put(hostName, newPanel);
-		//			tabbedPane.addTab(hostName, newPanel);
-		//		}
-		
-		// Alternative 2
 		if(tabIndex.get(hostName) == null) {
 
 			JPanel newPanel = new ChatPanel(gui, address);
@@ -92,16 +84,53 @@ public class TabbedChatPanel extends JPanel{
 	}
 
 	/**
+	 * Method to get the name of the host related to the active panel
+	 * @return hostName
+	 */
+	public String getActiveHost(){
+		return tabIndex.inverse().get(tabbedPane.getSelectedComponent());
+	}
+	
+	/**
+	 * Method to change the HostName of an already active tab.
+	 * @param address of the host
+	 * @Param new name for the host
+	 */
+	public void setHostName(byte address, String oldName, byte[] newName){
+		if(tabIndex.get(oldName) != null) {
+			//TODO check if this method works
+			tabbedPane.setTitleAt(address, (String.valueOf(address) + ": " +new String(newName)));
+		}
+	}
+
+	/**
 	 * Parses a chat message to the tab belonging to the specified host
 	 * @param nickName of the user
 	 * @param address of the user
 	 * @param chat message to be parsed
 	 */
-	public void parseMessage(String nickName, int address, String message){
+	public void parseMessage(String nickName, Byte address, String message){
 		String hostName = gui.getUserList().findHostName(address);
+		int adr = address;
+		
 		ChatPanel cp = (ChatPanel) tabIndex.get(hostName);
-		cp.addMessage(nickName, address, message);
-
+		// If no tab is active create a new tab and parse
+		if(cp == null){
+			addChatPanel(hostName, address);
+			((ChatPanel) tabIndex.get(hostName)).addMessage(nickName, adr, message);
+		}
+		// Else just parse and (cp != null)
+		else{
+				cp.addMessage(nickName, adr, message);
+		}
+	}
+	
+	/** 
+	 * Method determine if this component has finished initializing
+	 * @return boolean
+	 */
+	public boolean isReady(){
+		return isReady;
 	}
 
 }

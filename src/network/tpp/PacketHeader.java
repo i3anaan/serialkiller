@@ -139,7 +139,7 @@ public class PacketHeader {
     }
 
     public int getSeqnum() {
-        return (int) Bytes.fromBitSet(raw, 64);
+        return Bytes.fromBitSet(raw, 64) & 0xFF;
     }
 
     protected void setSeqnum(int seqnum) {
@@ -152,10 +152,10 @@ public class PacketHeader {
     }
 
     public int getAcknum() {
-        return (int) Bytes.fromBitSet(raw, 72);
+        return Bytes.fromBitSet(raw, 72) & 0xFF;
     }
 
-    protected void setAcknum(long acknum) {
+    protected void setAcknum(int acknum) {
         if (acknum >= 0 && acknum <= MAX_SEQNUM) {
             raw.or(Bytes.toBitSet((byte) acknum, HEADER_LENGTH * 8, 72));
         } else {

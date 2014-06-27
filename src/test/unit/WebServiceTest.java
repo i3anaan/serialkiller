@@ -38,11 +38,10 @@ public class WebServiceTest {
     }
 
     @Test public void testIndex()   throws Exception { testURL("/"); }
-    @Test public void testChat()    throws Exception { testURL("/chat/"); }
     @Test public void testLogs()    throws Exception { testURL("/logs/"); }
-    @Test public void testFiles()   throws Exception { testURL("/files/"); }
     @Test public void testStats()   throws Exception { testURL("/status/"); }
     @Test public void testThreads() throws Exception { testURL("/threads/"); }
+    @Test public void testRoutes()  throws Exception { testURL("/routes/"); }
 
     private void testURL(String requestURL) throws Exception {
         assertTrue(request(requestURL).startsWith("<html>"));

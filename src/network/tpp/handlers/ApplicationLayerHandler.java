@@ -45,8 +45,11 @@ public class ApplicationLayerHandler extends Handler {
         byte sender = p.header().getSender();
         boolean more = p.header().getMore();
 
+        TPPNetworkLayer.getLogger().debug(toString() + " received " + p.toString() + ".");
+
         // Check if the payload is segmented.
         if (more || segnum != 0) {
+            TPPNetworkLayer.getLogger().debug(p.toString() + " is segmented.");
             // Check for overflow / DoS.
             if (segnum > SAFE_SEGNUM) {
                 // Drop whole sequence.
@@ -74,21 +77,27 @@ public class ApplicationLayerHandler extends Handler {
 
             // If this packet is the last segment, set total.
             if (!more) {
-                sequenceSizes.get(sender).put(seqnum, segnum);
+                sequenceSizes.get(sender).put(seqnum, segnum + 1);
             }
 
             // Check if we have all segments and concatenate data.
             if (sequenceSizes.get(sender).get(seqnum) == segments.get(sender).get(seqnum).size()) {
+                TPPNetworkLayer.getLogger().debug(p.toString() + " is final packet for segment.");
+
                 // Send concatenated payload to application.
                 appQueue.put(new Payload(Packet.concatPayloads(segments.get(sender).get(seqnum).values()), sender));
+                TPPNetworkLayer.getLogger().debug("Payload added to application queue.");
 
                 // Cleanup.
                 segments.get(sender).remove(seqnum);
                 sequenceSizes.get(sender).remove(seqnum);
+            } else if (sequenceSizes.get(sender).get(seqnum) != 0 && sequenceSizes.get(sender).get(seqnum) < segments.get(sender).get(seqnum).size()) {
+                TPPNetworkLayer.getLogger().warning(String.format("Sequence %d from host %d has more (%d) segments than the given number (%d) allows.", seqnum, sender, segments.get(sender).get(seqnum).size(), sequenceSizes.get(sender).get(seqnum)));
             }
         } else {
             // Simple payload.
             appQueue.put(new Payload(p.payload(), sender));
+            TPPNetworkLayer.getLogger().debug("Payload added to application queue.");
         }
     }
 

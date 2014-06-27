@@ -1,6 +1,5 @@
 package application.UserInterface;
 import java.awt.*;
-import java.awt.image.*;
 import javax.swing.*;
 
 /**
@@ -50,8 +49,8 @@ public class BackgroundPanel extends JPanel
 
 		//  Draws the image if there is one
 		if (image != null ){
-		Dimension d = getSize();
-		g.drawImage(image, 0, 0, d.width, d.height, null);
+			Dimension d = getSize();
+			g.drawImage(image, 0, 0, d.width, d.height, null);
 		}
 	}
 
