@@ -15,6 +15,7 @@ import common.Graph;
 import common.Stack;
 import common.Startable;
 import link.FrameLinkLayer;
+import link.PacketFrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
@@ -63,7 +64,7 @@ import log.LogMessage.Subsystem;
  *
  */
 //TODO implement this class more serious.
-public class AngelMaker extends FrameLinkLayer implements Startable{
+public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	
 	public static AngelMaker instance;
 	
