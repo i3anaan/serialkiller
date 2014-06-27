@@ -214,8 +214,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * @param input The byte read from the physical layer.
 	 * @return	The data bit this byte represents.
 	 */
-	public boolean extractBitFromInput(byte input){
-		return (input&1)==1;
+	public boolean[] extractBitFromInput(byte previousByteReceived,byte input){
+		return new boolean[]{(input&1)==1};
 	}
 	
 	/**
@@ -252,10 +252,10 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			
 			
 			//Read bit. (Skips on timeout).
-			Boolean bitReceived = null;
+			boolean[] bitsReceived = null;
 			try {
 				byte receivedByte = readByte();
-				bitReceived = extractBitFromInput(receivedByte);
+				bitsReceived = extractBitFromInput(previousByteReceived,receivedByte);
 				//System.out.println(bitReceived);
 				previousByteReceived = receivedByte; //Currently unused. //TODO really unused?
 				firstRound = false;					
@@ -266,13 +266,14 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				//This might reduce out of sync problems.
 			}
 			
-			if(bitReceived!=null){		
-				queueIn.offer(bitReceived);
+			if(bitsReceived!=null){
+				for(boolean b : bitsReceived){
+					queueIn.offer(b);
+				}
 				if(round<100){
 				//AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
 				}
 				round++;
-				//TODO what to do when overflow.
 			}
 					
 		}
