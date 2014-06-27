@@ -10,7 +10,7 @@ public abstract class PacketFrameLinkLayer extends FrameLinkLayer {
     private byte[] overhead;
 
     public PacketFrameLinkLayer() {
-        overhead = new byte[0];
+        this.reset();
     }
 
     public byte[] readPacket() {
@@ -31,5 +31,9 @@ public abstract class PacketFrameLinkLayer extends FrameLinkLayer {
         overhead = Arrays.copyOfRange(data, packetLength, data.length);
 
         return Arrays.copyOfRange(data, 0, packetLength);
+    }
+    
+    public void reset() {
+    	overhead = new byte[0];
     }
 }
