@@ -301,18 +301,9 @@ public class BitSet2 extends BitSet {
      * @return A new BitSet2 being a concatenation of both.
      */
     public static BitSet2 concatenate(BitSet2 first, BitSet2 second) {
-    	//Use System.arrayCopy?
-    	int newSize = first.length()+second.length();
-    	BitSet2 result = new BitSet2(newSize);
-    	int f = 0;
-    	int s = 0;
-    	for(f=0;f<first.length();f++){
-    		result.set(f+s,first.get(f));
-    	}
-    	for(s=0;s<second.length();s++){
-    		result.set(f+s,second.get(s));
-    	}
-    	
+    	BitSet2 result = new BitSet2(first.length()+second.length());
+    	first.insert(0, first);
+    	first.addAtEnd(second);    	
     	return result;
     }
 	
