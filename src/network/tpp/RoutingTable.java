@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -166,10 +168,10 @@ public class RoutingTable {
 	}
 	
 	/**
-	 * Generate a link to 
+	 * Generate a link to Google's Chart API that shows the routing graph.
 	 */
 	public String toGraphUri() {
-		return "https://chart.googleapis.com/chart?cht=gv&chl=" + toGraph();
+		return "http://chart.googleapis.com/chart?cht=gv&chl=" + toGraph();
 	}
 
     /**

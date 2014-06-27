@@ -14,6 +14,9 @@ import javax.naming.SizeLimitExceededException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -27,53 +30,64 @@ import java.util.concurrent.locks.ReentrantLock;
  * This class also has methods for sending data and tracks sent packets.
  */
 public class TPPNetworkLayer extends NetworkLayer implements Runnable {
-    public static final long TIMEOUT = 10000; // in milliseconds
-    public static final int MAX_RETRANSMISSIONS = 10; // 0 for no maximum
-    public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt"; // TODO: Move to configuration file
+    /** Retransmission timeout in milliseconds. */
+    public static final long TIMEOUT = 10000; // Protocol: no spec
+
+    /** Maximum number of retransmissions until a packet is dropped. */
+    public static final int MAX_RETRANSMISSIONS = 3; // Protocol: 3
+
+    /** The maximum amount of packets that should be in the network for a certain host. Used as a congestion control mechanism. */
+    public static final int MAX_FOR_HOST = 1; // Protocol: 1
+
+    /** The path where the routes file should be located. */
+    public static final String ROUTING_PATH = System.getProperty("user.home") + "/serialkiller/routes.txt";
 
     /** Size of the queue. */
-    public static final int QUEUE_SIZE = 64;
+    public static final int QUEUE_SIZE = 102400;
 
-    /** The logger. */
+    /** The logger for the network layer. */
     private static Logger logger;
 
     /** The thread for this instance. */
     private Thread t;
 
-    /** The collection of handlers used for connecting with underlying layers. */
-    private Collection<Handler> handlers;
+    /** The stack. */
+    private Stack stack;
 
-    /** The retransmission handler. */
-    private Handler retransmissionHandler;
-
-    /** The tunneling handler. */
-    private Handler tunnelingHandler;
-
-    /** The link layer that is used. */
+    /** The (framed) link layer that is used. */
     private FrameLinkLayer link;
-
-    /** The tunneling class instance. */
-    private Tunneling tunnels;
 
     /** The router for this network. */
     private Router router;
 
-    /** A lock for the router. */
-    private Lock routerLock;
+    /** The tunneling instance. */
+    private Tunneling tunnels;
 
-    /** The router queue. */
+    /** The collection of handlers used for connecting with underlying layers. */
+    private Collection<Handler> handlers;
+
+    /** Pointers to individual handlers that are very specific. */
+    private RetransmissionHandler retransmissionHandler; // Handler for retransmissions
+    private ReofferHandler reofferHandler; // Handler for reoffering
+    private TunnelingHandler tunnelingHandler; // Handler for tunneling
+
+    /** The network layer queue: contains packets that have to be handled by the network layer. */
     protected ArrayBlockingQueue<Packet> queue;
 
-    /** The queue for the application layer. */
+    /** The application layer queue: contains packets that are to be sent to the application layer. */
     private ArrayBlockingQueue<Payload> appQueue;
 
-    /** The sent and to be acknowledged packets. */
-    private Map<Integer, HashMap<Integer, Packet>> sent;
+    /** The retransmission queue: contains packets that are to be retransmitted. Releases packets after a specified amount of time. */
+    private DelayQueue<Packet> retransmissionQueue;
+
+    /** Retransmission list, maps the identifier of a packet to packets. */
+    private ConcurrentHashMap<String, Packet> sentPackets;
+
+    /** Congestion control administration: contains the number of packets in the network for a certain TPP address. */
+    private ConcurrentHashMap<Byte, Integer> congestion;
 
     /** The next available sequence number. */
     private int seqnum;
-
-    private Stack stack;
 
     /**
      * Constructs a new NetworkLayer instance.
@@ -83,12 +97,14 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         queue = new ArrayBlockingQueue<Packet>(QUEUE_SIZE, true);
         appQueue = new ArrayBlockingQueue<Payload>(QUEUE_SIZE, true);
-        sent = new TreeMap<Integer, HashMap<Integer, Packet>>();
+        retransmissionQueue = new DelayQueue<Packet>();
+
+        sentPackets = new ConcurrentHashMap<String, Packet>();
+
+        congestion = new ConcurrentHashMap<Byte, Integer>();
 
         router = new Router();
-        routerLock = new ReentrantLock(true);
-
-        this.tunnels = new Tunneling(this);
+        tunnels = new Tunneling(this);
 
         // Construct and run thread
         t = new Thread(this);
@@ -96,11 +112,135 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     }
 
     /**
-     * Returns the incoming queue of the network layer.
-     * @return The incoming queue.
+     * Returns a collection of all addresses known to the router.
+     * @return The collection of all known addresses.
+     */
+    public Collection<Byte> hosts() {
+        Collection<Byte> hosts = new ArrayList<Byte>();
+
+        for (Host h : router.hosts()) {
+            hosts.add(h.address());
+        }
+
+        return hosts;
+    }
+
+    /**
+     * Returns the address of this host.
+     * @return The address of this host.
+     */
+    public Byte host() {
+        return router.self();
+    }
+
+    /**
+     * Returns the queue of the network layer. Elements in this queue will be
+     * handled by the network layer.
+     * @return The network layer queue.
      */
     public ArrayBlockingQueue<Packet> queue() {
         return queue;
+    }
+
+    /**
+     * Returns the queue for retransmissions. Only the retransmission handler
+     * should be removing elements from this queue.
+     * @return The retransmission queue.
+     */
+    public DelayQueue<Packet> retransmissionQueue() {
+        return retransmissionQueue;
+    }
+
+    /**
+     * Marks the specified packet as sent. Adds the packet to the retransmission
+     * queue with the default delay.
+     * @param p The packet.
+     */
+    private void markAsSent(Packet p) {
+        p.delay(TIMEOUT);
+        retransmissionQueue.offer(p);
+        sentPackets.put(p.id(), p);
+        increaseCongestion(p.header().getDestination());
+    }
+
+    /**
+     * Marks the specified packet as acknowledged. Removes the packet from the
+     * retransmission queue and sets the delay to zero.
+     * @param p The packet.
+     */
+    private void markAsAcknowledged(Packet p) {
+        // Remove packet from retransmission queue.
+        if (retransmissionQueue.remove(p)) {
+            // If removed, set the delay to 0. If not removed, keep delay.
+            p.delay(0);
+        }
+        sentPackets.remove(p.id());
+        decreaseCongestion(p.header().getDestination());
+    }
+
+    /**
+     * Marks the packet with the specified id as acknowledged. Removes the
+     * packet from the retransmission queue and sets the delay to zero.
+     * @param id The id of the packet.
+     */
+    private void markAsAcknowledged(String id) {
+        if (sentPackets.containsKey(id)) {
+            markAsAcknowledged(sentPackets.get(id));
+        }
+    }
+
+    /**
+     * Marks a packet as dropped.
+     * @param p The packet.
+     */
+    public void markAsDropped(Packet p) {
+        // Remove packet from retransmission queue.
+        if (retransmissionQueue.remove(p)) {
+            // If removed, set the delay to 0. If not removed, keep delay.
+            p.delay(0);
+        }
+        sentPackets.remove(p.id());
+        decreaseCongestion(p.header().getDestination());
+    }
+
+    /**
+     * Increases the network congestion for a host.
+     * @param address The address of the host.
+     */
+    private void increaseCongestion(Byte address) {
+        // Create entry if not exists.
+        if (!congestion.containsKey(address)) {
+            congestion.put(address, 1);
+        } else {
+            congestion.put(address, congestion.get(address) + 1);
+        }
+        TPPNetworkLayer.getLogger().debug(String.format("Congestion for %d increased to %d", address, congestion.get(address)));
+    }
+
+    /**
+     * Decreases the network congestion for a host to a minimum of 0.
+     * @param address The address of the host.
+     */
+    private void decreaseCongestion(Byte address) {
+        // Create entry if not exists.
+        if (!congestion.containsKey(address)) {
+            congestion.put(address, 0);
+        } else {
+            congestion.put(address, Math.max(congestion.get(address) - 1, 0));
+        }
+        // Immediately send the next packet.
+        reofferHandler.notify(address);
+        TPPNetworkLayer.getLogger().debug(String.format("Congestion for %d decreased to %d", address, congestion.get(address)));
+    }
+
+    /**
+     * Returns the congestion (number of packets in the network) for the
+     * specified host.
+     * @param address The address of the host.
+     * @return The congestion for the specified host.
+     */
+    public int getCongestion(Byte address) {
+        return congestion.get(address) != null ? congestion.get(address) : 0;
     }
 
     /**
@@ -124,10 +264,16 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         try {
             return appQueue.take();
         } catch (InterruptedException e) {
-            return new Payload(new byte[0], (byte) 0);
+            return new Payload(new byte[0], router.self());
         }
     }
 
+    /**
+     * Send data using this NetworkLayer. The data may be split into segments
+     * and being reassembled at the other end.
+     * @param payload The payload.
+     * @throws SizeLimitExceededException The data is too long.
+     */
     @Override
     public void send(Payload payload) throws SizeLimitExceededException {
         send(payload.data, payload.address);
@@ -137,6 +283,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Send data using this NetworkLayer. The data may be split into segments
      * and being reassembled at the other end.
      * @param data The data.
+     * @throws SizeLimitExceededException The data is too long.
      */
     public void send(byte[] data, byte destination) throws SizeLimitExceededException {
         int segments = (int) Math.ceil((double) data.length / Packet.MAX_PAYLOAD_LENGTH);
@@ -153,13 +300,20 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.header().setMore(i + 1 != segments);
                 p.header().setSender(router.self());
                 p.header().setDestination(destination);
-                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, Math.min(Packet.MAX_PAYLOAD_LENGTH * (i+1), segments)));
+
+                int end = Packet.MAX_PAYLOAD_LENGTH * (i+1) > data.length ? data.length : Packet.MAX_PAYLOAD_LENGTH * (i+1);
+
+                p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, end));
 
                 // Send it.
-                sendPacket(p);
+                try {
+                    queue.put(p);
+                } catch (InterruptedException e) {
+                    // Do nothing.
+                }
             }
         } else {
-            TPPNetworkLayer.getLogger().error(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
+            TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
             throw new SizeLimitExceededException("The data is too long for the packets.");
         }
     }
@@ -168,91 +322,61 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Sends the given packet.
      * @param p The packet.
      */
-    private void sendPacket(Packet p) {
-        routerLock.lock();
-
+    public void sendPacket(Packet p) {
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
-            if (!host.handler().offer(p)) {
-                TPPNetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
-            }
+            if (p.header().getDestination() == router.self() // Packets to ourselves do not get congestion control.
+                    || (p.header().getSender() == router.self() && p.header().getAck()) // Packets that are acknowledgements do not get congestion control.
+                    || (p.header().getSender() == router.self() && getCongestion(p.header().getDestination()) < MAX_FOR_HOST)) { // Packets for hosts that are congested by us can be sent.
+                // Decrease TTL if needed.
+                if (p.header().getSender() != router.self()) {
+                    p.header().decreaseTTL();
+                }
 
-            // Mark packet as sent when we are the original sender.
-            if (p.header().getSender() == router.self()) {
-                markSent(p);
+                // Offer packet to handler.
+                if (!host.handler().offer(p)) {
+                    TPPNetworkLayer.getLogger().error(p.toString() + " dropped, handler queue full.");
+                    return; // We are done.
+                } else {
+                    TPPNetworkLayer.getLogger().debug(p.toString() + " offered to " + host.handler().toString() + ".");
+                }
+
+                // Mark packet as sent when we are the original sender and the packet is not an acknowledgement.
+                if (p.header().getSender() == router.self() && p.header().getDestination() != router.self() && !p.header().getAck()) {
+                    markAsSent(p);
+                }
+            } else if(p.header().getSender() == router.self() && getCongestion(p.header().getDestination()) >= MAX_FOR_HOST) {
+                // Offer again.
+                reofferHandler.offer(p);
+                TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
             }
         } else {
-            TPPNetworkLayer.getLogger().error(p.toString() + " is not routeable. Packet dropped.");
+            TPPNetworkLayer.getLogger().error(p.toString() + " dropped, packet is not routable.");
         }
-
-        routerLock.unlock();
     }
 
-    /**
-     * Sends retransmissions to the RetransmissionHandler.
-     */
-    public void checkRetransmissions() {
-        TPPNetworkLayer.getLogger().debug(String.format("Checking for retransmissions: %s not acknowledged.", sent.size()));
-
-        for (Map<Integer, Packet> m : sent.values()) {
-            for (Packet p : m.values()) {
-                if (p.timestamp() + TIMEOUT < System.currentTimeMillis()) {
-                    // We handled this one.
-                    sent.get(p.header().getSeqnum()).remove(p.header().getSegnum());
-                    if (sent.get(p.header().getSeqnum()).size() == 0) {
-                        sent.remove(p.header().getSeqnum());
-                    }
-
-                    // Only retransmit if the threshold is not exceeded.
-                    if (MAX_RETRANSMISSIONS > 0 && p.retransmissions() < MAX_RETRANSMISSIONS) {
-                        // Offer packet to network.
-                        if (!retransmissionHandler.offer(p)) {
-                            // Keep in sent list and delay retransmission, queue full.
-                            if (!sent.containsKey(p.header().getSeqnum())) {
-                                sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
-                            }
-                            sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
-                            TPPNetworkLayer.getLogger().debug(p.toString() + " is delayed for retransmission, NetworkLayer queue full.");
-                        } else {
-                            p.retransmit(); // Mark packet as retransmitted once again.
-                            TPPNetworkLayer.getLogger().debug(p.toString() + " offered for retransmission.");
-                        }
-                    } else {
-                        TPPNetworkLayer.getLogger().debug(p.toString() + String.format(" dropped, %d retransmissions failed.", p.retransmissions()));
-                    }
-                }
-            }
-        }
-
-        TPPNetworkLayer.getLogger().debug(String.format("Checked for retransmissions: %s not acknowledged.", sent.size()));
+    private void handleAcknowledgement(Packet p) {
+        // Mark packet as acknowledged.
+        markAsAcknowledged(Packet.id(p.header().getSender(), p.header().getAcknum(), p.header().getSegnum()));
     }
 
-    /**
-     * Marks the given packet as sent.
-     * @param p The packet.
-     */
-    public void markSent(Packet p) {
-        p.timestamp(System.currentTimeMillis());
-        if (!sent.containsKey(p.header().getSeqnum())) {
-            sent.put(p.header().getSeqnum(), new HashMap<Integer, Packet>());
-        }
-        sent.get(p.header().getSeqnum()).put(p.header().getSegnum(), p);
-        TPPNetworkLayer.getLogger().debug(p.toString() + " marked as sent.");
+    private void handlePassthrough(Packet p) {
+        // Send the packet further in the network.
+        sendPacket(p);
     }
 
-    /**
-     * Returns a collection of all addresses known to the router.
-     * @return The collection of all known addresses.
-     */
-    public Collection<Byte> hosts() {
-        Collection<Byte> hosts = new ArrayList<Byte>();
-
-        for (Host h : router.hosts()) {
-            hosts.add(h.address());
+    private void handleForApplication(Packet p) {
+        // Create and send acknowledgement if the packet is not originating from us.
+        if (p.header().getSender() != router.self()) {
+            Packet ack = p.createAcknowledgement(nextSeqnum());
+            sendPacket(ack);
+        } else {
+            markAsAcknowledged(p);
         }
 
-        return hosts;
+        // Send the packet further in the network.
+        sendPacket(p);
     }
 
     @Override
@@ -266,21 +390,22 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         while (run) {
             try {
                 Packet p = queue.take();
-                p.header().decreaseTTL(); // Decrease the TTL for this hop.
 
                 // Check if this is an acknowledgement or should be acknowledged.
-                if (p.header().getAck()) {
-                    sent.remove(p.header().getAcknum());
+                if (p.header().getAck() && p.header().getDestination() == router.self()) {
+                    // Acknowledgement for us.
                     TPPNetworkLayer.getLogger().debug("Received acknowledgement: " + p.toString() + ".");
-                    return; // We are done.
+                    handleAcknowledgement(p);
                 } else if (p.header().getDestination() == router.self()) {
-                    // Send acknowledgement if we are the final destination.
-                    Packet ack = p.createAcknowledgement(nextSeqnum());
-                    queue.offer(ack);
-                    TPPNetworkLayer.getLogger().debug("Sent acknowledgement for " + p.toString() + ": " + ack.toString() + ".");
+                    // We are the final destination.
+                    TPPNetworkLayer.getLogger().debug("Received packet for application: " + p.toString() + ".");
+                    handleForApplication(p);
+                } else {
+                    // We are merely a simple workman, bossed around and without any initiative.
+                    // In other words, send the packet to another host.
+                    TPPNetworkLayer.getLogger().debug("Received packet for remote host: " + p.toString() + ".");
+                    handlePassthrough(p);
                 }
-
-                sendPacket(p);
             } catch (InterruptedException e) {
                 // Exit gracefully.
                 run = false;
@@ -317,6 +442,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
         handlers.remove(retransmissionHandler);
         retransmissionHandler = new RetransmissionHandler(this);
         handlers.add(retransmissionHandler);
+
+        // Add reoffering handler
+        handlers.remove(reofferHandler);
+        reofferHandler = new ReofferHandler(this);
+        handlers.add(reofferHandler);
 
         // Add tunneling handler
         handlers.remove(tunnelingHandler);
@@ -396,15 +526,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
     public void loadDefaultRoutes() {
         TPPNetworkLayer.getLogger().warning("Reloading routes from file (" + ROUTING_PATH + ").");
 
-        // Lock router
-        routerLock.lock();
-
         // Create new routes
         constructRoutes(new Router(), ROUTING_PATH);
         constructHandlers();
-
-        // Free router
-        routerLock.unlock();
     }
 
     /**
@@ -420,17 +544,11 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param filePath The routes file.
      */
     public void patchRoutes(String filePath) {
-        TPPNetworkLayer.getLogger().warning("Patching routes from file (" + filePath + ").");
-
-        // Lock router
-        routerLock.lock();
+        TPPNetworkLayer.getLogger().info("Patching routes from file (" + filePath + ").");
 
         // Add new routes
         constructRoutes(router, filePath);
         constructHandlers();
-
-        // Free router
-        routerLock.unlock();
     }
 
     /**
@@ -438,33 +556,10 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      */
     public void start() {
         assert (link != null);
+        assert (router != null);
+
         t.start();
-        TPPNetworkLayer.getLogger().warning("NetworkLayer started.");
-    }
-
-    /**
-     * Starts all handlers.
-     */
-    private void startHandlers() {
-        for (Handler h : handlers) {
-            h.start();
-        }
-    }
-
-    /**
-     * Stops all handlers.
-     */
-    private void stopHandlers() {
-        for (Handler h : handlers) {
-            h.stop();
-        }
-    }
-
-    public static Logger getLogger() {
-        if (logger == null) {
-            logger = new Logger(LogMessage.Subsystem.NETWORK);
-        }
-        return logger;
+        TPPNetworkLayer.getLogger().info("NetworkLayer started.");
     }
 
     @Override
@@ -484,5 +579,32 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
 
         // Return the thread.
         return this.t;
+    }
+
+    /**
+     * Starts all handlers.
+     */
+    private void startHandlers() {
+        for (Handler h : handlers) {
+            h.start();
+        }
+        tunnels.start();
+    }
+
+    /**
+     * Stops all handlers.
+     */
+    private void stopHandlers() {
+        tunnels.stop();
+        for (Handler h : handlers) {
+            h.stop();
+        }
+    }
+
+    public static Logger getLogger() {
+        if (logger == null) {
+            logger = new Logger(LogMessage.Subsystem.NETWORK);
+        }
+        return logger;
     }
 }

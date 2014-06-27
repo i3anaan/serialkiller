@@ -1,18 +1,23 @@
 package network.tpp;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Bytes;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 /**
  * Transport/network layer packet.
  *
+ * Implements the Delayed interface so it can be used in DelayQueues.
+ *
  * Protocol: https://github.com/cschutijser/tpp/blob/master/transport-network.md
  */
-public class Packet {
+public class Packet implements Delayed {
     public static final int HEADER_LENGTH = PacketHeader.HEADER_LENGTH;
     public static final int MAX_TTL = PacketHeader.MAX_TTL;
     public static final int MAX_SEQNUM = PacketHeader.MAX_SEQNUM;
@@ -32,8 +37,15 @@ public class Packet {
     /** Timestamp. */
     private long timestamp;
 
+    private long delay;
+    private TimeUnit delayUnit = TimeUnit.MILLISECONDS;
+    private Stopwatch stopwatch;
+
     /** Number of retransmissions. */
     private int retransmissions;
+
+    /** The reason for rejecting the packet. */
+    private RejectReason reason = RejectReason.UNKNOWN;
 
     /**
      * Constructs a new, empty Packet object with a new, empty header.
@@ -42,6 +54,9 @@ public class Packet {
         header = new PacketHeader();
         header.setSeqnum(seqnum);
         header.setTTL(MAX_TTL);
+        payload = new byte[0];
+        delay = 0;
+        stopwatch = Stopwatch.createUnstarted();
     }
 
     /**
@@ -49,8 +64,12 @@ public class Packet {
      * @param raw The raw input data.
      */
     public Packet(byte[] raw) {
-        if (raw == null || raw.length < HEADER_LENGTH) {
-            throw new IllegalArgumentException("The raw data is not of the correct size.");
+        if (raw == null) {
+        	throw new IllegalArgumentException("The raw data can not be null.");
+        }
+        
+        if (raw.length < HEADER_LENGTH) {
+            throw new IllegalArgumentException(String.format("The raw data is is shorter than the header (%d bytes).", raw.length));
         }
 
         header = new PacketHeader(Arrays.copyOfRange(raw, 0, HEADER_LENGTH));
@@ -143,6 +162,10 @@ public class Packet {
         // Verify length
         if (valid) {
             valid = payload().length == header().getLength();
+
+            if (!valid) {
+                reason = RejectReason.LENGTH;
+            }
         }
 
         // Verify checksum
@@ -158,6 +181,10 @@ public class Packet {
 
             // Restore original checksum.
             this.header().setChecksum(checksum);
+
+            if (!valid) {
+                reason = RejectReason.CHECKSUM;
+            }
         }
 
         return valid;
@@ -186,12 +213,8 @@ public class Packet {
         return result;
     }
 
-    public static PacketHeader parseHeader(byte[] raw) {
-        return new PacketHeader(raw);
-    }
-
     /**
-     * Get the meta timestamp.
+     * [METADATA] Get the meta timestamp.
      * @return The timestamp.
      */
     public long timestamp() {
@@ -199,7 +222,7 @@ public class Packet {
     }
 
     /**
-     * Set the meta timestamp for this packet.
+     * [METADATA] Set the meta timestamp for this packet.
      * @param timestamp The timestamp.
      */
     public void timestamp(long timestamp) {
@@ -207,7 +230,7 @@ public class Packet {
     }
 
     /**
-     * Returns the amount of retransmissions done for this packet.
+     * [METADATA] Returns the amount of retransmissions done for this packet.
      * @return The amount of retransmissions done for this packet.
      */
     public int retransmissions() {
@@ -215,13 +238,116 @@ public class Packet {
     }
 
     /**
-     * Marks this packet as being retransmitted. Updates a counter.
+     * [METADATA] Marks this packet as being retransmitted. Updates a counter.
      */
     public void retransmit() {
         retransmissions++;
     }
 
+    /**
+     * [METADATA] Returns the reason for rejecting the packet. This method is
+     * only useful right after running the verify() method.
+     * @return The reason for rejecting the packet.
+     */
+    public RejectReason reason() {
+        return reason;
+    }
+
+    /**
+     * [METADATA] Returns the delay used for delay queues.
+     * @return The delay.
+     */
+    public long delay() {
+        return this.delay;
+    }
+
+    /**
+     * [METADATA] Sets the delay used for delay queues.
+     * @param delay The delay.
+     */
+    public void delay(long delay) {
+        this.delay = delay;
+    }
+
+    /**
+     * [METADATA] Returns the delay used for delay queues in the given time
+     * unit. This method is used by DelayQueue instances.
+     */
+    @Override
+    public long getDelay(TimeUnit unit) {
+        if (!stopwatch.isRunning()) {
+            stopwatch.reset();
+            stopwatch.start();
+        }
+        long calculated = delay > stopwatch.elapsed(delayUnit) ? delay - stopwatch.elapsed(delayUnit) : 0;
+        if (calculated == 0) {
+            stopwatch.stop();
+        }
+        return unit.convert(calculated, delayUnit);
+    }
+
+    /**
+     * [METADATA] Compares two Packet instances based on the delay. This method
+     * is used by DelayQueue instances.
+     */
+    @Override
+    public int compareTo(Delayed o) {
+        return new Long(getDelay(delayUnit)).compareTo(o.getDelay(delayUnit));
+    }
+
+    /**
+     * [METADATA] Returns the string identifier of this packet.
+     * @return The identifier.
+     */
+    public String id() {
+        return Packet.id(header.getDestination(), header.getSeqnum(), header.getSegnum());
+    }
+
+    /**
+     * Returns a string representation of this object.
+     * @return The string representation.
+     */
     public String toString() {
-        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d;>", header().getSender(), header().getDestination(), header().getSeqnum(), header.getSegnum());
+        return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d; Ack: %d; More: %b>", header.getSender(), header.getDestination(), header.getSeqnum(), header.getSegnum(), header.getAcknum(), header.getMore());
+    }
+
+    /**
+     * Parses raw data into a new PacketHeader object.
+     * @param raw The raw input data.
+     * @return The PacketHeader object.
+     */
+    public static PacketHeader parseHeader(byte[] raw) {
+        return new PacketHeader(raw);
+    }
+
+    /**
+     * Returns a packet string identifier based on the specified parameters.
+     * @param host The original destination host.
+     * @param seqnum The sequence number.
+     * @param segnum The segment number.
+     * @return The identifier.
+     */
+    public static String id(byte host, int seqnum, int segnum) {
+        return String.format("%d.%d.%d", host, seqnum, segnum);
+    }
+
+    /**
+     * Identifies reasons for rejecting a packet after verifying. This is
+     * mainly used for logging purposes.
+     */
+    public enum RejectReason {
+        UNKNOWN ("Unknown"),
+        LENGTH ("Length"),
+        CHECKSUM ("Checksum");
+
+        private String description;
+
+        RejectReason(String description) {
+            this.description = description;
+        }
+
+        public String toString() {
+            return description;
+        }
     }
 }

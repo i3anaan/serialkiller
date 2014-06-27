@@ -66,8 +66,10 @@ public abstract class Handler implements Runnable {
      */
     public void start() {
         run = true;
-        t.start();
-        TPPNetworkLayer.getLogger().alert(toString() + " started.");
+        if (!t.isAlive()) {
+            t.start();
+            TPPNetworkLayer.getLogger().alert(toString() + " started.");
+        }
     }
 
     /**
@@ -76,7 +78,9 @@ public abstract class Handler implements Runnable {
      */
     public void stop() {
         run = false;
-        t.interrupt();
+        if (t.isAlive()) {
+            t.interrupt();
+        }
         try {
             t.join();
         } catch (InterruptedException e) {

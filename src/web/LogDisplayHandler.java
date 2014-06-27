@@ -47,10 +47,13 @@ class LogDisplayHandler extends ServiceHandler {
         	puts(r, "<td>[%s]</td>", new Date(lm.getTimestamp()));
         	puts(r, "<td>[%s]</td>", lm.getSubsystem());
         	puts(r, "<td>[%s]</td>", lm.getThread());
-        	puts(r, "<td>%s</td>", lm.getMessage());
+        	puts(r, "<td>%s</td>", lm.getEscapedMessage());
         	puts(r, "</tr>");
         }
         puts(r, "</table>");
+
+        // Add autorefresh
+        puts(r, "<script type='text/javascript'>setTimeout('document.location.reload(true);', %d);</script>", 5000);
 
         return r;
     }

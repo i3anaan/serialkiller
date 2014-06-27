@@ -15,6 +15,7 @@ import common.Graph;
 import common.Stack;
 import common.Startable;
 import link.FrameLinkLayer;
+import link.PacketFrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
@@ -64,7 +65,7 @@ import log.LogMessage.Subsystem;
  *
  */
 //TODO implement this class more serious.
-public class AngelMaker extends FrameLinkLayer implements Startable{
+public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	
 	public static AngelMaker instance;
 	
@@ -111,11 +112,6 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	@Override
 	public byte[] readFrame() {
 		return manager.readBytes();
-	}
-
-	@Override
-	public String toCoolString() {
-		return toString();
 	}
 
 	@Override

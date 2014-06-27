@@ -1,79 +1,52 @@
 package application.UserInterface;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Dimension;
-
-import javax.imageio.ImageIO;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UIManager.*;
-
-import common.Stack;
-import common.Startable;
-import application.*;
-import application.message.ChatMessage;
-import application.message.FileOfferMessage;
-
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Collection;
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
 
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.SwingConstants;
+
 import log.LogMessage;
 import log.Logger;
+import application.ApplicationLayer;
+import application.message.*;
 
 
-public class GUI extends JFrame implements ActionListener, ItemListener, Observer{
+public class GUI extends JFrame implements Observer{
 
 	/** The Logger object used by this layer to send log messages to the web interface */
 	private static Logger logger;
-
-	// private variables
-	private		Preferences 		prefs; 					
+	/** The preferences object used by this application */
+	private		Preferences 		prefs; 
+	/** The application layer this application communicates with */
 	private 	ApplicationLayer 	apl;
-	private 	TabbedChatPanel 	cp; 					
+	/** The container for all the ChatPanel Tabs*/
+	private 	TabbedChatPanel 	cp; 			
+	/** The list of hostNames we can communicate with */
 	private 	UserListPanel 		ulp;
+	private JMenuItem sendFileItem;
 
 	public GUI(ApplicationLayer applicationLayer){
 		super("G.A.R.G.L.E.");
 		apl = applicationLayer;
-		
-		// Setup Observer/Observable relation
-		apl.addObserver(this);
-		
 
 		// Initialize initial variables
 		prefs 				= Preferences.userNodeForPackage(getClass());
-		//cp 					= new ChatPanel(this);
 		cp					= new TabbedChatPanel(this);
-		ulp 				= new UserListPanel(this);
+		ulp 				= new UserListPanel(this, loadHostList());
 
 		// Layout main application Window
 		this.setLayout(new BorderLayout());
@@ -90,15 +63,15 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 			public void windowClosed(final WindowEvent e) {
 				System.exit(0);
 			}
-		}
-				);
+		});
 
+		// Start observable relation and make GUI ready for interaction
+		Start();
 		pack();
 		validate();
 		setVisible(true);
-		
-		GUI.getLogger().warning("GUI started.");
 
+		GUI.getLogger().info("GUI started.");
 	}
 
 	private void buildBarMenu(){
@@ -110,32 +83,21 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 
 		menu.setHorizontalTextPosition(SwingConstants.CENTER);
 		menu.setVerticalTextPosition(SwingConstants.BOTTOM);
-
 		menuBar.add(menu);
 
 		// SendFile Item
-		JMenuItem sendFileItem = new JMenuItem("Send File");
+		sendFileItem = new JMenuItem("Send File");
 		sendFileItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser c = new JFileChooser();
 				// Open dialog:
-				int rVal = c.showOpenDialog(GUI.this);
-				if (rVal == JFileChooser.APPROVE_OPTION) {
-					apl.readFile(c.getSelectedFile().getAbsolutePath());
+				if(cp.getActiveHost() != null){
+					int rVal = c.showOpenDialog(GUI.this);
+					if (rVal == JFileChooser.APPROVE_OPTION) {
+						apl.sendFileOffer(c.getSelectedFile().getAbsolutePath(), ulp.findValueAddress(cp.getActiveHost()));
+					}
 				}
-				if (rVal == JFileChooser.CANCEL_OPTION) {
-
-				}
-			}
-		});
-		// Exit item
-		JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				System.exit(0);
 			}
 		});
 		// Options item
@@ -147,13 +109,20 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 				buildOptionMenu();
 			}
 		});
+		// Exit item
+		JMenuItem exitItem = new JMenuItem("Exit");
+		exitItem.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 
 		menu.add(sendFileItem);
 		menu.add(optionItem);
 		menu.add(exitItem);
 
 		this.setJMenuBar(menuBar);
-
 	}
 
 	/**
@@ -166,37 +135,10 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	}
 
 	private void buildChatMenu() {
-
 		this.add(cp, BorderLayout.CENTER);
-		cp.addChatPanel("host 5", (byte)5);
-		cp.addChatPanel("host 4", (byte)4);
 		this.add(ulp, BorderLayout.EAST);
-
-	}
-	
-	/**
-	 * getter for the UserListPanel containing a list of all the hosts
-	 * @return UserLisPanel
-	 */
-	public UserListPanel getUserList(){
-		return ulp;
 	}
 
-	/**
-	 * getter for the Preferences object belonging to this application
-	 * @return preferences
-	 */
-	public Preferences getPreferences(){
-		return prefs;
-	}
-	
-	/**
-	 * getter for the ApplicationLayer being used by this application
-	 * @return ApplicationLayer
-	 */
-	public ApplicationLayer getApplicationLayer(){
-		return apl;
-	}
 	/**
 	 * Method to be called for saving files when a file transfer
 	 * request is received, returns null when file offer is refused
@@ -206,7 +148,6 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 	 * @return path to save file to
 	 */
 	private String saveFile(String senderName, String fileName, int fileSize){
-
 		FileOfferDialog fod = new FileOfferDialog(GUI.this, senderName, fileName, fileSize);
 		fod.setVisible(true);
 
@@ -215,39 +156,42 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		return rval;
 	}
 
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-
-
+	/**
+	 * getter for the UserListPanel containing a list of all the hosts
+	 * @return UserLisPanel
+	 */
+	public UserListPanel getUserList(){
+		return ulp;
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
+	/**
+	 * getter for the main chat panel in this application
+	 * @return TabbedChatPanel
+	 */
+	public TabbedChatPanel getChatPanel(){
+		return cp;
 	}
 
-	@Override
-	public void update(Observable o, Object arg) {
-
-
-		if(arg instanceof ChatMessage){
-			//cp.addMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
-			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
-		}
-		else if(arg instanceof FileOfferMessage){
-			// TODO 1: play sound
-			// TODO 2: parse system message
-			
-			//cp.addMessage("FILE OFFER", ((FileOfferMessage) arg).getAddress(), ((FileOfferMessage) arg).getFileName() + " | File Size: " + ((FileOfferMessage) arg).getFileSize() + " bytes");
-			saveFile("DEBUG", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
-		}
-
-
+	/**
+	 * getter for the Preferences object belonging to this application
+	 * @return preferences
+	 */
+	public Preferences getPreferences(){
+		return prefs;
 	}
 
-	/** Returns the Logger object for this GUI */
+	/**
+	 * getter for the ApplicationLayer being used by this application
+	 * @return ApplicationLayer
+	 */
+	public ApplicationLayer getApplicationLayer(){
+		return apl;
+	}
+
+	/**
+	 * Returns the Logger object for this GUI
+	 * @return Logger object
+	 */
 	public static Logger getLogger() {
 		if (logger == null) {
 			logger = new Logger(LogMessage.Subsystem.APPLICATION);
@@ -255,21 +199,55 @@ public class GUI extends JFrame implements ActionListener, ItemListener, Observe
 		return logger;
 	}
 
-	public static void main(String[] args) throws UnsupportedEncodingException {
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
+	/**
+	 * Loads a collection holding a list of hosts into the GUI.
+	 * @return the collection of hosts
+	 */
+	public Collection<Byte> loadHostList(){
+		return apl.getHosts();
+	}
+
+	/**
+	 * Method to retrieve the address of this host.
+	 * @return the address of this host.
+	 */
+	public Byte getHost(){
+		return apl.getHost();
+	}
+
+	// Starter of the GUI
+	private void Start(){
+		// Setup Observer/Observable relation
+		apl.addObserver(this);
+		apl.getHosts(true);
+	}
+	// Update Event Methods
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// Chat message has been received
+		if(arg instanceof ChatMessage){
+			cp.parseMessage(((ChatMessage) arg).getNickname(), ((ChatMessage) arg).getAddress(),((ChatMessage) arg).getMessage());
+		}
+		// File offer has been received
+		else if(arg instanceof FileOfferMessage){
+			// If IgnoreFileTransfer option has been set the offer will be ignored
+			if(!(this.getPreferences().get("TRANSFERIGNORE", "").equals("true"))){
+				String filePath = saveFile(ulp.findHostName(((FileOfferMessage) arg).getAddress()), ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize());
+				if(filePath != null){
+					apl.sendFileAccept((FileOfferMessage) arg, filePath);
+					cp.parseMessage(new Date().toString(), ((FileOfferMessage) arg).getAddress(), String.format("Accepted file offer for: %s (%d bytes)", ((FileOfferMessage) arg).getFileName(), ((FileOfferMessage) arg).getFileSize()));
 				}
 			}
-		} catch (Exception e) {
-			// If Nimbus is not available, fall back to cross-platform
-			try {
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			} catch (Exception ex) {
-
-			}
+		}
+		// WHOIS response has been received
+		else if(arg instanceof IdentificationMessage){
+			//TODO test if this method works
+			//cp.setHostName(((IdentificationMessage) arg).getAddress(), ulp.findHostName(((IdentificationMessage) arg).getAddress()), ((IdentificationMessage) arg).getPayload());
+			ulp.setHostName(((IdentificationMessage) arg).getAddress(), ((IdentificationMessage) arg).getPayload());
+		}
+		else if(arg instanceof FileTransferMessage){
+			cp.parseMessage(new Date().toString(), ((FileTransferMessage) arg).getAddress(), String.format("Completed file transfer for: %s (%d bytes)", ((FileTransferMessage) arg).getFileName(), ((FileTransferMessage) arg).getFileSize()));
 		}
 	}
 }

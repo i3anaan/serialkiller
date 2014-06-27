@@ -289,11 +289,6 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		}
 	}
 	
-	@Override
-	public String toCoolString(){
-		return "TODO: Not cool"; //TODO Wander;
-	}
-	
 	public class PanicException extends RuntimeException{
 		
 	}
