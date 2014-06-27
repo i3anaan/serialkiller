@@ -19,9 +19,9 @@ public class BitSetTests {
 		assertEquals(8, BitSet2.concatenate(bs1,bs2).length());
 		
 		BitSet2 bs3 = new BitSet2(8);
-		BitSet2 bs4 = new BitSet2();
-		BitSet2 bs5 = new BitSet2(8);
-		bs5.set(9,false);
+		BitSet2 bs4 = new BitSet2(1);
+		BitSet2 bs5 = new BitSet2(9);
+		bs5.set(8,false);
 		bs4.set(0,false);
 		assertEquals(bs5,BitSet2.concatenate(bs3, bs4));
 		
@@ -38,6 +38,15 @@ public class BitSetTests {
 		assertEquals(5,bs6.length());
 		bs6.set(5,false);
 		assertEquals(6,bs6.length());
+	}
+	
+	@Test
+	public void testContains() {
+		BitSet2 bs = new BitSet2("00001001000011");
+		assertEquals(4, bs.contains(new BitSet2("1001")));
+		assertEquals(0, bs.contains(new BitSet2("00")));
+		assertEquals(-1, bs.contains(new BitSet2("1111")));
+		assertEquals(10, bs.contains(new BitSet2("0011")));
 	}
 
 }

@@ -27,6 +27,25 @@ public class BitSet2 extends BitSet {
 		}
 	}
 	
+	public BitSet2(byte[] arr){
+		for(int i=0;i<arr.length;i++){
+			for(int bit=0;bit<8;bit++){
+				this.set(i*8 +(7-bit),((arr[i]>>bit)&1)==1);
+			}
+		}
+		//TODO unit test dit.
+	}
+	
+	public BitSet2(String string){
+		super();
+		for(int i=0;i<string.length();i++){
+			this.set(i,string.charAt(i)=='1');
+		}
+	}
+	
+	
+	
+	
 	public BitSet2(byte b){
 		super();
 		for(int i=0;i<8;i++){
@@ -83,6 +102,9 @@ public class BitSet2 extends BitSet {
 		for(int i=0;i<length();i++){
 			s = s + (this.get(i) ? "1" : "0");
 		}
+		if(s.equals("")){
+			s = "[empty]";
+		}
 		return s;
 	}
 	
@@ -102,6 +124,18 @@ public class BitSet2 extends BitSet {
 	}
 	
 	/**
+	 * Adds a bit at the end of this bitset2, same as set(length(), boolean)
+	 */
+	public void addAtEnd(boolean bit){
+		this.set(length,bit);
+	}
+	public void addAtEnd(BitSet2 bits){
+		for(int i=0;i<bits.length;i++){
+			this.set(length,bits.get(i));
+		}		
+	}
+	
+	/**
 	 * Inserts a boolean value on the given index.
 	 * This means that the boolean previously on the index will now be on index+1
 	 * @param index
@@ -115,16 +149,109 @@ public class BitSet2 extends BitSet {
 	}
 	
 	/**
-	 * Removes a boolean value, moving every subsequent boolean 1 index down.
+	 * Inserts a boolean value on the given index.
+	 * This means that the boolean previously on the index will now be on index+1
 	 * @param index
 	 * @param b
 	 */
-	public void remove(int index, boolean b) {
+	public void insert(int startIndex, BitSet2 bits) {
+		for(int i=this.length()-1;i>=startIndex;i--){
+			this.set(i+bits.length(),this.get(i));
+		}
+		for(int i=0;i<bits.length();i++){
+			this.set(startIndex+i,bits.get(i));
+		}
+	}
+	
+	/**
+	 * Removes a boolean value, moving every subsequent boolean 1 index down.
+	 * @param index
+	 */
+	public void remove(int index) {
 		for(int i=index;i<this.length();i++){
 			this.set(i,this.get(i+1));
 		}
 		this.length--;
 	}
+	
+	/**
+	 * Removes a couple of boolean values,
+	 * Every subsequent index is moved endIndex-startIndex down;
+	 * @param startIndex inclusive
+	 * @param endIndex exclusive
+	 */
+	public void remove(int startIndex, int endIndex) {
+		int diff = endIndex-startIndex;
+		for(int i=startIndex;i<this.length()-diff;i++){
+			this.set(i,this.get(i+diff));
+		}
+		this.length = this.length - diff;
+	}
+	
+	@Override
+	public boolean equals(Object object){
+		boolean isEqual = true;
+		if(object instanceof BitSet2){
+			BitSet2 other = (BitSet2) object;
+			if(this.length()==other.length()){
+				for(int i=0;i<this.length() && isEqual;i++){
+					if(this.get(i)!=other.get(i)){
+						isEqual = false;
+					}
+				}
+			}else{
+				isEqual = false;
+			}
+		}else{
+			isEqual = false;
+		}
+		return isEqual;
+	}
+	
+	/**
+	 * Whether or not this BitSet2 contains the other bs.
+	 * @param bs
+	 * @return	first index of occurence, else -1;
+	 */
+	public int contains(BitSet2 bs){
+		return contains(bs, 0);
+	}
+	
+	public int contains(BitSet2 needle, int startAt){
+		BitSet2 haystack = this;
+		
+		if (needle.length() > haystack.length()) return -1;
+		
+		// For every viable starting bit in the haystack...
+		for (int a = startAt; a < haystack.size() - needle.length() + 1; a++) {
+			int i = 0;
+			
+			while (i < needle.length()) {
+				if (haystack.get(a + i) != needle.get(i)) break;
+				i++;
+			}
+			
+			if (i == needle.length()) {
+				// Found the entire needle! Return the start index.
+				return a;
+			}
+		}
+		
+		// Matched nowhere, return -1
+		return -1;
+	}
+	
+	
+	public int getUnsignedValue(){
+		int value = 0;
+		for(int i=0;i<this.length();i++){
+			if(this.get(this.length()-1-i)){
+				value = value + (int)Math.pow(2, i);
+			}
+		}
+		return value;
+	}
+	
 	
 	
 	//Utility methods from java 7
@@ -133,6 +260,7 @@ public class BitSet2 extends BitSet {
      * Convert a BitSet2 object to a byte array.
      * This method becomes obsolete once Java 7 is available, then
      * BitSet2.toByteArray() is preferred.
+     * Fills half bytes with zeros
      * @param data The BitSet2 object to convert.
      * @return The byte array.
      */
@@ -177,17 +305,8 @@ public class BitSet2 extends BitSet {
      * @return A new BitSet2 being a concatenation of both.
      */
     public static BitSet2 concatenate(BitSet2 first, BitSet2 second) {
-    	int newSize = first.length()+second.length();
-    	BitSet2 result = new BitSet2(newSize);
-    	int f = 0;
-    	int s = 0;
-    	for(f=0;f<first.length();f++){
-    		result.set(f+s,first.get(f));
-    	}
-    	for(s=0;s<second.length();s++){
-    		result.set(f+s,second.get(s));
-    	}
-    	
+    	BitSet2 result = (BitSet2) first.clone();
+    	result.addAtEnd(second);    	
     	return result;
     }
 	

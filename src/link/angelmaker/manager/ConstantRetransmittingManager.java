@@ -1,0 +1,240 @@
+package link.angelmaker.manager;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ArrayBlockingQueue;
+
+import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Ints;
+
+import util.BitSet2;
+import link.angelmaker.AngelMaker;
+import link.angelmaker.IncompatibleModulesException;
+import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.nodes.FlaggingNode;
+import link.angelmaker.nodes.Node;
+import link.angelmaker.nodes.Node.Fillable;
+import link.angelmaker.nodes.SequencedNode;
+
+public class ConstantRetransmittingManager extends Thread implements AMManager, AMManager.Server {
+	//TODO better name
+	//TODO more like a manager, or combination of manager / node
+	public static final FlaggingNode NODE_FILLER = (FlaggingNode) new FlaggingNode(null);
+	
+	
+	private BitExchanger exchanger;
+	private ArrayBlockingQueue<Byte> queueIn;
+	private ArrayBlockingQueue<Byte> queueOut;
+	
+	public static final int MESSAGE_FINE = (int)Math.pow(2,SequencedNode.MESSAGE_BIT_COUNT)-1;
+	private int messageReceived;
+	private int messageToSend;
+	
+	private Node[] memory;
+	private BitSet2 spilledBitsIn;
+	
+	private Receiver receiver;
+	private int lastSent=0;
+	private int loadNew=0;
+	
+	private static final byte[] emptyArray = new byte[]{};
+	
+	public ConstantRetransmittingManager(){
+		this.queueIn = new ArrayBlockingQueue<Byte>(2048);
+		this.queueOut = new ArrayBlockingQueue<Byte>(2048);
+		this.memory = new Node[MESSAGE_FINE]; //bitsUsed - amount of special messages.
+		spilledBitsIn = new BitSet2();
+		messageReceived = MESSAGE_FINE;
+		messageToSend = MESSAGE_FINE;
+	}
+	
+	
+	@Override
+	public void setExchanger(BitExchanger exchanger) {
+		this.exchanger = exchanger;
+	}
+
+	@Override
+	public void enable() {
+		receiver = new Receiver();
+		receiver.start();
+	}
+
+	/**
+	 * Blocking if queue gets full.
+	 */
+	@Override
+	public void sendBytes(byte[] bytes) {
+		for(int i=0;i<bytes.length;i++){
+			try {
+				queueOut.put(bytes[i]);
+			} catch (InterruptedException e) {
+				//Should never happen
+				e.printStackTrace();
+			}
+		}
+	}
+
+	
+	@Override
+	public byte[] readBytes() {
+		if (queueIn.isEmpty()) {
+			return emptyArray;
+		} else {
+			ArrayList<Byte> arr = new ArrayList<Byte>();
+			queueIn.drainTo(arr);
+			return Bytes.toArray(arr);
+		}
+	}
+
+	@Override
+	public Node getCurrentSendingNode() {
+		return memory[lastSent]; 
+		//TODO not really the currently send node.
+		//Kind of want to get the memory.
+	}
+
+	@Override
+	public Node getCurrentReceivingNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Node getNextNode() {
+		Node nodeToSendNext;
+		if(messageReceived!=MESSAGE_FINE){
+			lastSent = messageReceived; //Other side requested retransmitting after this index
+			messageReceived = MESSAGE_FINE; //Moved sending index down, now continue assuming fine.
+		}
+		
+		int indexToSend = (lastSent+1)%(memory.length);
+		if(lastSent==loadNew){
+			loadNewNodeInMemory(indexToSend);
+		}
+		nodeToSendNext = memory[indexToSend];
+		
+		lastSent = indexToSend;
+		if(nodeToSendNext.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
+			SequencedNode seqNode = ((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]);			
+			seqNode.setMessage(intMessageToBitSet(messageToSend));		
+			seqNode.setSeq(intMessageToBitSet(indexToSend));
+		}else{
+			throw new IncompatibleModulesException();
+		}
+		messageToSend = MESSAGE_FINE; //Do not send same message multiple times.
+		
+		if(lastSent == (loadNew+1)%memory.length){
+			loadNew = lastSent;
+		}
+		
+		//AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
+		
+		return nodeToSendNext;
+	}
+	
+	
+	
+	public void loadNewNodeInMemory(int index){
+		Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+		BitSet2 bs = new BitSet2();
+		int byteCount = 0;
+		Byte b = queueOut.poll();
+		if(b==null){
+			//Filler
+			node = NODE_FILLER;
+		}else{
+			while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
+				bs.addAtEnd(new BitSet2(b));
+				byteCount++;
+				if (byteCount<SequencedNode.PACKET_BIT_COUNT/8) {
+					b = queueOut.poll();
+				}
+			}
+			node.giveOriginal(bs);
+		}
+		
+		/*
+		if(node.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
+			SequencedNode seqNode = ((SequencedNode)node.getChildNodes()[0].getChildNodes()[0]);			
+			//seqNode.setMessage(intMessageToBitSet(MESSAGE_FINE));			
+			//seqNode.setSeq(intMessageToBitSet(index));
+		}else{
+			throw new IncompatibleModulesException();
+		}*/
+		
+		memory[index] = node;
+		
+		
+	}
+	
+	public BitSet2 intMessageToBitSet(int message){
+		BitSet2 bs = new BitSet2(Ints.toByteArray(message));
+		return bs.get(bs.length()-SequencedNode.MESSAGE_BIT_COUNT, bs.length());
+	}
+	
+	@Override
+	public String toString(){
+		return "ConstantRetransmittingManager";
+	}
+		
+	private class Receiver extends Thread{
+		private int lastReceivedCorrect;
+		
+		public void run(){
+			while(true){
+				Node received = fillNewNode();
+				FlaggingNode flaggingNode = (FlaggingNode) received;
+				Node errorDetection = received.getChildNodes()[0];
+				if(errorDetection.isCorrect()){
+					Node packetNode = errorDetection.getChildNodes()[0];
+					if(packetNode instanceof SequencedNode){
+						SequencedNode seqNode = ((SequencedNode) packetNode);
+						//AngelMaker.logger.debug("Received packet\tseq="+seqNode.getSeq().getUnsignedValue()+" ("+((lastReceivedCorrect+1)%memory.length)+")"+"\tmsg="+seqNode.getMessage().getUnsignedValue()+"\tdata="+seqNode.getOriginal());
+						if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
+							//Fully correct.
+							//AngelMaker.logger.debug("Received correct packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tOK");
+							Node data = received.getChildNodes()[0];
+							byte[] dataBytes = data.getOriginal().toByteArray();
+							for(byte b : dataBytes){
+							try {
+								queueIn.put(b);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							}
+							lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
+							int currentMessageReceived = seqNode.getMessage().getUnsignedValue();
+							if(currentMessageReceived!=MESSAGE_FINE){
+								messageReceived = currentMessageReceived;
+							}
+							messageToSend = MESSAGE_FINE;
+						}else{
+							//Only sequence number is wrong, packet is correct.
+							int currentMessageReceived = seqNode.getMessage().getUnsignedValue();
+							if(currentMessageReceived!=MESSAGE_FINE){
+								messageReceived = currentMessageReceived;
+							}
+							messageToSend = lastReceivedCorrect;
+						}
+					}else{
+						throw new IncompatibleModulesException();
+					}
+				}else{
+					//Packet has errors.
+					messageToSend = lastReceivedCorrect;
+				}
+			}
+		}
+		
+		private Node fillNewNode(){
+			Node node = AngelMaker.TOP_NODE_IN_USE.getClone();
+			while(!node.isFull()){
+				spilledBitsIn = node.giveConverted(BitSet2.concatenate(spilledBitsIn,exchanger.readBits()));
+			}
+			
+			return node;
+		}
+	}
+}
