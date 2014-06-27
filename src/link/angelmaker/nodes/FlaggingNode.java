@@ -3,6 +3,7 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
 /**
@@ -25,6 +26,9 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 			"10011001"));
 	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
 			"00111001101"));
+	
+	
+	
 	/*
 	 * Requirements for flags: FLAG_END_OF_FRAME Does NOT contain part of itself
 	 * starting at the right. In other words: It should not be possible to
@@ -41,10 +45,23 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
+	
+	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
 
 	public FlaggingNode(Node parent, int dataBitCount) {
-		childNodes = new Node[] { new FrameCeptionNode<Node>(parent, 0) };
+		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
+		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
 		this.dataBitCount = dataBitCount;
+		this.parent = parent;
+		stored = new BitSet2();
+		storedConverted = new BitSet2();
+		lastReceivedConvertedJunk = new BitSet2();
+	}
+	
+	public FlaggingNode(Node parent) {
+		this.dataBitCount = maxBitsExpected;
+		childNodes = new Node[] { new ErrorDetectionNode(this, dataBitCount) };
+		
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
@@ -66,9 +83,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		for (i = 0; i < bits.length() && stored.length() < dataBitCount; i++) {
 			stored.addAtEnd(bits.get(i));
 		}
-		if (stored.length() >= dataBitCount) {
-			isFull = true;
-		}
+		isFull = true;
 		if (isFull) {
 			BitSet2 remaining = childNodes[0].giveOriginal(stored);
 			if (remaining.length() > 0) {
@@ -82,14 +97,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	public BitSet2 getOriginal() {
 		return childNodes[0].getOriginal();
 	}
-
-	/**
-	 * Receive 7 bits extra after spotting the first end of frame flag. Check if
-	 * there is no en of frame flag in these 7 bits. Take last possible end of
-	 * frame start. Return unused stuff (even from previous calls) afterwards.
-	 * This for situation: 1111011001100110 DDDDDDDDFFFFFFFF Correct
-	 * DDDDFFFFFFFF---- (possibly) Read
-	 */
+	
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
 		//System.out.println("Give Converted");
@@ -118,7 +126,8 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 			// Received start and end flag.
 			isFull = true;
 			stored = new BitSet2();
-			giveOriginal(unStuff(getDataBeforeEndFlag(storedConverted)));
+			stored = unStuff(getDataBeforeEndFlag(storedConverted));
+			childNodes[0].giveConverted(stored);
 			//System.out.println("GiveConverted done");
 			return storedConverted.get(contains
 					+ FLAG_END_OF_FRAME.getFlag().length(),
@@ -132,7 +141,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public BitSet2 getConverted() {
-		return placeFlags(stuff(getOriginal()));
+		return placeFlags(stuff(childNodes[0].getConverted()));
 	}
 
 	private int getRealEndFlagIndex(BitSet2 bits) {
@@ -197,8 +206,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public boolean isFull() {
-		return stored.length() == dataBitCount || childNodes[0].isFull()
-				|| isFull;
+		return isFull;
 	}
 
 	@Override
@@ -213,9 +221,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public boolean isFiller() {
-		return stored.length() == 0
-				|| (childNodes[0] instanceof Node.Fillable && ((Node.Fillable) childNodes[0])
-						.isFiller());
+		return getOriginal().length()==0;
 	}
 
 	@Override
@@ -257,4 +263,3 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 
 }
-// JJ 255, Derk 240, Martijn 200

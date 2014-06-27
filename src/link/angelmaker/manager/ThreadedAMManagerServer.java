@@ -115,4 +115,9 @@ public class ThreadedAMManagerServer extends Thread implements AMManager,
 			}
 		}
 	}
+	
+	@Override
+	public String toString(){
+		return "ThreadedAMManagerServer";
+	}
 }

@@ -88,4 +88,9 @@ public class PureNode implements Node.Leaf{
 		}
 		return s;
 	}
+
+	@Override
+	public Node[] getChildNodes() {
+		return null;
+	}
 }

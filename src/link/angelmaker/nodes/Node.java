@@ -134,6 +134,11 @@ public interface Node {
 	 *         Nodes, ie where parent==null.
 	 */
 	public Node getClone();
+	
+	/**
+	 * @return array of the childs, can be or contain null.
+	 */
+	public Node[] getChildNodes();
 
 	/**
 	 * This method is somewhat optional, AngelMaker should not depend on this
@@ -152,6 +157,8 @@ public interface Node {
 	 * mutually exclusive, and a single class may implement all.
 	 */
 
+	
+	//TODO leaf/internal interfaces do nothing.
 	/**
 	 * A Node that does NOT have child nodes itself, it is a leaf.
 	 * 
@@ -175,7 +182,7 @@ public interface Node {
 		 * @return the childNodes of this InternalNode. |result| is not
 		 *         specified, this may be 0.
 		 */
-		public Node[] getChildNodes();
+		//public Node[] getChildNodes();
 	}
 
 	/**

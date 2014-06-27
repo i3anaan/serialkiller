@@ -36,7 +36,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final String ROLE_MASTER = "master";
 	public static final String ROLE_SLAVE = "slave";
 	public static final String ROLE_UKNOWN = "unkown";
-	public static final int STABILITY = 4;//TODO This is kind of a dirty fix.
+	public static final int STABILITY = 400;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
 	public static final long READ_TIMEOUT_NO_ACK = 100l*1000000l;
@@ -208,7 +208,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public byte adaptBitToPrevious(byte previousByte,boolean nextData) {
 		return (byte)(((previousByte^2)&-2)|(nextData ? 1 : 0));
-		//TODO test.
 	}
 	
 	/**
@@ -217,7 +216,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public boolean extractBitFromInput(byte input){
 		return (input&1)==1;
-		//TODO test;
 	}
 	
 	/**
@@ -226,8 +224,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * Needs a AMManager.Server to be able to send filler data.
 	 */
 	public void run(){
-		//waitForSync();
-		AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
+		waitForSync();
+		if(connectionRole.equals(ROLE_MASTER) || connectionRole.equals(ROLE_SLAVE)){
+			AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
+		}else{
+			AngelMaker.logger.warning("Assumed "+connectionRole+" in this connection.");
+		}
 		boolean firstRound = true;
 		int round = 0;
 		while(true){
@@ -259,7 +261,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				firstRound = false;					
 			} catch (TimeOutException e) {
 				//Time-out, ignore, moving, don't hang.
-				AngelMaker.logger.debug("Time out waiting on ack.");
+				//AngelMaker.logger.debug("Time out waiting on ack.");
 				//TODO instead of not adding a bit here, it might be usefull to still add a (guessed) bit.
 				//This might reduce out of sync problems.
 			}
