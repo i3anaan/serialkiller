@@ -27,8 +27,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	private ArrayBlockingQueue<Byte> queueOut;
 	
 	public static final int MESSAGE_FINE = (int)Math.pow(2,SequencedNode.MESSAGE_BIT_COUNT)-1;
-	private int messageReceived;
-	private int messageToSend;
+	private volatile int messageReceived;
+	private volatile int messageToSend;
 	
 	private Node[] memory;
 	private BitSet2 spilledBitsIn;
@@ -111,8 +111,10 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		int indexToSend = (lastSent+1)%(memory.length);
 		if(lastSent==loadNew){
 			loadNewNodeInMemory(indexToSend);
+			//AngelMaker.logger.debug("Loaded new Node in Memory");
 		}
 		nodeToSendNext = memory[indexToSend];
+		//AngelMaker.logger.debug("NodeToSendNext [" +indexToSend+"] = "+nodeToSendNext);
 		
 		lastSent = indexToSend;
 		if(nodeToSendNext.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){

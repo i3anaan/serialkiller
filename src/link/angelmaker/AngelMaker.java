@@ -76,7 +76,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
 	private AMManager STANDARD_MANAGER = new ConstantRetransmittingManager();
-	private BitExchanger STANDARD_EXCHANGER = new HighSpeedBitExchanger();
+	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
 	
 	
 	
