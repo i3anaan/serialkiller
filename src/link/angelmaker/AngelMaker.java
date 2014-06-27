@@ -87,18 +87,17 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		return instance;
 	}
 	
-	
+	//TODO alleen hier voor tests? weghalen voor final implementatie?
 	public AngelMaker(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
 		standardSetup(phys,topNode,manager,exchanger);
 		instance = this;
 	}
+	//TODO alleen hier voor tests? weghalen voor final implementatie?
 	public AngelMaker(PhysicalLayer phys){
 		standardSetup(phys,null,null,null);
 		instance = this;
 	}
 	public AngelMaker(){
-		//TODO deze moet niet standard setup aanropen.
-		standardSetup(null,null,null,null);
 		instance = this;
 	}
 	
@@ -130,9 +129,6 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		AMManager managerUsed = manager;
 		BitExchanger exchangerUsed = exchanger;
 		PhysicalLayer physUsed = phys;
-		if(physUsed==null){
-			physUsed = STANDARD_PHYS;
-		}
 		if(topNodeUsed==null){
 			topNodeUsed = TOP_NODE_IN_USE;
 		}
