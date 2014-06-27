@@ -57,9 +57,11 @@ public class GUI extends JFrame implements Observer{
 		buildChatMenu();
 
 		addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(final WindowEvent e) {
 				e.getWindow().dispose();
 			}
+			@Override
 			public void windowClosed(final WindowEvent e) {
 				System.exit(0);
 			}

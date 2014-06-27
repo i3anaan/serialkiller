@@ -44,6 +44,7 @@ public class TabbedChatPanel extends JPanel{
 
 		// Create a tabbed pane
 		tabbedPane = new ClosableTabbedPane() {
+			@Override
 			public boolean tabAboutToClose(int tabIndex) {
 				String tab = tabbedPane.getTabTitleAt(tabIndex);
 				removeChatPanel(tab);

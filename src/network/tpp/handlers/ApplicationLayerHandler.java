@@ -13,7 +13,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Handler for the application layer.
  */
 public class ApplicationLayerHandler extends Handler {
-    public static final int SAFE_SEGNUM = (int) Math.min(Integer.MAX_VALUE, Packet.MAX_SEGNUM);
+    public static final int SAFE_SEGNUM = Math.min(Integer.MAX_VALUE, Packet.MAX_SEGNUM);
 
     /** The queue to the application layer. */
     ArrayBlockingQueue<Payload> appQueue;
@@ -101,7 +101,8 @@ public class ApplicationLayerHandler extends Handler {
         }
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "ApplicationLayer" +  super.toString();
     }
 }

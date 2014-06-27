@@ -39,7 +39,8 @@ public abstract class FileMessage extends ApplicationLayerMessage {
 	 */
 	private void setFileSize(byte[] data){
 		byte [] size = Arrays.copyOfRange(data, 1, 5);
-		int derp = ByteBuffer.allocate(4).wrap(size).getInt();
+		ByteBuffer.allocate(4);
+		int derp = ByteBuffer.wrap(size).getInt();
 		fileSize = 	derp;
 	}
 	

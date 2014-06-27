@@ -120,7 +120,7 @@ public class BitSet2 extends BitSet {
 	}
 	@Override
 	public Object clone(){
-		return (Object) new BitSet2(this);
+		return new BitSet2(this);
 	}
 	
 	@Override
@@ -270,7 +270,8 @@ public class BitSet2 extends BitSet {
      * @param data The BitSet2 object to convert.
      * @return The byte array.
      */
-    public byte[] toByteArray() {
+    @Override
+	public byte[] toByteArray() {
         int len = (int) Math.ceil((double) this.length() / 8);
         byte[] bytes = new byte[len];
 

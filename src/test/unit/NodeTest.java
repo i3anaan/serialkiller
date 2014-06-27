@@ -2,12 +2,8 @@ package test.unit;
 
 import static org.junit.Assert.*;
 
-import javax.sound.midi.Sequence;
-
-import link.angelmaker.codec.ParityBitsCodec;
 import link.angelmaker.nodes.ErrorDetectionNode;
 import link.angelmaker.nodes.FlaggingNode;
-import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.SequencedNode;
 
 import org.junit.Test;

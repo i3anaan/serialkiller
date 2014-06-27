@@ -42,6 +42,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		this.inbox = new ArrayBlockingQueue<byte[]>(MAX_WAITING_FRAMES);
 	}
 	
+	@Override
 	public Thread start(Stack stack) {
 		this.down = stack.physLayer;
 		t = new Thread(this);
@@ -49,6 +50,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		return t;
 	}
 	
+	@Override
 	public void sendFrame(byte[] frame) {
 		try {
 			outbox.put(frame);
@@ -57,6 +59,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		}
 	}
 
+	@Override
 	public byte[] readFrame() {
 		try {
 			return inbox.take();

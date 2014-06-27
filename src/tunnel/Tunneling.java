@@ -2,7 +2,6 @@ package tunnel;
 
 import log.LogMessage;
 import log.Logger;
-import network.NetworkLayer;
 import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 

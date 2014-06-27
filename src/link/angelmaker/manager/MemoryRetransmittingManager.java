@@ -17,7 +17,7 @@ import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.SequencedNode;
 
 public class MemoryRetransmittingManager extends Thread implements Node ,AMManager, AMManager.Server {
-	public static final FlaggingNode NODE_FILLER = (FlaggingNode) new FlaggingNode(null);
+	public static final FlaggingNode NODE_FILLER = new FlaggingNode(null);
 	
 	
 	private BitExchanger exchanger;
@@ -171,6 +171,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	private class Receiver extends Thread{
 		
 		
+		@Override
 		public void run(){
 			while(true){
 				refillReceivingNode();

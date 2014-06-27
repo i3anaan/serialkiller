@@ -1,7 +1,6 @@
 package link.angelmaker.nodes;
 
 import link.angelmaker.AngelMaker;
-import link.angelmaker.manager.MemoryRetransmittingManager;
 import util.BitSet2;
 
 /**

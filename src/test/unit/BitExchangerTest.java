@@ -14,7 +14,6 @@ import org.junit.Test;
 import phys.diag.NullPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 import util.BitSet2;
-import util.Bytes;
 
 public class BitExchangerTest {
 	

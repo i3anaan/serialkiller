@@ -194,7 +194,8 @@ public class Packet implements Delayed {
      * Clone this packet instance.
      * @return The cloned packet instance.
      */
-    public Packet clone() {
+    @Override
+	public Packet clone() {
         return new Packet(Bytes.concat(header.compile(), payload));
     }
 
@@ -307,7 +308,8 @@ public class Packet implements Delayed {
      * Returns a string representation of this object.
      * @return The string representation.
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return String.format("Packet<From: %d; To: %d; Seq: %d; Seg: %d; Ack: %d; More: %b>", header.getSender(), header.getDestination(), header.getSeqnum(), header.getSegnum(), header.getAcknum(), header.getMore());
     }
 
@@ -346,7 +348,8 @@ public class Packet implements Delayed {
             this.description = description;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return description;
         }
     }

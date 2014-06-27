@@ -1,30 +1,19 @@
 package link.angelmaker;
 
-import java.io.File;
-import java.util.Arrays;
-
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-
-import phys.PhysicalLayer;
-import phys.diag.NullPhysicalLayer;
-import phys.diag.VirtualPhysicalLayer;
-import util.BitSet2;
-import util.Bytes;
-import common.Graph;
-import common.Stack;
-import common.Startable;
-import link.FrameLinkLayer;
 import link.PacketFrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
-import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.MemoryRetransmittingManager;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
-import log.Logger;
 import log.LogMessage.Subsystem;
+import log.Logger;
+import phys.PhysicalLayer;
+import phys.diag.NullPhysicalLayer;
+
+import common.Stack;
+import common.Startable;
 
 /**
  * The upper class of the ANGEL_MAKER system.
@@ -161,6 +150,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 		}
 	}
 	
+	@Override
 	public String toString(){
 		String s = "ANGEL_MAKER\n"
 				+ "Consisting of:\n"

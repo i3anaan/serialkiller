@@ -58,7 +58,8 @@ public class LogMessage {
         return escaper.escape(getMessage());
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return String.format("[%-8s] [%s] [%4s] [%04d] %s",
                 severity,
                 new Date(timestamp),

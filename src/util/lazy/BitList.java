@@ -18,21 +18,25 @@ public abstract class BitList implements Iterable<Boolean> {
 			this.i = 0;
 		}
 
+		@Override
 		public boolean hasNext() {
 			return size >= this.i;
 		}
 
+		@Override
 		public Boolean next() {
 			Boolean b = bl.get(i);
 			i++;
 			return b;
 		}
 		
+		@Override
 		public void remove() {
 			throw new UnsupportedOperationException("We're an immutable collection.");
 		}
 	}
 	
+	@Override
 	public Iterator<Boolean> iterator() {
 		return new BitList.BitListIterator(this);
 	}

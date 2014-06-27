@@ -2,8 +2,6 @@ package web;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-
 import link.angelmaker.AngelMaker;
 import link.angelmaker.nodes.Node;
 
@@ -11,10 +9,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import common.Graph;
-import common.GraphViz;
-import network.tpp.TPPNetworkLayer;
-import stats.Stats;
-import util.Environment;
 
 public class SendingGraphHandler extends ServiceHandler {
 

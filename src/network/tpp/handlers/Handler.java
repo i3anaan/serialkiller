@@ -101,7 +101,8 @@ public abstract class Handler implements Runnable {
         }
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return String.format("Handler<" + hashCode() + ">");
     }
 }

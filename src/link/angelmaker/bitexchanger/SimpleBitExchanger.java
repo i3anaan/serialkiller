@@ -1,6 +1,5 @@
 package link.angelmaker.bitexchanger;
 
-import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import link.angelmaker.AngelMaker;
@@ -9,7 +8,6 @@ import link.angelmaker.manager.AMManager;
 import link.angelmaker.nodes.Node;
 import phys.PhysicalLayer;
 import util.BitSet2;
-import util.Bytes;
 
 /**
  * Right bit is always the data bit.
@@ -49,10 +47,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		this.connectionRole = ROLE_UKNOWN;
 	}
 	
+	@Override
 	public void givePhysicalLayer(PhysicalLayer down){
 		this.down = down;
 	}
 	
+	@Override
 	public void giveAMManager(AMManager manager){
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
@@ -61,6 +61,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		}
 	}
 	
+	@Override
 	public void enable(){
 		if(this.down!=null && this.manager !=null){
 			this.start();
@@ -240,6 +241,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * Can never hang, will skip and drop bits if necessary.
 	 * Needs a AMManager.Server to be able to send filler data.
 	 */
+	@Override
 	public void run(){
 		AngelMaker.logger.info("Starting Sync procedure");
 		waitForSync();
@@ -296,6 +298,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		
 	}
 	
+	@Override
 	public String toString(){
 		return "SimpleBitExchanger, using: "+down.toString();
 	}

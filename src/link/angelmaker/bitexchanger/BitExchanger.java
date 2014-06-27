@@ -1,10 +1,7 @@
 package link.angelmaker.bitexchanger;
 
-import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import link.angelmaker.AngelMaker;
-import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.manager.AMManager;
 import phys.PhysicalLayer;
 import util.BitSet2;

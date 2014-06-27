@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import log.LogMessage.Severity;
-
 
 /**
  * A singleton class that manages a synchronized list of LogMessage instances.

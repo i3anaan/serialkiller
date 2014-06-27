@@ -2,7 +2,6 @@ package link.angelmaker.nodes;
 
 import com.google.common.base.Optional;
 
-import link.angelmaker.AngelMaker;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 

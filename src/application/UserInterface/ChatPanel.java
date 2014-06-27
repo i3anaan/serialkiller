@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 /**
  * Panel for chat application that contains
@@ -49,8 +50,8 @@ public class ChatPanel extends JPanel implements KeyListener, UIMessage{
 
 		// Make it scrollable
 		JScrollPane taScroll = new JScrollPane(taMessages, 
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		this.add(taScroll, BorderLayout.CENTER);	
 

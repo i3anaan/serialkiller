@@ -4,7 +4,6 @@ import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Makes sure that packets are retransmitted.
@@ -41,7 +40,8 @@ public class RetransmissionHandler extends Handler {
         return delayed.offer(p);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "Retransmission" + super.toString();
     }
 }

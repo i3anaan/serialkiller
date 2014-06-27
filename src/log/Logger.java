@@ -75,7 +75,8 @@ public class Logger {
         logService.add(new LogMessage(subsys, sev, message));
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "Logger";
     }
 }

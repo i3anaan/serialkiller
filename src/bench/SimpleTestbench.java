@@ -2,7 +2,6 @@ package bench;
 
 import link.*;
 import link.angelmaker.AngelMaker;
-import phys.diag.BitErrorPhysicalLayer;
 import phys.diag.DelayPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 
@@ -18,11 +17,12 @@ public class SimpleTestbench {
 			this.down = down;
 		}
 
+		@Override
 		public void run() {
 			while(true){
 				for (byte i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
 					//TODO why did this need to be '<=' instead of just '<' ?
-					down.sendFrame(new byte[]{(byte)(i)});
+					down.sendFrame(new byte[]{(i)});
 				}
 			}
 		}
@@ -34,6 +34,7 @@ public class SimpleTestbench {
 			this.down = down;
 		}
 
+		@Override
 		public void run() {
 			while(true){
 				int correct = 0;

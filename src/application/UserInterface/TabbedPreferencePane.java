@@ -34,6 +34,7 @@ extends 	Dialog
 		super(gui, name, modal);
 		this.gui = gui;
 		this.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(final WindowEvent e) {
 				e.getWindow().dispose();
 			}

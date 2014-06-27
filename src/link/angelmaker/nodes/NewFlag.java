@@ -55,6 +55,7 @@ public class NewFlag implements Flag{
 	}
 
 	// TODO SHOULD TEST
+	@Override
 	public void stuff(BitSet2 bits) {
 		//System.out.println("Original:\t"+bits);
 		// If data contains escaped flag, place escape escaper after it.
@@ -80,6 +81,7 @@ public class NewFlag implements Flag{
 		//System.out.println("Stuffed:\t"+bits);
 	}
 
+	@Override
 	public void unStuff(BitSet2 bits) {
 		//System.out.println("To be unstuffed: "+bits);
 		int index = 0;

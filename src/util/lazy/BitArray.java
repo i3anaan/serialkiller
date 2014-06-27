@@ -51,6 +51,7 @@ public class BitArray extends BitList {
 		return ((index + 63) / 64) * 64;
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof BitArray) {
 			return Arrays.equals(((BitArray) obj).words, this.words);

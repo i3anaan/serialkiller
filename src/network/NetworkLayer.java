@@ -1,14 +1,11 @@
 package network;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import common.Layer;
 import common.Startable;
 
 import javax.naming.SizeLimitExceededException;
-
-import network.tpp.Host;
 
 /**
  * Abstract class for network layers. Requires two methods to be implemented

@@ -1,6 +1,5 @@
 package network.tpp;
 
-import common.*;
 import common.Stack;
 import link.FrameLinkLayer;
 import log.LogMessage;
@@ -11,14 +10,10 @@ import network.tpp.handlers.*;
 import tunnel.Tunneling;
 
 import javax.naming.SizeLimitExceededException;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The main class for the network layer.
@@ -115,7 +110,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Returns a collection of all addresses known to the router.
      * @return The collection of all known addresses.
      */
-    public Collection<Byte> hosts() {
+    @Override
+	public Collection<Byte> hosts() {
         Collection<Byte> hosts = new ArrayList<Byte>();
 
         for (Host h : router.hosts()) {
@@ -129,7 +125,8 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * Returns the address of this host.
      * @return The address of this host.
      */
-    public Byte host() {
+    @Override
+	public Byte host() {
         return router.self();
     }
 

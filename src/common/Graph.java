@@ -3,7 +3,6 @@ package common;
 import java.io.File;
 
 import util.BitSet2;
-import link.angelmaker.AngelMaker;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.SequencedNode;

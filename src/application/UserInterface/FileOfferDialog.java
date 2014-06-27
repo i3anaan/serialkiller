@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.EventListener;
 import java.util.prefs.Preferences;
 
@@ -19,7 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 public class FileOfferDialog extends Dialog implements EventListener{
 
@@ -52,6 +50,7 @@ public class FileOfferDialog extends Dialog implements EventListener{
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		fileName = name;
 		this.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(final WindowEvent e) {
 				e.getWindow().dispose();
 			}

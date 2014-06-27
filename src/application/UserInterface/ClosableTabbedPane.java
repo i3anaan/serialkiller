@@ -25,6 +25,7 @@ public class ClosableTabbedPane extends JTabbedPane{
 	/** override of the tabbedPane paint method to
 	 * also draw the close button UI
 	 */
+	@Override
 	public void paint(Graphics g){
 		super.paint(g);
 		closeUI.paint(g);
@@ -33,6 +34,7 @@ public class ClosableTabbedPane extends JTabbedPane{
 	/**
 	 * Add a tab to the pane with added spacing
 	 */
+	@Override
 	public void addTab(String title, Component component) {
 		super.addTab(title+"    ", component);
 	}
@@ -87,6 +89,7 @@ public class ClosableTabbedPane extends JTabbedPane{
 		
 		
 		/** event when close button has been clicked and mouse has been released */
+		@Override
 		public void mouseReleased(MouseEvent me) {
 			if(closeUnderMouse(me.getX(), me.getY())){
 				boolean isToCloseTab = tabAboutToClose(selectedTab);
@@ -97,6 +100,7 @@ public class ClosableTabbedPane extends JTabbedPane{
 			}
 		}
 
+		@Override
 		public void mouseMoved(MouseEvent me) {	
 			meX = me.getX();
 			meY = me.getY();			

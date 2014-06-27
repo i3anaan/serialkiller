@@ -8,6 +8,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -56,14 +57,15 @@ public class UserListPanel extends JPanel{
 
 		// Make sure it's scrollable
 		JScrollPane taScroll = new JScrollPane(hostList, 
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		this.add(taScroll, BorderLayout.CENTER);	
 
 
 		// Listens to selection events in the hostList
 		ListSelectionListener listSelectionListener = new ListSelectionListener() {
+			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				
 				// When done changing to a new selection return the index of the selection

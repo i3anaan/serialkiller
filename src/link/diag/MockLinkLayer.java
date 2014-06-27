@@ -25,6 +25,7 @@ public class MockLinkLayer extends FrameLinkLayer implements Startable {
 	 * Note that this method takes the other side's stack, i.e. the stack we're
 	 * planning on communicating with, instead of our own stack.
 	 */
+	@Override
 	public Thread start(Stack stack) {
 		this.that = (MockLinkLayer)stack.linkLayer;
 		this.bq = new ArrayBlockingQueue<byte[]>(queue_sz);

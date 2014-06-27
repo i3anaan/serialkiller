@@ -1,6 +1,5 @@
 package link.angelmaker.bitexchanger;
 
-import util.Bytes;
 import link.angelmaker.nodes.Node;
 
 public class HighSpeedBitExchanger extends SimpleBitExchanger {
@@ -66,6 +65,7 @@ public class HighSpeedBitExchanger extends SimpleBitExchanger {
 	 * @param input The byte read from the physical layer.
 	 * @return	The data bit this byte represents.
 	 */
+	@Override
 	public boolean[] extractBitFromInput(byte previousByte, byte input){
 		//System.out.println("Old: "+Bytes.format(previousByte)+"\tNew: "+Bytes.format(input));
 		if((previousByte&1)==(input&1)){

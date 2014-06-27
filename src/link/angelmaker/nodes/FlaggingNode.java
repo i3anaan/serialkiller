@@ -3,7 +3,6 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
-import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
 /**
@@ -187,6 +186,10 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		}
 	}
 
+	@Override
+	public Node[] getChildNodes(){
+		return children;
+	}
 	@Override
 	public boolean isFull() {
 		return isFull;

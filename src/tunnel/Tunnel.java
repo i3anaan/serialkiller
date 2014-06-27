@@ -2,7 +2,6 @@ package tunnel;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Bytes;
-import network.NetworkLayer;
 import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 import network.tpp.PacketHeader;
@@ -12,7 +11,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -187,7 +185,8 @@ public class Tunnel implements Runnable {
         socket = new Socket(ip, Tunneling.PORT);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "Tunnel<" + ip + "; auto:" + String.valueOf(autoconnect) + ">";
     }
 
@@ -330,7 +329,8 @@ public class Tunnel implements Runnable {
             t.interrupt();
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return "TunnelReader<" + tunnel.hashCode() + ">";
         }
     }
@@ -394,7 +394,8 @@ public class Tunnel implements Runnable {
             t.interrupt();
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return "TunnelWriter<" + tunnel.hashCode() + ">";
         }
     }

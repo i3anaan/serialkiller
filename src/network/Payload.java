@@ -18,7 +18,8 @@ public class Payload {
      * data and address.
      * @return The new Payload instance.
      */
-    public Payload clone() {
+    @Override
+	public Payload clone() {
         return new Payload(data, address);
     }
     
@@ -30,7 +31,8 @@ public class Payload {
         return data.length > 0 ? data[0] : 0;
 	}
 
-    public String toString() {
+    @Override
+	public String toString() {
         return String.format("Payload<%s>", hashCode());
     }
 }
