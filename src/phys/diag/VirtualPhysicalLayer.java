@@ -7,7 +7,6 @@ import phys.PhysicalLayer;
  * threads on the same machine.
  */
 public class VirtualPhysicalLayer extends PhysicalLayer {
-	private static VirtualPhysicalLayer FIRST_INSTANCE;
 	private VirtualPhysicalLayer that;
 	private byte state;
 
