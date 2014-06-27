@@ -1,6 +1,7 @@
 package link.angelmaker.nodes;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.manager.MemoryRetransmittingManager;
 import util.BitSet2;
 
 /**
@@ -9,9 +10,7 @@ import util.BitSet2;
  * @author I3anaan
  *
  */
-public class SequencedNode implements Node{
-
-	private Node parent;
+public class SequencedNode extends AbstractNode implements Node.OneTimeInjection, Node.Resetable,Node.Fillable{
 	private int maxDataSize;
 	private int messageBitCount;
 	private boolean full;
@@ -27,6 +26,8 @@ public class SequencedNode implements Node{
 		this.maxDataSize = maxDataSize;
 		this.messageBitCount = messageBitCount;
 		this.storedData = new BitSet2();
+		this.sequenceNumber = new BitSet2();
+		this.message = new BitSet2();
 	}
 	
 	
@@ -58,23 +59,8 @@ public class SequencedNode implements Node{
 	}
 
 	@Override
-	public Node getParent() {
-		return parent;
-	}
-
-	@Override
 	public boolean isFull() {
 		return full;
-	}
-
-	@Override
-	public boolean isReady() {
-		return isFull();
-	}
-
-	@Override
-	public boolean isCorrect() {
-		return true;
 	}
 
 	@Override
@@ -84,11 +70,6 @@ public class SequencedNode implements Node{
 			clone.giveConverted(getConverted());
 		}
 		return clone;
-	}
-
-	@Override
-	public Node[] getChildNodes() {
-		return null;
 	}
 
 	@Override
@@ -131,6 +112,18 @@ public class SequencedNode implements Node{
 	public void reset() {
 		this.storedData.clear();
 		full = false;
+	}
+
+
+	@Override
+	public boolean isFiller() {
+		return storedData.length()==0;
+	}
+
+
+	@Override
+	public Node getFiller() {
+		return new SequencedNode(null, PACKET_BIT_COUNT, MESSAGE_BIT_COUNT);
 	}
 
 }

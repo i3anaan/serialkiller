@@ -6,13 +6,11 @@ import link.angelmaker.AngelMaker;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
-public class ErrorDetectionNode implements Node,Node.Internal {
-
-	private Node parent;
+public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,Node.OneTimeInjection {
 	private boolean full;
 	private boolean correct;
 	private int maxDataSize;
-	private Node child;
+	private Node.Resetable child;
 	
 	public ErrorDetectionNode(Node parent, int maxDataSize){
 		this.parent = parent;
@@ -64,18 +62,8 @@ public class ErrorDetectionNode implements Node,Node.Internal {
 	}
 
 	@Override
-	public Node getParent() {
-		return parent;
-	}
-
-	@Override
 	public boolean isFull() {
 		return full;
-	}
-
-	@Override
-	public boolean isReady() {
-		return isFull();
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class SendingGraphHandler extends ServiceHandler {
 		r.out.append("<h2>Sending Node Graph LinkLayer</h2>");
 		AngelMaker am = AngelMaker.getInstanceOrNull();
 		if(am!=null){
-			Node sendingNode = am.getCurrentReceivingNode();
+			Node sendingNode = am.getCurrentSendingNode();
 	        Graph.makeImage(Graph.getFullGraphForNode(sendingNode, true),"sending_node_graph");
 	        String img;
 			try {

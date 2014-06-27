@@ -84,11 +84,6 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	}
 
 	@Override
-	public void emptyQueue() {
-		queueOut.clear();
-	}
-
-	@Override
 	public BitSet2 readBits() {
 		BitSet2 bits = new BitSet2();
 		Boolean bit = null;

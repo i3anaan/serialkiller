@@ -18,15 +18,12 @@ import util.BitSet2;
  * @author I3anaan
  * 
  */
-public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
-
-	private Node[] childNodes;
-	private Node parent;
+public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {
 	public static final Flag FLAG_START_OF_FRAME = new BasicFlag(new BitSet2(
 			"10011001"));
 	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
 			"00111001101"));
-	
+	protected Node.Resetable[] children;
 	
 	
 	/*
@@ -47,29 +44,19 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private BitSet2 lastReceivedConvertedJunk;
 	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
-
-	public FlaggingNode(Node parent, int dataBitCount) {
-		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
-		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
-		this.dataBitCount = dataBitCount;
-		this.parent = parent;
-		stored = new BitSet2();
-		storedConverted = new BitSet2();
-		lastReceivedConvertedJunk = new BitSet2();
-	}
 	
 	public FlaggingNode(Node parent) {
 		this.dataBitCount = maxBitsExpected;
-		childNodes = new Node[] { new ErrorDetectionNode(this, dataBitCount) };
+		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount) };
 		
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
 		lastReceivedConvertedJunk = new BitSet2();
 	}
-
-	public FlaggingNode(Node parent, Node child, int dataBitCount) {
-		childNodes = new Node[] { child };
+	
+	public FlaggingNode(Node parent, Node.Resetable child, int dataBitCount) {
+		children = new Node.Resetable[] { child };
 		this.dataBitCount = dataBitCount;
 		this.parent = parent;
 		stored = new BitSet2();
@@ -77,6 +64,10 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		lastReceivedConvertedJunk = new BitSet2();
 	}
 
+	public void setParent(Node parent){
+		this.parent = parent;
+	}
+	
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {
 		int i;
@@ -85,7 +76,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 		}
 		isFull = true;
 		if (isFull) {
-			BitSet2 remaining = childNodes[0].giveOriginal(stored);
+			BitSet2 remaining = children[0].giveOriginal(stored);
 			if (remaining.length() > 0) {
 				AngelMaker.logger.alert("FlaggingNode is spilling data");
 			}
@@ -95,7 +86,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public BitSet2 getOriginal() {
-		return childNodes[0].getOriginal();
+		return children[0].getOriginal();
 	}
 	
 	@Override
@@ -124,7 +115,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 			// Received start and end flag.
 			isFull = true;
 			stored = unStuff(getDataBeforeEndFlag(storedConverted));
-			childNodes[0].giveConverted(stored);
+			children[0].giveConverted(stored);
 			//System.out.println("GiveConverted done");
 			return storedConverted.get(contains
 					+ FLAG_END_OF_FRAME.getFlag().length(),
@@ -138,7 +129,7 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public BitSet2 getConverted() {
-		return placeFlags(stuff(childNodes[0].getConverted()));
+		return placeFlags(stuff(children[0].getConverted()));
 	}
 
 	private int getRealEndFlagIndex(BitSet2 bits) {
@@ -197,23 +188,18 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 
 	@Override
-	public Node getParent() {
-		return parent;
-	}
-
-	@Override
 	public boolean isFull() {
 		return isFull;
 	}
 
 	@Override
 	public boolean isReady() {
-		return childNodes[0].isReady();
+		return children[0].isReady() || stored.length()==0;
 	}
 
 	@Override
 	public boolean isCorrect() {
-		return childNodes[0].isCorrect();
+		return children[0].isCorrect();
 	}
 
 	@Override
@@ -222,18 +208,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 
 	@Override
-	public Node[] getChildNodes() {
-		return childNodes;
-	}
-
-	@Override
 	public Node getClone() {
-		return new FlaggingNode(parent, childNodes[0].getClone(), dataBitCount);
+		return new FlaggingNode(parent, (Node.Resetable)children[0].getClone(), dataBitCount);
 	}
 	
 	@Override
 	public Node getFiller(){
-		//TODO test, rethink;
 		return AngelMaker.TOP_NODE_IN_USE.getClone();
 	}
 
@@ -256,12 +236,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public String toString() {
-		return "FlaggingNode[" + Arrays.toString(childNodes) + "]";
+		return "FlaggingNode[" + Arrays.toString(children) + "]";
 	}
 
 	@Override
 	public void reset() {
-		for(Node n : childNodes){
+		for(Node.Resetable n : children){
 			n.reset();
 		}
 		stored.clear();

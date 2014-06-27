@@ -20,7 +20,7 @@ import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
-import link.angelmaker.manager.ConstantRetransmittingManager;
+import link.angelmaker.manager.MemoryRetransmittingManager;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NotSupportedNodeException;
@@ -75,7 +75,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
 	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
-	private AMManager STANDARD_MANAGER = new ConstantRetransmittingManager();
+	private AMManager STANDARD_MANAGER = new MemoryRetransmittingManager();
 	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
 	
 	

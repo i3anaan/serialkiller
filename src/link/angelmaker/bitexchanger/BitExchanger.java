@@ -15,14 +15,7 @@ import util.BitSet2;
  * implementation. An implementation of this should NEVER get stuck
  * (freeze/hang).
  * 
- * This should run in an separate thread. No method of this class should be
- * blocking.
- * 
- * This should always act like it is duplex. Meaning that you should be able to
- * call read while still sending bits. It is then up to the implementation to
- * decide whether to be duplex or not. It can even choose to simulate duplex
- * (half rate, take turns). But may also just return null when it is still
- * sending.
+ * This should run in an separate thread.
  * 
  * @author I3anaan
  * 
@@ -47,14 +40,6 @@ public interface BitExchanger {
 	 * @param bits
 	 */
 	public void sendBits(BitSet2 bits);
-
-	/**
-	 * Empties the queue, meaning that any bits currently queued will be
-	 * dropped, not sent. There is no way to tell how many bits that are not in
-	 * the queue anymore reached the other end.
-	 */
-	public void emptyQueue();
-
 	/**
 	 * @return bits read. Will not block on read, meaning that it can return an
 	 *         empty BitSet2.

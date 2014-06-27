@@ -6,7 +6,7 @@ import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
-import link.angelmaker.manager.ConstantRetransmittingManager;
+import link.angelmaker.manager.MemoryRetransmittingManager;
 import link.angelmaker.manager.NullAMManager;
 
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class BitExchangerTest {
 	public void testSimpleBitExchanger(){
 		SimpleBitExchanger e = new SimpleBitExchanger();
 		e.givePhysicalLayer(new NullPhysicalLayer());
-		e.giveAMManager(new ConstantRetransmittingManager());
+		e.giveAMManager(new MemoryRetransmittingManager());
 		e.enable();
 		
 		for(int i=0;i<4;i++){
@@ -41,7 +41,7 @@ public class BitExchangerTest {
 	public void testHighSpeedBitExchanger(){
 		HighSpeedBitExchanger e = new HighSpeedBitExchanger();
 		e.givePhysicalLayer(new NullPhysicalLayer());
-		e.giveAMManager(new ConstantRetransmittingManager());
+		e.giveAMManager(new MemoryRetransmittingManager());
 		e.enable();
 		
 		for(int i=0;i<4;i++){

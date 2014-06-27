@@ -2,7 +2,7 @@ package link.angelmaker.nodes;
 
 import util.BitSet2;
 
-public class NullNode implements Node{
+public class NullNode extends AbstractNode implements Node.Resetable{
 
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {

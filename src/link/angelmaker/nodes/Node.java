@@ -1,46 +1,20 @@
 package link.angelmaker.nodes;
-
-import link.angelmaker.bitexchanger.BitExchanger;
 import util.BitSet2;
 
 /**
- * The basic Node class. This class accepts a BitSet2, stores a BitSet2
- * internally, and can then give a BitSet2 back. These 3 BitSet2 can be
- * different. The implementation can fully decide what to do with the bits,
- * including the storage method. The implementation can either be a leaf or have
- * child nodes itself. The implementation may or may not have error detection or
- * correction.
+ * The Node interface. This class acts as a conversion function.
+ * Instead of the normal layer like structure, nodes support a tree structure.
+ * This creates higher potential functionality, however at the cost of computing time, memory and clearness.
+ * As a tree is able to split the data, it needs to also be able to recombine it.
+ * To be able to do this, the Node needs to be able to store data internally.
+ * Also this means that the Node cannot simply be used as a single conversion Function, it needs a state.
  * 
- * A Node that isReady() but not isFull() should be a flag, the other way around
- * is not set in stone.
+ * At any point in time the state of the Node has 2 representations: Original and Converted.
+ * Original is just the original data that was put in, this usually is stored in the lowest Node.
+ * Converted is a serialized version of the Node, usually more resilient to errors.
  * 
- * The following pieces of pseudo code should hold (with no errors occurring): n
- * = giveConverted(n.getConverted());
- * 
- * n = giveOriginal(n.getOriginal());
- * 
- * sent.giveOriginal(data) received.giveConverted(sent.getConverted()); data =
- * received.getOriginal();
- * 
- * sent.giveConverted(data) received.giveOriginal(sent.getOriginal()); data =
- * received.getConverted();
- * 
- * In diagram form:
- * 
- * [ 1 0 1 ] giveOriginal() [111 000 111] getConverted()
- * 
- * V
- * 
- * [111 000 111] giveConverted() [ 1 0 1 ] getOriginal()
- * 
- * V
- * 
- * [ 1 0 1 ] giveOriginal() [111 000 111] getConverted() etc...
- * 
- * 
- * This should NOT be implemented directly. Implement indirectly through either
- * LeafNode or InternalNode, or both.
- * 
+ * The original should always be the same as the original given.
+ * When full, getting the converted and giving it to an empty node should create the exact same state.
  * @author I3anaan
  */
 public interface Node {
@@ -50,7 +24,7 @@ public interface Node {
 	 * errors in this input. Similar to giveConverted(); Will return the unused
 	 * bits in a >NEW< bitset2. (so if you give it more than it needs,it returns
 	 * the unused rest which can then for example be given to the next Node).
-	 * This method should not consume any bits when isComplete() holds.
+	 * This method should not consume any bits when isFull() holds.
 	 * 
 	 * @require bits!=null;
 	 * @ensure result!=null;
@@ -61,8 +35,7 @@ public interface Node {
 	public BitSet2 giveOriginal(BitSet2 bits);
 
 	/**
-	 * Get the original bits from the Node Does it best to correct the bits
-	 * before returning.
+	 * Get the original, not encoded, data.
 	 * 
 	 * @return The bits stored in this Node.
 	 * @ensure result!=null No guarantees are given about this result when
@@ -72,11 +45,11 @@ public interface Node {
 
 	/**
 	 * Give the Node bits that were previously converted, or received converted.
-	 * Generally the Node will try to correct errors in this input. Similar to
+	 * Generally the Node will try to correct errors in this input. These converted strings can also hold extra state information Similar to
 	 * giveOriginal(); Will return the unused bits. (so if you give it more than
 	 * it needs,it returns the unused rest which can then for example be given
 	 * to the next Node). This method should not consume any bits when
-	 * isComplete() holds.
+	 * isComplete() holds. 
 	 * 
 	 * @require bits!=null;
 	 * @ensure result!=null;
@@ -88,7 +61,7 @@ public interface Node {
 
 	/**
 	 * Get the converted bits from the Node. Generally these bits are more error
-	 * resilient. (Usually because these bits contain redundancy).
+	 * resilient or include extra state information. (Usually because these bits contain redundancy).
 	 * 
 	 * @return The bits stored in this Node.
 	 * @ensure result!=null No guarantees are given about this result when
@@ -109,9 +82,7 @@ public interface Node {
 	public boolean isFull();
 
 	/**
-	 * While this usually will be the same as isFull(), in some cases a Node
-	 * might be a flag. A flag Node will not always consider itself to be full,
-	 * but it is ready to send.
+	 * Not all nodes will always need to be completely filled before being ready to send, isReady determines whether or not the Node considers itself ready to send.
 	 * 
 	 * @return Whether or not this Node is ready to be either send or read out.
 	 */
@@ -136,11 +107,13 @@ public interface Node {
 	public Node getClone();
 	
 	/**
-	 * @return array of the childs, can be or contain null.
+	 * @return array of the children, can be or contain null.
 	 */
 	public Node[] getChildNodes();
 	
-	public void reset();
+	
+	
+	
 
 	/**
 	 * This method is somewhat optional, AngelMaker should not depend on this
@@ -152,41 +125,23 @@ public interface Node {
 	 *         etc...
 	 */
 	public String getStateString();
-
-	/*
-	 * Following are some extensions to the interface. Node implementations
-	 * should ALWAYS implement at least 1 of these. These however are not
-	 * mutually exclusive, and a single class may implement all.
-	 */
-
 	
-	//TODO leaf/internal interfaces do nothing.
 	/**
-	 * A Node that does NOT have child nodes itself, it is a leaf.
-	 * 
+	 * Interface to indicate the Node only accepts a one time injection of data, then considers itself full.
+	 * This interface has no method, but further specifies the contract of the give/get data methods.
 	 * @author I3anaan
-	 * 
+	 *
 	 */
-	public interface Leaf extends Node {
-
+	public interface OneTimeInjection extends Node{
+		
 	}
-
-	/**
-	 * Nodes that implement this Interface recognize the ability to have
-	 * childNodes. No guarantees given if it actually does have childNodes.
-	 * 
-	 * @author I3anaan
-	 * 
-	 */
-	public interface Internal extends Node {
-
+	
+	public interface Resetable extends Node {
 		/**
-		 * @return the childNodes of this InternalNode. |result| is not
-		 *         specified, this may be 0.
+		 * Reset the Node, same as building a new node (except more memory efficient).
 		 */
-		//public Node[] getChildNodes();
+		public void reset();
 	}
-
 	/**
 	 * An Interface to indicate whether or not this Node has the ability to send
 	 * filler data. This ability means calling getConverted() on an empty node
@@ -200,38 +155,4 @@ public interface Node {
 		public boolean isFiller();
 		public Node getFiller();
 	}
-
-	/**
-	 * An interface to indicate that this Node can build itself if given a
-	 * BitExchanger.
-	 * 
-	 * @author I3anaan
-	 * 
-	 */
-	public interface SelfBuilding extends Node {
-
-		/**
-		 * Hands the BitExchanger instance to the Node, to build itself. This
-		 * way the Node has more control on how to build itself. (With aspect to
-		 * blocking, reacting to received bits, etc)
-		 * 
-		 * The node that this method is called on will change it self, to match
-		 * the received node. It needs a Node to send to the other side.
-		 * 
-		 * @param exchanger
-		 *            The BitExchanger to communicate on.
-		 * @param nodeToSend
-		 *            The Node containing data to be send.
-		 */
-		public void buildSelf(BitExchanger exchanger, Node nodeToSend);
-
-		/**
-		 * @author I3anaan
-		 * @Requires BitExchanger.MasterSlave
-		 */
-		public interface TurnedBased extends SelfBuilding {
-
-		}
-	}
-
 }

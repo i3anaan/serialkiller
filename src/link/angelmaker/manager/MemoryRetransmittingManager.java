@@ -7,18 +7,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
-import link.angelmaker.nodes.Node.Fillable;
 import link.angelmaker.nodes.SequencedNode;
 
-public class ConstantRetransmittingManager extends Thread implements AMManager, AMManager.Server {
-	//TODO better name
-	//TODO more like a manager, or combination of manager / node
+public class MemoryRetransmittingManager extends Thread implements Node ,AMManager, AMManager.Server {
 	public static final FlaggingNode NODE_FILLER = (FlaggingNode) new FlaggingNode(null);
 	
 	
@@ -27,12 +25,12 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	private ArrayBlockingQueue<Byte> queueOut;
 	
 	public static final int MESSAGE_FINE = (int)Math.pow(2,SequencedNode.MESSAGE_BIT_COUNT)-1;
-	private static BitSet2[] possibleMessages;
-	private Node receivingNode = NODE_FILLER.getClone();
+	public static BitSet2[] possibleMessages;
+	private Node.Resetable receivingNode = (Node.Resetable)NODE_FILLER.getClone();
 	private volatile int messageReceived;
 	private volatile int messageToSend;
-	
-	private Node[] memory;
+	private int lastReceivedCorrect;
+	private Node.Resetable[] memory;
 	private BitSet2 spilledBitsIn;
 	
 	private Receiver receiver;
@@ -41,16 +39,18 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 	
 	private static final byte[] emptyArray = new byte[]{};
 	
-	public ConstantRetransmittingManager(){
+	public MemoryRetransmittingManager(){
 		this.queueIn = new ArrayBlockingQueue<Byte>(2048);
 		this.queueOut = new ArrayBlockingQueue<Byte>(2048);
-		this.memory = new Node[MESSAGE_FINE]; //bitsUsed - amount of special messages.
+		this.memory = new Node.Resetable[MESSAGE_FINE]; //bitsUsed - amount of special messages.
+		NODE_FILLER.setParent(this);
 		possibleMessages = new BitSet2[MESSAGE_FINE+1];
+		possibleMessages[MESSAGE_FINE] = intMessageToBitSet(MESSAGE_FINE);
 		for(int i=0;i<memory.length;i++){
-			memory[i] = NODE_FILLER.getClone();
+			memory[i] = (Node.Resetable)NODE_FILLER.getClone();
 			possibleMessages[i] = intMessageToBitSet(i);
 		}
-		possibleMessages[MESSAGE_FINE] = intMessageToBitSet(MESSAGE_FINE);
+		
 		spilledBitsIn = new BitSet2();
 		messageReceived = MESSAGE_FINE;
 		messageToSend = MESSAGE_FINE;
@@ -97,15 +97,15 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 
 	@Override
 	public Node getCurrentSendingNode() {
-		return memory[lastSent]; 
-		//TODO not really the currently send node.
-		//Kind of want to get the memory.
+		AngelMaker.logger.info("Requested Current Sending Node");
+		System.out.println(this);
+		return this;
 	}
 
 	@Override
 	public Node getCurrentReceivingNode() {
-		// TODO Auto-generated method stub
-		return null;
+		AngelMaker.logger.info("Requested Current Receving Node");
+		return receivingNode;
 	}
 	
 	@Override
@@ -119,10 +119,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		int indexToSend = (lastSent+1)%(memory.length);
 		if(lastSent==loadNew){
 			loadNewNodeInMemory(indexToSend);
-			//AngelMaker.logger.debug("Loaded new Node in Memory");
 		}
 		nodeToSendNext = memory[indexToSend];
-		//AngelMaker.logger.debug("NodeToSendNext [" +indexToSend+"] = "+nodeToSendNext);
 		
 		lastSent = indexToSend;
 		if(nodeToSendNext.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
@@ -165,18 +163,13 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		}		
 	}
 	
-	public BitSet2 intMessageToBitSet(int message){
+	public static BitSet2 intMessageToBitSet(int message){
 		BitSet2 bs = new BitSet2(Ints.toByteArray(message));
 		return bs.get(bs.length()-SequencedNode.MESSAGE_BIT_COUNT, bs.length());
 	}
-	
-	@Override
-	public String toString(){
-		return "ConstantRetransmittingManager";
-	}
 		
 	private class Receiver extends Thread{
-		private int lastReceivedCorrect;
+		
 		
 		public void run(){
 			while(true){
@@ -186,9 +179,8 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 					Node packetNode = errorDetection.getChildNodes()[0];
 					if(packetNode instanceof SequencedNode){
 						SequencedNode seqNode = ((SequencedNode) packetNode);
-						//AngelMaker.logger.debug("Received packet\tseq="+seqNode.getSeq().getUnsignedValue()+" ("+((lastReceivedCorrect+1)%memory.length)+")"+"\tmsg="+seqNode.getMessage().getUnsignedValue()+"\tdata="+seqNode.getOriginal());
 						if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
-							//Fully correct.
+							//Fully correct, expected sequence number
 							//AngelMaker.logger.debug("Received correct packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tOK");
 
 							byte[] dataBytes = seqNode.getOriginal().toByteArray();
@@ -196,7 +188,7 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 							try {
 								queueIn.put(b);
 							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
+								//Should not happen, but if does, just drop bit.
 								e.printStackTrace();
 							}
 							}
@@ -227,9 +219,95 @@ public class ConstantRetransmittingManager extends Thread implements AMManager, 
 		private void refillReceivingNode(){
 			receivingNode.reset();
 			while(!receivingNode.isFull()){
-				//TODO optimize
 				spilledBitsIn = receivingNode.giveConverted(BitSet2.concatenate(spilledBitsIn,exchanger.readBits()));
 			}
 		}
+	}
+
+	
+	/*
+	 * Implements Node to let Graph draw the memory.
+	 */
+	
+	
+	
+	@Override
+	public BitSet2 getOriginal() {
+		BitSet2 original = new BitSet2();
+		for(Node n : memory){
+			original.addAtEnd(n.getOriginal());
+		}
+		return original;
+	}
+
+
+	@Override
+	public BitSet2 getConverted() {
+		BitSet2 converted = new BitSet2();
+		for(Node n : memory){
+			converted.addAtEnd(n.getConverted());
+		}
+		return converted;
+	}
+
+
+	@Override
+	public Node getParent() {
+		return null;
+	}
+
+
+	@Override
+	public boolean isFull() {
+		return false;
+	}
+
+
+	@Override
+	public boolean isReady() {
+		return false;
+	}
+
+
+	@Override
+	public boolean isCorrect() {
+		return true;
+	}
+
+	@Override
+	public Node[] getChildNodes() {
+		return memory;
+	}
+
+
+	@Override
+	public String getStateString() {
+		return "LastSent: "+lastSent+"\tNewestSend: "+loadNew+"\tLastReceived: "+lastReceivedCorrect;
+	}
+
+
+	@Override
+	public BitSet2 giveOriginal(BitSet2 bits) {
+		throw new NotImplementedException();
+	}
+
+
+	@Override
+	public BitSet2 giveConverted(BitSet2 bits) {
+		throw new NotImplementedException();
+	}
+
+
+	@Override
+	public Node getClone() {
+		throw new NotImplementedException();
+	}
+	
+	@Override
+	public String toString(){
+		String result =  "MemoryRetransmittingManager";
+		result = result +"\n\tLastSent: "+lastSent+"\tNewestSend: "+loadNew+"\tLastReceived: "+lastReceivedCorrect;
+		result = result + "\n\tMemory"+Arrays.toString(memory);
+		return result;
 	}
 }
