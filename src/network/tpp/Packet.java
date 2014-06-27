@@ -64,8 +64,12 @@ public class Packet implements Delayed {
      * @param raw The raw input data.
      */
     public Packet(byte[] raw) {
-        if (raw == null || raw.length < HEADER_LENGTH) {
-            throw new IllegalArgumentException("The raw data is not of the correct size.");
+        if (raw == null) {
+        	throw new IllegalArgumentException("The raw data can not be null.");
+        }
+        
+        if (raw.length < HEADER_LENGTH) {
+            throw new IllegalArgumentException(String.format("The raw data is is shorter than the header (%d bytes).", raw.length));
         }
 
         header = new PacketHeader(Arrays.copyOfRange(raw, 0, HEADER_LENGTH));
