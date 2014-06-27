@@ -99,6 +99,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 		standardSetup(phys,null,null,null);
 		instance = this;
 	}
+	
 	public AngelMaker(){
 		instance = this;
 	}
