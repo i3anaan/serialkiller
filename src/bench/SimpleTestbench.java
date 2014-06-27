@@ -28,9 +28,9 @@ public class SimpleTestbench {
 		}
 	}
 	private class CheckThread extends Thread {
-		private FrameLinkLayer down;
+		private PacketFrameLinkLayer down;
 
-		public CheckThread(FrameLinkLayer down) {
+		public CheckThread(PacketFrameLinkLayer down) {
 			this.down = down;
 		}
 
@@ -87,8 +87,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		FrameLinkLayer a = new AngelMaker(new BitErrorPhysicalLayer(vpla),null,null,null);
-		FrameLinkLayer b = new AngelMaker(new BitErrorPhysicalLayer(vplb),null,null,null);
+		PacketFrameLinkLayer a = new AngelMaker(new BitErrorPhysicalLayer(vpla),null,null,null);
+		PacketFrameLinkLayer b = new AngelMaker(new BitErrorPhysicalLayer(vplb),null,null,null);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);
