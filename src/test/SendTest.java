@@ -15,21 +15,19 @@ import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.PureNode;
 public class SendTest {
 
-	
+	public static final String STRING_TO_SEND = "Such test, such amazing, wow, up to 420 gigadoge! #swag\n";
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		PhysicalLayer phys = new LptHardwareLayer();
-		AMManager manager = new BlockingAMManagerServer();
-		Node node = new PureNode(null,8);
-		node = new FlaggingNode(null,8);
-		FrameLinkLayer am = new AngelMaker(phys, node, manager,
-				new SimpleBitExchanger());
+		FrameLinkLayer am = new AngelMaker(phys);
+		
 		System.out.println(am.toString());
-		String stringToSend = "Such test, such amazing, wow, up to 420 gigadoge! #swag\n";
-		byte[] bytesToSend = stringToSend.getBytes(Charsets.US_ASCII);
-		System.out.println(stringToSend+"\n["+stringToSend.length()+","+bytesToSend.length+"]\n");
+		
+		byte[] bytesToSend = STRING_TO_SEND.getBytes(Charsets.US_ASCII);
+		System.out.println(STRING_TO_SEND+"\n["+STRING_TO_SEND.length()+","+bytesToSend.length+"]\n");
+		
 		for(byte b : bytesToSend){
 			System.out.println(Bytes.format(b));
 		}
