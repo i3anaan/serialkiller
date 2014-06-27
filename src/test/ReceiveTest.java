@@ -20,18 +20,8 @@ import util.BitSet2;
 
 public class ReceiveTest {	
 	public static void main(String[] args) {
-<<<<<<< HEAD
-		PhysicalLayer phys = new LptErrorHardwareLayer();
-		AMManager manager = new ThreadedAMManagerServer();
-		Node node = new FrameNode<Node>(null,3);
-		node = new FlaggingNode(null,8);
-		FrameLinkLayer am = new AngelMaker(phys, node, manager,
-				new SimpleBitExchanger());
-=======
 		PhysicalLayer phys = new LptHardwareLayer();
 		FrameLinkLayer am = new AngelMaker(phys);
-		
->>>>>>> 6a2590102431ab9ce1ac7284789cde0a8cdc9c93
 		System.out.println(am);
 		System.out.println("BEGIN TEST");
 
