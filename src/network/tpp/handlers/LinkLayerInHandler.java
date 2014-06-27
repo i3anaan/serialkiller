@@ -47,6 +47,10 @@ public class LinkLayerInHandler extends LinkLayerHandler {
             }
         } else {
             TPPNetworkLayer.getLogger().warning("Link layer delivered malformed packet (" + p.reason() + "), packet dropped.");
+            
+            if (isPacketFrameLinkLayer()) {
+            	this.toPacketFrameLinkLayer().reset();
+            }
         }
     }
 
