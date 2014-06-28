@@ -39,7 +39,8 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	private BitSet2 stored;
 	private BitSet2 storedConverted;
 	private int dataBitCount;
-
+	
+	private int checkedForStartFlagInJunkTill = 0;
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
@@ -49,6 +50,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
 	
+	
 	public FlaggingNode(Node parent) {
 		this.dataBitCount = maxBitsExpected;
 		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount,CODEC) };
@@ -57,6 +59,9 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
 		lastReceivedConvertedJunk = new BitSet2();
+		if(!isSolidEndFlag(FLAG_END_OF_FRAME.getFlag())){
+			AngelMaker.logger.bbq("Invalid End of frame flag, ealier occurence possible");
+		}
 	}
 	
 	public FlaggingNode(Node parent, Node.Resetable child, int dataBitCount) {
@@ -66,6 +71,9 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
 		lastReceivedConvertedJunk = new BitSet2();
+		if(!isSolidEndFlag(FLAG_END_OF_FRAME.getFlag())){
+			AngelMaker.logger.bbq("Invalid End of frame flag, ealier occurence possible");
+		}
 	}
 
 	public void setParent(Node parent){
@@ -95,38 +103,33 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		//TODO optimize
+		//System.out.println("Give Converted: "+lastReceivedConvertedJunk+"\t storedConverted: "+storedConverted);
 		if (!receivedStartFlag) {
-			BitSet2 tempConcat = BitSet2.concatenate(lastReceivedConvertedJunk,
-					bits); // Add just received to already received.
-			// Keep only just received + max flag length (so it cannot
-			// Infinitely grow.
-			lastReceivedConvertedJunk = tempConcat.get(
-					Math.max(0,
-							tempConcat.length()
-									- FLAG_START_OF_FRAME.getFlag().length()
-									- bits.length()), tempConcat.length());
-			BitSet2 afterStart = getDataAfterStartFlag(lastReceivedConvertedJunk);
-			//System.out.println("Data after start:"+afterStart);
-			if (afterStart.length() >= 0) {
+			//This code does less allocation and is easier on CPU, can however (theoretically) store infinitely long bitsets.
+			//TODO better?
+			lastReceivedConvertedJunk.addAtEnd(bits);
+			
+			BitSet2 afterStart = getDataAfterStartFlag();
+			if (afterStart!=null) {
 				storedConverted = afterStart;
 			}
 		} else {
-			storedConverted = BitSet2.concatenate(storedConverted, bits);
+			storedConverted.addAtEnd(bits);
 		}
-		int contains = getRealEndFlagIndex(storedConverted);
+		
+		int contains = getEndFlagIndex(storedConverted);
 		if (receivedStartFlag && contains >= 0) {
 			// Received start and end flag.
 			isFull = true;
 			stored = unStuff(getDataBeforeEndFlag(storedConverted));
+			//System.out.println("Full data: "+stored);
 			children[0].giveConverted(stored);
-			//System.out.println("GiveConverted done");
+			
 			return storedConverted.get(contains
 					+ FLAG_END_OF_FRAME.getFlag().length(),
 					storedConverted.length());
 		} else {
 			// Does not have end flag yet.
-			//System.out.println("GiveConverted done");
 			return new BitSet2();
 		}
 	}
@@ -136,7 +139,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		return placeFlags(stuff(children[0].getConverted()));
 	}
 
-	private int getRealEndFlagIndex(BitSet2 bits) {
+	private int getEndFlagIndex(BitSet2 bits) {
 		return bits.contains(FLAG_END_OF_FRAME.getFlag());
 	}
 
@@ -166,24 +169,24 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 
 	/**
-	 * @bits BitSet2 to look in.
-	 * @return the data after the start flag, empty bitset2 if bits does not
+	 * Looks in lastReceivedConvertedJunk for a start flag.
+	 * @return the data after the start flag, null if bits does not
 	 *         contain the start flag
 	 */
-	private BitSet2 getDataAfterStartFlag(BitSet2 bits) {
-		int contains = bits.contains(FLAG_START_OF_FRAME.getFlag());
+	private BitSet2 getDataAfterStartFlag() {
+		int contains = lastReceivedConvertedJunk.contains(FLAG_START_OF_FRAME.getFlag(),checkedForStartFlagInJunkTill);
+		checkedForStartFlagInJunkTill = Math.max(lastReceivedConvertedJunk.length()-FLAG_START_OF_FRAME.getFlag().length()+1,0);
 		if (contains >= 0) {
 			receivedStartFlag = true;
-			//System.out.println("Seen start flag");
-			return bits.get(contains + FLAG_START_OF_FRAME.getFlag().length(),
-					bits.length());
+			return lastReceivedConvertedJunk.get(contains + FLAG_START_OF_FRAME.getFlag().length(),
+					lastReceivedConvertedJunk.length());
 		} else {
-			return new BitSet2();
+			return null;
 		}
 	}
 
 	private BitSet2 getDataBeforeEndFlag(BitSet2 bits) {
-		int contains = getRealEndFlagIndex(bits);
+		int contains = getEndFlagIndex(bits);
 		if (contains >= 0) {
 			return bits.get(0, contains);
 		} else {
@@ -257,6 +260,20 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		receivedStartFlag = false;
 		isFull = false;
 		lastReceivedConvertedJunk.clear();
+		checkedForStartFlagInJunkTill=0;
+	}
+	
+	/**
+	 * @return true if no sequence of bits can be placed in front of the end flag to create an extra new endflag earlier then the real endflag.
+	 */
+	public static boolean isSolidEndFlag(BitSet2 flag){
+		for(int i=1;i<flag.length();i++){
+			if(flag.get(0,i).equals(flag.get(flag.length()-i,flag.length()))){
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }

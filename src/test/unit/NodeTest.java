@@ -96,6 +96,24 @@ public class NodeTest {
 			assertEquals(data,clone.getOriginal());
 			assertEquals(seq,((SequencedNode)clone.getChildNodes()[0].getChildNodes()[0]).getSeq());
 			assertEquals(message,((SequencedNode)clone.getChildNodes()[0].getChildNodes()[0]).getMessage());
+			
+			
+			//Network simulation.
+			FlaggingNode networkConstructed = new FlaggingNode(null);
+			BitSet2 converted = flagNode.getConverted();
+			BitSet2 randomJunkFront = new BitSet2("00011");
+			BitSet2 randomJunkEnd = new BitSet2("001010");
+			BitSet2 given = BitSet2.concatenate(randomJunkFront,BitSet2.concatenate(converted, randomJunkEnd));
+			int index=0;
+			while(index<given.length()){
+				int add = Math.min((int)(Math.random()*3),given.length()-index);
+				networkConstructed.giveConverted(given.get(index,index+add));
+				index = index+add;
+			}
+			assertEquals(data,networkConstructed.getOriginal());
+			assertEquals(seq,((SequencedNode)networkConstructed.getChildNodes()[0].getChildNodes()[0]).getSeq());
+			assertEquals(message,((SequencedNode)networkConstructed.getChildNodes()[0].getChildNodes()[0]).getMessage());
+			
 		}
 	}
 }
