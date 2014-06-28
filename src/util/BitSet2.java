@@ -39,7 +39,11 @@ public class BitSet2 extends BitSet {
 	public BitSet2(String string){
 		super();
 		for(int i=0;i<string.length();i++){
-			this.set(i,string.charAt(i)=='1');
+			if(string.charAt(i)=='1'){
+				this.addAtEnd(true);
+			}else if(string.charAt(i)=='0'){
+				this.addAtEnd(false);
+			}
 		}
 	}
 	

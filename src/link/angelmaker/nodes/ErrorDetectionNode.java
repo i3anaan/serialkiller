@@ -2,6 +2,7 @@ package link.angelmaker.nodes;
 
 import com.google.common.base.Optional;
 
+import link.angelmaker.codec.Codec;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
@@ -10,10 +11,12 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 	private boolean correct;
 	private int maxDataSize;
 	private Node.Resetable child;
+	private Codec codec;
 	
-	public ErrorDetectionNode(Node parent, int maxDataSize){
+	public ErrorDetectionNode(Node parent, int maxDataSize, Codec codec){
 		this.parent = parent;
 		this.maxDataSize = maxDataSize;
+		this.codec = codec;
 		child = new SequencedNode(this,SequencedNode.PACKET_BIT_COUNT,SequencedNode.MESSAGE_BIT_COUNT);
 	}
 	
@@ -43,7 +46,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 			
 			int maxExpectedBits = (SequencedNode.PACKET_BIT_COUNT + SequencedNode.MESSAGE_BIT_COUNT*2)*ParityBitsCodec.ENCODED_BYTE/8;
 			BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxExpectedBits));
-			Optional<BitSet2> decoded = ParityBitsCodec.decode(bitsToUse);
+			Optional<BitSet2> decoded = codec.decode(bitsToUse);
 			correct = decoded.isPresent();
 			if(correct){
 				child.giveConverted(decoded.get());
@@ -57,7 +60,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 
 	@Override
 	public BitSet2 getConverted() {
-		return ParityBitsCodec.encode(child.getConverted());
+		return codec.encode(child.getConverted());
 	}
 
 	@Override
@@ -72,7 +75,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 
 	@Override
 	public Node getClone() {
-		Node clone = new ErrorDetectionNode(parent, maxDataSize);
+		Node clone = new ErrorDetectionNode(parent, maxDataSize,codec);
 		if(isFull()){
 			clone.giveConverted(getConverted());
 		}

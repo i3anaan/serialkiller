@@ -1,7 +1,7 @@
 package test.unit;
 
 import static org.junit.Assert.*;
-
+import link.angelmaker.codec.ParityBitsCodec;
 import link.angelmaker.nodes.ErrorDetectionNode;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.SequencedNode;
@@ -39,7 +39,7 @@ public class NodeTest {
 	
 	@Test
 	public void testErrorDetectionNode(){
-		ErrorDetectionNode errNode = new ErrorDetectionNode(null,64);
+		ErrorDetectionNode errNode = new ErrorDetectionNode(null,64, new ParityBitsCodec());
 		BitSet2 data = new BitSet2(new byte[]{1,2,3,4,5,6,7,8});
 		BitSet2 seq = new BitSet2("0011");
 		BitSet2 message = new BitSet2("1101");
@@ -54,7 +54,7 @@ public class NodeTest {
 		assertEquals(BitSet2.concatenate(seq, BitSet2.concatenate(data, message)),((SequencedNode)errNode.getChildNodes()[0]).getConverted());	
 		
 		
-		ErrorDetectionNode constructed = new ErrorDetectionNode(null,64);
+		ErrorDetectionNode constructed = new ErrorDetectionNode(null,64,new ParityBitsCodec());
 		constructed.giveConverted(errNode.getConverted());
 		assertEquals(data,constructed.getOriginal());
 		assertEquals(seq,((SequencedNode)constructed.getChildNodes()[0]).getSeq());

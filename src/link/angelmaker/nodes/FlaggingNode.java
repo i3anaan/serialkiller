@@ -3,6 +3,8 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.codec.Codec;
+import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
 /**
@@ -42,11 +44,14 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
+	private static final Codec CODEC = new ParityBitsCodec();
+	
+	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
 	
 	public FlaggingNode(Node parent) {
 		this.dataBitCount = maxBitsExpected;
-		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount) };
+		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount,CODEC) };
 		
 		this.parent = parent;
 		stored = new BitSet2();
