@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
 import link.angelmaker.codec.Codec;
+import link.angelmaker.codec.NaiveRepeaterCodec;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 

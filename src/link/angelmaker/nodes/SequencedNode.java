@@ -2,6 +2,7 @@ package link.angelmaker.nodes;
 
 import link.angelmaker.AngelMaker;
 import util.BitSet2;
+import util.EmptyBitSet2;
 
 /**
  * Accepts one-time injection of data.
@@ -34,7 +35,7 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	public BitSet2 giveOriginal(BitSet2 bits) {
 		this.storedData = bits.get(0,Math.min(bits.length(), maxDataSize));
 		full = true;
-		return bits.get(Math.min(bits.length(), maxDataSize),bits.length());
+		return EmptyBitSet2.getInstance();
 	}
 
 	@Override
@@ -44,12 +45,11 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		BitSet2 bitsToUse = bits.get(0,Math.min(bits.length(),maxDataSize+2*messageBitCount));
-		sequenceNumber = bitsToUse.get(0,messageBitCount);
-		message = bitsToUse.get(Math.max(0,bits.length()-messageBitCount),bits.length());
-		storedData = bitsToUse.get(messageBitCount, Math.max(0,bits.length()-messageBitCount));
+		sequenceNumber = bits.get(0,messageBitCount);
+		message = bits.get(Math.max(0,bits.length()-messageBitCount),bits.length());
+		storedData = bits.get(messageBitCount, Math.max(0,bits.length()-messageBitCount));
 		full = true;
-		return bits.get(Math.min(bits.length(),maxDataSize+2*messageBitCount),bits.length());
+		return EmptyBitSet2.getInstance();
 	}
 
 	@Override

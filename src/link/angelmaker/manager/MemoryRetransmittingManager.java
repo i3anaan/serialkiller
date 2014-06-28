@@ -136,7 +136,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 			loadNew = lastSent;
 		}
 		
-		//AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
+		AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
 		
 		return nodeToSendNext;
 	}
@@ -182,7 +182,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 						SequencedNode seqNode = ((SequencedNode) packetNode);
 						if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
 							//Fully correct, expected sequence number
-							//AngelMaker.logger.debug("Received correct packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tOK");
+							AngelMaker.logger.debug("Received correct packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tOK");
 
 							byte[] dataBytes = seqNode.getOriginal().toByteArray();
 							for(byte b : dataBytes){

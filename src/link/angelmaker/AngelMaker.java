@@ -2,6 +2,7 @@ package link.angelmaker;
 
 import link.PacketFrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.MemoryRetransmittingManager;
@@ -11,7 +12,6 @@ import log.LogMessage.Subsystem;
 import log.Logger;
 import phys.PhysicalLayer;
 import phys.diag.NullPhysicalLayer;
-
 import common.Stack;
 import common.Startable;
 
@@ -133,7 +133,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	
 	
 	public void setup(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
-		logger.info("Building ANGEL_MAKER with: "+phys+" | "+topNode+" | "+manager+" | "+exchanger);
+		logger.info("Building ANGEL_MAKER with: "+phys.getClass().getSimpleName()+" | "+topNode.getClass().getSimpleName()+" | "+manager.getClass().getSimpleName()+" | "+exchanger.getClass().getSimpleName());
 		//TODO thread name on AMManger is TPPHandler, why is this?
 		logger.info("Setting up ANGEL_MAKER");
 		try{

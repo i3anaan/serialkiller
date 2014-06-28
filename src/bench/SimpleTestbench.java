@@ -2,6 +2,7 @@ package bench;
 
 import link.*;
 import link.angelmaker.AngelMaker;
+import phys.diag.BitErrorPhysicalLayer;
 import phys.diag.DelayPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 
@@ -88,8 +89,8 @@ public class SimpleTestbench {
 		vpla.connect(vplb);
 		vplb.connect(vpla);
 
-		PacketFrameLinkLayer a = new AngelMaker(new DelayPhysicalLayer(vpla),null,null,null);
-		PacketFrameLinkLayer b = new AngelMaker(new DelayPhysicalLayer(vplb),null,null,null);
+		PacketFrameLinkLayer a = new AngelMaker(new BitErrorPhysicalLayer(vpla),null,null,null);
+		PacketFrameLinkLayer b = new AngelMaker(new BitErrorPhysicalLayer(vplb),null,null,null);
 		
 		System.out.println("STACK A: " + a);
 		System.out.println("STACK B: " + a);

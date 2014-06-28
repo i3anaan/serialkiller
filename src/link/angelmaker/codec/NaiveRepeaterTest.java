@@ -7,7 +7,7 @@ import org.junit.Test;
 import util.BitSet2;
 
 public class NaiveRepeaterTest {
-	private Codec codec = new NaiveRepeaterCodec();
+	private Codec codec = new NaiveRepeaterCodec(2);
 	
 	@Test
 	public void testEncode() {
