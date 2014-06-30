@@ -26,9 +26,11 @@ public class ReceiveTest {
 					}	
 					bytesReceivedCount++;
 				}
-				System.out.print(new String(arr,Charsets.US_ASCII));
-				if((bytesReceivedCount % SendTest.STRING_TO_SEND.length())==0){
-					System.out.print("\n["+bytesCorrectCount+"/"+bytesReceivedCount+"]\tSpeed (bytes/s): "+(bytesReceivedCount/(System.currentTimeMillis()-startTime))+"\n");
+				//System.out.print(new String(arr,Charsets.US_ASCII));
+				int i = 0;
+				if((bytesReceivedCount % SendTest.STRING_TO_SEND.length())==0 && System.currentTimeMillis()-startTime >= i*2000){
+					System.out.print("\n["+bytesCorrectCount+"/"+bytesReceivedCount+"]\tSpeed (bytes/s): "+((double)bytesReceivedCount/(((double)System.currentTimeMillis()-(double)startTime)/1000.0))+"\n");
+					i++;
 				}
 			}
 		}

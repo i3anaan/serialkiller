@@ -92,7 +92,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 	
 	@Override
 	public String toString(){
-		return "ErrorDetectionNode(Parity)["+child+"]";
+		return "ErrorDetectionNode(Parity)["+child.getClass().getSimpleName()+"]";
 	}
 
 
