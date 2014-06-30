@@ -3,6 +3,7 @@ package link.angelmaker;
 import link.PacketFrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
+import link.angelmaker.bitexchanger.NonInvertingBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.MemoryRetransmittingManager;
@@ -64,7 +65,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
 	private AMManager STANDARD_MANAGER = new MemoryRetransmittingManager();
-	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
+	private BitExchanger STANDARD_EXCHANGER = new HighSpeedBitExchanger();
 	
 	
 	

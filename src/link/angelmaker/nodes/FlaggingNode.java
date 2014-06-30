@@ -46,7 +46,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
-	private static final Codec CODEC = new ParityBitsCodec();
+	private static final Codec CODEC = new NaiveRepeaterCodec(3);
 	
 	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
@@ -216,7 +216,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 
 	@Override
 	public boolean isFiller() {
-		return getOriginal().length()==0;
+		return isFull() && getOriginal().length()==0;
 	}
 
 	@Override

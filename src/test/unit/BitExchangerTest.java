@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
+import link.angelmaker.bitexchanger.NonInvertingBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.manager.MemoryRetransmittingManager;
@@ -25,7 +26,22 @@ public class BitExchangerTest {
 	public void testSimpleBitExchanger(){
 		SimpleBitExchanger e = new SimpleBitExchanger();
 		e.givePhysicalLayer(new NullPhysicalLayer());
-		e.giveAMManager(new MemoryRetransmittingManager());
+		e.giveAMManager(new NullAMManager());
+		e.enable();
+		
+		for(int i=0;i<4;i++){
+			for(int b=0;b<2;b++){
+				boolean[] arr = e.extractBitFromInput((byte)i,e.adaptBitToPrevious(((byte)i),b==1));
+				assertEquals(b==1,arr[0]);
+			}
+		}
+	}
+	
+	@Test
+	public void testNonInvertingBitExchanger(){
+		NonInvertingBitExchanger e = new NonInvertingBitExchanger();
+		e.givePhysicalLayer(new NullPhysicalLayer());
+		e.giveAMManager(new NullAMManager());
 		e.enable();
 		
 		for(int i=0;i<4;i++){

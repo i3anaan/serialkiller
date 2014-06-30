@@ -31,6 +31,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	private volatile int messageToSend;
 	private int lastReceivedCorrect;
 	private Node.Resetable[] memory;
+	private Node.Resetable[] backupMemoryRealNodes;
 	private BitSet2 spilledBitsIn;
 	
 	private Receiver receiver;
@@ -43,14 +44,18 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 		this.queueIn = new ArrayBlockingQueue<Byte>(2048);
 		this.queueOut = new ArrayBlockingQueue<Byte>(2048);
 		this.memory = new Node.Resetable[MESSAGE_FINE]; //bitsUsed - amount of special messages.
+		this.backupMemoryRealNodes = new Node.Resetable[MESSAGE_FINE];
 		NODE_FILLER.setParent(this);
+		
 		possibleMessages = new BitSet2[MESSAGE_FINE+1];
 		possibleMessages[MESSAGE_FINE] = intMessageToBitSet(MESSAGE_FINE);
 		for(int i=0;i<memory.length;i++){
-			memory[i] = (Node.Resetable)NODE_FILLER.getClone();
+			Node.Resetable newNode = ((Node.Resetable)NODE_FILLER.getClone());
+			memory[i] = newNode;
+			backupMemoryRealNodes[i] = newNode;
 			possibleMessages[i] = intMessageToBitSet(i);
 		}
-		
+		NODE_FILLER.giveOriginal(new BitSet2()); //Make sure it is full (so isFiller() returns true);
 		spilledBitsIn = new BitSet2();
 		messageReceived = MESSAGE_FINE;
 		messageToSend = MESSAGE_FINE;
@@ -136,7 +141,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 			loadNew = lastSent;
 		}
 		
-		AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
+		//AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
 		
 		return nodeToSendNext;
 	}
@@ -144,7 +149,6 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	
 	
 	public void loadNewNodeInMemory(int index){
-		memory[index].reset();
 		BitSet2 bs = new BitSet2();
 		int byteCount = 0;
 		Byte b = queueOut.poll();
@@ -152,6 +156,10 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 			//Filler
 			memory[index] = NODE_FILLER;
 		}else{
+			if(((Node.Fillable)memory[index]).isFiller()){
+				memory[index] = backupMemoryRealNodes[index];
+			}
+			memory[index].reset();
 			while(b!=null && byteCount<SequencedNode.PACKET_BIT_COUNT/8){
 				bs.addAtEnd(new BitSet2(b));
 				byteCount++;
@@ -180,10 +188,11 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 					Node packetNode = errorDetection.getChildNodes()[0];
 					if(packetNode instanceof SequencedNode){
 						SequencedNode seqNode = ((SequencedNode) packetNode);
+						//AngelMaker.logger.debug("Received packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tmsg="+seqNode.getMessage().getUnsignedValue()+"\t"+((seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length)?"OK":"ERROR")+"\tData="+seqNode.getOriginal());
+
 						if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
 							//Fully correct, expected sequence number
-							AngelMaker.logger.debug("Received correct packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tOK");
-
+							
 							byte[] dataBytes = seqNode.getOriginal().toByteArray();
 							for(byte b : dataBytes){
 							try {

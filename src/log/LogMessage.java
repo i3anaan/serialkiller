@@ -22,7 +22,7 @@ public class LogMessage {
     private String message;
     
     /** The thread that logged the message. */
-    private long thread;
+    private String thread;
 
     /** Create a new log message with the given properties. */
     public LogMessage(Subsystem sys, Severity sev, String msg) {
@@ -30,7 +30,7 @@ public class LogMessage {
         severity = sev;
         message = msg;
         timestamp = System.currentTimeMillis();
-        thread = Thread.currentThread().getId();
+        thread = Thread.currentThread().getName();
     }
 
     public Subsystem getSubsystem() {
@@ -45,7 +45,7 @@ public class LogMessage {
         return timestamp;
     }
     
-    public long getThread() {
+    public String getThread() {
     	return thread;
     }
 
@@ -60,7 +60,7 @@ public class LogMessage {
 
     @Override
 	public String toString() {
-        return String.format("[%-8s] [%s] [%4s] [%04d] %s",
+        return String.format("[%-8s] [%s] [%4s] [%s] %s",
                 severity,
                 new Date(timestamp),
                 subsystem,

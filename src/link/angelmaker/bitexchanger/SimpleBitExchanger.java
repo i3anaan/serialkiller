@@ -2,12 +2,15 @@ package link.angelmaker.bitexchanger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+import common.Graph;
+
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.manager.AMManager;
 import link.angelmaker.nodes.Node;
 import phys.PhysicalLayer;
 import util.BitSet2;
+import util.Bytes;
 
 /**
  * Right bit is always the data bit.
@@ -34,7 +37,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final String ROLE_MASTER = "master";
 	public static final String ROLE_SLAVE = "slave";
 	public static final String ROLE_UKNOWN = "unkown";
-	public static final int STABILITY = 100;//TODO This is kind of a dirty fix.
+	public static final int STABILITY = 40;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
 	public static final long READ_TIMEOUT_NO_ACK = 50l*1000000l;
@@ -42,8 +45,11 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	protected byte previousByteReceived;
 	
 	public SimpleBitExchanger(){
-		queueOut = new ArrayBlockingQueue<Boolean>(256);
-		queueIn = new ArrayBlockingQueue<Boolean>(256);
+		//TODO Make it so that it will never block when filling itself.
+		//(current solution is larger queues).
+		//TODO restructure AngelMaker to fix this issue.
+		queueOut = new ArrayBlockingQueue<Boolean>(2048);
+		queueIn = new ArrayBlockingQueue<Boolean>(2048);
 		this.connectionRole = ROLE_UKNOWN;
 	}
 	
@@ -72,6 +78,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	}
 	
 	
+	//TODO bits can interleave when multiple threads call this method at once.
 	@Override
 	public void sendBits(BitSet2 bits) {
 		for(int i=0;i<bits.length();i++){
@@ -229,6 +236,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		Boolean sendNext = queueOut.poll();
 		while(sendNext==null){
 			Node requested = manager.getNextNode();
+			//System.out.println("BitExchanger filling self with: ["+requested.getConverted().length()+"]  "+requested.getConverted());
 			this.sendBits(requested.getConverted());
 			sendNext = queueOut.poll();
 		}
@@ -274,7 +282,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 				firstRound = false;					
 			} catch (TimeOutException e) {
 				//Time-out, ignore, moving, don't hang.
-				//AngelMaker.logger.debug("Time out waiting on ack. Currently on line:"+Bytes.format(down.readByte()));
+				AngelMaker.logger.debug("Time out waiting on ack. Currently on line:"+Bytes.format(down.readByte()));
 				//TODO instead of not adding a bit here, it might be usefull to still add a (guessed) bit.
 				//This might reduce out of sync problems.
 			}
@@ -282,7 +290,14 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			if(bitsReceived!=null){
 				for(boolean b : bitsReceived){
 					//System.out.println("bit received: "+(b ? "1" : "0"));
-					queueIn.offer(b);
+					try {
+						queueIn.put(b);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					//if(queueIn.offer(b)){
+					//	AngelMaker.logger.alert("BitExchanger queueIn full, dropping bits");
+					//}
 				}
 				if(round<100){
 				//AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
