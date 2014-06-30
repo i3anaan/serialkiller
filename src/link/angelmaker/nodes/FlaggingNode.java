@@ -79,8 +79,10 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 	
 	private void setFlags(){
-		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("1"));
-		FLAG_END_OF_FRAME = new FixedFlag(new BitSet2("001101"));
+		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("010"));
+		FLAG_END_OF_FRAME = new FixedEndFlag();
+		//FLAG_START_OF_FRAME = new BasicFlag(new BitSet2("10011001"));
+		//FLAG_END_OF_FRAME = new BasicFlag(new BitSet2("00111001101"));
 	}
 	
 	

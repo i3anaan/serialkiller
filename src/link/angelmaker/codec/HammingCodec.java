@@ -32,7 +32,7 @@ public class HammingCodec implements Codec{
 			BitSet2 decoded = new BitSet2();
 			for(int i=0;i<input.length();i=i+codec.encodedBitCount){
 				if(!codec.hasError(input.get(i,i+codec.encodedBitCount))){	
-					decoded.addAtEnd(codec.encode(input.get(i,i+codec.encodedBitCount)));
+					decoded.addAtEnd(codec.decode(input.get(i,i+codec.encodedBitCount)));
 				}else{
 					return Optional.absent();
 				}

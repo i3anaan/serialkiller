@@ -11,15 +11,23 @@ public class FixedEndFlag implements Flag{
 	 * opposite of the last bit. Together these two stuffings should make it
 	 * impossible for the original flag to appear somewhere.
 	 */
-	BitSet2 escapedFlag = new BitSet2("110010");
-	BitSet2 realEscapedFlag = new BitSet2("1100100");	//had flag in data.
-	BitSet2 escapedEscapedFlag = new BitSet2("1100101");		//had escapedFlag in data.
+	BitSet2 escapedFlag = 			new BitSet2("00011001");
+	BitSet2 realEscapedFlag = 		new BitSet2("00011001 111");	//had flag in data.
+	BitSet2 escapedEscapedFlag = 	new BitSet2("00011001 011");		//had escapedFlag in data.
 
+
+	public static void main(String[] args){
+		System.out.println("Start test");
+		System.out.println(new FixedEndFlag().alwaysWorks());
+		System.out.println("Test done");
+	}
+	
 	public FixedEndFlag() {
 	}
 
     @Override
 	public void stuff(BitSet2 bits) {
+    	//System.out.println("Stuffing: "+bits);
 		int index = 0;
         int contains = bits.contains(escapedFlag, index);
 
@@ -41,7 +49,8 @@ public class FixedEndFlag implements Flag{
             bits.insert(contains, realEscapedFlag);
 
             index = contains + realEscapedFlag.length();
-            contains = bits.contains(escapedFlag, index);
+            contains = bits.contains(flag, index);
+            //System.out.println("Bits: "+bits+"\t["+contains+"]");
         }
 	}
 
@@ -75,6 +84,71 @@ public class FixedEndFlag implements Flag{
 	@Override
 	public BitSet2 getFlag() {
 		return flag;
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Test method, returns true if this flag works for every possible bitsequence.
+	 * @return
+	 */
+	private int additionCount;
+	private int testProgress = 0;
+	
+	public boolean alwaysWorks(){
+		additionCount = escapedFlag.length()*2;
+		return testBitSequence(new BitSet2(), additionCount);
+	}
+	
+	private boolean testBitSequence(BitSet2 current, int additionsLeft){
+		if(additionsLeft<=0){
+			//test sequence
+			BitSet2 clone = (BitSet2) current.clone();
+			stuff(clone);
+			boolean containsFlag = clone.contains(flag)>=0;
+			boolean equal = false;
+			if(!containsFlag){
+				unStuff(clone);
+				equal = clone.equals(current);
+				if(!equal){
+					System.out.println("NOT EQUAL.");
+					System.out.println("Flag:\t\t\t"+flag);
+					System.out.println("EscapedFlag:\t\t"+escapedFlag);
+					System.out.println("EscapedEscapedFlag:\t"+escapedEscapedFlag);
+					System.out.println("RealEscapedFlag:\t"+realEscapedFlag);
+					System.out.println("original:\t"+current);
+					stuff(current);
+					System.out.println("stuffed:\t"+current);
+					System.out.println("unstuffed:\t"+clone);
+				}
+			}else{
+				System.out.println("Flag:\t\t\t"+flag);
+				System.out.println("EscapedFlag:\t\t"+escapedFlag);
+				System.out.println("EscapedEscapedFlag:\t"+escapedEscapedFlag);
+				System.out.println("RealEscapedFlag:\t"+realEscapedFlag);
+				
+				System.out.println("unstuffed:\t"+current);
+				System.out.println("stuffed:\t"+clone);
+			}
+			return !containsFlag && equal;
+		}else{
+			BitSet2 clone = (BitSet2) current.clone();
+			current.addAtEnd(false);
+			boolean resultFalse = testBitSequence(current, additionsLeft-1);
+			boolean resultTrue = false;
+			if(resultFalse){
+				clone.addAtEnd(true);
+				resultTrue = testBitSequence(clone, additionsLeft-1);
+			}
+			//if(additionsLeft>additionCount-14){
+				testProgress++;
+				//System.out.println("testProgress: "+(testProgress)/68719476736.0+"%");
+				System.out.println(current);
+			//}
+			return resultFalse && resultTrue;
+		}
 	}
 
 }
