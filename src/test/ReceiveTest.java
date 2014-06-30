@@ -16,6 +16,7 @@ public class ReceiveTest {
 
 		int bytesReceivedCount=0;
 		int bytesCorrectCount=0;
+		long startTime = System.currentTimeMillis();
 		while (true) {
 			byte[] arr = am.readFrame();
 			if (arr.length > 0) {
@@ -27,7 +28,7 @@ public class ReceiveTest {
 				}
 				System.out.print(new String(arr,Charsets.US_ASCII));
 				if((bytesReceivedCount % SendTest.STRING_TO_SEND.length())==0){
-					System.out.print("\n["+bytesCorrectCount+"/"+bytesReceivedCount+"]\n");
+					System.out.print("\n["+bytesCorrectCount+"/"+bytesReceivedCount+"]\tSpeed (bytes/s): "+(bytesReceivedCount/(System.currentTimeMillis()-startTime))+"\n");
 				}
 			}
 		}
