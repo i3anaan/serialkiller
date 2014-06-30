@@ -1,6 +1,5 @@
 package link.angelmaker.bitexchanger;
 
-import java.util.BitSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import link.angelmaker.AngelMaker;
@@ -9,7 +8,6 @@ import link.angelmaker.manager.AMManager;
 import link.angelmaker.nodes.Node;
 import phys.PhysicalLayer;
 import util.BitSet2;
-import util.Bytes;
 
 /**
  * Right bit is always the data bit.
@@ -36,23 +34,25 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final String ROLE_MASTER = "master";
 	public static final String ROLE_SLAVE = "slave";
 	public static final String ROLE_UKNOWN = "unkown";
-	public static final int STABILITY = 4;//TODO This is kind of a dirty fix.
+	public static final int STABILITY = 100;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 100l*1000000l;
-	private byte previousByteSent;
-	private byte previousByteReceived;
+	public static final long READ_TIMEOUT_NO_ACK = 50l*1000000l;
+	protected byte previousByteSent;
+	protected byte previousByteReceived;
 	
 	public SimpleBitExchanger(){
-		queueOut = new ArrayBlockingQueue<Boolean>(1024*8);
-		queueIn = new ArrayBlockingQueue<Boolean>(1024*8);
+		queueOut = new ArrayBlockingQueue<Boolean>(256);
+		queueIn = new ArrayBlockingQueue<Boolean>(256);
 		this.connectionRole = ROLE_UKNOWN;
 	}
 	
+	@Override
 	public void givePhysicalLayer(PhysicalLayer down){
 		this.down = down;
 	}
 	
+	@Override
 	public void giveAMManager(AMManager manager){
 		if(manager instanceof AMManager.Server){
 			this.manager = (AMManager.Server) manager;
@@ -61,6 +61,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		}
 	}
 	
+	@Override
 	public void enable(){
 		if(this.down!=null && this.manager !=null){
 			this.start();
@@ -84,14 +85,15 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	}
 
 	@Override
-	public void emptyQueue() {
-		queueOut.clear();
-	}
-
-	@Override
 	public BitSet2 readBits() {
 		BitSet2 bits = new BitSet2();
-		Boolean bit = queueIn.poll();
+		Boolean bit = null;
+		try {
+			bit = queueIn.take();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		while(bit!=null){
 			bits.addAtEnd(bit);
 			bit = queueIn.poll();
@@ -192,6 +194,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		while (!(input != previousByteReceived)) {
 			//TODO can theoretically hang here when trying to get a stable input.
 			input = getStableInput();
+			down.sendByte(previousByteSent);
 			if (System.nanoTime() > waitTime) {
 				throw new TimeOutException();
 			}
@@ -208,16 +211,29 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public byte adaptBitToPrevious(byte previousByte,boolean nextData) {
 		return (byte)(((previousByte^2)&-2)|(nextData ? 1 : 0));
-		//TODO test.
 	}
 	
 	/**
 	 * @param input The byte read from the physical layer.
 	 * @return	The data bit this byte represents.
 	 */
-	public boolean extractBitFromInput(byte input){
-		return (input&1)==1;
-		//TODO test;
+	public boolean[] extractBitFromInput(byte previousByteReceived,byte input){
+		return new boolean[]{(input&1)==1};
+	}
+	
+	public byte getNextByteToSend(){
+		return adaptBitToPrevious(previousByteSent,getNextBitToSend());
+	}
+	
+	protected boolean getNextBitToSend(){
+		Boolean sendNext = queueOut.poll();
+		while(sendNext==null){
+			Node requested = manager.getNextNode();
+			this.sendBits(requested.getConverted());
+			sendNext = queueOut.poll();
+		}
+		//System.out.println("Next bit to send: "+(sendNext ? "1" : "0"));
+		return sendNext;
 	}
 	
 	/**
@@ -225,7 +241,9 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 * Can never hang, will skip and drop bits if necessary.
 	 * Needs a AMManager.Server to be able to send filler data.
 	 */
+	@Override
 	public void run(){
+		AngelMaker.logger.info("Starting Sync procedure");
 		waitForSync();
 		if(connectionRole.equals(ROLE_MASTER) || connectionRole.equals(ROLE_SLAVE)){
 			AngelMaker.logger.info("Assumed "+connectionRole+" in this connection.");
@@ -237,44 +255,39 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		while(true){
 			//Send bit. (Slave skips this first time)
 			if(!firstRound || connectionRole.equals(ROLE_MASTER)){
-				Boolean sendNext = queueOut.poll();
-				while(sendNext==null){
-					Node requested = manager.getNextNode();
-					this.sendBits(requested.getConverted());
-					sendNext = queueOut.poll();
-					//System.out.println("sendNext null");
-				}
-				byte byteToSendNext = adaptBitToPrevious(previousByteSent,sendNext);
+				byte byteToSendNext = getNextByteToSend();
 				down.sendByte(byteToSendNext);
 				previousByteSent = byteToSendNext;
-				if(round<100){
-				//AngelMaker.logger.debug("["+round+"]Send Bit: "+sendNext);
+				if(round<10){
+					//AngelMaker.logger.debug("["+round+"]Send Bytes: "+Bytes.format(byteToSendNext));
 				}
 			}
 			
 			
 			//Read bit. (Skips on timeout).
-			Boolean bitReceived = null;
+			boolean[] bitsReceived = null;
 			try {
 				byte receivedByte = readByte();
-				bitReceived = extractBitFromInput(receivedByte);
+				bitsReceived = extractBitFromInput(previousByteReceived,receivedByte);
 				//System.out.println(bitReceived);
-				previousByteReceived = receivedByte; //Currently unused. //TODO really unused?
+				previousByteReceived = receivedByte; //Currently unused.
 				firstRound = false;					
 			} catch (TimeOutException e) {
 				//Time-out, ignore, moving, don't hang.
-				AngelMaker.logger.debug("Time out waiting on ack.");
+				//AngelMaker.logger.debug("Time out waiting on ack. Currently on line:"+Bytes.format(down.readByte()));
 				//TODO instead of not adding a bit here, it might be usefull to still add a (guessed) bit.
 				//This might reduce out of sync problems.
 			}
 			
-			if(bitReceived!=null){		
-				queueIn.offer(bitReceived);
+			if(bitsReceived!=null){
+				for(boolean b : bitsReceived){
+					//System.out.println("bit received: "+(b ? "1" : "0"));
+					queueIn.offer(b);
+				}
 				if(round<100){
 				//AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
 				}
 				round++;
-				//TODO what to do when overflow.
 			}
 					
 		}
@@ -285,6 +298,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		
 	}
 	
+	@Override
 	public String toString(){
 		return "SimpleBitExchanger, using: "+down.toString();
 	}

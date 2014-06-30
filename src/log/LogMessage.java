@@ -1,5 +1,8 @@
 package log;
 
+import com.google.common.escape.Escaper;
+import com.google.common.html.HtmlEscapers;
+
 import java.util.Date;
 
 /**
@@ -50,7 +53,13 @@ public class LogMessage {
         return message;
     }
 
-    public String toString() {
+    public String getEscapedMessage() {
+        Escaper escaper = HtmlEscapers.htmlEscaper();
+        return escaper.escape(getMessage());
+    }
+
+    @Override
+	public String toString() {
         return String.format("[%-8s] [%s] [%4s] [%04d] %s",
                 severity,
                 new Date(timestamp),

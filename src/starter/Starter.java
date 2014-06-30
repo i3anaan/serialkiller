@@ -12,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 
 import application.ApplicationLayer;
@@ -30,6 +32,7 @@ import link.BittasticLinkLayer;
 import link.LinkLayer;
 import link.BufferStufferLinkLayer;
 import link.angelmaker.AngelMaker;
+import link.diag.MockFrameLinkLayer;
 import log.LogMessage;
 import log.Logger;
 
@@ -45,8 +48,8 @@ public class Starter extends JFrame implements ActionListener {
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
-	private Class<?> linkLayers[] = {AngelMaker.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class,};
-	private Class<?> physLayers[] = {LptHardwareLayer.class, LptErrorHardwareLayer.class, NullPhysicalLayer.class};
+	private Class<?> linkLayers[] = {AngelMaker.class,MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class};
+	private Class<?> physLayers[] = {LptErrorHardwareLayer.class,NullPhysicalLayer.class, LptHardwareLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	
 	// Combo boxes for all the options.
@@ -66,6 +69,21 @@ public class Starter extends JFrame implements ActionListener {
 	
 	/** Main entry point. This is the mainest main of all the mains. */
 	public static void main(String[] args) {
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (Exception e) {
+			// If Nimbus is not available, fall back to cross-platform
+			try {
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			} catch (Exception ex) {
+
+			}
+		}
 		new Starter().run();
 	}
 	
@@ -226,8 +244,8 @@ public class Starter extends JFrame implements ActionListener {
 	
 	public void startGUI(final Stack stack){
 		SwingUtilities.invokeLater(new Runnable() {
-		    public void run() {
-		    	
+		    @Override
+			public void run() {
 		GUI gui = new GUI(stack.applicationLayer);
 		    }
 		});

@@ -3,9 +3,11 @@ package test.unit;
 import static org.junit.Assert.*;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
+import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
-import link.angelmaker.manager.BlockingAMManagerServer;
+import link.angelmaker.manager.MemoryRetransmittingManager;
+import link.angelmaker.manager.NullAMManager;
 
 import org.junit.Test;
 
@@ -23,61 +25,98 @@ public class BitExchangerTest {
 	public void testSimpleBitExchanger(){
 		SimpleBitExchanger e = new SimpleBitExchanger();
 		e.givePhysicalLayer(new NullPhysicalLayer());
-		e.giveAMManager(new BlockingAMManagerServer());
+		e.giveAMManager(new MemoryRetransmittingManager());
 		e.enable();
+		
 		for(int i=0;i<4;i++){
 			for(int b=0;b<2;b++){
-				assertTrue((b==1)==e.extractBitFromInput(e.adaptBitToPrevious(((byte)i),b==1)));
+				boolean[] arr = e.extractBitFromInput((byte)i,e.adaptBitToPrevious(((byte)i),b==1));
+				assertEquals(b==1,arr[0]);
 			}
 		}
 	}
 	
-	//TODO
-	//@Test
-	public void testBitExchanger() {
+	@Test
+	public void testHighSpeedBitExchanger(){
+		HighSpeedBitExchanger e = new HighSpeedBitExchanger();
+		e.givePhysicalLayer(new NullPhysicalLayer());
+		e.giveAMManager(new MemoryRetransmittingManager());
+		e.enable();
+		
+		for(int i=0;i<4;i++){
+			for(int b=0;b<2;b++){
+				for(int a=0;a<2;a++){
+					boolean[] arr = e.extractBitFromInput((byte)i,e.adaptBitToPrevious(((byte)i),b==1,a==1));
+					//System.out.println("Previous: "+Bytes.format((byte)i)+"\t New1: "+b+"\t New2: "+a+"\tResult: "+(arr[0] ? "1" : "0")+(arr.length==2 ? (arr[1] ? "1" : "0") : "x"));
+					
+					assertEquals(b==1,arr[0]);
+					if((byte)(i&1)!=b){
+						assertEquals(2,arr.length);
+						assertEquals(a==1,arr[1]);
+					}
+				}
+			}
+		}
+	}
+	
+	
+	@Test
+	public void testHighSpeedBitExchangerInAction() {
 		try{
 		VirtualPhysicalLayer vplA, vplB;
-		int bitAmount = 1000;
+		int bitAmount = 255;
 		vplA = new VirtualPhysicalLayer();
 		vplB = new VirtualPhysicalLayer();
 		
 		vplA.connect(vplB);
 		vplB.connect(vplA);
-		AMManager managerA = new BlockingAMManagerServer();
-		AMManager managerB = new BlockingAMManagerServer();
-		BitExchanger beA = new SimpleBitExchanger();
+		
+		AMManager managerA = new NullAMManager();
+		AMManager managerB = new NullAMManager();
+		
+		BitExchanger beA = new HighSpeedBitExchanger();
 		beA.givePhysicalLayer(vplA);
 		beA.giveAMManager(managerA);
-		BitExchanger beB = new SimpleBitExchanger();
+		
+		BitExchanger beB = new HighSpeedBitExchanger();
 		beB.givePhysicalLayer(vplB);
 		beB.giveAMManager(managerB);
+		
 		managerA.setExchanger(beA);
 		managerB.setExchanger(beB);
 		
 		managerA.enable();
 		managerB.enable();
 		
-		BitSet2 send = new BitSet2(PARSED);
-		//for(int bit = 0;bit<bitAmount;bit++){
-		//	send.addAtEnd(Math.random()>0.5);
-		//}
-		beA.sendBits(send);
-		beB.sendBits(send);
+		//System.out.println("Building BitSet2 to send");
+		BitSet2 send = new BitSet2(PARSED).get(0,bitAmount);
+		assertEquals(bitAmount,send.length());
+		//System.out.println("Done building BitSet2 to send");
+		//System.out.println("Handing Bits to BitExchanger");
+		beA.sendBits((BitSet2)send.clone());
+		beB.sendBits((BitSet2)send.clone());
+		
+		//System.out.println("Enabling BitExchangers");
+		beA.enable();
+		beB.enable();
+		
+		//System.out.println("Start reading A.");
 		BitSet2 receivedA = new BitSet2();
 		while(receivedA.length()<bitAmount){
-			receivedA = BitSet2.concatenate(receivedA, beA.readBits());
-			if(receivedA.length()>0){
-			}
+			BitSet2 read = beA.readBits();
+			//System.out.println("A received bits: "+read);
+			receivedA = BitSet2.concatenate(receivedA, read);
+			
 		}
 		receivedA = receivedA.get(0,bitAmount);
+		
 		BitSet2 receivedB = new BitSet2();
 		while(receivedB.length()<bitAmount){
-			BitSet2 read = beB.readBits();
-			receivedB = BitSet2.concatenate(receivedB, read);
-			if(read.length()>0){
-			}
+			receivedB = BitSet2.concatenate(receivedB, beB.readBits());
+			//System.out.println("B received bits");
 		}
 		receivedB = receivedB.get(0,bitAmount);
+		
 		System.out.println("Original:\t"+send);
 		System.out.println("A:\t\t"+receivedA);
 		System.out.println("B:\t\t"+receivedB);

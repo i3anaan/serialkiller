@@ -1,5 +1,7 @@
 package network;
 
+import java.util.Collection;
+
 import common.Layer;
 import common.Startable;
 
@@ -23,4 +25,16 @@ public abstract class NetworkLayer extends Layer implements Startable {
      * @throws SizeLimitExceededException
      */
     public abstract void send(Payload p) throws SizeLimitExceededException;
+    
+    /**
+     * Returns a collection of all addresses known to the router.
+     * @return The collection of all known addresses.
+     */
+    public abstract Collection<Byte> hosts();
+    
+    /**
+     * Returns the address of this host.
+     * @return The address of this host.
+     */
+    public abstract Byte host();
 }

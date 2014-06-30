@@ -1,33 +1,19 @@
 package link.angelmaker;
 
-import java.io.File;
-import java.util.Arrays;
-
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-
-import phys.PhysicalLayer;
-import phys.diag.NullPhysicalLayer;
-import phys.diag.VirtualPhysicalLayer;
-import util.BitSet2;
-import util.Bytes;
-import common.Graph;
-import common.Stack;
-import common.Startable;
-import link.FrameLinkLayer;
+import link.PacketFrameLinkLayer;
 import link.angelmaker.bitexchanger.BitExchanger;
-import link.angelmaker.bitexchanger.DummyBitExchanger;
+import link.angelmaker.bitexchanger.HighSpeedBitExchanger;
 import link.angelmaker.bitexchanger.SimpleBitExchanger;
 import link.angelmaker.manager.AMManager;
-import link.angelmaker.manager.BlockingAMManager;
-import link.angelmaker.manager.BlockingAMManagerServer;
-import link.angelmaker.manager.ConstantRetransmittingManager;
+import link.angelmaker.manager.MemoryRetransmittingManager;
 import link.angelmaker.nodes.FlaggingNode;
 import link.angelmaker.nodes.Node;
-import link.angelmaker.nodes.NotSupportedNodeException;
-import link.angelmaker.nodes.PureNode;
-import log.Logger;
 import log.LogMessage.Subsystem;
+import log.Logger;
+import phys.PhysicalLayer;
+import phys.diag.NullPhysicalLayer;
+import common.Stack;
+import common.Startable;
 
 /**
  * The upper class of the ANGEL_MAKER system.
@@ -67,7 +53,7 @@ import log.LogMessage.Subsystem;
  *
  */
 //TODO implement this class more serious.
-public class AngelMaker extends FrameLinkLayer implements Startable{
+public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	
 	public static AngelMaker instance;
 	
@@ -77,38 +63,31 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
 	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
-	private AMManager STANDARD_MANAGER = new ConstantRetransmittingManager();
+	private AMManager STANDARD_MANAGER = new MemoryRetransmittingManager();
 	private BitExchanger STANDARD_EXCHANGER = new SimpleBitExchanger();
-	
-	/*
-	 * NEW PLAN NODE
-	 * new FlaggingNode(null,errorDetectionNode(),80)
-	 * 
-	 */
 	
 	
 	
 	public static final Logger logger =  new Logger(Subsystem.LINK);
 	public AMManager manager;
 	public BitExchanger bitExchanger;
-	private Stack stack;
 	
 	public static AngelMaker getInstanceOrNull(){
 		return instance;
 	}
 	
-	
+	//TODO alleen hier voor tests? weghalen voor final implementatie?
 	public AngelMaker(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
 		standardSetup(phys,topNode,manager,exchanger);
 		instance = this;
 	}
+	//TODO alleen hier voor tests? weghalen voor final implementatie?
 	public AngelMaker(PhysicalLayer phys){
 		standardSetup(phys,null,null,null);
 		instance = this;
 	}
+	
 	public AngelMaker(){
-		//TODO deze moet niet standard setup aanropen.
-		standardSetup(null,null,null,null);
 		instance = this;
 	}
 	
@@ -124,13 +103,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	}
 
 	@Override
-	public String toCoolString() {
-		return toString();
-	}
-
-	@Override
 	public Thread start(Stack stack) {
-		this.stack = stack;
 		standardSetup(stack.physLayer,null,null,null);
 		return null;
 	}
@@ -160,8 +133,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 	
 	
 	public void setup(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
-		logger.info("Building ANGEL_MAKER with: "+phys+" | "+topNode+" | "+manager+" | "+exchanger);
-		//TODO severities set correct?
+		logger.info("Building ANGEL_MAKER with: "+phys.getClass().getSimpleName()+" | "+topNode.getClass().getSimpleName()+" | "+manager.getClass().getSimpleName()+" | "+exchanger.getClass().getSimpleName());
 		//TODO thread name on AMManger is TPPHandler, why is this?
 		logger.info("Setting up ANGEL_MAKER");
 		try{
@@ -179,6 +151,7 @@ public class AngelMaker extends FrameLinkLayer implements Startable{
 		}
 	}
 	
+	@Override
 	public String toString(){
 		String s = "ANGEL_MAKER\n"
 				+ "Consisting of:\n"

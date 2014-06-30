@@ -8,6 +8,11 @@ import java.util.Arrays;
 
 /**
  * Handler for data from the link layer.
+ *
+ * Checks whether a FrameLinkLayer or PacketFrameLinkLayer is used. Any
+ * LinkLayer implementation that uses FrameLinkLayer (and not
+ * PacketFrameLinkLayer) should work with a whole packet as a frame. If not, it
+ * should implement PacketFrameLinkLayer.
  */
 public class LinkLayerInHandler extends LinkLayerHandler {
     public LinkLayerInHandler(TPPNetworkLayer parent, FrameLinkLayer link) {
@@ -16,8 +21,14 @@ public class LinkLayerInHandler extends LinkLayerHandler {
 
     @Override
     public void handle() {
+        byte[] data;
+
         // Get new data frame from the link.
-        byte[] data = link.readFrame();
+        if (isPacketFrameLinkLayer()) {
+            data = this.toPacketFrameLinkLayer().readPacket();
+        } else {
+            data = link.readFrame();
+        }
 
         // Make sure the data fits in a packet, otherwise crop it.
         if (data.length > Packet.MAX_PACKET_LENGTH) {
@@ -35,11 +46,16 @@ public class LinkLayerInHandler extends LinkLayerHandler {
                 TPPNetworkLayer.getLogger().warning(p.toString() + " dropped, NetworkLayer queue full.");
             }
         } else {
-            TPPNetworkLayer.getLogger().warning("Link layer delivered malformed packet, packet dropped.");
+            TPPNetworkLayer.getLogger().warning("Link layer delivered malformed packet (" + p.reason() + "), packet dropped.");
+            
+            if (isPacketFrameLinkLayer()) {
+            	this.toPacketFrameLinkLayer().reset();
+            }
         }
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "LinkLayerIn" + super.toString();
     }
 }

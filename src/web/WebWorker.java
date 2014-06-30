@@ -27,7 +27,8 @@ class WebWorker extends Thread {
         this.setName("Web worker");
     }
 
-    public void run() {
+    @Override
+	public void run() {
         try {
             is = sock.getInputStream();
             os = sock.getOutputStream();

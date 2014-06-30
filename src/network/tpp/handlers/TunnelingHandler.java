@@ -40,17 +40,16 @@ public class TunnelingHandler extends Handler {
 
     @Override
     public void start() {
-        tunneling.start();
         super.start();
     }
 
     @Override
     public void stop() {
         super.stop();
-        tunneling.stop();
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "Tunneling" + super.toString();
     }
 }

@@ -1,11 +1,6 @@
 package util.encoding;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import util.BitSet2;
-import util.Bytes;
 
 /**
  * Methods to use a 7,4 (4 to 7) hamming code.

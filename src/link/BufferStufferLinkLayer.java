@@ -42,6 +42,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		this.inbox = new ArrayBlockingQueue<byte[]>(MAX_WAITING_FRAMES);
 	}
 	
+	@Override
 	public Thread start(Stack stack) {
 		this.down = stack.physLayer;
 		t = new Thread(this);
@@ -49,6 +50,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		return t;
 	}
 	
+	@Override
 	public void sendFrame(byte[] frame) {
 		try {
 			outbox.put(frame);
@@ -57,6 +59,7 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 		}
 	}
 
+	@Override
 	public byte[] readFrame() {
 		try {
 			return inbox.take();
@@ -287,11 +290,6 @@ public class BufferStufferLinkLayer extends FrameLinkLayer implements Runnable, 
 			//System.out.printf("[%8x] [%s] " + msg + "%n", this.hashCode(), System.nanoTime(), arguments);
 			System.out.flush();
 		}
-	}
-	
-	@Override
-	public String toCoolString(){
-		return "TODO: Not cool"; //TODO Wander;
 	}
 	
 	public class PanicException extends RuntimeException{

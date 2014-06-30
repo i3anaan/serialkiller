@@ -39,10 +39,12 @@ public class LogService {
     public void add(LogMessage msg) {
         if (msg.getSeverity().ordinal() >= level.ordinal()) {
             Stats.hit("log.messagesLogged");
+            
             synchronized (System.out) {
             	System.out.println(msg);
                 System.out.flush();
             }
+
             messages.add(msg);
         }
     }

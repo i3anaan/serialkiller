@@ -21,7 +21,7 @@ import util.BitSet2;
  * 
  * No error correction is attempted.
  */
-public class ParityBitsCodec {
+public class ParityBitsCodec implements Codec {
 	/** The amount of bits in a byte. */
 	public static final int BYTE = 8;
 	
@@ -37,7 +37,7 @@ public class ParityBitsCodec {
 	 * 
 	 * @throws IllegalArgumentException if the BitSet is not a BitSet of bytes
 	 */
-	public static BitSet2 encode(BitSet2 input) throws IllegalArgumentException {
+	public BitSet2 encode(BitSet2 input) throws IllegalArgumentException {
 		if (input.length() % 8 != 0) {
 			String msg = "encode: input.length() must be a multiple of 8 bits";
 			throw new IllegalArgumentException(msg);
@@ -61,7 +61,7 @@ public class ParityBitsCodec {
 	 * 
 	 * @throws IllegalArgumentException if the BitSet is not encoded parity
 	 */
-	public static Optional<BitSet2> decode(BitSet2 input) throws IllegalArgumentException {
+	public Optional<BitSet2> decode(BitSet2 input) throws IllegalArgumentException {
 		if (input.length() % 10 != 0) {
 			String msg = "decode: input.length() must be a multiple of 10 bits";
 			throw new IllegalArgumentException(msg);

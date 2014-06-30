@@ -18,7 +18,21 @@ public class Payload {
      * data and address.
      * @return The new Payload instance.
      */
-    public Payload clone() {
+    @Override
+	public Payload clone() {
         return new Payload(data, address);
+    }
+    
+	/**
+	 * Retrieves the first byte from the payload.
+	 * @return The byte representing the command in this payload
+	 */
+	public byte getCommand() {
+        return data.length > 0 ? data[0] : 0;
+	}
+
+    @Override
+	public String toString() {
+        return String.format("Payload<%s>", hashCode());
     }
 }

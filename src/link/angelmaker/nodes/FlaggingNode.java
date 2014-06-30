@@ -3,6 +3,8 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.codec.Codec;
+import link.angelmaker.codec.NaiveRepeaterCodec;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
 
@@ -18,15 +20,12 @@ import util.BitSet2;
  * @author I3anaan
  * 
  */
-public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
-
-	private Node[] childNodes;
-	private Node parent;
+public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {
 	public static final Flag FLAG_START_OF_FRAME = new BasicFlag(new BitSet2(
 			"10011001"));
 	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
 			"00111001101"));
-	
+	protected Node.Resetable[] children;
 	
 	
 	/*
@@ -41,53 +40,56 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	private BitSet2 stored;
 	private BitSet2 storedConverted;
 	private int dataBitCount;
-
+	
+	private int checkedForStartFlagInJunkTill = 0;
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
+	private static final Codec CODEC = new ParityBitsCodec();
+	
+	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
-
-	public FlaggingNode(Node parent, int dataBitCount) {
-		AngelMaker.logger.wtf("using deprecated FlaggingNode constructor");
-		childNodes = new Node[] { new ErrorDetectionNode(this, SequencedNode.PACKET_BIT_COUNT+2*SequencedNode.MESSAGE_BIT_COUNT) };
-		this.dataBitCount = dataBitCount;
-		this.parent = parent;
-		stored = new BitSet2();
-		storedConverted = new BitSet2();
-		lastReceivedConvertedJunk = new BitSet2();
-	}
+	
 	
 	public FlaggingNode(Node parent) {
 		this.dataBitCount = maxBitsExpected;
-		childNodes = new Node[] { new ErrorDetectionNode(this, dataBitCount) };
+		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount,CODEC) };
 		
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
 		lastReceivedConvertedJunk = new BitSet2();
+		if(!isSolidEndFlag(FLAG_END_OF_FRAME.getFlag())){
+			AngelMaker.logger.bbq("Invalid End of frame flag, ealier occurence possible");
+		}
 	}
-
-	public FlaggingNode(Node parent, Node child, int dataBitCount) {
-		childNodes = new Node[] { child };
+	
+	public FlaggingNode(Node parent, Node.Resetable child, int dataBitCount) {
+		children = new Node.Resetable[] { child };
 		this.dataBitCount = dataBitCount;
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
 		lastReceivedConvertedJunk = new BitSet2();
+		if(!isSolidEndFlag(FLAG_END_OF_FRAME.getFlag())){
+			AngelMaker.logger.bbq("Invalid End of frame flag, ealier occurence possible");
+		}
 	}
 
+	public void setParent(Node parent){
+		this.parent = parent;
+	}
+	
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {
 		int i;
 		for (i = 0; i < bits.length() && stored.length() < dataBitCount; i++) {
 			stored.addAtEnd(bits.get(i));
 		}
-		if (stored.length() >= dataBitCount) {
-			isFull = true;
-		}
+		isFull = true;
 		if (isFull) {
-			BitSet2 remaining = childNodes[0].giveOriginal(stored);
+			BitSet2 remaining = children[0].giveOriginal(stored);
 			if (remaining.length() > 0) {
 				AngelMaker.logger.alert("FlaggingNode is spilling data");
 			}
@@ -97,63 +99,48 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public BitSet2 getOriginal() {
-		return childNodes[0].getOriginal();
+		return children[0].getOriginal();
 	}
-
-	/**
-	 * Receive 7 bits extra after spotting the first end of frame flag. Check if
-	 * there is no en of frame flag in these 7 bits. Take last possible end of
-	 * frame start. Return unused stuff (even from previous calls) afterwards.
-	 * This for situation: 1111011001100110 DDDDDDDDFFFFFFFF Correct
-	 * DDDDFFFFFFFF---- (possibly) Read
-	 */
+	
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		//System.out.println("Give Converted");
+		//System.out.println("Give Converted: "+lastReceivedConvertedJunk+"\t storedConverted: "+storedConverted);
 		if (!receivedStartFlag) {
-			BitSet2 tempConcat = BitSet2.concatenate(lastReceivedConvertedJunk,
-					bits); // Add just received to already received.
-			// Keep only just received + max flag length (so it cannot
-			// infinetely grow.
-			//System.out.println("TempConcat = "+tempConcat +"    Start flag = "+FLAG_START_OF_FRAME.getFlag());
-			lastReceivedConvertedJunk = tempConcat.get(
-					Math.max(0,
-							tempConcat.length()
-									- FLAG_START_OF_FRAME.getFlag().length()
-									- bits.length()), tempConcat.length());
-			BitSet2 afterStart = getDataAfterStartFlag(lastReceivedConvertedJunk);
-			//System.out.println("Data after start:"+afterStart);
-			if (afterStart.length() >= 0) {
+			//This code does less allocation and is easier on CPU, can however (theoretically) store infinitely long bitsets.
+			//TODO better?
+			lastReceivedConvertedJunk.addAtEnd(bits);
+			
+			BitSet2 afterStart = getDataAfterStartFlag();
+			if (afterStart!=null) {
 				storedConverted = afterStart;
 			}
 		} else {
-			//System.out.println("receivedFlag");
-			storedConverted = BitSet2.concatenate(storedConverted, bits);
+			storedConverted.addAtEnd(bits);
 		}
-		int contains = getRealEndFlagIndex(storedConverted);
+		
+		int contains = getEndFlagIndex(storedConverted);
 		if (receivedStartFlag && contains >= 0) {
 			// Received start and end flag.
 			isFull = true;
-			stored = new BitSet2();
 			stored = unStuff(getDataBeforeEndFlag(storedConverted));
-			childNodes[0].giveConverted(stored);
-			//System.out.println("GiveConverted done");
+			//System.out.println("Full data: "+stored);
+			children[0].giveConverted(stored);
+			
 			return storedConverted.get(contains
 					+ FLAG_END_OF_FRAME.getFlag().length(),
 					storedConverted.length());
 		} else {
 			// Does not have end flag yet.
-			//System.out.println("GiveConverted done");
 			return new BitSet2();
 		}
 	}
 
 	@Override
 	public BitSet2 getConverted() {
-		return placeFlags(stuff(childNodes[0].getConverted()));
+		return placeFlags(stuff(children[0].getConverted()));
 	}
 
-	private int getRealEndFlagIndex(BitSet2 bits) {
+	private int getEndFlagIndex(BitSet2 bits) {
 		return bits.contains(FLAG_END_OF_FRAME.getFlag());
 	}
 
@@ -183,24 +170,24 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 
 	/**
-	 * @bits BitSet2 to look in.
-	 * @return the data after the start flag, empty bitset2 if bits does not
+	 * Looks in lastReceivedConvertedJunk for a start flag.
+	 * @return the data after the start flag, null if bits does not
 	 *         contain the start flag
 	 */
-	private BitSet2 getDataAfterStartFlag(BitSet2 bits) {
-		int contains = bits.contains(FLAG_START_OF_FRAME.getFlag());
+	private BitSet2 getDataAfterStartFlag() {
+		int contains = lastReceivedConvertedJunk.contains(FLAG_START_OF_FRAME.getFlag(),checkedForStartFlagInJunkTill);
+		checkedForStartFlagInJunkTill = Math.max(lastReceivedConvertedJunk.length()-FLAG_START_OF_FRAME.getFlag().length()+1,0);
 		if (contains >= 0) {
 			receivedStartFlag = true;
-			//System.out.println("Seen start flag");
-			return bits.get(contains + FLAG_START_OF_FRAME.getFlag().length(),
-					bits.length());
+			return lastReceivedConvertedJunk.get(contains + FLAG_START_OF_FRAME.getFlag().length(),
+					lastReceivedConvertedJunk.length());
 		} else {
-			return new BitSet2();
+			return null;
 		}
 	}
 
 	private BitSet2 getDataBeforeEndFlag(BitSet2 bits) {
-		int contains = getRealEndFlagIndex(bits);
+		int contains = getEndFlagIndex(bits);
 		if (contains >= 0) {
 			return bits.get(0, contains);
 		} else {
@@ -209,10 +196,9 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 
 	@Override
-	public Node getParent() {
-		return parent;
+	public Node[] getChildNodes(){
+		return children;
 	}
-
 	@Override
 	public boolean isFull() {
 		return isFull;
@@ -220,12 +206,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public boolean isReady() {
-		return childNodes[0].isReady();
+		return children[0].isReady() || stored.length()==0;
 	}
 
 	@Override
 	public boolean isCorrect() {
-		return childNodes[0].isCorrect();
+		return children[0].isCorrect();
 	}
 
 	@Override
@@ -234,18 +220,12 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 	}
 
 	@Override
-	public Node[] getChildNodes() {
-		return childNodes;
-	}
-
-	@Override
 	public Node getClone() {
-		return new FlaggingNode(parent, childNodes[0].getClone(), dataBitCount);
+		return new FlaggingNode(parent, (Node.Resetable)children[0].getClone(), dataBitCount);
 	}
 	
 	@Override
 	public Node getFiller(){
-		//TODO test, rethink;
 		return AngelMaker.TOP_NODE_IN_USE.getClone();
 	}
 
@@ -268,7 +248,33 @@ public class FlaggingNode implements Node, Node.Internal, Node.Fillable {
 
 	@Override
 	public String toString() {
-		return "FlaggingNode[" + Arrays.toString(childNodes) + "]";
+		return "FlaggingNode[" + Arrays.toString(children) + "]";
+	}
+
+	@Override
+	public void reset() {
+		for(Node.Resetable n : children){
+			n.reset();
+		}
+		stored.clear();
+		storedConverted.clear();
+		receivedStartFlag = false;
+		isFull = false;
+		lastReceivedConvertedJunk.clear();
+		checkedForStartFlagInJunkTill=0;
+	}
+	
+	/**
+	 * @return true if no sequence of bits can be placed in front of the end flag to create an extra new endflag earlier then the real endflag.
+	 */
+	public static boolean isSolidEndFlag(BitSet2 flag){
+		for(int i=1;i<flag.length();i++){
+			if(flag.get(0,i).equals(flag.get(flag.length()-i,flag.length()))){
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }

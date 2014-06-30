@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import common.Graph;
+
 /**
  * This class represents a simple routing table that manages a collection of
  * machine addresses. For every address, it stores the next host address and
@@ -147,7 +149,9 @@ public class RoutingTable {
 	 */
 	public String toGraph() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("graph{node[shape=box];");
+		sb.append("graph{");
+		sb.append(Graph.getGraphStyle());
+		sb.append(Graph.getNodeStyle());
 
         Map<Byte, Byte> allRoutes = new TreeMap<Byte, Byte>();
         allRoutes.putAll(routes);
@@ -166,10 +170,10 @@ public class RoutingTable {
 	}
 	
 	/**
-	 * Generate a link to 
+	 * Generate a link to Google's Chart API that shows the routing graph.
 	 */
 	public String toGraphUri() {
-		return "https://chart.googleapis.com/chart?cht=gv&chl=" + toGraph();
+		return "http://chart.googleapis.com/chart?cht=gv&chl=" + toGraph();
 	}
 
     /**

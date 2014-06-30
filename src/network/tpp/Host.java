@@ -105,7 +105,8 @@ public class Host {
         handler = null;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         if (ip == null || ip.equals("")) {
             return String.format("Host<Addr: %d>", address);
         } else {

@@ -39,7 +39,11 @@ public class BitSet2 extends BitSet {
 	public BitSet2(String string){
 		super();
 		for(int i=0;i<string.length();i++){
-			this.set(i,string.charAt(i)=='1');
+			if(string.charAt(i)=='1'){
+				this.addAtEnd(true);
+			}else if(string.charAt(i)=='0'){
+				this.addAtEnd(false);
+			}
 		}
 	}
 	
@@ -120,7 +124,13 @@ public class BitSet2 extends BitSet {
 	}
 	@Override
 	public Object clone(){
-		return (Object) new BitSet2(this);
+		return new BitSet2(this);
+	}
+	
+	@Override
+	public void clear(){
+		this.length = 0;
+		super.clear();
 	}
 	
 	/**
@@ -214,26 +224,30 @@ public class BitSet2 extends BitSet {
 	 * @return	first index of occurence, else -1;
 	 */
 	public int contains(BitSet2 bs){
-		if(bs.length()>this.length()){
-			return -1;
-		}
-		for(int i=0;i<this.length()-bs.length()+1;i++){
-			if(this.get(i,i+bs.length()).equals(bs)){
-				return i;
-			}
-		}
-		return -1;
+		return contains(bs, 0);
 	}
 	
-	public int contains(BitSet2 bs,int startAt){
-		if(bs.length()>this.length()){
-			return -1;
-		}
-		for(int i=Math.max(startAt,0);i<this.length()-bs.length()+1;i++){
-			if(this.get(i,i+bs.length()).equals(bs)){
-				return i;
+	public int contains(BitSet2 needle, int startAt){
+		BitSet2 haystack = this;
+		
+		if (needle.length() > haystack.length()) return -1;
+		
+		// For every viable starting bit in the haystack...
+		for (int a = startAt; a < haystack.size() - needle.length() + 1; a++) {
+			int i = 0;
+			
+			while (i < needle.length()) {
+				if (haystack.get(a + i) != needle.get(i)) break;
+				i++;
+			}
+			
+			if (i == needle.length()) {
+				// Found the entire needle! Return the start index.
+				return a;
 			}
 		}
+		
+		// Matched nowhere, return -1
 		return -1;
 	}
 	
@@ -260,7 +274,8 @@ public class BitSet2 extends BitSet {
      * @param data The BitSet2 object to convert.
      * @return The byte array.
      */
-    public byte[] toByteArray() {
+    @Override
+	public byte[] toByteArray() {
         int len = (int) Math.ceil((double) this.length() / 8);
         byte[] bytes = new byte[len];
 
@@ -301,18 +316,8 @@ public class BitSet2 extends BitSet {
      * @return A new BitSet2 being a concatenation of both.
      */
     public static BitSet2 concatenate(BitSet2 first, BitSet2 second) {
-    	//Use System.arrayCopy?
-    	int newSize = first.length()+second.length();
-    	BitSet2 result = new BitSet2(newSize);
-    	int f = 0;
-    	int s = 0;
-    	for(f=0;f<first.length();f++){
-    		result.set(f+s,first.get(f));
-    	}
-    	for(s=0;s<second.length();s++){
-    		result.set(f+s,second.get(s));
-    	}
-    	
+    	BitSet2 result = (BitSet2) first.clone();
+    	result.addAtEnd(second);    	
     	return result;
     }
 	
