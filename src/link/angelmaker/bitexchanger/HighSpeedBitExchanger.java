@@ -46,17 +46,6 @@ public class HighSpeedBitExchanger extends SimpleBitExchanger {
 	}
 	
 	@Override
-	protected boolean getNextBitToSend(){
-		Boolean sendNext = queueOut.poll();
-		while(sendNext==null){
-			Node requested = manager.getNextNode();
-			this.sendBits(requested.getConverted());
-			sendNext = queueOut.poll();
-		}
-		return sendNext;
-	}
-	
-	@Override
 	public byte getNextByteToSend(){
 		return adaptBitToPrevious(previousByteSent,getNextBitToSend());
 	}

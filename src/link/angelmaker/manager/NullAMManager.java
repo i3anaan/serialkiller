@@ -1,5 +1,6 @@
 package link.angelmaker.manager;
 
+import util.BitSet2;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.Node;
 import link.angelmaker.nodes.NullNode;
@@ -41,11 +42,10 @@ public class NullAMManager implements AMManager.Server{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 	@Override
-	public Node getNextNode() {
+	public BitSet2 getNextBits() {
 		// TODO Auto-generated method stub
-		return new NullNode();
+		return null;
 	}
 
 }

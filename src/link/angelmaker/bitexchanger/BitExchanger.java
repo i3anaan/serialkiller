@@ -71,6 +71,4 @@ public interface BitExchanger {
 	public interface AlwaysSending extends BitExchanger {
 
 	}
-
-	public ArrayBlockingQueue<Boolean> getQueueOut();
 }

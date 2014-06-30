@@ -3,7 +3,6 @@ package link.angelmaker.bitexchanger;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import common.Graph;
-
 import link.angelmaker.AngelMaker;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.manager.AMManager;
@@ -11,6 +10,7 @@ import link.angelmaker.nodes.Node;
 import phys.PhysicalLayer;
 import util.BitSet2;
 import util.Bytes;
+import util.EmptyBitSet2;
 
 /**
  * Right bit is always the data bit.
@@ -29,7 +29,7 @@ import util.Bytes;
  */
 public class SimpleBitExchanger extends Thread implements BitExchanger, BitExchanger.AlwaysSending {
 
-	public ArrayBlockingQueue<Boolean> queueOut;
+	//public ArrayBlockingQueue<Boolean> queueOut;
 	public ArrayBlockingQueue<Boolean> queueIn;
 	private String connectionRole;
 	PhysicalLayer down;
@@ -44,13 +44,18 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	protected byte previousByteSent;
 	protected byte previousByteReceived;
 	
+	private int indexToSendNext;
+	private BitSet2 bitsToSend;
+	
 	public SimpleBitExchanger(){
 		//TODO Make it so that it will never block when filling itself.
 		//(current solution is larger queues).
 		//TODO restructure AngelMaker to fix this issue.
-		queueOut = new ArrayBlockingQueue<Boolean>(2048);
+		//queueOut = new ArrayBlockingQueue<Boolean>(2048);
 		queueIn = new ArrayBlockingQueue<Boolean>(2048);
 		this.connectionRole = ROLE_UKNOWN;
+		this.bitsToSend = EmptyBitSet2.getInstance();
+		this.indexToSendNext = 1; //Make higher than 0 to make sure the emptyBitSet does not get send;
 	}
 	
 	@Override
@@ -81,14 +86,15 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	//TODO bits can interleave when multiple threads call this method at once.
 	@Override
 	public void sendBits(BitSet2 bits) {
-		for(int i=0;i<bits.length();i++){
+		throw new UnsupportedOperationException();
+		/*for(int i=0;i<bits.length();i++){
 			try {
 				queueOut.put(bits.get(i));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				AngelMaker.logger.warning("Interrupted while trying to put bit to send in SimpleBitExchanger.queueOut");
 			}
-		}
+		}*/
 	}
 
 	@Override
@@ -233,15 +239,14 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	}
 	
 	protected boolean getNextBitToSend(){
-		Boolean sendNext = queueOut.poll();
-		while(sendNext==null){
-			Node requested = manager.getNextNode();
-			//System.out.println("BitExchanger filling self with: ["+requested.getConverted().length()+"]  "+requested.getConverted());
-			this.sendBits(requested.getConverted());
-			sendNext = queueOut.poll();
+		if(indexToSendNext<bitsToSend.length()){
+			indexToSendNext++;
+			return bitsToSend.get(indexToSendNext-1);
+		}else{
+			bitsToSend = manager.getNextBits();
+			indexToSendNext = 1;
+			return bitsToSend.get(0);
 		}
-		//System.out.println("Next bit to send: "+(sendNext ? "1" : "0"));
-		return sendNext;
 	}
 	
 	/**
@@ -310,10 +315,5 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	@Override
 	public String toString(){
 		return "SimpleBitExchanger, using: "+down.toString();
-	}
-
-	@Override
-	public ArrayBlockingQueue<Boolean> getQueueOut() {
-		return queueOut;
 	}
 }

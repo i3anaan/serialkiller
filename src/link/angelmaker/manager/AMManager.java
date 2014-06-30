@@ -1,5 +1,6 @@
 package link.angelmaker.manager;
 
+import util.BitSet2;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.Node;
 
@@ -78,6 +79,6 @@ public interface AMManager {
 	 * @author I3anaan
 	 */
 	public interface Server extends AMManager{
-		public Node getNextNode();
+		public BitSet2 getNextBits();
 	}
 }

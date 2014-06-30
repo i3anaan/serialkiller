@@ -118,13 +118,14 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	}
 	
 	@Override
-	public Node getNextNode() {
+	public BitSet2 getNextBits() {
 		if(messageReceived!=MESSAGE_FINE){
 			lastSent = messageReceived; //Other side requested retransmitting after this index
 			messageReceived = MESSAGE_FINE; //Moved sending index down, now continue assuming fine.
 		}
 		
 		int indexToSend = (lastSent+1)%(memory.length);
+		//Reset array.
 		for(int i=0;i<SequencedNode.PACKET_BYTE_COUNT;i++){
 			nodeBuildingBytes[i] = null;
 		}
@@ -147,11 +148,13 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 			}
 			lastSent = (indexToSend+i)%memory.length;
 		}
-		//AngelMaker.logger.debug("Building node ["+indexToSend+"] from: "+Arrays.toString(nodeBuildingBytes));
-		//Put created array in node.
+		
+		//Build Node from created array
+		
 		sendingNode.reset();
-		sendingNode.giveOriginal(new BitSet2(nodeBuildingBytes));
-		//AngelMaker.logger.debug("Node Original: "+sendingNode.getOriginal()+"\tConverted: "+sendingNode.getConverted());
+		if(nodeBuildingBytes[0]!=null){
+			sendingNode.giveOriginal(new BitSet2(nodeBuildingBytes));
+		}
 		
 		if(sendingNode.getChildNodes()[0].getChildNodes()[0] instanceof SequencedNode){
 			SequencedNode seqNode = ((SequencedNode)sendingNode.getChildNodes()[0].getChildNodes()[0]);			
@@ -160,10 +163,8 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 		}else{
 			throw new IncompatibleModulesException();
 		}
-		
 		messageToSend = MESSAGE_FINE; //Do not send same message multiple times.
-		//AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)sendingNode.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)sendingNode.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+sendingNode.getOriginal()+"\tConverted: "+sendingNode.getConverted());
-		return sendingNode;
+		return sendingNode.getConverted(); //Extract from Node.
 	}
 	
 	public static BitSet2 intMessageToBitSet(int message){
