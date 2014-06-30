@@ -18,7 +18,8 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	private BitSet2 sequenceNumber;
 	private BitSet2 message;
 	
-	public static final int PACKET_BIT_COUNT = 64;
+	public static final int PACKET_BYTE_COUNT = 8;
+	public static final int PACKET_BIT_COUNT = PACKET_BYTE_COUNT*8;
 	public static final int MESSAGE_BIT_COUNT = 8;
 	
 	public SequencedNode(Node parent, int maxDataSize, int messageBitCount){

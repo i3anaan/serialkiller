@@ -3,7 +3,6 @@ package bench;
 import link.*;
 import link.angelmaker.AngelMaker;
 import phys.diag.BitErrorPhysicalLayer;
-import phys.diag.DelayPhysicalLayer;
 import phys.diag.VirtualPhysicalLayer;
 
 /**
@@ -50,10 +49,10 @@ public class SimpleTestbench {
 								System.out.print("\n");
 							}
 							if (bytes[j] == i) {
-								System.out.printf("[OK] expected %d got %d\n", i, bytes[j]);
+								//System.out.printf("[OK] expected %d got %d\n", i, bytes[j]);
 								correct++;
 							} else {
-								System.out.printf("[!!] expected %d got %d\n", i, bytes[j]);
+								//System.out.printf("[!!] expected %d got %d\n", i, bytes[j]);
 							}
 							if((i+256)%BYTES_PER_CHAR==BYTES_PER_CHAR-1){
 								if(correct==BYTES_PER_CHAR){

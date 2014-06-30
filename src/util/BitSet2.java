@@ -35,6 +35,19 @@ public class BitSet2 extends BitSet {
 		}
 		//TODO unit test dit.
 	}
+	public BitSet2(Byte[] arr){
+		int offset = 0;
+		for(int i=0;i<arr.length;i++){
+			if(arr[i]!=null){
+				for(int bit=0;bit<8;bit++){
+					this.set((i-offset)*8 +(7-bit),((arr[i]>>bit)&1)==1);
+				}
+			}else{
+				offset++;
+			}
+		}
+		//TODO unit test dit.
+	}
 	
 	public BitSet2(String string){
 		super();

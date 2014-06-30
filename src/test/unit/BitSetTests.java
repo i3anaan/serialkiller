@@ -49,5 +49,24 @@ public class BitSetTests {
 		assertEquals(10, bs.contains(new BitSet2("0011")));
         assertEquals(-1, bs.contains(new BitSet2("1100")));
 	}
+	
+	@Test
+	public void testConstructors(){
+		Byte[] arrNonNull = new Byte[]{1,3,5,6};
+		Byte[] arrWithNull = new Byte[]{1,3,null,null};
+		Byte[] arrOnlyNull = new Byte[]{null,null,null,null};
+		BitSet2 bs1 = new BitSet2(arrNonNull);
+		BitSet2 bs2 = new BitSet2(arrWithNull);
+		BitSet2 bs3 = new BitSet2(arrOnlyNull);
+		assertEquals(32,bs1.length());
+		assertEquals(1,bs1.toByteArray()[0]);
+		assertEquals(3,bs1.toByteArray()[1]);
+		assertEquals(5,bs1.toByteArray()[2]);
+		assertEquals(6,bs1.toByteArray()[3]);
+		assertEquals(16,bs2.length());
+		assertEquals(1,bs2.toByteArray()[0]);
+		assertEquals(3,bs2.toByteArray()[1]);
+		assertEquals(0,bs3.length());
+	}
 
 }
