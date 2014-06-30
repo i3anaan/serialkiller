@@ -20,10 +20,7 @@ public class SendTest {
 		
 		byte[] bytesToSend = STRING_TO_SEND.getBytes(Charsets.US_ASCII);
 		System.out.println(STRING_TO_SEND+"\n["+STRING_TO_SEND.length()+","+bytesToSend.length+"]\n");
-		
-		for(byte b : bytesToSend){
-			System.out.println(Bytes.format(b));
-		}
+
 		System.out.println("START SENDING");
 		
 		while(true){
