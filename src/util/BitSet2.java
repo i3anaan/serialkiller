@@ -102,6 +102,17 @@ public class BitSet2 extends BitSet {
 		super.set(bitIndexFrom,bitIndexTo,value);
 		this.length = Math.max(length, bitIndexTo+1);
 	}
+	
+	public void set(int bitIndexFrom, int bitIndexTo, BitSet2 bits){
+		if(bits.length==bitIndexTo-bitIndexFrom){
+			for(int i=0;i<bits.length;i++){
+				this.set(bitIndexFrom+i,bits.get(i));
+			}
+		}else{
+			throw new IllegalArgumentException();
+		}
+	}
+	
 	@Override
 	public int length(){
 		return length;
@@ -186,6 +197,15 @@ public class BitSet2 extends BitSet {
 		}
 	}
 	
+	public void insert(int startIndex, int endIndex, boolean bit) {
+		for(int i=this.length()-1;i>=startIndex;i--){
+			this.set(i+endIndex-startIndex,this.get(i));
+		}
+		for(int i=startIndex;i<startIndex-endIndex;i++){
+			this.set(startIndex+i,bit);
+		}
+	}
+	
 	/**
 	 * Removes a boolean value, moving every subsequent boolean 1 index down.
 	 * @param index
@@ -209,6 +229,30 @@ public class BitSet2 extends BitSet {
 			this.set(i,this.get(i+diff));
 		}
 		this.length = this.length - diff;
+	}
+	
+	/**
+	 * Replaces the segment from start (including) till end (excluding) with the given replacement.
+	 * Will remove or shift bits when |replacement|!= end-start;
+	 * 
+	 * Similar to the following, but more optimized:
+	 * remove(start,end);
+	 * insert(start,replacement);
+	 * 
+	 * @param start
+	 * @param end
+	 * @param replacement
+	 */
+	public void replace(int start, int end, BitSet2 replacement){
+		if(replacement.length<end-start){
+			//need to remove;
+			this.set(start,start+replacement.length,replacement);
+			this.remove(replacement.length+start,end);
+		}else{
+			//need to shift right
+			this.insert(end, replacement.length+start,false);
+			this.set(start,start+replacement.length,replacement);
+		}
 	}
 	
 	@Override

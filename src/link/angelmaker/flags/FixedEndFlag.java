@@ -33,8 +33,7 @@ public class FixedEndFlag implements Flag{
 
         while (contains >= 0) {
             // Replace escapedFlag with escapedEscapedFlag
-            bits.remove(contains, contains + escapedFlag.length());
-            bits.insert(contains, escapedEscapedFlag);
+            bits.replace(contains, contains + escapedFlag.length(),escapedEscapedFlag);
 
             index = contains + escapedEscapedFlag.length();
             contains = bits.contains(escapedFlag, index);
@@ -45,8 +44,7 @@ public class FixedEndFlag implements Flag{
 
         while (contains >= 0) {
             // Replace flag with realEscapedFlag
-            bits.remove(contains, contains + flag.length());
-            bits.insert(contains, realEscapedFlag);
+            bits.replace(contains, contains + flag.length(), realEscapedFlag);
 
             index = contains + realEscapedFlag.length();
             contains = bits.contains(flag, index);
@@ -61,8 +59,7 @@ public class FixedEndFlag implements Flag{
 
         while (contains >= 0) {
             // Replace realEscapedFlag with flag
-            bits.remove(contains, contains + realEscapedFlag.length());
-            bits.insert(contains, flag);
+            bits.replace(contains, contains + realEscapedFlag.length(), flag);
 
             index = contains + flag.length();
             contains = bits.contains(realEscapedFlag, index);
@@ -73,8 +70,7 @@ public class FixedEndFlag implements Flag{
 
 		while (contains >= 0) {
             // Replace escapedEscapedFlag with escapedFlag
-            bits.remove(contains, contains + escapedEscapedFlag.length());
-            bits.insert(contains, escapedFlag);
+            bits.replace(contains, contains + escapedEscapedFlag.length(), escapedFlag);
 
             index = contains + escapedFlag.length();
             contains = bits.contains(escapedEscapedFlag, index);
