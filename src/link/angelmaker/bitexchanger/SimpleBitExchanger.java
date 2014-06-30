@@ -37,10 +37,10 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final String ROLE_MASTER = "master";
 	public static final String ROLE_SLAVE = "slave";
 	public static final String ROLE_UKNOWN = "unkown";
-	public static final int STABILITY = 40;//TODO This is kind of a dirty fix.
+	public static final int STABILITY = 2;//TODO This is kind of a dirty fix.
 	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
 	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 50l*1000000l;
+	public static final long READ_TIMEOUT_NO_ACK = 20l*1000000l;
 	protected byte previousByteSent;
 	protected byte previousByteReceived;
 	
