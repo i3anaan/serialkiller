@@ -21,10 +21,9 @@ import util.BitSet2;
  * 
  */
 public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {
-	public static final Flag FLAG_START_OF_FRAME = new BasicFlag(new BitSet2(
+	public static final Flag FLAG_START_OF_FRAME = new DummyFlag(new BitSet2(
 			"10011001"));
-	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
-			"00111001101"));
+	public static final Flag FLAG_END_OF_FRAME = new FixedEndFlag();
 	protected Node.Resetable[] children;
 	
 	
@@ -175,7 +174,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	 *         contain the start flag
 	 */
 	private BitSet2 getDataAfterStartFlag() {
-		int contains = lastReceivedConvertedJunk.contains(FLAG_START_OF_FRAME.getFlag(),checkedForStartFlagInJunkTill);
+		int contains = lastReceivedConvertedJunk.contains(FLAG_START_OF_FRAME.getFlag(), checkedForStartFlagInJunkTill);
 		checkedForStartFlagInJunkTill = Math.max(lastReceivedConvertedJunk.length()-FLAG_START_OF_FRAME.getFlag().length()+1,0);
 		if (contains >= 0) {
 			receivedStartFlag = true;

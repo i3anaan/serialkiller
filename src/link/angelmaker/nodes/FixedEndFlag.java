@@ -2,7 +2,7 @@ package link.angelmaker.nodes;
 
 import util.BitSet2;
 
-public class FixedFlag implements Flag{
+public class FixedEndFlag implements Flag{
 
 	public final BitSet2 flag = new BitSet2("001101");
 	/*
@@ -15,62 +15,59 @@ public class FixedFlag implements Flag{
 	BitSet2 realEscapedFlag = new BitSet2("1100100");	//had flag in data.
 	BitSet2 escapedEscapedFlag = new BitSet2("1100101");		//had escapedFlag in data.
 
-	public FixedFlag() {
+	public FixedEndFlag() {
 	}
 
-	// TODO SHOULD TEST
 	public void stuff(BitSet2 bits) {
-		//System.out.println("Original:\t"+bits);
-		// If data contains escaped flag, place escape escaper after it.
 		int index = 0;
-		int containsEscapedFlag = bits.contains(escapedFlag);
-		while(containsEscapedFlag>=0){
-			bits.insert(containsEscapedFlag + escapedFlag.length(), escapedEscapedFlag);
-			index = containsEscapedFlag + escapedFlag.length() + escapedEscapedFlag.length()+6;
-			//System.out.println("Index = "+index+"  length="+bits.length());
-			containsEscapedFlag = bits.contains(escapedFlag,index); //Ignore already flagged part.
-			//System.out.println("Iteration:\t"+bits);
-		}
+        int contains = bits.contains(escapedFlag, index);
 
-		// If data contains flag, escape it.
-		int containsFlag = bits.contains(flag);
-		while(containsFlag>=0){
-			//bits.insert(containsFlag, !flag.get(0));
-			bits.remove(containsFlag,containsFlag+flag.length());
-			bits.insert(containsFlag, BitSet2.concatenate(escapedFlag,realEscapedFlag));
-			
-			containsFlag = bits.contains(flag);
-		}
-		//System.out.println("Stuffed:\t"+bits);
+        while (contains >= 0) {
+            // Replace escapedFlag with escapedEscapedFlag
+            bits.remove(contains, contains + escapedFlag.length());
+            bits.insert(contains, escapedEscapedFlag);
+
+            index = contains + escapedEscapedFlag.length();
+            contains = bits.contains(escapedFlag, index);
+        }
+
+        index = 0;
+        contains = bits.contains(flag, index);
+
+        while (contains >= 0) {
+            // Replace flag with realEscapedFlag
+            bits.remove(contains, contains + flag.length());
+            bits.insert(contains, realEscapedFlag);
+
+            index = contains + realEscapedFlag.length();
+            contains = bits.contains(escapedFlag, index);
+        }
 	}
 
 	public void unStuff(BitSet2 bits) {
-		//System.out.println("To be unstuffed: "+bits);
 		int index = 0;
-		int contains = bits.contains(escapedFlag);
-		while(contains>=0){
-			int start = contains+escapedFlag.length();
-			int end = contains+escapedFlag.length()+realEscapedFlag.length();
-			if(end<=bits.length() && bits.get(start,end).equals(realEscapedFlag)){
-				//Was real flag.				
-				bits.remove(contains, end);
-				//System.out.println("rmvd sffg:\t"+bits);
-				bits.insert(contains, flag);
-			}
-			index = index+1;
-			contains = bits.contains(escapedFlag,index);
-		}
-		//System.out.println("Unstuffed real flags.");
+        int contains = bits.contains(realEscapedFlag, index);
+
+        while (contains >= 0) {
+            // Replace realEscapedFlag with flag
+            bits.remove(contains, contains + realEscapedFlag.length());
+            bits.insert(contains, flag);
+
+            index = contains + flag.length();
+            contains = bits.contains(realEscapedFlag, index);
+        }
+
 		index = 0;
-		contains = bits.contains(escapedFlag);
-		while(contains>=0){
-			int end = contains+escapedFlag.length()+realEscapedFlag.length();
-			//Was escaped flag.
-			bits.remove(contains+escapedFlag.length(),end);
-			index = contains+1;//Ignore already unstuffed parts.
-			contains = bits.contains(escapedFlag,index);
+		contains = bits.contains(escapedEscapedFlag, index);
+
+		while (contains >= 0) {
+            // Replace escapedEscapedFlag with escapedFlag
+            bits.remove(contains, contains + escapedEscapedFlag.length());
+            bits.insert(contains, escapedFlag);
+
+            index = contains + escapedFlag.length();
+            contains = bits.contains(escapedEscapedFlag, index);
 		}
-		//System.out.println("unstuffed: "+bits);
 	}
 	
 	/**
@@ -124,6 +121,10 @@ public class FixedFlag implements Flag{
 			return resultFalse && resultTrue;
 		}
 	}
+
+    public static void main(String[] args) {
+        System.out.println(new FixedEndFlag().alwaysWorks());
+    }
 	
 
 	@Override
