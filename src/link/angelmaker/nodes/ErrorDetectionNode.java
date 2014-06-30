@@ -68,7 +68,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 
 	@Override
 	public boolean isCorrect() {
-		return correct;
+		return correct && child.isCorrect();
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 	
 	@Override
 	public String toString(){
-		return "ErrorDetectionNode(Parity)["+child.getClass().getSimpleName()+"]";
+		return "ErrorDetectionNode("+codec.getClass().getSimpleName()+")["+child.getClass().getSimpleName()+"]";
 	}
 
 

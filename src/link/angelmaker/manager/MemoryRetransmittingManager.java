@@ -25,8 +25,9 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	private ArrayBlockingQueue<Byte> queueOut;
 	
 	public static final int MESSAGE_FINE = (int)Math.pow(2,SequencedNode.MESSAGE_BIT_COUNT)-1;
-	public static BitSet2[] possibleMessages;
+	public BitSet2[] possibleMessages;
 	private Node.Resetable receivingNode = (Node.Resetable)NODE_FILLER.getClone();
+	private Node.Resetable sendingNode = (Node.Resetable)NODE_FILLER.getClone();
 	private volatile int messageReceived;
 	private volatile int messageToSend;
 	private int lastReceivedCorrect;
@@ -84,6 +85,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 			} catch (InterruptedException e) {
 				//Should never happen
 				e.printStackTrace();
+				AngelMaker.logger.warning("Dropped Byte to send while trying to put it in MemoryRetransmittingManager.queueOut.");
 			}
 		}
 	}
@@ -141,7 +143,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 			loadNew = lastSent;
 		}
 		
-		//AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal());
+		AngelMaker.logger.debug("Sending packet,\tseq="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getSeq().getUnsignedValue()+"\t\tmsg="+((SequencedNode)nodeToSendNext.getChildNodes()[0].getChildNodes()[0]).getMessage().getUnsignedValue()+"\tdata="+nodeToSendNext.getOriginal()+"\tConverted: "+nodeToSendNext.getConverted());
 		
 		return nodeToSendNext;
 	}
@@ -188,7 +190,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 					Node packetNode = errorDetection.getChildNodes()[0];
 					if(packetNode instanceof SequencedNode){
 						SequencedNode seqNode = ((SequencedNode) packetNode);
-						//AngelMaker.logger.debug("Received packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tmsg="+seqNode.getMessage().getUnsignedValue()+"\t"+((seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length)?"OK":"ERROR")+"\tData="+seqNode.getOriginal());
+						AngelMaker.logger.debug("Received packet\tseq="+seqNode.getSeq().getUnsignedValue()+"\tmsg="+seqNode.getMessage().getUnsignedValue()+"\tExpected:"+((lastReceivedCorrect+1)%memory.length)+"\tData="+seqNode.getOriginal()+"\tConverted: "+receivingNode.getConverted());
 
 						if(seqNode.getSeq().getUnsignedValue()==(lastReceivedCorrect+1)%memory.length){
 							//Fully correct, expected sequence number
@@ -198,8 +200,9 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 							try {
 								queueIn.put(b);
 							} catch (InterruptedException e) {
-								//Should not happen, but if does, just drop bit.
+								//Should not happen, but if does, just drop byte.
 								e.printStackTrace();
+								AngelMaker.logger.warning("Dropped received byte while trying to put it in MemoryRetransmittingManager.queueIn");
 							}
 							}
 							lastReceivedCorrect = (lastReceivedCorrect+1)%memory.length;
@@ -317,7 +320,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	public String toString(){
 		String result =  "MemoryRetransmittingManager";
 		result = result +"\n\tLastSent: "+lastSent+"\tNewestSend: "+loadNew+"\tLastReceived: "+lastReceivedCorrect;
-		result = result + "\n\tMemory"+Arrays.toString(memory);
+		//result = result + "\n\tMemory"+Arrays.toString(memory);
 		return result;
 	}
 }

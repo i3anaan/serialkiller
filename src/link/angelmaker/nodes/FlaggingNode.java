@@ -7,6 +7,9 @@ import link.angelmaker.codec.Codec;
 import link.angelmaker.codec.HammingCodec;
 import link.angelmaker.codec.NaiveRepeaterCodec;
 import link.angelmaker.codec.ParityBitsCodec;
+import link.angelmaker.flags.DummyFlag;
+import link.angelmaker.flags.FixedEndFlag;
+import link.angelmaker.flags.Flag;
 import util.BitSet2;
 
 /**
@@ -45,7 +48,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
-	private static final Codec CODEC = new HammingCodec(4);
+	private static final Codec CODEC = new HammingCodec(8);
 	
 	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
@@ -79,7 +82,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 	
 	private void setFlags(){
-		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("010"));
+		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("11101"));
 		FLAG_END_OF_FRAME = new FixedEndFlag();
 		//FLAG_START_OF_FRAME = new BasicFlag(new BitSet2("10011001"));
 		//FLAG_END_OF_FRAME = new BasicFlag(new BitSet2("00111001101"));

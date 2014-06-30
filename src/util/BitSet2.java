@@ -102,11 +102,11 @@ public class BitSet2 extends BitSet {
 	}
 	@Override
 	public String toString(){
-		String s = "";
+		String s = "["+this.length+"]";
 		for(int i=0;i<length();i++){
 			s = s + (this.get(i) ? "1" : "0");
 		}
-		if(s.equals("")){
+		if(this.length==0){
 			s = "[empty]";
 		}
 		return s;

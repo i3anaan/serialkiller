@@ -1,4 +1,4 @@
-package link.angelmaker.nodes;
+package link.angelmaker.flags;
 
 import util.BitSet2;
 

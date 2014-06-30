@@ -45,16 +45,16 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		sequenceNumber = bits.get(0,messageBitCount);
-		message = bits.get(Math.max(0,bits.length()-messageBitCount),bits.length());
-		storedData = bits.get(messageBitCount, Math.max(0,bits.length()-messageBitCount));
+		sequenceNumber = bits.get(0,Math.min(messageBitCount,bits.length()));
+		message = bits.get(Math.min(messageBitCount,bits.length()),Math.min(messageBitCount*2,bits.length()));
+		storedData = bits.get(Math.min(messageBitCount*2,bits.length()), bits.length());
 		full = true;
 		return EmptyBitSet2.getInstance();
 	}
 
 	@Override
 	public BitSet2 getConverted() {
-		return BitSet2.concatenate(sequenceNumber, BitSet2.concatenate(storedData, message));
+		return BitSet2.concatenate(sequenceNumber, BitSet2.concatenate(message,storedData));
 	}
 
 	@Override
@@ -117,6 +117,11 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	@Override
 	public boolean isFiller() {
 		return storedData.length()==0;
+	}
+	
+	@Override
+	public boolean isCorrect(){
+		return message.length()==MESSAGE_BIT_COUNT && sequenceNumber.length()==MESSAGE_BIT_COUNT;
 	}
 
 

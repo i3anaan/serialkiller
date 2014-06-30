@@ -85,8 +85,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			try {
 				queueOut.put(bits.get(i));
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				AngelMaker.logger.warning("Interrupted while trying to put bit to send in SimpleBitExchanger.queueOut");
 			}
 		}
 	}
@@ -98,8 +98,8 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 		try {
 			bit = queueIn.take();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			AngelMaker.logger.warning("Interrupted while reading bit from SimpleBitExchanger.queueIn");
 		}
 		while(bit!=null){
 			bits.addAtEnd(bit);
@@ -289,18 +289,12 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			
 			if(bitsReceived!=null){
 				for(boolean b : bitsReceived){
-					//System.out.println("bit received: "+(b ? "1" : "0"));
 					try {
 						queueIn.put(b);
 					} catch (InterruptedException e) {
+						AngelMaker.logger.alert("Interrupted while trying to put received bit in SimpleBitExchanger.queueIn");
 						e.printStackTrace();
 					}
-					//if(queueIn.offer(b)){
-					//	AngelMaker.logger.alert("BitExchanger queueIn full, dropping bits");
-					//}
-				}
-				if(round<100){
-				//AngelMaker.logger.debug("["+round+"] Received Bit: "+bitReceived);
 				}
 				round++;
 			}
