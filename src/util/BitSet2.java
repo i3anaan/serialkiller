@@ -236,7 +236,7 @@ public class BitSet2 extends BitSet {
 		for (int a = startAt; a < haystack.size() - needle.length() + 1; a++) {
 			int i = 0;
 			
-			while (i < needle.length()) {
+			while (i < needle.length() && a + i < haystack.length()) {
 				if (haystack.get(a + i) != needle.get(i)) break;
 				i++;
 			}
@@ -274,7 +274,6 @@ public class BitSet2 extends BitSet {
      * @param data The BitSet2 object to convert.
      * @return The byte array.
      */
-    @Override
 	public byte[] toByteArray() {
         int len = (int) Math.ceil((double) this.length() / 8);
         byte[] bytes = new byte[len];
