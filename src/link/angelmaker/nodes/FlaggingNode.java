@@ -22,7 +22,7 @@ import util.BitSet2;
  */
 public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {
 	public static final Flag FLAG_START_OF_FRAME = new DummyFlag(new BitSet2(
-			"10011001"));
+			"101101"));
 	public static final Flag FLAG_END_OF_FRAME = new FixedEndFlag();
 	protected Node.Resetable[] children;
 	

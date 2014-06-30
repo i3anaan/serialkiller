@@ -18,6 +18,7 @@ public class FixedEndFlag implements Flag{
 	public FixedEndFlag() {
 	}
 
+    @Override
 	public void stuff(BitSet2 bits) {
 		int index = 0;
         int contains = bits.contains(escapedFlag, index);
@@ -44,6 +45,7 @@ public class FixedEndFlag implements Flag{
         }
 	}
 
+    @Override
 	public void unStuff(BitSet2 bits) {
 		int index = 0;
         int contains = bits.contains(realEscapedFlag, index);
@@ -69,63 +71,6 @@ public class FixedEndFlag implements Flag{
             contains = bits.contains(escapedEscapedFlag, index);
 		}
 	}
-	
-	/**
-	 * Test method, returns true if this flag works for every possible bitsequence.
-	 * @return
-	 */
-	private int additionCount;
-	private int testProgress = 0;
-	
-	public boolean alwaysWorks(){
-		additionCount = escapedFlag.length()*2;
-		return testBitSequence(new BitSet2(), additionCount);
-	}
-	
-	private boolean testBitSequence(BitSet2 current, int additionsLeft){
-		if(additionsLeft<=0){
-			//test sequence
-			BitSet2 clone = (BitSet2) current.clone();
-			stuff(clone);
-			boolean containsFlag = clone.contains(flag)>0;
-			boolean equal = false;
-			if(!containsFlag){
-				unStuff(clone);
-				equal = clone.equals(current);
-				if(!equal){
-					System.out.println("NOT EQUAL.");
-					System.out.println("Flag:\t\t\t"+flag);
-					System.out.println("EscapedFlag:\t\t"+escapedFlag);
-					System.out.println("EscapedEscapedFlag:\t"+escapedEscapedFlag);
-					System.out.println("RealEscapedFlag:\t"+realEscapedFlag);
-					System.out.println("original:\t"+current);
-					stuff(current);
-					System.out.println("stuffed:\t"+current);
-					System.out.println("unstuffed:\t"+clone);
-				}
-			}
-			return !containsFlag && equal;
-		}else{
-			BitSet2 clone = (BitSet2) current.clone();
-			current.addAtEnd(false);
-			boolean resultFalse = testBitSequence(current, additionsLeft-1);
-			boolean resultTrue = false;
-			if(resultFalse){
-				clone.addAtEnd(true);
-				resultTrue = testBitSequence(clone, additionsLeft-1);
-			}
-			//if(additionsLeft>additionCount-14){
-				testProgress++;
-				System.out.println("testProgress: "+(testProgress)/68719476736.0+"%");
-			//}
-			return resultFalse && resultTrue;
-		}
-	}
-
-    public static void main(String[] args) {
-        System.out.println(new FixedEndFlag().alwaysWorks());
-    }
-	
 
 	@Override
 	public BitSet2 getFlag() {
