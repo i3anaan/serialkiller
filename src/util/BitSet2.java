@@ -274,7 +274,6 @@ public class BitSet2 extends BitSet {
      * @param data The BitSet2 object to convert.
      * @return The byte array.
      */
-    @Override
 	public byte[] toByteArray() {
         int len = (int) Math.ceil((double) this.length() / 8);
         byte[] bytes = new byte[len];
