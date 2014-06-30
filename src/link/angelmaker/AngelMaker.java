@@ -62,7 +62,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	 * Standard classes to use when nothing else specified.	
 	 */
 	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
-	public static Node TOP_NODE_IN_USE = new FlaggingNode(null);
+	public Node TOP_NODE_IN_USE = new FlaggingNode(null);
 	//TODO set changed zodat zeker dat leeg is.
 	private AMManager STANDARD_MANAGER = new MemoryRetransmittingManager();
 	private BitExchanger STANDARD_EXCHANGER = new HighSpeedBitExchanger();

@@ -20,11 +20,9 @@ import util.BitSet2;
  * @author I3anaan
  * 
  */
-public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {
-	public static final Flag FLAG_START_OF_FRAME = new BasicFlag(new BitSet2(
-			"10011001"));
-	public static final Flag FLAG_END_OF_FRAME = new BasicFlag(new BitSet2(
-			"00111001101"));
+public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {	
+	public Flag FLAG_START_OF_FRAME;
+	public Flag FLAG_END_OF_FRAME;
 	protected Node.Resetable[] children;
 	
 	
@@ -53,6 +51,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	
 	
 	public FlaggingNode(Node parent) {
+		setFlags();
 		this.dataBitCount = maxBitsExpected;
 		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount,CODEC) };
 		
@@ -66,6 +65,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 	
 	public FlaggingNode(Node parent, Node.Resetable child, int dataBitCount) {
+		setFlags();
 		children = new Node.Resetable[] { child };
 		this.dataBitCount = dataBitCount;
 		this.parent = parent;
@@ -76,7 +76,13 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 			AngelMaker.logger.bbq("Invalid End of frame flag, ealier occurence possible");
 		}
 	}
-
+	
+	private void setFlags(){
+		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("1010101"));
+		FLAG_END_OF_FRAME = new DummyFlag(new BitSet2("01100110"));
+	}
+	
+	
 	public void setParent(Node parent){
 		this.parent = parent;
 	}
@@ -226,7 +232,9 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	
 	@Override
 	public Node getFiller(){
-		return AngelMaker.TOP_NODE_IN_USE.getClone();
+		Node.Resetable clone =(Node.Resetable)this.getClone();
+		clone.reset();
+		return clone;
 	}
 
 	@Override
