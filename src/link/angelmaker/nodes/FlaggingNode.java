@@ -181,7 +181,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	 *         contain the start flag
 	 */
 	private BitSet2 getDataAfterStartFlag() {
-		int contains = lastReceivedConvertedJunk.contains(FLAG_START_OF_FRAME.getFlag(),checkedForStartFlagInJunkTill);
+		int contains = lastReceivedConvertedJunk.contains(FLAG_START_OF_FRAME.getFlag(), checkedForStartFlagInJunkTill);
 		checkedForStartFlagInJunkTill = Math.max(lastReceivedConvertedJunk.length()-FLAG_START_OF_FRAME.getFlag().length()+1,0);
 		if (contains >= 0) {
 			receivedStartFlag = true;
