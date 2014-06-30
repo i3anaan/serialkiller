@@ -47,6 +47,7 @@ public class BitSetTests {
 		assertEquals(0, bs.contains(new BitSet2("00")));
 		assertEquals(-1, bs.contains(new BitSet2("1111")));
 		assertEquals(10, bs.contains(new BitSet2("0011")));
+        assertEquals(-1, bs.contains(new BitSet2("1100")));
 	}
 
 }

@@ -236,7 +236,7 @@ public class BitSet2 extends BitSet {
 		for (int a = startAt; a < haystack.size() - needle.length() + 1; a++) {
 			int i = 0;
 			
-			while (i < needle.length()) {
+			while (i < needle.length() && a + i < haystack.length()) {
 				if (haystack.get(a + i) != needle.get(i)) break;
 				i++;
 			}
