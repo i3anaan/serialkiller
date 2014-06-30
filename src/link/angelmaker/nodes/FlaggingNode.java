@@ -45,7 +45,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
-	private static final Codec CODEC = new HammingCodec(8);
+	private static final Codec CODEC = new HammingCodec(4);
 	
 	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
