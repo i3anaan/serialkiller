@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
 import link.angelmaker.codec.Codec;
+import link.angelmaker.codec.HammingCodec;
 import link.angelmaker.codec.NaiveRepeaterCodec;
 import link.angelmaker.codec.ParityBitsCodec;
 import util.BitSet2;
@@ -44,7 +45,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
-	private static final Codec CODEC = new NaiveRepeaterCodec(3);
+	private static final Codec CODEC = new HammingCodec(8);
 	
 	
 	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
@@ -78,8 +79,8 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 	
 	private void setFlags(){
-		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("1010101"));
-		FLAG_END_OF_FRAME = new DummyFlag(new BitSet2("01100110"));
+		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("1"));
+		FLAG_END_OF_FRAME = new FixedFlag(new BitSet2("001101"));
 	}
 	
 	
