@@ -303,11 +303,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, end));
 
                 // Send it.
-                try {
-                    queue.put(p);
-                } catch (InterruptedException e) {
-                    // Do nothing.
-                }
+                sendPacket(p);
             }
         } else {
             TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
