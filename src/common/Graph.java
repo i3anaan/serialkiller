@@ -22,10 +22,11 @@ public class Graph {
 	public static void main(String[] args) {
 		// Make example graph.
 		Node node = new FlaggingNode(null);
+		node.giveOriginal(new BitSet2(new byte[]{1,3,5,39,-100,8,103,90}));
 		((SequencedNode) node.getChildNodes()[0].getChildNodes()[0])
-				.setMessage(new BitSet2("0000"));
+				.setMessage(new BitSet2("0000 0000"));
 		((SequencedNode) node.getChildNodes()[0].getChildNodes()[0])
-				.setSeq(new BitSet2("1111"));
+				.setSeq(new BitSet2("1111 1111"));
 		BitSet2 bs = new BitSet2();
 		for (int i = 0; i < 64; i++) {
 			bs.addAtEnd(Math.random() > 0.5);

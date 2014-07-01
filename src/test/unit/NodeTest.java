@@ -14,7 +14,7 @@ import util.BitSet2;
 public class NodeTest {
 	@Test
 	public void testSequencedNode(){
-		SequencedNode seqNode = new SequencedNode(null, AngelMakerConfig.PACKET_BIT_COUNT, AngelMakerConfig.MESSAGE_BIT_COUNT);
+		SequencedNode seqNode = new SequencedNode(null);
 		BitSet2 data = new BitSet2(new byte[]{1,2,3,4,5,6,7,8});
 		BitSet2 seq = new BitSet2("1100");
 		BitSet2 message = new BitSet2("0111");
@@ -25,7 +25,7 @@ public class NodeTest {
 		assertEquals(seq,seqNode.getSeq());
 		assertEquals(message,seqNode.getMessage());
 		
-		SequencedNode constructed = new SequencedNode(null, AngelMakerConfig.PACKET_BIT_COUNT, AngelMakerConfig.MESSAGE_BIT_COUNT);
+		SequencedNode constructed = new SequencedNode(null);
 		constructed.giveConverted(seqNode.getConverted());
 		assertEquals(data,constructed.getOriginal());
 		assertEquals(seq,constructed.getSeq());
