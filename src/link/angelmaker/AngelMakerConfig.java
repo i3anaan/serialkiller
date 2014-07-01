@@ -3,19 +3,11 @@ package link.angelmaker;
 import phys.PhysicalLayer;
 import phys.diag.NullPhysicalLayer;
 import util.BitSet2;
-import link.angelmaker.bitexchanger.BitExchanger;
-import link.angelmaker.bitexchanger.NonInvertingBitExchanger;
-import link.angelmaker.codec.Codec;
-import link.angelmaker.codec.HammingCodec;
-import link.angelmaker.codec.MixedCodec;
-import link.angelmaker.codec.ParityBitsCodec;
-import link.angelmaker.flags.DummyFlag;
-import link.angelmaker.flags.FixedEndFlag;
-import link.angelmaker.flags.Flag;
-import link.angelmaker.manager.AMManager;
-import link.angelmaker.manager.MemoryRetransmittingManager;
-import link.angelmaker.nodes.FlaggingNode;
-import link.angelmaker.nodes.Node;
+import link.angelmaker.bitexchanger.*;
+import link.angelmaker.codec.*;
+import link.angelmaker.flags.*;
+import link.angelmaker.manager.*;
+import link.angelmaker.nodes.*;
 
 public class AngelMakerConfig {
 	//Encoding (ErrorDetectionNode)
@@ -40,7 +32,7 @@ public class AngelMakerConfig {
 		return new FixedEndFlag();
 	}
 	
-	//Default modules used by AngelMaker (Start uses these)
+	//Default modules used by AngelMaker (Starter uses these for Node, Manager and BitExchanger)
 	public static PhysicalLayer getPhys(){
 		return new NullPhysicalLayer();
 	}
@@ -51,6 +43,6 @@ public class AngelMakerConfig {
 		return new MemoryRetransmittingManager();
 	}
 	public static BitExchanger getBitExchanger(){
-		return new NonInvertingBitExchanger();
+		return new HighSpeedBitExchanger();
 	}
 }
