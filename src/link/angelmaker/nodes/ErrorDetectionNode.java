@@ -6,6 +6,13 @@ import link.angelmaker.AngelMakerConfig;
 import util.BitSet2;
 import util.EmptyBitSet2;
 
+/**
+ * Node that accepts a one time injection, either original or converted.
+ * The Converted data is data encoded by a set Codec in AngelMakerConfig.
+ * This encoding is then used to check if the converted data put in is correct.
+ * @author I3anaan
+ *
+ */
 public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,Node.OneTimeInjection {
 	private boolean full;
 	private boolean correct;
@@ -13,7 +20,7 @@ public class ErrorDetectionNode extends AbstractNode implements Node.Resetable,N
 	
 	public ErrorDetectionNode(Node parent){
 		this.parent = parent;
-		child = new SequencedNode(this,AngelMakerConfig.PACKET_BIT_COUNT,AngelMakerConfig.MESSAGE_BIT_COUNT);
+		child = new SequencedNode(this);
 	}
 	
 	

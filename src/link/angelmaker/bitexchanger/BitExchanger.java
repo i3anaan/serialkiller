@@ -1,7 +1,5 @@
 package link.angelmaker.bitexchanger;
 
-import java.util.concurrent.ArrayBlockingQueue;
-
 import link.angelmaker.manager.AMManager;
 import phys.PhysicalLayer;
 import util.BitSet2;
@@ -26,7 +24,6 @@ public interface BitExchanger {
 	/**
 	 * Enables the BitExchanger.
 	 * Before enabling, calling the different methods have absolutely no guarantees.
-	 * They might crash, they might work, they might do nothing.
 	 */
 	public void enable();
 	

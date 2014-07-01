@@ -8,13 +8,6 @@ import util.BitSet2;
 public class DummyFlag implements Flag{
 
 	public final BitSet2 flag;
-	/*
-	 * Escaped flag has the a first bit appended, opposite of the original
-	 * flags first bit Before the last bit an extra bit is inserted, the
-	 * opposite of the last bit. Together these two stuffings should make it
-	 * impossible for the original flag to appear somewhere.
-	 */
-
 	public DummyFlag(BitSet2 flag) {
 		this.flag = flag;
 	}

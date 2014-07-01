@@ -1,18 +1,10 @@
 ANGEL_MAKER TODOs
 
 General:
->Check existing TODOs
 >Thread safety, some specifics:
 	>Diagram drawing (getCurrentReceivingNode(),getCurrentSendingNode())
-	>Check thread safety in classes with 2 threads
-		>ConstantRetransmittingManager probably has problems with this		#>High Priority<#
 >Cleanup
-	>Check logging (some unnecessary right now, some useful logs could be added)
 	>Clean up tests (and possibly make new tests)
-	>Better program structure
-		>Clean up and improve interfaces
->Documentation
-
 
 AngelMaker:
 >Some better testing of the entire system.

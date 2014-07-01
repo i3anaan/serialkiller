@@ -6,23 +6,29 @@ import util.BitSet2;
 import util.EmptyBitSet2;
 
 /**
+ * Node that contains 3 elements:
+ * Data, just normal data stored.
+ * Sequence number, The sequence number of this Node (packet).
+ * Message, A message packed in this Node, for example to be used with retransmitting.
+ * 
+ * NodeLayout:
+ * | SEQ | MSG | DATA |
+ * 
+ * The length of the data and these messages are specified in AngelMakerConfig.
+ * 
  * Accepts one-time injection of data.
  * Sequence numbers / flags can be set afterwards.
  * @author I3anaan
  *
  */
 public class SequencedNode extends AbstractNode implements Node.OneTimeInjection, Node.Resetable,Node.Fillable{
-	private int maxDataSize;
-	private int messageBitCount;
 	private boolean full;
 	private BitSet2 storedData;
 	private BitSet2 sequenceNumber;
 	private BitSet2 message;
 	
-	public SequencedNode(Node parent, int maxDataSize, int messageBitCount){
+	public SequencedNode(Node parent){
 		this.parent = parent;
-		this.maxDataSize = maxDataSize;
-		this.messageBitCount = messageBitCount;
 		this.storedData = new BitSet2();
 		this.sequenceNumber = new BitSet2();
 		this.message = new BitSet2();
@@ -31,7 +37,7 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {
-		this.storedData = bits.get(0,Math.min(bits.length(), maxDataSize));
+		this.storedData = bits.get(0,bits.length());
 		full = true;
 		return EmptyBitSet2.getInstance();
 	}
@@ -43,16 +49,19 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 
 	@Override
 	public BitSet2 giveConverted(BitSet2 bits) {
-		sequenceNumber = bits.get(0,Math.min(messageBitCount,bits.length()));
-		message = bits.get(Math.min(messageBitCount,bits.length()),Math.min(messageBitCount*2,bits.length()));
-		storedData = bits.get(Math.min(messageBitCount*2,bits.length()), bits.length());
+		sequenceNumber = bits.get(0,Math.min(AngelMakerConfig.MESSAGE_BIT_COUNT,bits.length()));
+		message = bits.get(Math.min(AngelMakerConfig.MESSAGE_BIT_COUNT,bits.length()),Math.min(AngelMakerConfig.MESSAGE_BIT_COUNT*2,bits.length()));
+		storedData = bits.get(Math.min(AngelMakerConfig.MESSAGE_BIT_COUNT*2,bits.length()), bits.length());
 		full = true;
 		return EmptyBitSet2.getInstance();
 	}
 
 	@Override
 	public BitSet2 getConverted() {
-		return BitSet2.concatenate(sequenceNumber, BitSet2.concatenate(message,storedData));
+		BitSet2 out = (BitSet2) sequenceNumber.clone();
+		out.addAtEnd(message);
+		out.addAtEnd(storedData);
+		return out;
 	}
 
 	@Override
@@ -62,7 +71,7 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 
 	@Override
 	public Node getClone() {
-		Node clone = new SequencedNode(parent, maxDataSize, messageBitCount);
+		Node clone = new SequencedNode(parent);
 		if(isFull()){
 			clone.giveConverted(getConverted());
 		}
@@ -125,7 +134,7 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 
 	@Override
 	public Node getFiller() {
-		return new SequencedNode(null, AngelMakerConfig.PACKET_BIT_COUNT, AngelMakerConfig.MESSAGE_BIT_COUNT);
+		return new SequencedNode(null);
 	}
 
 }

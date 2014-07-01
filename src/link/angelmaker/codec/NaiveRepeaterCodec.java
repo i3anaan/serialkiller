@@ -4,6 +4,16 @@ import util.BitSet2;
 
 import com.google.common.base.Optional;
 
+/**
+ * Utilizes repetition code.
+ * Simply repeats every bit the given amount of times.
+ * When decoding it expects every bit to appear the same amount of times in a row.
+ * If not, it is considered incorrect.
+ * 
+ * No attempt to correct is made (if for example 4 out of 5 say 1, it is most likely a 1).
+ * @author I3anaan
+ *
+ */
 public class NaiveRepeaterCodec implements Codec{
 
 	private int repeatCount = 2;

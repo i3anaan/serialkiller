@@ -2,6 +2,12 @@ package link.angelmaker.nodes;
 
 import util.BitSet2;
 
+/**
+ * Basic abstract implementation of the Node class.
+ * Typically alot of these methods will have to be overwritten.
+ * @author I3anaan
+ *
+ */
 public abstract class AbstractNode implements Node {
 
 	protected Node[] children = null;

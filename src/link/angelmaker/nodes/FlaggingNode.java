@@ -4,61 +4,39 @@ import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
 import link.angelmaker.AngelMakerConfig;
-import link.angelmaker.codec.Codec;
-import link.angelmaker.codec.HammingCodec;
-import link.angelmaker.codec.MixedCodec;
-import link.angelmaker.codec.NaiveRepeaterCodec;
-import link.angelmaker.codec.ParityBitsCodec;
-import link.angelmaker.flags.DummyFlag;
-import link.angelmaker.flags.FixedEndFlag;
 import link.angelmaker.flags.Flag;
 import util.BitSet2;
+import util.EmptyBitSet2;
 
 /**
  * A Node that flags its data, has 1 childNode. It reads a bit stream, consumes
  * till it spots a start of frame flag. Then start reading data after that flag,
- * till it spots an end of frame flag. It collects bits till it is full (got
- * dataBitCount bits). Only when it detects its full, it gives the data to its
- * childNode. When not full, getOriginal() returns an empty BitSet2.
- * 
- * Best to use either giveConverted or giveOriginal, not both.
+ * till it spots an end of frame flag. The data in between is handed down, to the next node.
+ * giveOriginal() is a one time injection
+ * giveConverted() is not.
  * 
  * @author I3anaan
  * 
  */
-public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.OneTimeInjection,Node.Resetable {	
+public class FlaggingNode extends AbstractNode implements Node.Fillable,Node.Resetable {	
 	public Flag FLAG_START_OF_FRAME;
 	public Flag FLAG_END_OF_FRAME;
-	protected Node.Resetable[] children;
+	protected Node.Resetable[] children; //children this Node has.
+	private BitSet2 stored;	//The original data stored in this Node.
+	private BitSet2 storedConverted;	//Data collected so far through giveConverted(). 
 	
-	
-	/*
-	 * Requirements for flags: FLAG_END_OF_FRAME Does NOT contain part of itself
-	 * starting at the right. In other words: It should not be possible to
-	 * append a X amount of bits left of the FLAG_END_OF_FRAME resulting in that
-	 * new sequence to contain a FLAG_END_OF_FRAME before the real
-	 * FLAG_END_OF_FRAME starts.
+	/**
+	 * (possible) junk received through giveConverted().
+	 * This is used till the startflag is found.
 	 */
-
-	// Original, unstuffed, unflagged data.
-	private BitSet2 stored;
-	private BitSet2 storedConverted;
-	//private int dataBitCount;
+	private BitSet2 lastReceivedConvertedJunk; 
+	private int checkedForStartFlagInJunkTill = 0;//Value to optimize contains function.
 	
-	private int checkedForStartFlagInJunkTill = 0;
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
-	private BitSet2 lastReceivedConvertedJunk;
-	
-	
-	
-	
-	//public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
-	
 	
 	public FlaggingNode(Node parent) {
 		setFlags();
-		//this.dataBitCount = maxBitsExpected;
 		children = new Node.Resetable[] { new ErrorDetectionNode(this) };
 		
 		this.parent = parent;
@@ -87,12 +65,20 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		FLAG_END_OF_FRAME = AngelMakerConfig.getEndFlag();
 	}
 	
-	
+	/**
+	 * Used to set the parent after constructing.
+	 * This was used to better draw diagrams.
+	 * @param parent
+	 */
 	public void setParent(Node parent){
 		this.parent = parent;
 	}
 	
 	@Override
+	/**
+	 * Give original data.
+	 * Accepts one time injection.
+	 */
 	public BitSet2 giveOriginal(BitSet2 bits) {
 		int i;
 		for (i = 0; i < bits.length(); i++) {
@@ -114,25 +100,31 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 	
 	@Override
+	/**
+	 * Give a converted data stream, the FlaggingNode will consume these bits till it finds the start flag.
+	 * After which it stores the bits till it finds the end flag, then it considers the data inbetween to be complete.
+	 * It then unstuffs the data and gives it to its child.
+	 */
 	public BitSet2 giveConverted(BitSet2 bits) {
-		//System.out.println("Give Converted: "+lastReceivedConvertedJunk+"\t storedConverted: "+storedConverted);
 		if (!receivedStartFlag) {
+			//Look for start flag
 			lastReceivedConvertedJunk.addAtEnd(bits);
 			
 			BitSet2 afterStart = getDataAfterStartFlag();
-			if (afterStart!=null) {
+			if (afterStart.length()>0) {
 				storedConverted = afterStart;
 			}
 		} else {
+			//Start flag found, append at data received
 			storedConverted.addAtEnd(bits);
 		}
 		
 		int contains = getEndFlagIndex(storedConverted);
+		//Check if data received so far contains endflag.
 		if (receivedStartFlag && contains >= 0) {
 			// Received start and end flag.
 			isFull = true;
 			stored = unStuff(getDataBeforeEndFlag(storedConverted));
-			//System.out.println("Full data: "+stored);
 			children[0].giveConverted(stored);
 			
 			return storedConverted.get(contains
@@ -140,7 +132,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 					storedConverted.length());
 		} else {
 			// Does not have end flag yet.
-			return new BitSet2();
+			return EmptyBitSet2.getInstance();
 		}
 	}
 
@@ -148,11 +140,14 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	public BitSet2 getConverted() {
 		return placeFlags(stuff(children[0].getConverted()));
 	}
-
 	private int getEndFlagIndex(BitSet2 bits) {
 		return bits.contains(FLAG_END_OF_FRAME.getFlag());
 	}
 
+	/**
+	 * Places the flags around bits.
+	 * Does NOT stuff the bits first.
+	 */
 	private BitSet2 placeFlags(BitSet2 bits) {
 		return BitSet2.concatenate(
 				BitSet2.concatenate(FLAG_START_OF_FRAME.getFlag(), bits),
@@ -160,6 +155,11 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 
 	}
 
+	/**
+	 * Stuffs the bits given, removing occurrences of the flags it stuffs.
+	 * @param bits to stuff
+	 * @return	Stuffed data, not containing any flags.
+	 */
 	private BitSet2 stuff(BitSet2 bits) {
 		BitSet2 result = (BitSet2) bits.clone();
 		Flag[] flags = new Flag[] { FLAG_START_OF_FRAME, FLAG_END_OF_FRAME };
@@ -169,6 +169,9 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		return result;
 	}
 
+	/**
+	 * Reverses the stuffing.
+	 */
 	private BitSet2 unStuff(BitSet2 bits) {
 		BitSet2 result = (BitSet2) bits.clone();
 		Flag[] flags = new Flag[] { FLAG_START_OF_FRAME, FLAG_END_OF_FRAME };
@@ -180,7 +183,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 
 	/**
 	 * Looks in lastReceivedConvertedJunk for a start flag.
-	 * @return the data after the start flag, null if bits does not
+	 * @return the data after the start flag, empty if lastReceivedConvertedJunk does not
 	 *         contain the start flag
 	 */
 	private BitSet2 getDataAfterStartFlag() {
@@ -191,10 +194,15 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 			return lastReceivedConvertedJunk.get(contains + FLAG_START_OF_FRAME.getFlag().length(),
 					lastReceivedConvertedJunk.length());
 		} else {
-			return null;
+			return EmptyBitSet2.getInstance();
 		}
 	}
 
+	/**
+	 * @param bits to look in
+	 * @return	All the bits before the first occurence of the end flag.
+	 * 			Returns a copy of the bits if it does not contain the end flag.
+	 */
 	private BitSet2 getDataBeforeEndFlag(BitSet2 bits) {
 		int contains = getEndFlagIndex(bits);
 		if (contains >= 0) {

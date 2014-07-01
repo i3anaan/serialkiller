@@ -2,6 +2,12 @@ package link.angelmaker.nodes;
 
 import util.BitSet2;
 
+/**
+ * A Node that does nothing.
+ * Used for testing.
+ * @author I3anaan
+ *
+ */
 public class NullNode extends AbstractNode implements Node.Resetable{
 
 	@Override
@@ -11,7 +17,6 @@ public class NullNode extends AbstractNode implements Node.Resetable{
 
 	@Override
 	public BitSet2 getOriginal() {
-		// TODO Auto-generated method stub
 		return new BitSet2();
 	}
 

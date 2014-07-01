@@ -5,6 +5,12 @@ import util.encoding.HammingCode;
 
 import com.google.common.base.Optional;
 
+/**
+ * Codec that makes use of the HammingCode class.
+ * Applies HammingCode to the given data.
+ * @author I3anaan
+ *
+ */
 public class HammingCodec implements Codec{
 
 	private HammingCode codec;
