@@ -23,13 +23,27 @@ import util.BitSet2;
  */
 public class ParityBitsCodec implements Codec {
 	/** The amount of bits in a byte. */
-	public static final int BYTE = 8;
+    public static final int BYTE = 8;
+	private int byteLength;
 	
 	/** The amount of overhead per byte as bits. */
-	public static final int OVERHEAD = 2;
+    public static final int OVERHEAD = 2;
+	private int overheadLength;
 	
 	/** The space required to store one encoded byte, in bits. */
-	public static final int ENCODED_BYTE = BYTE + OVERHEAD;
+    public static final int ENCODED_BYTE = BYTE + OVERHEAD;
+	private int encodedByteLength;
+
+    public ParityBitsCodec() {
+        this(BYTE, OVERHEAD);
+    }
+
+    public ParityBitsCodec(int byteLength, int overheadLength) {
+        super();
+        this.byteLength = byteLength;
+        this.overheadLength = overheadLength;
+        this.encodedByteLength = byteLength + overheadLength;
+    }
 
 	/**
 	 * Encodes a BitSet of input data by adding two parity bits for every
@@ -38,15 +52,15 @@ public class ParityBitsCodec implements Codec {
 	 * @throws IllegalArgumentException if the BitSet is not a BitSet of bytes
 	 */
 	public BitSet2 encode(BitSet2 input) throws IllegalArgumentException {
-		if (input.length() % 8 != 0) {
-			String msg = "encode: input.length() must be a multiple of 8 bits";
+		if (input.length() % byteLength != 0) {
+			String msg = String.format("encode: input.length() must be a multiple of %d bits", byteLength);
 			throw new IllegalArgumentException(msg);
 		}
 		
 		BitSet2 out = new BitSet2();
 		
-		for (int i = 0; i < input.length(); i += 8) {
-			BitSet2 oneByte = input.get(i, i+8);
+		for (int i = 0; i < input.length(); i += byteLength) {
+			BitSet2 oneByte = input.get(i, i+ byteLength);
 			BitSet2 parBits = parity(oneByte);
 			
 			out.addAtEnd(oneByte);
@@ -62,16 +76,16 @@ public class ParityBitsCodec implements Codec {
 	 * @throws IllegalArgumentException if the BitSet is not encoded parity
 	 */
 	public Optional<BitSet2> decode(BitSet2 input) throws IllegalArgumentException {
-		if (input.length() % 10 != 0) {
-			String msg = "decode: input.length() must be a multiple of 10 bits";
+		if (input.length() % encodedByteLength != 0) {
+			String msg = String.format("decode: input.length() must be a multiple of %d bits", encodedByteLength);
 			throw new IllegalArgumentException(msg);
 		}
 		
 		BitSet2 out = new BitSet2();
 		
-		for (int i = 0; i < input.length(); i += 10) {
-			BitSet2 oneByte = input.get(i, i + 8);
-			BitSet2 parBits = input.get(i + 8, i + 10);
+		for (int i = 0; i < input.length(); i += encodedByteLength) {
+			BitSet2 oneByte = input.get(i, i + byteLength);
+			BitSet2 parBits = input.get(i + byteLength, i + encodedByteLength);
 			BitSet2 dataPar = parity(oneByte);
 			
 			if (!dataPar.equals(parBits)) {
@@ -84,8 +98,8 @@ public class ParityBitsCodec implements Codec {
 		return Optional.of(out);
 	}
 
-	private static BitSet2 parity(BitSet2 input) {
-		byte par = (byte) (input.cardinality() % 4);
-		return new BitSet2(par).get(6, 8);
+	private BitSet2 parity(BitSet2 input) {
+		byte par = (byte) (input.cardinality() % (int) Math.pow(2, overheadLength));
+		return new BitSet2(par).get(8 - overheadLength, 8);
 	}
 }

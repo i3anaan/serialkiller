@@ -19,6 +19,12 @@ public class ParityBitsTest  {
 		assertEquals(new BitSet2("1111000000"), codec.encode(new BitSet2("11110000")));
 		
 		assertEquals(new BitSet2("01010101000101010100"), codec.encode(new BitSet2("0101010101010101")));
+
+        codec = new ParityBitsCodec(4, 1);
+        assertEquals(new BitSet2("00000"), codec.encode(new BitSet2("0000")));
+        assertEquals(new BitSet2("10111"), codec.encode(new BitSet2("1011")));
+
+        assertEquals(new BitSet2("01010010100101001010"), codec.encode(new BitSet2("0101010101010101")));
 	}
 	
 	@Test
