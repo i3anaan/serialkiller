@@ -11,7 +11,7 @@ import link.angelmaker.nodes.*;
 
 public class AngelMakerConfig {
 	//Encoding (ErrorDetectionNode)
-	public static final Codec CODEC = new MixedCodec(new Codec[]{new HammingCodec(8),new ParityBitsCodec()});
+	public static final Codec CODEC = new MixedCodec(new Codec[]{new HammingCodec(8),new ParityBitsCodec(4,1)});
 	
 	//Packet fromat (SequencedNode)
 	public static final int PACKET_BYTE_COUNT = 8;
