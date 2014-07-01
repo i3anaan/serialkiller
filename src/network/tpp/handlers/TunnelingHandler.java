@@ -39,6 +39,19 @@ public class TunnelingHandler extends Handler {
     }
 
     @Override
+    public boolean offerWithPriority(Packet p) {
+        // Look up route.
+        Host h = router.route(p);
+
+        if (h != null) {
+            // Send to tunnel.
+            tunneling.send(p, h.IP());
+        }
+
+        return true;
+    }
+
+    @Override
     public void start() {
         super.start();
     }

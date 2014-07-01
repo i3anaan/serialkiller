@@ -316,6 +316,16 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param p The packet.
      */
     public void sendPacket(Packet p) {
+        sendPacket(p, false);
+    }
+
+    /**
+     * Sends the given packet.
+     * @param p The packet.
+     * @param prioritize Whether to prioritize the packet.
+     */
+    public void sendPacket(Packet p, boolean prioritize) {
+        boolean offered;
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
@@ -328,7 +338,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 }
 
                 // Offer packet to handler.
-                if (!host.handler().offer(p)) {
+                offered = prioritize ? host.handler().offerWithPriority(p) : host.handler().offer(p);
+
+                if (!offered) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " dropped, handler queue full.");
                     return; // We are done.
                 } else {
@@ -345,7 +357,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
             } else {
             	// This packet was not for us but for someone else.
-                if (!host.handler().offer(p)) {
+                offered = prioritize ? host.handler().offerWithPriority(p) : host.handler().offer(p);
+
+                if (!offered) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " forward dropped, handler queue full.");
                     return; // We are done.
                 } else {
