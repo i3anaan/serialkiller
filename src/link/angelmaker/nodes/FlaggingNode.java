@@ -3,6 +3,7 @@ package link.angelmaker.nodes;
 import java.util.Arrays;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.AngelMakerConfig;
 import link.angelmaker.codec.Codec;
 import link.angelmaker.codec.HammingCodec;
 import link.angelmaker.codec.MixedCodec;
@@ -42,23 +43,23 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	// Original, unstuffed, unflagged data.
 	private BitSet2 stored;
 	private BitSet2 storedConverted;
-	private int dataBitCount;
+	//private int dataBitCount;
 	
 	private int checkedForStartFlagInJunkTill = 0;
 	private boolean receivedStartFlag = false;
 	private boolean isFull;
 	private BitSet2 lastReceivedConvertedJunk;
 	
-	private static final Codec CODEC = new MixedCodec(new Codec[]{new HammingCodec(8),new ParityBitsCodec()});
 	
 	
-	public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
+	
+	//public static int maxBitsExpected = SequencedNode.PACKET_BIT_COUNT;
 	
 	
 	public FlaggingNode(Node parent) {
 		setFlags();
-		this.dataBitCount = maxBitsExpected;
-		children = new Node.Resetable[] { new ErrorDetectionNode(this, dataBitCount,CODEC) };
+		//this.dataBitCount = maxBitsExpected;
+		children = new Node.Resetable[] { new ErrorDetectionNode(this) };
 		
 		this.parent = parent;
 		stored = new BitSet2();
@@ -69,10 +70,9 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 		}
 	}
 	
-	public FlaggingNode(Node parent, Node.Resetable child, int dataBitCount) {
+	public FlaggingNode(Node parent, Node.Resetable child) {
 		setFlags();
 		children = new Node.Resetable[] { child };
-		this.dataBitCount = dataBitCount;
 		this.parent = parent;
 		stored = new BitSet2();
 		storedConverted = new BitSet2();
@@ -83,10 +83,8 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	}
 	
 	private void setFlags(){
-		FLAG_START_OF_FRAME = new DummyFlag(new BitSet2("11101"));
-		FLAG_END_OF_FRAME = new FixedEndFlag();
-		//FLAG_START_OF_FRAME = new BasicFlag(new BitSet2("10011001"));
-		//FLAG_END_OF_FRAME = new BasicFlag(new BitSet2("00111001101"));
+		FLAG_START_OF_FRAME = AngelMakerConfig.getStartFlag();
+		FLAG_END_OF_FRAME = AngelMakerConfig.getEndFlag();
 	}
 	
 	
@@ -97,7 +95,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	@Override
 	public BitSet2 giveOriginal(BitSet2 bits) {
 		int i;
-		for (i = 0; i < bits.length() && stored.length() < dataBitCount; i++) {
+		for (i = 0; i < bits.length(); i++) {
 			stored.addAtEnd(bits.get(i));
 		}
 		isFull = true;
@@ -119,8 +117,6 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 	public BitSet2 giveConverted(BitSet2 bits) {
 		//System.out.println("Give Converted: "+lastReceivedConvertedJunk+"\t storedConverted: "+storedConverted);
 		if (!receivedStartFlag) {
-			//This code does less allocation and is easier on CPU, can however (theoretically) store infinitely long bitsets.
-			//TODO better?
 			lastReceivedConvertedJunk.addAtEnd(bits);
 			
 			BitSet2 afterStart = getDataAfterStartFlag();
@@ -234,7 +230,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable, Node.On
 
 	@Override
 	public Node getClone() {
-		return new FlaggingNode(parent, (Node.Resetable)children[0].getClone(), dataBitCount);
+		return new FlaggingNode(parent, (Node.Resetable)children[0].getClone());
 	}
 	
 	@Override

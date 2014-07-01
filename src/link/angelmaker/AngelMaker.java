@@ -39,13 +39,6 @@ import common.Startable;
  * 
  * 
  * 
- * TODO:
- * #>Implement working BitExchanger.
- * #>Test Graphing for thread safety.
- * #>Build smart Frame, Receives stream, consumes till it finds start of frame flag, then reads till end of frame flag.
- * Check if correct, if not issues retransmit. recursively apply.
- * #>Make Non-Blocking AMManager.
- * #>More and better unitTests.
  * 
  * 
  * 
@@ -53,7 +46,6 @@ import common.Startable;
  * @author I3anaan
  *
  */
-//TODO implement this class more serious.
 public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	
 	public static AngelMaker instance;
@@ -61,11 +53,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 	/**
 	 * Standard classes to use when nothing else specified.	
 	 */
-	private PhysicalLayer STANDARD_PHYS = new NullPhysicalLayer();
-	public Node TOP_NODE_IN_USE = new FlaggingNode(null);
-	//TODO set changed zodat zeker dat leeg is.
-	private AMManager STANDARD_MANAGER = new MemoryRetransmittingManager();
-	private BitExchanger STANDARD_EXCHANGER = new NonInvertingBitExchanger();
+	
 	
 	
 	
@@ -77,12 +65,10 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 		return instance;
 	}
 	
-	//TODO alleen hier voor tests? weghalen voor final implementatie?
 	public AngelMaker(PhysicalLayer phys,Node topNode,AMManager manager, BitExchanger exchanger){
 		standardSetup(phys,topNode,manager,exchanger);
 		instance = this;
 	}
-	//TODO alleen hier voor tests? weghalen voor final implementatie?
 	public AngelMaker(PhysicalLayer phys){
 		standardSetup(phys,null,null,null);
 		instance = this;
@@ -115,18 +101,17 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 		BitExchanger exchangerUsed = exchanger;
 		PhysicalLayer physUsed = phys;
 		if(physUsed==null){
-			physUsed = STANDARD_PHYS;
+			physUsed = AngelMakerConfig.getPhys();
 		}
 		if(topNodeUsed==null){
-			topNodeUsed = TOP_NODE_IN_USE;
+			topNodeUsed = AngelMakerConfig.getNode();
 		}
 		if(managerUsed==null){
-			managerUsed = STANDARD_MANAGER;
+			managerUsed = AngelMakerConfig.getAMManager();
 		}
 		if(exchangerUsed==null){
-			exchangerUsed =STANDARD_EXCHANGER;
+			exchangerUsed =AngelMakerConfig.getBitExchanger();
 		}
-		TOP_NODE_IN_USE = topNodeUsed;
 		exchangerUsed.givePhysicalLayer(physUsed);
 		exchangerUsed.giveAMManager(managerUsed);
 		setup(physUsed,topNodeUsed,managerUsed,exchangerUsed);
@@ -138,7 +123,6 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 		//TODO thread name on AMManger is TPPHandler, why is this?
 		logger.info("Setting up ANGEL_MAKER");
 		try{
-		TOP_NODE_IN_USE = topNode;
 		this.manager = manager;
 		this.bitExchanger = exchanger;
 		this.manager.setExchanger(bitExchanger);
@@ -158,7 +142,7 @@ public class AngelMaker extends PacketFrameLinkLayer implements Startable{
 				+ "Consisting of:\n"
 				+ "\tAMManager:\t"+manager.toString()
 				+ "\n\tBitExchanger:\t"+bitExchanger.toString()
-				+ "\n\tNode:\t\t"+TOP_NODE_IN_USE.toString()+"\n";
+				+ "\n\tNode:\t\t"+AngelMakerConfig.getNode().toString()+"\n";
 		
 		return s;
 	}

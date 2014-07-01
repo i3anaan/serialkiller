@@ -28,9 +28,7 @@ import util.Environment;
 import web.WebService;
 import network.NetworkLayer;
 import network.tpp.TPPNetworkLayer;
-import link.BittasticLinkLayer;
 import link.LinkLayer;
-import link.BufferStufferLinkLayer;
 import link.angelmaker.AngelMaker;
 import link.diag.MockFrameLinkLayer;
 import log.LogMessage;
@@ -48,7 +46,7 @@ public class Starter extends JFrame implements ActionListener {
 	private String swingOptions[] = {"Yes", "No"};
 	private Class<?> applicationLayers[] = {ApplicationLayer.class};
 	private Class<?> networkLayers[] = {TPPNetworkLayer.class};
-	private Class<?> linkLayers[] = {AngelMaker.class,MockFrameLinkLayer.class, BittasticLinkLayer.class, BufferStufferLinkLayer.class};
+	private Class<?> linkLayers[] = {AngelMaker.class,MockFrameLinkLayer.class};
 	private Class<?> physLayers[] = {LptErrorHardwareLayer.class,NullPhysicalLayer.class, LptHardwareLayer.class};
 	private String webOptions[] = {"Yes", "No"};
 	

@@ -10,6 +10,7 @@ import com.google.common.primitives.Ints;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.BitSet2;
 import link.angelmaker.AngelMaker;
+import link.angelmaker.AngelMakerConfig;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.bitexchanger.BitExchanger;
 import link.angelmaker.nodes.FlaggingNode;
@@ -24,7 +25,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	private ArrayBlockingQueue<Byte> queueIn;
 	private ArrayBlockingQueue<Byte> queueOut;
 	
-	public static final int MESSAGE_FINE = (int)Math.pow(2,SequencedNode.MESSAGE_BIT_COUNT)-1;
+	public static final int MESSAGE_FINE = (int)Math.pow(2,AngelMakerConfig.MESSAGE_BIT_COUNT)-1;
 	public BitSet2[] possibleMessages;
 	private Node.Resetable receivingNode = (Node.Resetable)NODE_FILLER.getClone();
 	private Node.Resetable sendingNode = (Node.Resetable)NODE_FILLER.getClone();
@@ -47,7 +48,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 		this.queueOut = new ArrayBlockingQueue<Byte>(2048);
 		this.memory = new Byte[MESSAGE_FINE]; //bitsUsed - amount of special messages.
 		this.backupMemoryRealNodes = new Byte[MESSAGE_FINE];
-		nodeBuildingBytes = new Byte[SequencedNode.PACKET_BIT_COUNT/8];
+		nodeBuildingBytes = new Byte[AngelMakerConfig.PACKET_BYTE_COUNT];
 		NODE_FILLER.setParent(this);
 		
 		possibleMessages = new BitSet2[MESSAGE_FINE+1];
@@ -126,10 +127,10 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 		
 		int indexToSend = (lastSent+1)%(memory.length);
 		//Reset array.
-		for(int i=0;i<SequencedNode.PACKET_BYTE_COUNT;i++){
+		for(int i=0;i<AngelMakerConfig.PACKET_BYTE_COUNT;i++){
 			nodeBuildingBytes[i] = null;
 		}
-		for(int i=0;i<SequencedNode.PACKET_BYTE_COUNT;i++){
+		for(int i=0;i<AngelMakerConfig.PACKET_BYTE_COUNT;i++){
 			if((indexToSend+i)%(memory.length)==loadNew){
 				//If added all the requested retransmissions.
 				Byte newByte = queueOut.poll();
@@ -139,7 +140,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 					nodeBuildingBytes[i] = newByte;
 					loadNew = (indexToSend+i+1)%(memory.length);
 				}else{
-					i = SequencedNode.PACKET_BYTE_COUNT;
+					i = AngelMakerConfig.PACKET_BYTE_COUNT;
 					//Stop for loop if nothing else to send
 				}
 			}else{
@@ -169,7 +170,7 @@ public class MemoryRetransmittingManager extends Thread implements Node ,AMManag
 	
 	public static BitSet2 intMessageToBitSet(int message){
 		BitSet2 bs = new BitSet2(Ints.toByteArray(message));
-		return bs.get(bs.length()-SequencedNode.MESSAGE_BIT_COUNT, bs.length());
+		return bs.get(bs.length()-AngelMakerConfig.MESSAGE_BIT_COUNT, bs.length());
 	}
 		
 	private class Receiver extends Thread{

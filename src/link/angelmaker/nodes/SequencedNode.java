@@ -1,6 +1,7 @@
 package link.angelmaker.nodes;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.AngelMakerConfig;
 import util.BitSet2;
 import util.EmptyBitSet2;
 
@@ -17,10 +18,6 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	private BitSet2 storedData;
 	private BitSet2 sequenceNumber;
 	private BitSet2 message;
-	
-	public static final int PACKET_BYTE_COUNT = 8;
-	public static final int PACKET_BIT_COUNT = PACKET_BYTE_COUNT*8;
-	public static final int MESSAGE_BIT_COUNT = 8;
 	
 	public SequencedNode(Node parent, int maxDataSize, int messageBitCount){
 		this.parent = parent;
@@ -86,7 +83,7 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	}
 	
 	public void setSeq(BitSet2 seq){
-		if(seq.length()==MESSAGE_BIT_COUNT){
+		if(seq.length()==AngelMakerConfig.MESSAGE_BIT_COUNT){
 			this.sequenceNumber = seq;
 		}else{
 			AngelMaker.logger.error("Trying to set packet seq number with too many bits");
@@ -94,7 +91,7 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	}
 	
 	public void setMessage(BitSet2 msg){
-		if(msg.length()==MESSAGE_BIT_COUNT){
+		if(msg.length()==AngelMakerConfig.MESSAGE_BIT_COUNT){
 			this.message = msg;
 		}else{
 			AngelMaker.logger.error("Trying to set packet msg with too many bits");
@@ -122,13 +119,13 @@ public class SequencedNode extends AbstractNode implements Node.OneTimeInjection
 	
 	@Override
 	public boolean isCorrect(){
-		return message.length()==MESSAGE_BIT_COUNT && sequenceNumber.length()==MESSAGE_BIT_COUNT;
+		return message.length()==AngelMakerConfig.MESSAGE_BIT_COUNT && sequenceNumber.length()==AngelMakerConfig.MESSAGE_BIT_COUNT;
 	}
 
 
 	@Override
 	public Node getFiller() {
-		return new SequencedNode(null, PACKET_BIT_COUNT, MESSAGE_BIT_COUNT);
+		return new SequencedNode(null, AngelMakerConfig.PACKET_BIT_COUNT, AngelMakerConfig.MESSAGE_BIT_COUNT);
 	}
 
 }

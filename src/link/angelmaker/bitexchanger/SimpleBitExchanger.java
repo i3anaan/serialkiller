@@ -3,6 +3,7 @@ package link.angelmaker.bitexchanger;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import link.angelmaker.AngelMaker;
+import link.angelmaker.AngelMakerConfig;
 import link.angelmaker.IncompatibleModulesException;
 import link.angelmaker.manager.AMManager;
 import phys.PhysicalLayer;
@@ -35,10 +36,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	public static final String ROLE_MASTER = "master";
 	public static final String ROLE_SLAVE = "slave";
 	public static final String ROLE_UKNOWN = "unkown";
-	public static final int STABILITY = 2;//TODO This is kind of a dirty fix.
-	public static final long SYNC_RANGE_WAIT = 100l*1000000l;
-	public static final long SYNC_TIMEOUT_DESYNC = 1000l*1000000l;
-	public static final long READ_TIMEOUT_NO_ACK = 20l*1000000l;
+	
 	protected byte previousByteSent;
 	protected byte previousByteReceived;
 	
@@ -137,7 +135,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	public byte getStableInput() {
 		byte in = down.readByte();
-		while (!checkStable(in, STABILITY)) {
+		while (!checkStable(in, AngelMakerConfig.STABILITY)) {
 			in = down.readByte();
 		}
 		return in;
@@ -156,7 +154,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			// Wait on 11.
 			inputOne = getStableInput();
 		}
-		long waitTime = (long) (Math.random() * SYNC_RANGE_WAIT)
+		long waitTime = (long) (Math.random() * AngelMakerConfig.SYNC_RANGE_WAIT)
 				+ System.nanoTime();
 		while (System.nanoTime() < waitTime && !lastToSend) {
 			byte inputTwo = getStableInput();
@@ -175,7 +173,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 			connectionRole = ROLE_SLAVE;
 			down.sendByte((byte) 0);
 			long waitTill = System.nanoTime()
-					+ SYNC_TIMEOUT_DESYNC;
+					+ AngelMakerConfig.SYNC_TIMEOUT_DESYNC;
 			byte input = getStableInput();
 			while (!(input == 1)) {
 				input = getStableInput();
@@ -200,7 +198,7 @@ public class SimpleBitExchanger extends Thread implements BitExchanger, BitExcha
 	 */
 	private byte readByte() throws TimeOutException {
 		byte input = getStableInput();
-		long waitTime = READ_TIMEOUT_NO_ACK + System.nanoTime();
+		long waitTime = AngelMakerConfig.READ_TIMEOUT_NO_ACK + System.nanoTime();
 		
 		while (!(input != previousByteReceived)) {
 			//TODO can theoretically hang here when trying to get a stable input.

@@ -1,6 +1,7 @@
-package link.angelmaker.codec;
+package test.unit;
 
 import static org.junit.Assert.*;
+import link.angelmaker.codec.ParityBitsCodec;
 
 import org.junit.Test;
 

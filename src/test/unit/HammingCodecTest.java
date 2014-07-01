@@ -1,6 +1,8 @@
-package link.angelmaker.codec;
+package test.unit;
 
 import static org.junit.Assert.*;
+import link.angelmaker.codec.Codec;
+import link.angelmaker.codec.HammingCodec;
 
 import org.junit.Test;
 
