@@ -19,6 +19,12 @@ public class LinkLayerOutHandler extends LinkLayerHandler {
     }
 
     @Override
+    public boolean offerWithPriority(Packet p) {
+        link.sendFrame(p.compile());
+        return true;
+    }
+
+    @Override
 	public String toString() {
         return "LinkLayerOut" + super.toString();
     }

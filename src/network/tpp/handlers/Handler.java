@@ -4,6 +4,8 @@ import network.tpp.TPPNetworkLayer;
 import network.tpp.Packet;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Base handler class for network layer handlers.
@@ -53,6 +55,16 @@ public abstract class Handler implements Runnable {
      */
     public boolean offer(Packet p) {
         return out.offer(p);
+    }
+
+    /**
+     * Handles the packet with priority. If not implemented otherwise, this
+     * method simply puts the packet in the queue. This method should be used
+     * to bypass the queue where necessary.
+     * @param p The packet.
+     */
+    public boolean offerWithPriority(Packet p) {
+        return offer(p);
     }
 
     /**
