@@ -33,6 +33,7 @@ public class FileTransferMessage extends FileMessage {
 	 */
 	public FileTransferMessage(byte address, byte[] messageData, byte[] fileData){
 		super(address, writeData(messageData, fileData));
+		setFileBytes(fileData);
 	}
 
 	/**
@@ -50,7 +51,7 @@ public class FileTransferMessage extends FileMessage {
 		System.arraycopy(data, 1, fileTransferData, 1, (data.length - 1) );
 		fileTransferData[data.length] = nullbyte;
 		System.arraycopy(fileData, 0, fileTransferData, data.length + 1, fileData.length);
-
+		
 		return fileTransferData;
 	}
 
