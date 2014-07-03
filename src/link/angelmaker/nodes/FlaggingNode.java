@@ -132,7 +132,7 @@ public class FlaggingNode extends AbstractNode implements Node.Fillable,Node.Res
 					storedConverted.length());
 		} else {
 			// Does not have end flag yet.
-			return EmptyBitSet2.getInstance();
+			return new BitSet2();
 		}
 	}
 
