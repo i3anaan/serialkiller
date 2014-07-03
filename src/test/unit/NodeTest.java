@@ -16,8 +16,8 @@ public class NodeTest {
 	public void testSequencedNode(){
 		SequencedNode seqNode = new SequencedNode(null);
 		BitSet2 data = new BitSet2(new byte[]{1,2,3,4,5,6,7,8});
-		BitSet2 seq = new BitSet2("1100");
-		BitSet2 message = new BitSet2("0111");
+		BitSet2 seq = new BitSet2("11001100");
+		BitSet2 message = new BitSet2("01110111");
 		seqNode.giveOriginal(data);
 		seqNode.setSeq(seq);
 		seqNode.setMessage(message);
@@ -42,8 +42,8 @@ public class NodeTest {
 	public void testErrorDetectionNode(){
 		ErrorDetectionNode errNode = new ErrorDetectionNode(null);
 		BitSet2 data = new BitSet2(new byte[]{1,2,3,4,5,6,7,8});
-		BitSet2 seq = new BitSet2("0011");
-		BitSet2 message = new BitSet2("1101");
+		BitSet2 seq = new BitSet2("00110011");
+		BitSet2 message = new BitSet2("11011101");
 		
 		errNode.giveOriginal(data);
 		((SequencedNode)errNode.getChildNodes()[0]).setSeq(seq);
@@ -52,7 +52,7 @@ public class NodeTest {
 		assertEquals(data,((SequencedNode)errNode.getChildNodes()[0]).getOriginal());
 		assertEquals(seq,((SequencedNode)errNode.getChildNodes()[0]).getSeq());
 		assertEquals(message,((SequencedNode)errNode.getChildNodes()[0]).getMessage());
-		assertEquals(BitSet2.concatenate(seq, BitSet2.concatenate(data, message)),((SequencedNode)errNode.getChildNodes()[0]).getConverted());	
+		assertEquals(BitSet2.concatenate(seq, BitSet2.concatenate(message,data )),((SequencedNode)errNode.getChildNodes()[0]).getConverted());	
 		
 		
 		ErrorDetectionNode constructed = new ErrorDetectionNode(null);
@@ -74,8 +74,8 @@ public class NodeTest {
 			FlaggingNode flagNode = new FlaggingNode(null);
 			BitSet2 data = new BitSet2(new byte[]{1,2,3,4,5,6,7,8});
 			data = data.get(0,(i+1)*8);
-			BitSet2 seq = new BitSet2("0011");
-			BitSet2 message = new BitSet2("1101");
+			BitSet2 seq = new BitSet2("00110011");
+			BitSet2 message = new BitSet2("11011101");
 			
 			flagNode.giveOriginal(data);
 			((SequencedNode)flagNode.getChildNodes()[0].getChildNodes()[0]).setSeq(seq);
@@ -84,7 +84,7 @@ public class NodeTest {
 			assertEquals(data,((SequencedNode)flagNode.getChildNodes()[0].getChildNodes()[0]).getOriginal());
 			assertEquals(seq,((SequencedNode)flagNode.getChildNodes()[0].getChildNodes()[0]).getSeq());
 			assertEquals(message,((SequencedNode)flagNode.getChildNodes()[0].getChildNodes()[0]).getMessage());
-			assertEquals(BitSet2.concatenate(seq, BitSet2.concatenate(data, message)),((SequencedNode)flagNode.getChildNodes()[0].getChildNodes()[0]).getConverted());
+			assertEquals(BitSet2.concatenate(seq, BitSet2.concatenate(message, data)),((SequencedNode)flagNode.getChildNodes()[0].getChildNodes()[0]).getConverted());
 			
 			FlaggingNode constructed = new FlaggingNode(null);
 			constructed.giveConverted(flagNode.getConverted());

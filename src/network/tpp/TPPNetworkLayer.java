@@ -303,7 +303,7 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 p.setPayload(Arrays.copyOfRange(data, Packet.MAX_PAYLOAD_LENGTH * i, end));
 
                 // Send it.
-                sendPacket(p);
+                sendPacket(p, segments == 1); // Prioritize for single segments, probably a chat message.
             }
         } else {
             TPPNetworkLayer.getLogger().warning(String.format("Tried to send more data (%s bytes) than the protocol allows (%s bytes).", data.length, Packet.MAX_PAYLOAD_LENGTH));
@@ -316,6 +316,16 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
      * @param p The packet.
      */
     public void sendPacket(Packet p) {
+        sendPacket(p, false);
+    }
+
+    /**
+     * Sends the given packet.
+     * @param p The packet.
+     * @param prioritize Whether to prioritize the packet.
+     */
+    public void sendPacket(Packet p, boolean prioritize) {
+        boolean offered;
         Host host = router.route(p);
 
         if (host != null && host.handler() != null) {
@@ -328,7 +338,9 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
                 }
 
                 // Offer packet to handler.
-                if (!host.handler().offer(p)) {
+                offered = prioritize ? host.handler().offerWithPriority(p) : host.handler().offer(p);
+
+                if (!offered) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " dropped, handler queue full.");
                     return; // We are done.
                 } else {
@@ -342,10 +354,12 @@ public class TPPNetworkLayer extends NetworkLayer implements Runnable {
             } else if(p.header().getSender() == router.self() && getCongestion(p.header().getDestination()) >= MAX_FOR_HOST) {
                 // Offer again.
                 reofferHandler.offer(p);
-                TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", host.address(), getCongestion(host.address()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
+                TPPNetworkLayer.getLogger().debug(String.format("%d congested (%d/%d in route), ", p.header().getDestination(), getCongestion(p.header().getDestination()), MAX_FOR_HOST) + p.toString() + " will be delayed.");
             } else {
             	// This packet was not for us but for someone else.
-                if (!host.handler().offer(p)) {
+                offered = prioritize ? host.handler().offerWithPriority(p) : host.handler().offer(p);
+
+                if (!offered) {
                     TPPNetworkLayer.getLogger().error(p.toString() + " forward dropped, handler queue full.");
                     return; // We are done.
                 } else {

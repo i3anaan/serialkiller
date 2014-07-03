@@ -52,35 +52,34 @@ public class BitExchangerTest {
 		}
 	}
 	
-	
-	@Test
+
 	public void testHighSpeedBitExchangerInAction() {
 		try{
 		VirtualPhysicalLayer vplA, vplB;
 		int bitAmount = 255;
 		vplA = new VirtualPhysicalLayer();
 		vplB = new VirtualPhysicalLayer();
-		
+
 		vplA.connect(vplB);
 		vplB.connect(vplA);
-		
+
 		AMManager managerA = new NullAMManager();
 		AMManager managerB = new NullAMManager();
-		
+
 		BitExchanger beA = new HighSpeedBitExchanger();
 		beA.givePhysicalLayer(vplA);
 		beA.giveAMManager(managerA);
-		
+
 		BitExchanger beB = new HighSpeedBitExchanger();
 		beB.givePhysicalLayer(vplB);
 		beB.giveAMManager(managerB);
-		
+
 		managerA.setExchanger(beA);
 		managerB.setExchanger(beB);
-		
+
 		managerA.enable();
 		managerB.enable();
-		
+
 		//System.out.println("Building BitSet2 to send");
 		BitSet2 send = new BitSet2(PARSED).get(0,bitAmount);
 		assertEquals(bitAmount,send.length());
@@ -88,28 +87,28 @@ public class BitExchangerTest {
 		//System.out.println("Handing Bits to BitExchanger");
 		beA.sendBits((BitSet2)send.clone());
 		beB.sendBits((BitSet2)send.clone());
-		
+
 		//System.out.println("Enabling BitExchangers");
 		beA.enable();
 		beB.enable();
-		
+
 		//System.out.println("Start reading A.");
 		BitSet2 receivedA = new BitSet2();
 		while(receivedA.length()<bitAmount){
 			BitSet2 read = beA.readBits();
 			//System.out.println("A received bits: "+read);
 			receivedA = BitSet2.concatenate(receivedA, read);
-			
+
 		}
 		receivedA = receivedA.get(0,bitAmount);
-		
+
 		BitSet2 receivedB = new BitSet2();
 		while(receivedB.length()<bitAmount){
 			receivedB = BitSet2.concatenate(receivedB, beB.readBits());
 			//System.out.println("B received bits");
 		}
 		receivedB = receivedB.get(0,bitAmount);
-		
+
 		System.out.println("Original:\t"+send);
 		System.out.println("A:\t\t"+receivedA);
 		System.out.println("B:\t\t"+receivedB);
